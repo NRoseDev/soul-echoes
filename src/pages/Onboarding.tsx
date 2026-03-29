@@ -586,11 +586,19 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             tabIndex={0}
             onKeyDown={(e) => e.key === "Enter" && setStep(1)}
           >
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="inline-block px-5 py-1.5 rounded-full border border-purple-400/30 bg-purple-500/10 backdrop-blur-sm shadow-[0_0_20px_rgba(168,85,247,0.15)]"
+            >
+              <span className="text-sm font-medium text-purple-300">Your sanctuary for healing</span>
+            </motion.div>
             <motion.h1
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8 }}
-              className="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-tight"
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-tight bg-gradient-to-r from-teal-400 via-pink-400 to-purple-500 bg-clip-text text-transparent"
             >
               Soul Echoes
             </motion.h1>
