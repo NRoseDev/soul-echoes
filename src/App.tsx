@@ -9,6 +9,7 @@ import BrainDump from "./pages/BrainDump";
 import HealingRoom from "./pages/HealingRoom";
 import NotFound from "./pages/NotFound";
 import Onboarding from "./pages/Onboarding";
+import VoiceSettings from "./pages/VoiceSettings";
 import { getPreferences } from "./lib/preferences";
 
 const queryClient = new QueryClient();
@@ -43,7 +44,8 @@ const App = () => {
               <Route path="/spiritual-tools" element={<HealingRoom />} />
               <Route path="/community" element={<HealingRoom />} />
               <Route path="/practitioner" element={<HealingRoom />} />
-              <Route path="/crisis" element={<HealingRoom />} />
+            <Route path="/voice-settings" element={<VoiceSettings />} />
+            <Route path="/crisis" element={<HealingRoom />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>
