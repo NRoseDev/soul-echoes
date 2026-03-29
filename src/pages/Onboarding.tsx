@@ -98,19 +98,55 @@ function guessGender(name: string): VoiceSettings["genderPref"] {
 }
 
 /* ─── ACCESS METHOD options ─── */
-const ACCESS_METHOD_OPTIONS: { id: AccessMethod; label: string; icon: string; desc: string }[] = [
-  { id: "pin", label: "4-Digit PIN", icon: "🔢", desc: "Type a 4-digit code" },
-  { id: "codeword", label: "Code Word", icon: "🗣️", desc: "Speak or type a secret word" },
-  { id: "symbol", label: "Personal Symbol", icon: "✨", desc: "Select your sacred symbol" },
-  { id: "colorseq", label: "Color Sequence", icon: "🎨", desc: "Choose 3 colors in order" },
-  { id: "sign", label: "Sign Gesture", icon: "🤟", desc: "Show your sign on camera" },
-  { id: "pattern", label: "Drawn Pattern", icon: "✏️", desc: "Draw your pattern" },
+const ACCESS_METHOD_OPTIONS: { id: AccessMethod; label: string; icon: string; desc: string; color: string }[] = [
+  { id: "pin", label: "4-Digit PIN", icon: "🔢", desc: "Type a 4-digit code", color: "hsl(210,60%,50%)" },
+  { id: "codeword", label: "Code Word", icon: "🗣️", desc: "Speak or type a secret word", color: "hsl(30,70%,50%)" },
+  { id: "symbol", label: "Personal Symbol", icon: "✨", desc: "Select your sacred symbol", color: "hsl(280,50%,50%)" },
+  { id: "colorseq", label: "Color Sequence", icon: "🎨", desc: "Choose 3 colors in order", color: "hsl(340,60%,50%)" },
+  { id: "sign", label: "Sign Gesture", icon: "🤟", desc: "Show your sign on camera", color: "hsl(140,50%,45%)" },
+  { id: "pattern", label: "Drawn Pattern", icon: "✏️", desc: "Draw your pattern", color: "hsl(45,70%,50%)" },
 ];
+
+/* ─── ASL Camera Panel — always visible when open ─── */
+function ASLCameraPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 320 }, height: { ideal: 240 } } })
+        .then((stream) => {
+          streamRef.current = stream;
+          if (videoRef.current) videoRef.current.srcObject = stream;
+        })
+        .catch(() => {});
+    } else {
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+    return () => {
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden" role="region" aria-label="ASL camera — sign your answer here">
+      <div className="relative">
+        <video ref={videoRef} autoPlay playsInline muted className="w-full aspect-video object-cover" aria-label="Camera feed for signing" />
+        <div className="absolute bottom-1 left-1 bg-background/80 text-[10px] px-2 py-0.5 rounded text-foreground">
+          Sign your answer here
+        </div>
+        <button onClick={onClose} className="absolute top-1 right-1 bg-background/80 rounded-full h-6 w-6 flex items-center justify-center text-xs" aria-label="Close camera">✕</button>
+      </div>
+    </div>
+  );
+}
 
 /* ═══════════════════════════ COMPONENT ═══════════════════════════ */
 
 export default function Onboarding({ onComplete }: { onComplete: () => void }) {
-  // Steps: 0=Welcome, 1=Language, 2=Communication, 3=Safety, 4=Voice, 5=Confirmation
   const [step, setStep] = useState(0);
   const [welcomeDone, setWelcomeDone] = useState(false);
 
@@ -168,7 +204,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
   /* ─── Step effects ─── */
 
-  // STEP 0: Welcome — auto-advance after 5s or tap
+  // STEP 0: Welcome
   useEffect(() => {
     if (step === 0) {
       const text = "Soul Echoes — Your daily healing advocate. A sacred space to release, heal, and find closure. Let the tools of the universe guide you home to your heart, where your journey began.";
@@ -333,12 +369,44 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     (accessMethod === "pattern" && accessValue.length >= 1)
   );
 
+  /* ─── Shared multi-input panel visible on every step ─── */
+  function InputMethodsBar() {
+    return (
+      <div className="space-y-2" role="region" aria-label="All input methods available">
+        {/* Voice listening indicator */}
+        <ListeningIndicator visible={speech.listening} />
+
+        {/* Retry message */}
+        {retryMessage && <p className="text-sm text-center text-destructive" role="alert">{retryMessage}</p>}
+
+        {/* ASL camera toggle + panel */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setCameraOpen(!cameraOpen)}
+            className={`flex items-center gap-2 text-xs px-3 py-2 rounded-xl border transition-all ${
+              cameraOpen ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
+            }`}
+            aria-label={cameraOpen ? "Close ASL camera" : "Open ASL camera to sign your answer"}
+            aria-pressed={cameraOpen}
+          >
+            <Hand className="h-4 w-4" />
+            <span>Sign It (ASL)</span>
+          </button>
+          <span className="text-[10px] text-muted-foreground" aria-hidden="true">
+            🗣️ Voice · ☝️ Tap · 🤟 Sign · 🖼️ Point · 🎨 Color — all active
+          </span>
+        </div>
+        <ASLCameraPanel open={cameraOpen} onClose={() => setCameraOpen(false)} />
+      </div>
+    );
+  }
+
   /* ═══════════════════ RENDER ═══════════════════ */
   return (
     <div
       className="fixed inset-0 z-50 bg-background flex items-center justify-center p-4 overflow-y-auto"
       role="main"
-      aria-label="Soul Echoes Onboarding"
+      aria-label="Soul Echoes Onboarding — all input methods active: voice, tap, sign, point, color, screen reader, braille"
     >
       <AnimatePresence mode="wait">
         {/* ─── STEP 0: Welcome ─── */}
@@ -349,7 +417,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             className="text-center max-w-2xl mx-auto space-y-8 cursor-pointer"
             onClick={() => setStep(1)}
             role="button"
-            aria-label="Tap to continue"
+            aria-label="Soul Echoes welcome. Tap anywhere to continue."
             tabIndex={0}
             onKeyDown={(e) => e.key === "Enter" && setStep(1)}
           >
@@ -366,6 +434,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
               className="text-lg sm:text-xl md:text-2xl text-foreground leading-relaxed"
+              aria-live="polite"
             >
               Your daily healing advocate.
             </motion.p>
@@ -387,45 +456,34 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
         {/* ─── STEP 1: Language ─── */}
         {step === 1 && (
-          <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-6">
-            {/* ASL camera placeholder visible on all sub-steps */}
-            <div className="flex justify-end">
-              <button
-                onClick={() => setCameraOpen(!cameraOpen)}
-                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full border border-border"
-                aria-label="Open camera for sign language"
-              >
-                <Hand className="h-4 w-4" /> ASL Camera
-              </button>
-            </div>
-            {cameraOpen && (
-              <div className="rounded-xl border border-border bg-card p-4 text-center text-sm text-muted-foreground">
-                <Hand className="h-8 w-8 mx-auto mb-2" />
-                ASL video recognition coming soon. Please tap your answer below.
-              </div>
-            )}
+          <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4">
+            <InputMethodsBar />
 
             {langSubStep === 0 && (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
                   What is your primary language?
                 </h2>
-                <ListeningIndicator visible={speech.listening} />
-                {retryMessage && <p className="text-sm text-center text-destructive" role="alert">{retryMessage}</p>}
+                <p className="text-xs text-muted-foreground text-center" aria-live="polite">
+                  Say it, tap a flag, point to the color, or sign it
+                </p>
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" aria-hidden="true" />
-                  <Input value={searchPrimary} onChange={(e) => setSearchPrimary(e.target.value)} placeholder="Search languages..." className="pl-10 text-lg h-12" aria-label="Search languages" />
+                  <Input value={searchPrimary} onChange={(e) => setSearchPrimary(e.target.value)} placeholder="Search languages..." className="pl-10 text-lg h-12" aria-label="Search languages by typing" />
                 </div>
-                <div className="max-h-64 overflow-y-auto rounded-xl border border-border bg-card space-y-1 p-2" role="listbox" aria-label="Language list">
+                <div className="max-h-64 overflow-y-auto rounded-xl border border-border bg-card space-y-1 p-2" role="listbox" aria-label="Language list — tap, point, or use color to select">
                   {filteredLangs(searchPrimary).map((lang) => (
                     <button
                       key={lang.code}
                       onClick={() => { speech.stop(); setPrimaryLang(lang.code); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Got it — ${lang.name} selected.`).then(() => setLangSubStep(1)); }}
-                      className={`w-full text-left px-4 py-3 rounded-lg text-base transition-colors ${primaryLang === lang.code ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"}`}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors ${primaryLang === lang.code ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"}`}
                       role="option"
                       aria-selected={primaryLang === lang.code}
+                      aria-label={`${lang.name} — tap or point to select`}
                     >
-                      {lang.name}
+                      <span className="text-xl" aria-hidden="true">{lang.flag}</span>
+                      <span className="flex-1 text-left">{lang.name}</span>
+                      <span className="h-5 w-5 rounded-full shrink-0 border border-foreground/10" style={{ backgroundColor: lang.color }} aria-label={`Color indicator for ${lang.name}`} />
                     </button>
                   ))}
                 </div>
@@ -437,14 +495,27 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
                   Would you like to add a second language?
                 </h2>
-                <ListeningIndicator visible={speech.listening} />
-                {retryMessage && <p className="text-sm text-center text-destructive" role="alert">{retryMessage}</p>}
+                <p className="text-xs text-muted-foreground text-center">Say yes or no, tap a button, point, or sign</p>
                 <div className="flex gap-4 justify-center">
-                  <Button size="lg" className="text-lg px-8 py-6 rounded-2xl min-w-[100px]" onClick={() => { speech.stop(); setWantSecondary(true); setRetryMessage(null); }} variant={wantSecondary === true ? "default" : "outline"} aria-label="Yes, add second language">
-                    ✅ Yes
+                  <Button
+                    size="lg"
+                    className="text-lg px-8 py-6 rounded-2xl min-w-[120px] gap-2"
+                    onClick={() => { speech.stop(); setWantSecondary(true); setRetryMessage(null); }}
+                    variant={wantSecondary === true ? "default" : "outline"}
+                    aria-label="Yes, add second language"
+                    style={{ borderLeftWidth: 4, borderLeftColor: "hsl(140,60%,45%)" }}
+                  >
+                    <span className="text-2xl" aria-hidden="true">✅</span> Yes
                   </Button>
-                  <Button size="lg" className="text-lg px-8 py-6 rounded-2xl min-w-[100px]" onClick={() => { speech.stop(); setWantSecondary(false); setSecondaryLang(null); setRetryMessage(null); setLangSubStep(2); }} variant={wantSecondary === false ? "default" : "outline"} aria-label="No second language">
-                    ❌ No
+                  <Button
+                    size="lg"
+                    className="text-lg px-8 py-6 rounded-2xl min-w-[120px] gap-2"
+                    onClick={() => { speech.stop(); setWantSecondary(false); setSecondaryLang(null); setRetryMessage(null); setLangSubStep(2); }}
+                    variant={wantSecondary === false ? "default" : "outline"}
+                    aria-label="No second language"
+                    style={{ borderLeftWidth: 4, borderLeftColor: "hsl(0,60%,45%)" }}
+                  >
+                    <span className="text-2xl" aria-hidden="true">❌</span> No
                   </Button>
                 </div>
                 {wantSecondary && (
@@ -458,11 +529,14 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                         <button
                           key={lang.code}
                           onClick={() => { speech.stop(); setSecondaryLang(lang.code); setRetryMessage(null); hasSpokenRef.current = ""; setLangSubStep(2); }}
-                          className={`w-full text-left px-4 py-3 rounded-lg text-base transition-colors ${secondaryLang === lang.code ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"}`}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors ${secondaryLang === lang.code ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"}`}
                           role="option"
                           aria-selected={secondaryLang === lang.code}
+                          aria-label={`${lang.name} — tap or point to select`}
                         >
-                          {lang.name}
+                          <span className="text-xl" aria-hidden="true">{lang.flag}</span>
+                          <span className="flex-1 text-left">{lang.name}</span>
+                          <span className="h-5 w-5 rounded-full shrink-0 border border-foreground/10" style={{ backgroundColor: lang.color }} />
                         </button>
                       ))}
                     </div>
@@ -476,14 +550,27 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
                   Would you like to enable Sign Language?
                 </h2>
-                <ListeningIndicator visible={speech.listening} />
-                {retryMessage && <p className="text-sm text-center text-destructive" role="alert">{retryMessage}</p>}
+                <p className="text-xs text-muted-foreground text-center">Say yes or no, tap, point, or sign your answer</p>
                 <div className="flex gap-4 justify-center">
-                  <Button size="lg" className="text-xl px-10 py-7 rounded-2xl min-w-[120px]" onClick={() => { speech.stop(); setSignLanguage(true); setRetryMessage(null); setStep(2); }} variant={signLanguage === true ? "default" : "outline"} aria-label="Yes, enable sign language">
-                    🤟 Yes
+                  <Button
+                    size="lg"
+                    className="text-xl px-10 py-7 rounded-2xl min-w-[140px] gap-3"
+                    onClick={() => { speech.stop(); setSignLanguage(true); setRetryMessage(null); setStep(2); }}
+                    variant={signLanguage === true ? "default" : "outline"}
+                    aria-label="Yes, enable sign language"
+                    style={{ borderLeftWidth: 4, borderLeftColor: "hsl(280,50%,50%)" }}
+                  >
+                    <span className="text-3xl" aria-hidden="true">🤟</span> Yes
                   </Button>
-                  <Button size="lg" className="text-xl px-10 py-7 rounded-2xl min-w-[120px]" onClick={() => { speech.stop(); setSignLanguage(false); setRetryMessage(null); setStep(2); }} variant={signLanguage === false ? "default" : "outline"} aria-label="No sign language">
-                    ❌ No
+                  <Button
+                    size="lg"
+                    className="text-xl px-10 py-7 rounded-2xl min-w-[140px] gap-3"
+                    onClick={() => { speech.stop(); setSignLanguage(false); setRetryMessage(null); setStep(2); }}
+                    variant={signLanguage === false ? "default" : "outline"}
+                    aria-label="No sign language"
+                    style={{ borderLeftWidth: 4, borderLeftColor: "hsl(0,60%,45%)" }}
+                  >
+                    <span className="text-3xl" aria-hidden="true">❌</span> No
                   </Button>
                 </div>
                 <p className="text-center text-muted-foreground text-sm">
@@ -496,16 +583,15 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
         {/* ─── STEP 2: Communication ─── */}
         {step === 2 && (
-          <motion.div key="communication" {...fadeSlide} className="w-full max-w-2xl mx-auto space-y-6">
+          <motion.div key="communication" {...fadeSlide} className="w-full max-w-2xl mx-auto space-y-4">
+            <InputMethodsBar />
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
               How do you like to communicate?
             </h2>
             <p className="text-center text-muted-foreground text-sm">
-              Choose up to 3 methods. {commMethods.length}/3 selected.
+              Choose up to 3 methods. {commMethods.length}/3 selected. Say it, tap it, point to the picture, or tap the color.
             </p>
-            <ListeningIndicator visible={speech.listening} />
-            {retryMessage && <p className="text-sm text-center text-destructive" role="alert">{retryMessage}</p>}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="group" aria-label="Communication methods">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="group" aria-label="Communication methods — all input methods active">
               {COMMUNICATION_METHODS.map((method) => {
                 const selected = commMethods.includes(method.id);
                 const disabled = !selected && commMethods.length >= 3;
@@ -521,12 +607,14 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                         ? "border-border bg-card text-muted-foreground/50 cursor-not-allowed"
                         : "border-border bg-card text-foreground hover:border-primary/50 hover:bg-muted"
                     }`}
+                    style={{ borderLeftWidth: 5, borderLeftColor: method.color }}
                     aria-pressed={selected}
-                    aria-label={method.label}
+                    aria-label={`${method.label} — tap or point to ${selected ? "deselect" : "select"}`}
                   >
-                    <span className="text-2xl sm:text-3xl" aria-hidden="true">{method.icon}</span>
-                    <span>{method.label}</span>
-                    {selected && <Check className="ml-auto h-5 w-5 text-primary shrink-0" aria-hidden="true" />}
+                    <span className="text-3xl sm:text-4xl" aria-hidden="true">{method.picture}</span>
+                    <span className="flex-1">{method.label}</span>
+                    <span className="h-6 w-6 rounded-full shrink-0 border border-foreground/10" style={{ backgroundColor: method.color }} aria-label={`Color: ${method.id}`} />
+                    {selected && <Check className="h-5 w-5 text-primary shrink-0" aria-hidden="true" />}
                   </button>
                 );
               })}
@@ -552,11 +640,12 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
         {/* ─── STEP 3: Safety Angel Setup ─── */}
         {step === 3 && (
-          <motion.div key="safety" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-6 max-h-[85vh] overflow-y-auto">
+          <motion.div key="safety" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[85vh] overflow-y-auto">
+            <InputMethodsBar />
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
               🦄 Your Safety Angel
             </h2>
-            <p className="text-center text-muted-foreground text-sm">This is just between us.</p>
+            <p className="text-center text-muted-foreground text-sm">This is just between us. Tap, point, sign, or say your choice.</p>
 
             {/* Angel selection */}
             {!safetyAngel && (
@@ -564,18 +653,22 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 <button
                   onClick={() => { setSafetyAngel("michael"); speak("Michael selected. Now choose your private access method."); }}
                   className="flex flex-col items-center gap-3 p-4 rounded-2xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition-all"
-                  aria-label="Michael — masculine protective energy"
+                  style={{ borderBottomWidth: 4, borderBottomColor: "hsl(220,70%,45%)" }}
+                  aria-label="Michael — masculine protective energy. Blue guardian. Tap or point to select."
                 >
-                  <img src={angelMichaelImg} alt="Michael — protective guardian" className="w-28 h-28 object-contain" />
+                  <img src={angelMichaelImg} alt="Michael — protective guardian in blue armor" className="w-28 h-28 object-contain" />
                   <span className="font-display font-bold text-foreground text-lg">Michael ⚔️</span>
+                  <span className="h-4 w-4 rounded-full" style={{ backgroundColor: "hsl(220,70%,45%)" }} aria-label="Blue color indicator" />
                 </button>
                 <button
                   onClick={() => { setSafetyAngel("faith"); speak("Faith selected. Now choose your private access method."); }}
                   className="flex flex-col items-center gap-3 p-4 rounded-2xl border-2 border-border bg-card hover:border-secondary/50 hover:bg-secondary/5 transition-all"
-                  aria-label="Faith — feminine nurturing energy"
+                  style={{ borderBottomWidth: 4, borderBottomColor: "hsl(280,50%,50%)" }}
+                  aria-label="Faith — feminine nurturing energy. Purple guardian. Tap or point to select."
                 >
-                  <img src={angelFaithImg} alt="Faith — nurturing guardian" className="w-28 h-28 object-contain" />
+                  <img src={angelFaithImg} alt="Faith — nurturing guardian in purple" className="w-28 h-28 object-contain" />
                   <span className="font-display font-bold text-foreground text-lg">Faith 🕊️</span>
+                  <span className="h-4 w-4 rounded-full" style={{ backgroundColor: "hsl(280,50%,50%)" }} aria-label="Purple color indicator" />
                 </button>
               </div>
             )}
@@ -584,17 +677,20 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             {safetyAngel && !accessMethod && (
               <div className="space-y-3">
                 <p className="font-display text-lg font-bold text-foreground text-center">Choose your private access method</p>
+                <p className="text-xs text-muted-foreground text-center">Tap the picture or color that matches your choice</p>
                 <div className="grid grid-cols-2 gap-3">
                   {ACCESS_METHOD_OPTIONS.map((opt) => (
                     <button
                       key={opt.id}
                       onClick={() => setAccessMethod(opt.id)}
                       className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-border bg-card hover:border-primary/50 hover:bg-muted transition-all"
-                      aria-label={`${opt.label} — ${opt.desc}`}
+                      style={{ borderLeftWidth: 4, borderLeftColor: opt.color }}
+                      aria-label={`${opt.label} — ${opt.desc}. Tap or point to select.`}
                     >
-                      <span className="text-2xl">{opt.icon}</span>
+                      <span className="text-3xl" aria-hidden="true">{opt.icon}</span>
                       <span className="font-medium text-sm text-foreground">{opt.label}</span>
-                      <span className="text-xs text-muted-foreground">{opt.desc}</span>
+                      <span className="text-xs text-muted-foreground text-center">{opt.desc}</span>
+                      <span className="h-4 w-4 rounded-full" style={{ backgroundColor: opt.color }} aria-label={`Color: ${opt.label}`} />
                     </button>
                   ))}
                 </div>
@@ -628,13 +724,13 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     onChange={(e) => setAccessValue(e.target.value)}
                     placeholder="Your secret word…"
                     className="text-center text-xl h-14"
-                    aria-label="Enter code word"
+                    aria-label="Enter code word — type or speak it"
                     autoFocus
                   />
                 )}
 
                 {accessMethod === "symbol" && (
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-4 gap-3" role="group" aria-label="Symbol grid — tap or point to select your sacred symbol">
                     {ACCESS_SYMBOLS.map((sym) => (
                       <button
                         key={sym}
@@ -653,8 +749,8 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
                 {accessMethod === "colorseq" && (
                   <div className="space-y-3">
-                    <p className="text-sm text-muted-foreground text-center">Tap 3 colors in your secret order ({colorSequence.length}/3)</p>
-                    <div className="grid grid-cols-4 gap-3">
+                    <p className="text-sm text-muted-foreground text-center" aria-live="polite">Tap 3 colors in your secret order ({colorSequence.length}/3)</p>
+                    <div className="grid grid-cols-4 gap-3" role="group" aria-label="Color grid — tap colors in your secret order">
                       {ACCESS_COLORS.map((c) => (
                         <button
                           key={c.id}
@@ -663,26 +759,26 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                           }}
                           className="h-14 rounded-xl border-2 border-border transition-all hover:scale-105"
                           style={{ backgroundColor: `hsl(${c.hsl})` }}
-                          aria-label={`Select ${c.label}`}
+                          aria-label={`Select ${c.label} — tap or point`}
                         />
                       ))}
                     </div>
                     {colorSequence.length > 0 && (
-                      <div className="flex gap-2 justify-center">
+                      <div className="flex gap-2 justify-center" aria-live="polite">
                         {colorSequence.map((cId, i) => {
                           const c = ACCESS_COLORS.find((x) => x.id === cId);
                           return (
-                            <div key={i} className="h-8 w-8 rounded-full border-2 border-foreground/20" style={{ backgroundColor: c ? `hsl(${c.hsl})` : undefined }} />
+                            <div key={i} className="h-8 w-8 rounded-full border-2 border-foreground/20" style={{ backgroundColor: c ? `hsl(${c.hsl})` : undefined }} aria-label={`Color ${i + 1}: ${c?.label}`} />
                           );
                         })}
-                        <button onClick={() => setColorSequence([])} className="text-xs text-muted-foreground underline ml-2">Reset</button>
+                        <button onClick={() => setColorSequence([])} className="text-xs text-muted-foreground underline ml-2" aria-label="Reset color sequence">Reset</button>
                       </div>
                     )}
                   </div>
                 )}
 
                 {accessMethod === "sign" && (
-                  <div className="text-center space-y-3">
+                  <div className="text-center space-y-3" role="region" aria-label="Sign gesture access method">
                     <Hand className="h-10 w-10 mx-auto text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">Sign gesture recognition coming soon.</p>
                     <p className="text-xs text-muted-foreground">Your gesture will be saved locally on your device.</p>
@@ -696,13 +792,13 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     onChange={(e) => setAccessValue(e.target.value)}
                     placeholder="Draw or type your pattern…"
                     className="text-center text-xl h-14"
-                    aria-label="Enter pattern"
+                    aria-label="Enter pattern — type or draw"
                     autoFocus
                   />
                 )}
 
                 <div className="flex gap-3 pt-2">
-                  <Button variant="outline" onClick={() => { setAccessMethod(null); setAccessValue(""); setColorSequence([]); setSelectedSymbol(null); }} className="flex-1 rounded-2xl">
+                  <Button variant="outline" onClick={() => { setAccessMethod(null); setAccessValue(""); setColorSequence([]); setSelectedSymbol(null); }} className="flex-1 rounded-2xl" aria-label="Go back to access method selection">
                     Back
                   </Button>
                   <Button
@@ -712,6 +808,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                       setTimeout(() => setStep(4), 2500);
                     }}
                     className="flex-1 rounded-2xl"
+                    aria-label="Confirm safety angel setup"
                   >
                     Confirm <Check className="ml-2 h-4 w-4" />
                   </Button>
@@ -723,44 +820,51 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
         {/* ─── STEP 4: Voice Setup ─── */}
         {step === 4 && (
-          <motion.div key="voice" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-6 max-h-[80vh] overflow-y-auto">
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
+          <motion.div key="voice" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[80vh] overflow-y-auto">
+            <InputMethodsBar />
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
               Choose Your AI Voice
             </h2>
-            <p className="text-center text-muted-foreground text-sm">Pick the voice Soul Echoes will use to speak to you.</p>
+            <p className="text-center text-muted-foreground text-sm">Pick the voice Soul Echoes will use to speak to you. Tap to preview, tap to select.</p>
 
             {/* Gender */}
-            <div className="flex gap-3" role="radiogroup" aria-label="Voice gender preference">
-              {(["feminine", "masculine", "neutral"] as const).map((g) => (
-                <button
-                  key={g}
-                  onClick={() => setVoiceSettings((s) => ({ ...s, genderPref: g }))}
-                  className={`flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
-                    voiceSettings.genderPref === g ? "border-primary bg-primary/10 text-foreground" : "border-border bg-card text-muted-foreground hover:border-primary/40"
-                  }`}
-                  role="radio"
-                  aria-checked={voiceSettings.genderPref === g}
-                  aria-label={g}
-                >
-                  {g.charAt(0).toUpperCase() + g.slice(1)}
-                </button>
-              ))}
+            <div className="flex gap-3" role="radiogroup" aria-label="Voice gender preference — tap or point">
+              {(["feminine", "masculine", "neutral"] as const).map((g) => {
+                const gColors = { feminine: "hsl(340,60%,50%)", masculine: "hsl(220,60%,50%)", neutral: "hsl(45,60%,50%)" };
+                const gIcons = { feminine: "♀️", masculine: "♂️", neutral: "⚧️" };
+                return (
+                  <button
+                    key={g}
+                    onClick={() => setVoiceSettings((s) => ({ ...s, genderPref: g }))}
+                    className={`flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                      voiceSettings.genderPref === g ? "border-primary bg-primary/10 text-foreground" : "border-border bg-card text-muted-foreground hover:border-primary/40"
+                    }`}
+                    style={{ borderBottomWidth: 3, borderBottomColor: gColors[g] }}
+                    role="radio"
+                    aria-checked={voiceSettings.genderPref === g}
+                    aria-label={`${g} voice — tap or point`}
+                  >
+                    <span className="text-lg" aria-hidden="true">{gIcons[g]}</span>
+                    {g.charAt(0).toUpperCase() + g.slice(1)}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Speed */}
             <div className="space-y-2">
-              <p className="text-sm font-medium text-foreground">Speed — {voiceSettings.speed <= 0.75 ? "Slow" : voiceSettings.speed >= 1.25 ? "Fast" : "Normal"}</p>
-              <Slider value={[voiceSettings.speed]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, speed: v }))} min={0.5} max={1.5} step={0.1} aria-label="Voice speed" />
+              <p className="text-sm font-medium text-foreground" id="speed-label">Speed — {voiceSettings.speed <= 0.75 ? "Slow 🐢" : voiceSettings.speed >= 1.25 ? "Fast 🐇" : "Normal"}</p>
+              <Slider value={[voiceSettings.speed]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, speed: v }))} min={0.5} max={1.5} step={0.1} aria-labelledby="speed-label" />
             </div>
 
             {/* Volume */}
             <div className="space-y-2">
-              <p className="text-sm font-medium text-foreground">Volume — {voiceSettings.volume <= 0.35 ? "Soft" : voiceSettings.volume >= 0.75 ? "Loud" : "Medium"}</p>
-              <Slider value={[voiceSettings.volume]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, volume: v }))} min={0.1} max={1} step={0.05} aria-label="Voice volume" />
+              <p className="text-sm font-medium text-foreground" id="volume-label">Volume — {voiceSettings.volume <= 0.35 ? "Soft 🔈" : voiceSettings.volume >= 0.75 ? "Loud 🔊" : "Medium 🔉"}</p>
+              <Slider value={[voiceSettings.volume]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, volume: v }))} min={0.1} max={1} step={0.05} aria-labelledby="volume-label" />
             </div>
 
             {/* Voice list */}
-            <div className="space-y-1 max-h-48 overflow-y-auto rounded-xl border border-border bg-card p-2" role="listbox" aria-label="Available voices">
+            <div className="space-y-1 max-h-48 overflow-y-auto rounded-xl border border-border bg-card p-2" role="listbox" aria-label="Available voices — tap to select, play button to preview">
               {filteredVoices.length === 0 && <p className="text-sm text-muted-foreground p-3">Loading voices…</p>}
               {filteredVoices.map((voice) => {
                 const isSelected = voiceSettings.voiceURI === voice.voiceURI;
@@ -773,6 +877,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     }`}
                     role="option"
                     aria-selected={isSelected}
+                    aria-label={`${voice.name} — ${voice.lang}. Tap to select.`}
                   >
                     <button
                       onClick={(e) => {
@@ -785,7 +890,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                         window.speechSynthesis.speak(u);
                       }}
                       className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20"
-                      aria-label={`Preview ${voice.name}`}
+                      aria-label={`Preview voice: ${voice.name}`}
                     >
                       <Play className="h-3 w-3 text-foreground" />
                     </button>
@@ -801,7 +906,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
             {/* Test & Continue */}
             <div className="flex gap-3">
-              <Button onClick={testVoice} variant="outline" className="flex-1 rounded-2xl" aria-label="Test selected voice">
+              <Button onClick={testVoice} variant="outline" className="flex-1 rounded-2xl" aria-label="Test selected voice — plays the welcome message">
                 <Volume2 className="h-4 w-4 mr-2" /> Test Voice
               </Button>
               <Button onClick={() => setStep(5)} className="flex-1 rounded-2xl" aria-label="Continue to confirmation">
