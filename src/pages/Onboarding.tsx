@@ -185,6 +185,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   // Continuous recognition for language step
   const contRecRef = useRef<any>(null);
   const contRecActiveRef = useRef(false);
+  const handleLangVoiceRef = useRef<(t: string) => void>(() => {});
 
   const startContinuousRec = useCallback(() => {
     if (contRecActiveRef.current) return;
@@ -199,13 +200,11 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     rec.onresult = (e: any) => {
       const last = e.results[e.results.length - 1];
       if (last.isFinal) {
-        const t = last[0].transcript;
-        handleLangVoice(t);
+        handleLangVoiceRef.current(last[0].transcript);
       }
     };
     rec.onend = () => {
       contRecActiveRef.current = false;
-      // Auto-restart if still on step 1
       if (contRecRef.current === rec) {
         setTimeout(() => startContinuousRec(), 300);
       }
