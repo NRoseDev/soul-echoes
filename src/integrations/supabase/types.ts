@@ -27,6 +27,7 @@ export type Database = {
           situation_code: string
           situation_label: string
           status: string
+          user_id: string | null
         }
         Insert: {
           angel: string
@@ -40,6 +41,7 @@ export type Database = {
           situation_code: string
           situation_label: string
           status?: string
+          user_id?: string | null
         }
         Update: {
           angel?: string
@@ -53,6 +55,7 @@ export type Database = {
           situation_code?: string
           situation_label?: string
           status?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -70,6 +73,7 @@ export type Database = {
           role: string
           scenario_answer: string | null
           status: string
+          user_id: string | null
         }
         Insert: {
           answers: Json
@@ -84,6 +88,7 @@ export type Database = {
           role: string
           scenario_answer?: string | null
           status?: string
+          user_id?: string | null
         }
         Update: {
           answers?: Json
@@ -98,6 +103,7 @@ export type Database = {
           role?: string
           scenario_answer?: string | null
           status?: string
+          user_id?: string | null
         }
         Relationships: []
       }
