@@ -177,9 +177,55 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   // Shared
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [activeInputMethod, setActiveInputMethod] = useState<"voice" | "tap" | "sign" | "point" | "color">("voice");
   const welcomeTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const hasSpokenRef = useRef<string>("");
   const speech = useSpeechRecognition();
+
+  // Continuous recognition for language step
+  const contRecRef = useRef<any>(null);
+  const contRecActiveRef = useRef(false);
+
+  const startContinuousRec = useCallback(() => {
+    if (contRecActiveRef.current) return;
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) return;
+    contRecRef.current?.abort();
+    const rec = new SR();
+    rec.continuous = true;
+    rec.interimResults = false;
+    rec.lang = "en-US";
+    rec.maxAlternatives = 3;
+    rec.onresult = (e: any) => {
+      const last = e.results[e.results.length - 1];
+      if (last.isFinal) {
+        const t = last[0].transcript;
+        handleLangVoice(t);
+      }
+    };
+    rec.onend = () => {
+      contRecActiveRef.current = false;
+      // Auto-restart if still on step 1
+      if (contRecRef.current === rec) {
+        setTimeout(() => startContinuousRec(), 300);
+      }
+    };
+    rec.onerror = (e: any) => {
+      if (e.error !== "no-speech" && e.error !== "aborted") {
+        console.warn("Continuous rec error:", e.error);
+      }
+      contRecActiveRef.current = false;
+    };
+    contRecRef.current = rec;
+    contRecActiveRef.current = true;
+    rec.start();
+  }, []);
+
+  const stopContinuousRec = useCallback(() => {
+    contRecRef.current?.abort();
+    contRecRef.current = null;
+    contRecActiveRef.current = false;
+  }, []);
 
   // Load voices
   useEffect(() => {
@@ -219,13 +265,28 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     }
   }, [step]);
 
-  // STEP 1: Language
+  // STEP 1: Language — continuous listening
   useEffect(() => {
-    if (step === 1 && langSubStep === 0) speakThenListen("What is your primary language?", "lang-primary");
-    if (step === 1 && langSubStep === 1 && wantSecondary !== true) speakThenListen("Would you like to add a second language?", "lang-secondary-decision");
-    if (step === 1 && langSubStep === 1 && wantSecondary === true) speakThenListen("Which second language would you like to add?", "lang-secondary-pick");
-    if (step === 1 && langSubStep === 2) speakThenListen("Would you like to enable Sign Language?", "lang-sign");
-  }, [step, langSubStep, wantSecondary, speakThenListen]);
+    if (step !== 1) { stopContinuousRec(); return; }
+    // Speak question then start continuous recognition
+    if (langSubStep === 0 && hasSpokenRef.current !== "lang-primary") {
+      hasSpokenRef.current = "lang-primary";
+      speakAsync("What is your primary language?").then(() => startContinuousRec());
+    }
+    if (langSubStep === 1 && wantSecondary === null && hasSpokenRef.current !== "lang-secondary-decision") {
+      hasSpokenRef.current = "lang-secondary-decision";
+      speakAsync("Would you like to add a second language?").then(() => startContinuousRec());
+    }
+    if (langSubStep === 1 && wantSecondary === true && hasSpokenRef.current !== "lang-secondary-pick") {
+      hasSpokenRef.current = "lang-secondary-pick";
+      speakAsync("Which second language would you like to add?").then(() => startContinuousRec());
+    }
+    if (langSubStep === 2 && hasSpokenRef.current !== "lang-sign") {
+      hasSpokenRef.current = "lang-sign";
+      speakAsync("Would you like to enable Sign Language?").then(() => startContinuousRec());
+    }
+    return () => { if (step !== 1) stopContinuousRec(); };
+  }, [step, langSubStep, wantSecondary, startContinuousRec, stopContinuousRec]);
 
   // STEP 2: Communication
   useEffect(() => {
@@ -269,60 +330,84 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
-  /* ─── Speech results handler ─── */
-  useEffect(() => {
-    if (!speech.transcript) return;
-    const t = speech.transcript;
-
-    if (step === 1 && langSubStep === 0) {
+  /* ─── Voice handler for language step (called by continuous rec) ─── */
+  const handleLangVoice = useCallback((t: string) => {
+    if (step !== 1) return;
+    if (langSubStep === 0) {
       const match = matchLanguage(t);
       if (match) {
+        stopContinuousRec();
         setPrimaryLang(match.code);
         setPendingLang(null);
+        setRetryMessage(null);
         hasSpokenRef.current = "";
         speakAsync(`Got it — ${match.name} selected.`).then(() => setLangSubStep(1));
       } else {
-        setRetryMessage(`I heard "${t}" but couldn't match a language.`);
-        speak(`I didn't catch that — please try again or tap below.`);
-        hasSpokenRef.current = "";
-        setTimeout(() => speech.start(), 3500);
+        setRetryMessage(`I heard "${t}" — try again or tap below.`);
       }
-    } else if (step === 1 && langSubStep === 1) {
-      const yn = matchYesNo(t);
-      if (yn === true) {
-        setWantSecondary(true);
-        setRetryMessage(null);
-        hasSpokenRef.current = "";
-      } else if (yn === false) {
-        setWantSecondary(false);
-        setSecondaryLang(null);
-        setRetryMessage(null);
-        hasSpokenRef.current = "";
-        setLangSubStep(2);
-      } else {
+    } else if (langSubStep === 1) {
+      if (wantSecondary === true) {
+        // Listening for second language name
         const match = matchLanguage(t);
         if (match) {
-          setWantSecondary(true);
+          stopContinuousRec();
           setSecondaryLang(match.code);
           setRetryMessage(null);
           hasSpokenRef.current = "";
           speakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
         } else {
-          setRetryMessage(`I heard "${t}". Say yes, no, or a language name.`);
+          setRetryMessage(`I heard "${t}" — say a language name or tap below.`);
+        }
+      } else {
+        // Listening for yes/no about second language
+        const yn = matchYesNo(t);
+        if (yn === true) {
+          setWantSecondary(true);
+          setRetryMessage(null);
           hasSpokenRef.current = "";
-          setTimeout(() => speech.start(), 3500);
+        } else if (yn === false) {
+          stopContinuousRec();
+          setWantSecondary(false);
+          setSecondaryLang(null);
+          setRetryMessage(null);
+          hasSpokenRef.current = "";
+          setLangSubStep(2);
+        } else {
+          // Maybe they said a language name directly
+          const match = matchLanguage(t);
+          if (match) {
+            stopContinuousRec();
+            setWantSecondary(true);
+            setSecondaryLang(match.code);
+            setRetryMessage(null);
+            hasSpokenRef.current = "";
+            speakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
+          } else {
+            setRetryMessage(`I heard "${t}". Say yes, no, or a language name.`);
+          }
         }
       }
-    } else if (step === 1 && langSubStep === 2) {
+    } else if (langSubStep === 2) {
       const yn = matchYesNo(t);
-      if (yn === true) { setSignLanguage(true); setStep(2); }
-      else if (yn === false) { setSignLanguage(false); setStep(2); }
-      else {
-        setRetryMessage(`I heard "${t}". Please say yes or no.`);
-        hasSpokenRef.current = "";
-        setTimeout(() => speech.start(), 3000);
-      }
-    } else if (step === 2) {
+      if (yn === true) { stopContinuousRec(); setSignLanguage(true); setStep(2); }
+      else if (yn === false) { stopContinuousRec(); setSignLanguage(false); setStep(2); }
+      else { setRetryMessage(`I heard "${t}". Please say yes or no.`); }
+    }
+  }, [step, langSubStep, wantSecondary, stopContinuousRec]);
+
+  // Wire handleLangVoice into continuous rec
+  const handleLangVoiceRef = useRef(handleLangVoice);
+  handleLangVoiceRef.current = handleLangVoice;
+
+  // Patch startContinuousRec to use latest handler — done via ref in onresult above
+  // We need to update the onresult callback. Let's use a ref pattern instead.
+
+  /* ─── Speech results handler (non-language steps) ─── */
+  useEffect(() => {
+    if (!speech.transcript) return;
+    const t = speech.transcript;
+
+    if (step === 2) {
       const method = matchCommMethod(t);
       if (method && !commMethods.includes(method)) {
         const updated = [...commMethods, method].slice(0, 3);
@@ -377,27 +462,43 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     (accessMethod === "pattern" && accessValue.length >= 1)
   );
 
-  /* ─── Shared multi-input panel visible on every step (inline JSX to avoid ref warnings) ─── */
+  /* ─── Input method switcher + shared bar ─── */
+  const INPUT_METHODS = [
+    { id: "voice" as const, label: "Voice", icon: "🗣️" },
+    { id: "tap" as const, label: "Tap", icon: "☝️" },
+    { id: "sign" as const, label: "Sign", icon: "🤟" },
+    { id: "point" as const, label: "Point", icon: "🖼️" },
+    { id: "color" as const, label: "Color", icon: "🎨" },
+  ];
+
   const inputMethodsBar = (
-    <div className="space-y-2" role="region" aria-label="All input methods available">
-      <ListeningIndicator visible={speech.listening} />
-      {retryMessage && <p className="text-sm text-center text-destructive" role="alert">{retryMessage}</p>}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setCameraOpen(!cameraOpen)}
-          className={`flex items-center gap-2 text-xs px-3 py-2 rounded-xl border transition-all ${
-            cameraOpen ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
-          }`}
-          aria-label={cameraOpen ? "Close ASL camera" : "Open ASL camera to sign your answer"}
-          aria-pressed={cameraOpen}
-        >
-          <Hand className="h-4 w-4" />
-          <span>Sign It (ASL)</span>
-        </button>
-        <span className="text-[10px] text-muted-foreground" aria-hidden="true">
-          🗣️ Voice · ☝️ Tap · 🤟 Sign · 🖼️ Point · 🎨 Color — all active
-        </span>
+    <div className="space-y-2" role="region" aria-label="Input method switcher — all methods always available">
+      {/* Method switcher buttons */}
+      <div className="flex flex-wrap gap-1.5 justify-center">
+        {INPUT_METHODS.map((m) => (
+          <button
+            key={m.id}
+            onClick={() => {
+              setActiveInputMethod(m.id);
+              if (m.id === "sign") { setCameraOpen(true); }
+              else { setCameraOpen(false); }
+              if (m.id === "voice" && step === 1) { startContinuousRec(); }
+            }}
+            className={`flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl border transition-all ${
+              activeInputMethod === m.id
+                ? "border-primary bg-primary/10 text-foreground font-semibold"
+                : "border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
+            }`}
+            aria-label={`Switch to ${m.label} input`}
+            aria-pressed={activeInputMethod === m.id}
+          >
+            <span aria-hidden="true">{m.icon}</span>
+            <span>{m.label}</span>
+          </button>
+        ))}
       </div>
+      <ListeningIndicator visible={speech.listening || contRecActiveRef.current} />
+      {retryMessage && <p className="text-sm text-center text-destructive" role="alert">{retryMessage}</p>}
       <ASLCameraPanel open={cameraOpen} onClose={() => setCameraOpen(false)} />
     </div>
   );
@@ -472,19 +573,18 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                   <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" aria-hidden="true" />
                   <Input value={searchPrimary} onChange={(e) => setSearchPrimary(e.target.value)} placeholder="Search languages..." className="pl-10 text-lg h-12" aria-label="Search languages by typing" />
                 </div>
-                <div className="max-h-64 overflow-y-auto rounded-xl border border-border bg-card space-y-1 p-2" role="listbox" aria-label="Language list — tap, point, or use color to select">
+                <div className="max-h-64 overflow-y-auto rounded-xl border border-border bg-card space-y-1 p-2" role="listbox" aria-label="Language list — tap any flag to select">
                   {filteredLangs(searchPrimary).map((lang) => (
                     <button
                       key={lang.code}
-                      onClick={() => { speech.stop(); setPrimaryLang(lang.code); setPendingLang(null); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Got it — ${lang.name} selected.`).then(() => setLangSubStep(1)); }}
+                      onClick={() => { stopContinuousRec(); setPrimaryLang(lang.code); setPendingLang(null); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Got it — ${lang.name} selected.`).then(() => setLangSubStep(1)); }}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors ${primaryLang === lang.code ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"}`}
                       role="option"
                       aria-selected={primaryLang === lang.code}
-                      aria-label={`${lang.name} — tap or point to select`}
+                      aria-label={`${lang.flag} ${lang.name} — tap to select`}
                     >
-                      <span className="text-xl" aria-hidden="true">{lang.flag}</span>
+                      <span className="text-2xl">{lang.flag}</span>
                       <span className="flex-1 text-left">{lang.name}</span>
-                      <span className="h-5 w-5 rounded-full shrink-0 border border-foreground/10" style={{ backgroundColor: lang.color }} aria-label={`Color indicator for ${lang.name}`} />
                     </button>
                   ))}
                 </div>
@@ -529,15 +629,14 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                       {filteredLangs(searchSecondary).filter((l) => l.code !== primaryLang).map((lang) => (
                         <button
                           key={lang.code}
-                          onClick={() => { speech.stop(); setSecondaryLang(lang.code); setRetryMessage(null); hasSpokenRef.current = ""; setLangSubStep(2); }}
+                          onClick={() => { stopContinuousRec(); setSecondaryLang(lang.code); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Selected ${lang.name}`).then(() => setLangSubStep(2)); }}
                           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors ${secondaryLang === lang.code ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"}`}
                           role="option"
                           aria-selected={secondaryLang === lang.code}
-                          aria-label={`${lang.name} — tap or point to select`}
+                          aria-label={`${lang.flag} ${lang.name} — tap to select`}
                         >
-                          <span className="text-xl" aria-hidden="true">{lang.flag}</span>
+                          <span className="text-2xl">{lang.flag}</span>
                           <span className="flex-1 text-left">{lang.name}</span>
-                          <span className="h-5 w-5 rounded-full shrink-0 border border-foreground/10" style={{ backgroundColor: lang.color }} />
                         </button>
                       ))}
                     </div>
