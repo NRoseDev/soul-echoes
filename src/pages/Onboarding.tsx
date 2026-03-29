@@ -373,16 +373,19 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     return () => { if (step !== 1) stopContinuousRec(); };
   }, [step, langSubStep, wantSecondary, voiceEnabled, startContinuousRec, stopContinuousRec]);
 
-  // STEP 2: Communication
+  // STEP 2: Voice Setup (moved before Communication)
+  // (No special effect needed — voice list loads via voiceschanged event)
+
+  // STEP 3: Communication
   useEffect(() => {
-    if (step === 2) {
+    if (step === 3) {
       speakThenListen("How do you like to communicate? You can choose up to 3 options. Say or tap your choices.", "comm-method");
     }
   }, [step, speakThenListen]);
 
-  // STEP 3: Safety
+  // STEP 4: Safety
   useEffect(() => {
-    if (step === 3 && !safetyAngel) {
+    if (step === 4 && !safetyAngel) {
       speakThenListen("Let's set up your safety angel. This is just between us. Choose Michael for protection, or Faith for inner strength.", "safety-angel");
     }
   }, [step, safetyAngel, speakThenListen]);
@@ -488,7 +491,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     if (!speech.transcript) return;
     const t = speech.transcript;
 
-    if (step === 2) {
+    if (step === 3) {
       const method = matchCommMethod(t);
       if (method && !commMethods.includes(method)) {
         const updated = [...commMethods, method].slice(0, 3);
@@ -786,8 +789,106 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           </motion.div>
         )}
 
-        {/* ─── STEP 2: Communication ─── */}
+        {/* ─── STEP 2: Voice Setup ─── */}
         {step === 2 && (
+          <motion.div key="voice" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[80vh] overflow-y-auto">
+            {inputMethodsBar}
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
+              Choose Your AI Voice
+            </h2>
+            <p className="text-center text-muted-foreground text-sm">Pick the voice Soul Echoes will use to speak to you. Tap to preview, tap to select.</p>
+
+            {/* Gender */}
+            <div className="flex gap-3" role="radiogroup" aria-label="Voice gender preference — tap or point">
+              {(["feminine", "masculine", "neutral"] as const).map((g) => {
+                const gColors = { feminine: "hsl(340,60%,50%)", masculine: "hsl(220,60%,50%)", neutral: "hsl(45,60%,50%)" };
+                const gIcons = { feminine: "♀️", masculine: "♂️", neutral: "⚧️" };
+                return (
+                  <button
+                    key={g}
+                    onClick={() => setVoiceSettings((s) => ({ ...s, genderPref: g }))}
+                    className={`flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                      voiceSettings.genderPref === g ? "border-primary bg-primary/10 text-foreground" : "border-border bg-card text-muted-foreground hover:border-primary/40"
+                    }`}
+                    style={{ borderBottomWidth: 3, borderBottomColor: gColors[g] }}
+                    role="radio"
+                    aria-checked={voiceSettings.genderPref === g}
+                    aria-label={`${g} voice — tap or point`}
+                  >
+                    <span className="text-lg" aria-hidden="true">{gIcons[g]}</span>
+                    {g.charAt(0).toUpperCase() + g.slice(1)}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Speed */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground" id="speed-label">Speed — {voiceSettings.speed <= 0.75 ? "Slow 🐢" : voiceSettings.speed >= 1.25 ? "Fast 🐇" : "Normal"}</p>
+              <Slider value={[voiceSettings.speed]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, speed: v }))} min={0.5} max={1.5} step={0.1} aria-labelledby="speed-label" />
+            </div>
+
+            {/* Volume */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground" id="volume-label">Volume — {voiceSettings.volume <= 0.35 ? "Soft 🔈" : voiceSettings.volume >= 0.75 ? "Loud 🔊" : "Medium 🔉"}</p>
+              <Slider value={[voiceSettings.volume]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, volume: v }))} min={0.1} max={1} step={0.05} aria-labelledby="volume-label" />
+            </div>
+
+            {/* Voice list */}
+            <div className="space-y-1 max-h-48 overflow-y-auto rounded-xl border border-border bg-card p-2" role="listbox" aria-label="Available voices — tap to select, play button to preview">
+              {filteredVoices.length === 0 && <p className="text-sm text-muted-foreground p-3">Loading voices…</p>}
+              {filteredVoices.map((voice) => {
+                const isSelected = voiceSettings.voiceURI === voice.voiceURI;
+                return (
+                  <div
+                    key={voice.voiceURI}
+                    onClick={() => setVoiceSettings((s) => ({ ...s, voiceURI: voice.voiceURI }))}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${
+                      isSelected ? "bg-primary/15 border border-primary/30" : "hover:bg-muted"
+                    }`}
+                    role="option"
+                    aria-selected={isSelected}
+                    aria-label={`${voice.name} — ${voice.lang}. Tap to select.`}
+                  >
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.speechSynthesis.cancel();
+                        const u = new SpeechSynthesisUtterance("Hello, I am " + voice.name + ". Welcome to Soul Echoes.");
+                        u.voice = voice;
+                        u.rate = voiceSettings.speed;
+                        u.volume = voiceSettings.volume;
+                        window.speechSynthesis.speak(u);
+                      }}
+                      className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20"
+                      aria-label={`Preview voice: ${voice.name}`}
+                    >
+                      <Play className="h-3 w-3 text-foreground" />
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{voice.name}</p>
+                      <p className="text-xs text-muted-foreground">{voice.lang}</p>
+                    </div>
+                    {isSelected && <Check className="h-4 w-4 text-primary shrink-0" />}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Test & Continue */}
+            <div className="flex gap-3">
+              <Button onClick={testVoice} variant="outline" className="flex-1 rounded-2xl" aria-label="Test selected voice — plays the welcome message">
+                <Volume2 className="h-4 w-4 mr-2" /> Test Voice
+              </Button>
+              <Button onClick={() => setStep(3)} className="flex-1 rounded-2xl" aria-label="Continue to communication setup">
+                Continue <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ─── STEP 3: Communication ─── */}
+        {step === 3 && (
           <motion.div key="communication" {...fadeSlide} className="w-full max-w-2xl mx-auto space-y-4">
             {inputMethodsBar}
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
@@ -832,7 +933,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                   onClick={() => {
                     speech.stop();
                     const labels = commMethods.map((m) => COMMUNICATION_METHODS.find((cm) => cm.id === m)?.label || m).join(", ");
-                    speakAsync(`Perfect — I have set up ${labels} for you. You can change this anytime in settings.`).then(() => setStep(3));
+                    speakAsync(`Perfect — I have set up ${labels} for you. You can change this anytime in settings.`).then(() => setStep(4));
                   }}
                   aria-label="Continue to safety setup"
                 >
@@ -843,8 +944,8 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           </motion.div>
         )}
 
-        {/* ─── STEP 3: Safety Angel Setup ─── */}
-        {step === 3 && (
+        {/* ─── STEP 4: Safety Angel Setup ─── */}
+        {step === 4 && (
           <motion.div key="safety" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[85vh] overflow-y-auto">
             {inputMethodsBar}
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
@@ -1010,7 +1111,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     disabled={!canFinishSafety}
                     onClick={() => {
                       speak("Your angel is set. You are protected.");
-                      setTimeout(() => setStep(4), 2500);
+                      setTimeout(() => setStep(5), 2500);
                     }}
                     className="flex-1 rounded-2xl"
                     aria-label="Confirm safety angel setup"
