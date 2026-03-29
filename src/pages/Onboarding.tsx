@@ -156,6 +156,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [wantSecondary, setWantSecondary] = useState<boolean | null>(null);
   const [signLanguage, setSignLanguage] = useState<boolean | null>(null);
   const [langSubStep, setLangSubStep] = useState(0);
+  const [pendingLang, setPendingLang] = useState<string | null>(null);
   const [searchPrimary, setSearchPrimary] = useState("");
   const [searchSecondary, setSearchSecondary] = useState("");
 
