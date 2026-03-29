@@ -224,6 +224,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const handleLangVoiceRef = useRef<(t: string) => void>(() => {});
 
   const startContinuousRec = useCallback(() => {
+    if (!voiceEnabled) return;
     if (contRecActiveRef.current) return;
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) return;
