@@ -56,7 +56,13 @@ export default function PractitionerSignup() {
 
     try {
       const { supabase } = await import("@/integrations/supabase/client");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: "Error", description: "You must be signed in to apply.", variant: "destructive" });
+        return;
+      }
       await (supabase as any).from("practitioner_applications").insert({
+        user_id: user.id,
         role: selectedRole,
         answers: JSON.stringify(answers),
         scenario_answer: scenarioAnswer || null,
