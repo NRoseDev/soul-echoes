@@ -14,7 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      distress_signals: {
+        Row: {
+          angel: string
+          created_at: string
+          dispatched_at: string | null
+          dispatcher_id: string | null
+          gps_lat: number | null
+          gps_lng: number | null
+          id: string
+          offline_flag: boolean
+          situation_code: string
+          situation_label: string
+          status: string
+        }
+        Insert: {
+          angel: string
+          created_at?: string
+          dispatched_at?: string | null
+          dispatcher_id?: string | null
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          offline_flag?: boolean
+          situation_code: string
+          situation_label: string
+          status?: string
+        }
+        Update: {
+          angel?: string
+          created_at?: string
+          dispatched_at?: string | null
+          dispatcher_id?: string | null
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          offline_flag?: boolean
+          situation_code?: string
+          situation_label?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      practitioner_applications: {
+        Row: {
+          answers: Json
+          bg_check_consent: boolean
+          code_of_conduct_agreed: boolean
+          created_at: string
+          id: string
+          reference_contact: string
+          reference_name: string
+          reviewed_at: string | null
+          reviewer_notes: string | null
+          role: string
+          scenario_answer: string | null
+          status: string
+        }
+        Insert: {
+          answers: Json
+          bg_check_consent?: boolean
+          code_of_conduct_agreed?: boolean
+          created_at?: string
+          id?: string
+          reference_contact: string
+          reference_name: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          role: string
+          scenario_answer?: string | null
+          status?: string
+        }
+        Update: {
+          answers?: Json
+          bg_check_consent?: boolean
+          code_of_conduct_agreed?: boolean
+          created_at?: string
+          id?: string
+          reference_contact?: string
+          reference_name?: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          role?: string
+          scenario_answer?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
