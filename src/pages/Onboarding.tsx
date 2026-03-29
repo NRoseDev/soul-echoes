@@ -328,7 +328,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       speakAsync("Would you like to enable Sign Language?").then(() => startContinuousRec());
     }
     return () => { if (step !== 1) stopContinuousRec(); };
-  }, [step, langSubStep, wantSecondary, startContinuousRec, stopContinuousRec]);
+  }, [step, langSubStep, wantSecondary, voiceEnabled, startContinuousRec, stopContinuousRec]);
 
   // STEP 2: Communication
   useEffect(() => {
