@@ -9,7 +9,7 @@ interface UseSpeechRecognitionOptions {
 export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) {
   const [listening, setListening] = useState(false);
   const [transcript, setTranscript] = useState("");
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<any>(null);
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
@@ -24,7 +24,7 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
       recognitionRef.current?.abort();
 
       const SpeechRecognitionAPI =
-        window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognitionAPI();
       recognition.continuous = false;
       recognition.interimResults = false;
