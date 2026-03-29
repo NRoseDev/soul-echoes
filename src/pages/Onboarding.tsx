@@ -482,6 +482,44 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     </button>
                   ))}
                 </div>
+                {pendingLang && (
+                  <div className="mt-4 p-4 rounded-2xl border border-primary/30 bg-primary/5 space-y-3" aria-live="polite">
+                    <p className="text-center text-lg font-medium text-foreground">
+                      You selected <span className="font-bold text-primary">{getLangName(pendingLang)}</span>. Is that correct?
+                    </p>
+                    <div className="flex gap-4 justify-center">
+                      <Button
+                        size="lg"
+                        className="text-lg px-8 py-5 rounded-2xl min-w-[120px] gap-2"
+                        onClick={() => {
+                          speech.stop();
+                          setPendingLang(null);
+                          hasSpokenRef.current = "";
+                          speakAsync(`Got it — ${getLangName(pendingLang)} confirmed.`).then(() => setLangSubStep(1));
+                        }}
+                        aria-label="Yes, confirm language"
+                      >
+                        <span className="text-xl" aria-hidden="true">✅</span> Yes
+                      </Button>
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="text-lg px-8 py-5 rounded-2xl min-w-[120px] gap-2"
+                        onClick={() => {
+                          speech.stop();
+                          setPendingLang(null);
+                          setPrimaryLang("en");
+                          setRetryMessage(null);
+                          hasSpokenRef.current = "";
+                          speakThenListen("No problem. What is your primary language?", "lang-primary-retry");
+                        }}
+                        aria-label="No, choose again"
+                      >
+                        <span className="text-xl" aria-hidden="true">❌</span> No
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
