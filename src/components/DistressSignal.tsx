@@ -147,14 +147,18 @@ export default function DistressSignal() {
     try {
       if (navigator.onLine) {
         const { supabase } = await import("@/integrations/supabase/client");
-        await (supabase as any).from("distress_signals").insert({
-          angel: signal.angel,
-          situation_code: signal.situationCode,
-          situation_label: signal.situationLabel,
-          gps_lat: signal.gpsLat,
-          gps_lng: signal.gpsLng,
-          offline_flag: signal.offlineFlag,
-        });
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await (supabase as any).from("distress_signals").insert({
+            user_id: user.id,
+            angel: signal.angel,
+            situation_code: signal.situationCode,
+            situation_label: signal.situationLabel,
+            gps_lat: signal.gpsLat,
+            gps_lng: signal.gpsLng,
+            offline_flag: signal.offlineFlag,
+          });
+        }
       }
     } catch { /* will retry later */ }
 
