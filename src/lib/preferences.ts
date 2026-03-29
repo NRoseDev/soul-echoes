@@ -150,6 +150,7 @@ export const COMMUNICATION_METHODS = [
   { id: "speak", label: "I speak", icon: "🗣️" },
   { id: "type", label: "I type", icon: "⌨️" },
   { id: "sign", label: "I sign (ASL or other)", icon: "🤟" },
+  { id: "colors", label: "I express through colors and symbols", icon: "🎨" },
   { id: "pictures", label: "I point to pictures or cards", icon: "🖼️" },
   { id: "braille", label: "I use braille or assistive device", icon: "⠿" },
   { id: "aac", label: "I use a computer or device that speaks for me", icon: "💻" },

@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, Palette, MessageSquare } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { streamChat, type ChatMessage } from "@/lib/chat";
 import { useToast } from "@/hooks/use-toast";
+import ColorSymbolCanvas from "@/components/ColorSymbolCanvas";
 
 const WELCOME_MESSAGE: ChatMessage = {
   role: "assistant",
@@ -24,6 +25,7 @@ export default function BrainDump() {
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [expressionMode, setExpressionMode] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
@@ -131,36 +133,58 @@ export default function BrainDump() {
         </div>
       )}
 
+      {/* Color/Symbol Canvas */}
+      {expressionMode && (
+        <div className="border-t border-border bg-background">
+          <ColorSymbolCanvas onSend={(msg) => send(msg)} disabled={isLoading} />
+        </div>
+      )}
+
       {/* Input */}
       <div className="border-t border-border px-4 py-3 bg-background">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            send(input);
-          }}
-          className="flex gap-2 items-end max-w-3xl mx-auto"
-        >
-          <Textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Let it out… type what's on your mind"
-            className="min-h-[48px] max-h-[160px] resize-none bg-card border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary text-base"
-            rows={1}
-            aria-label="Type your message"
-            disabled={isLoading}
-          />
+        <div className="flex gap-2 items-end max-w-3xl mx-auto">
           <Button
-            type="submit"
+            type="button"
             size="icon"
-            disabled={!input.trim() || isLoading}
-            className="shrink-0 h-12 w-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
-            aria-label="Send message"
+            variant={expressionMode ? "default" : "outline"}
+            onClick={() => setExpressionMode(!expressionMode)}
+            className="shrink-0 h-12 w-12 rounded-xl"
+            aria-label={expressionMode ? "Switch to text input" : "Express through colors and symbols"}
+            title={expressionMode ? "Switch to text" : "Colors & symbols"}
           >
-            <Send className="h-5 w-5" aria-hidden="true" />
+            {expressionMode ? <MessageSquare className="h-5 w-5" /> : <Palette className="h-5 w-5" />}
           </Button>
-        </form>
+          {!expressionMode && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                send(input);
+              }}
+              className="flex gap-2 items-end flex-1"
+            >
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Let it out… type what's on your mind"
+                className="min-h-[48px] max-h-[160px] resize-none bg-card border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary text-base"
+                rows={1}
+                aria-label="Type your message"
+                disabled={isLoading}
+              />
+              <Button
+                type="submit"
+                size="icon"
+                disabled={!input.trim() || isLoading}
+                className="shrink-0 h-12 w-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
+                aria-label="Send message"
+              >
+                <Send className="h-5 w-5" aria-hidden="true" />
+              </Button>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
