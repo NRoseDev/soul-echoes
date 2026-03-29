@@ -369,37 +369,30 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     (accessMethod === "pattern" && accessValue.length >= 1)
   );
 
-  /* ─── Shared multi-input panel visible on every step ─── */
-  function InputMethodsBar() {
-    return (
-      <div className="space-y-2" role="region" aria-label="All input methods available">
-        {/* Voice listening indicator */}
-        <ListeningIndicator visible={speech.listening} />
-
-        {/* Retry message */}
-        {retryMessage && <p className="text-sm text-center text-destructive" role="alert">{retryMessage}</p>}
-
-        {/* ASL camera toggle + panel */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setCameraOpen(!cameraOpen)}
-            className={`flex items-center gap-2 text-xs px-3 py-2 rounded-xl border transition-all ${
-              cameraOpen ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
-            }`}
-            aria-label={cameraOpen ? "Close ASL camera" : "Open ASL camera to sign your answer"}
-            aria-pressed={cameraOpen}
-          >
-            <Hand className="h-4 w-4" />
-            <span>Sign It (ASL)</span>
-          </button>
-          <span className="text-[10px] text-muted-foreground" aria-hidden="true">
-            🗣️ Voice · ☝️ Tap · 🤟 Sign · 🖼️ Point · 🎨 Color — all active
-          </span>
-        </div>
-        <ASLCameraPanel open={cameraOpen} onClose={() => setCameraOpen(false)} />
+  /* ─── Shared multi-input panel visible on every step (inline JSX to avoid ref warnings) ─── */
+  const inputMethodsBar = (
+    <div className="space-y-2" role="region" aria-label="All input methods available">
+      <ListeningIndicator visible={speech.listening} />
+      {retryMessage && <p className="text-sm text-center text-destructive" role="alert">{retryMessage}</p>}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setCameraOpen(!cameraOpen)}
+          className={`flex items-center gap-2 text-xs px-3 py-2 rounded-xl border transition-all ${
+            cameraOpen ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
+          }`}
+          aria-label={cameraOpen ? "Close ASL camera" : "Open ASL camera to sign your answer"}
+          aria-pressed={cameraOpen}
+        >
+          <Hand className="h-4 w-4" />
+          <span>Sign It (ASL)</span>
+        </button>
+        <span className="text-[10px] text-muted-foreground" aria-hidden="true">
+          🗣️ Voice · ☝️ Tap · 🤟 Sign · 🖼️ Point · 🎨 Color — all active
+        </span>
       </div>
-    );
-  }
+      <ASLCameraPanel open={cameraOpen} onClose={() => setCameraOpen(false)} />
+    </div>
+  );
 
   /* ═══════════════════ RENDER ═══════════════════ */
   return (
@@ -457,7 +450,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 1: Language ─── */}
         {step === 1 && (
           <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4">
-            <InputMethodsBar />
+            {inputMethodsBar}
 
             {langSubStep === 0 && (
               <div className="space-y-3">
@@ -584,7 +577,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 2: Communication ─── */}
         {step === 2 && (
           <motion.div key="communication" {...fadeSlide} className="w-full max-w-2xl mx-auto space-y-4">
-            <InputMethodsBar />
+            {inputMethodsBar}
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
               How do you like to communicate?
             </h2>
@@ -641,7 +634,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 3: Safety Angel Setup ─── */}
         {step === 3 && (
           <motion.div key="safety" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[85vh] overflow-y-auto">
-            <InputMethodsBar />
+            {inputMethodsBar}
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
               🦄 Your Safety Angel
             </h2>
@@ -821,7 +814,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 4: Voice Setup ─── */}
         {step === 4 && (
           <motion.div key="voice" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[80vh] overflow-y-auto">
-            <InputMethodsBar />
+            {inputMethodsBar}
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
               Choose Your AI Voice
             </h2>
