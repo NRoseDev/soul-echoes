@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Loader2, Mic, MicOff, Volume2, VolumeX, Camera } from "lucide-react";
+import { Send, Loader2, Mic, MicOff, Volume2, VolumeX, Hand } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,7 @@ import { useTTS } from "@/hooks/use-tts";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { getPreferences } from "@/lib/preferences";
 import ListeningIndicator from "@/components/ListeningIndicator";
+import ASLSignInput from "@/components/ASLSignInput";
 
 const WELCOME_MESSAGE: ChatMessage = {
   role: "assistant",
@@ -293,17 +294,7 @@ export default function BrainDump() {
         );
 
       case "sign":
-        return (
-          <div className="px-4 py-6 text-center space-y-3">
-            <Camera className="h-10 w-10 text-muted-foreground mx-auto" />
-            <p className="text-sm text-muted-foreground">
-              Sign language video interpretation is coming soon. ✨
-            </p>
-            <p className="text-xs text-muted-foreground/60">
-              For now, you can use another input method.
-            </p>
-          </div>
-        );
+        return <ASLSignInput onSend={send} disabled={isLoading} />;
 
       case "pictures":
         return <PointToItCards onSend={send} disabled={isLoading} />;
