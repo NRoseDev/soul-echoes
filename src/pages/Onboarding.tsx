@@ -395,12 +395,12 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full border border-border"
                 aria-label="Open camera for sign language"
               >
-                <Camera className="h-4 w-4" /> ASL Camera
+                <Hand className="h-4 w-4" /> ASL Camera
               </button>
             </div>
             {cameraOpen && (
               <div className="rounded-xl border border-border bg-card p-4 text-center text-sm text-muted-foreground">
-                <Camera className="h-8 w-8 mx-auto mb-2" />
+                <Hand className="h-8 w-8 mx-auto mb-2" />
                 ASL video recognition coming soon. Please tap your answer below.
               </div>
             )}
@@ -683,7 +683,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
                 {accessMethod === "sign" && (
                   <div className="text-center space-y-3">
-                    <Camera className="h-10 w-10 mx-auto text-muted-foreground" />
+                    <Hand className="h-10 w-10 mx-auto text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">Sign gesture recognition coming soon.</p>
                     <p className="text-xs text-muted-foreground">Your gesture will be saved locally on your device.</p>
                   </div>
