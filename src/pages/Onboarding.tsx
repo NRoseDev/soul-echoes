@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Search, ChevronRight, Volume2, Play, Camera, Eye } from "lucide-react";
+import { Check, Search, ChevronRight, Volume2, Play, Hand, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
