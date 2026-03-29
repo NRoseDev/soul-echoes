@@ -277,10 +277,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       const match = matchLanguage(t);
       if (match) {
         setPrimaryLang(match.code);
-        setPendingLang(match.code);
-        speakAsync(`You said ${match.name}. Is that correct? Say yes to confirm or no to try again.`).then(() => {
-          setTimeout(() => speech.start(), 400);
-        });
+        setPendingLang(null);
+        hasSpokenRef.current = "";
+        speakAsync(`Got it — ${match.name} selected.`).then(() => setLangSubStep(1));
       } else {
         setRetryMessage(`I heard "${t}" but couldn't match a language.`);
         speak(`I didn't catch that — please try again or tap below.`);
