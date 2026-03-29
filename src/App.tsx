@@ -47,6 +47,7 @@ const App = () => {
               <Route path="/spiritual-tools" element={<HealingRoom />} />
               <Route path="/community" element={<HealingRoom />} />
               <Route path="/practitioner" element={<HealingRoom />} />
+              <Route path="/practitioner/signup" element={<PractitionerSignup />} />
               <Route path="/crisis" element={<HealingRoom />} />
               <Route path="/voice-settings" element={<VoiceSettings />} />
               <Route path="/settings" element={<Settings />} />
