@@ -1,61 +1,68 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { getVoiceSettings } from "@/lib/voiceSettings";
+import { useCallback, useRef, useState } from "react";
 
-const PREFERRED_VOICES = [
-  "samantha", "karen", "moira",
-  "google uk english female", "google us english female",
-  "microsoft zira", "microsoft jenny",
-];
-
-function getBestFemaleVoice(): SpeechSynthesisVoice | null {
-  const voices = window.speechSynthesis.getVoices();
-  for (const pref of PREFERRED_VOICES) {
-    const match = voices.find((v) => v.name.toLowerCase().includes(pref));
-    if (match) return match;
-  }
-  return (
-    voices.find(
-      (v) => v.lang.startsWith("en") && /female|zira|samantha|karen|jenny/i.test(v.name)
-    ) || voices.find((v) => v.lang.startsWith("en")) || null
-  );
-}
+const VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; // Rachel
 
 export function useTTS() {
-  const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
   const [speaking, setSpeaking] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    return () => synthRef.current?.cancel();
-  }, []);
+  const speak = useCallback(async (text: string) => {
+    if (!text) return;
 
-  const speak = useCallback((text: string) => {
-    const synth = synthRef.current;
-    if (!synth) return;
-
-    synth.cancel();
-    const settings = getVoiceSettings();
-    const utterance = new SpeechSynthesisUtterance(text);
-
-    const voices = synth.getVoices();
-    let selectedVoice: SpeechSynthesisVoice | null = null;
-    if (settings.voiceURI) {
-      selectedVoice = voices.find((v) => v.voiceURI === settings.voiceURI) || null;
+    // Stop any current playback
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
     }
-    if (!selectedVoice) selectedVoice = getBestFemaleVoice();
-    if (selectedVoice) utterance.voice = selectedVoice;
 
-    utterance.rate = settings.speed ?? 0.85;
-    utterance.volume = settings.volume ?? 1;
-    utterance.pitch = 1.1;
-    utterance.onstart = () => setSpeaking(true);
-    utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
+    setSpeaking(true);
 
-    synth.speak(utterance);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text, voiceId: VOICE_ID }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`TTS request failed: ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+
+      audio.onended = () => {
+        setSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+        audioRef.current = null;
+      };
+      audio.onerror = () => {
+        setSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+        audioRef.current = null;
+      };
+
+      await audio.play();
+    } catch (err) {
+      console.error("ElevenLabs TTS error:", err);
+      setSpeaking(false);
+    }
   }, []);
 
   const stop = useCallback(() => {
-    synthRef.current?.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
     setSpeaking(false);
   }, []);
 
