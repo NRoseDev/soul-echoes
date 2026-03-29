@@ -182,12 +182,49 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const hasSpokenRef = useRef<string>("");
   const speech = useSpeechRecognition();
 
+  // Microphone permission state: "prompt" | "granted" | "denied" | "unavailable"
+  const [micPermission, setMicPermission] = useState<"prompt" | "granted" | "denied" | "unavailable">("prompt");
+  const micCheckedRef = useRef(false);
+
+  // Check mic permission on mount
+  useEffect(() => {
+    if (micCheckedRef.current) return;
+    micCheckedRef.current = true;
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { setMicPermission("unavailable"); return; }
+    // Check permissions API if available
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: "microphone" as PermissionName }).then((result) => {
+        if (result.state === "granted") setMicPermission("granted");
+        else if (result.state === "denied") setMicPermission("denied");
+        // else stays "prompt"
+        result.onchange = () => {
+          if (result.state === "granted") setMicPermission("granted");
+          else if (result.state === "denied") setMicPermission("denied");
+        };
+      }).catch(() => { /* permissions API not supported, stay as prompt */ });
+    }
+  }, []);
+
+  const requestMicPermission = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((t) => t.stop());
+      setMicPermission("granted");
+    } catch {
+      setMicPermission("denied");
+    }
+  }, []);
+
+  const voiceEnabled = micPermission === "granted";
+
   // Continuous recognition for language step
   const contRecRef = useRef<any>(null);
   const contRecActiveRef = useRef(false);
   const handleLangVoiceRef = useRef<(t: string) => void>(() => {});
 
   const startContinuousRec = useCallback(() => {
+    if (!voiceEnabled) return;
     if (contRecActiveRef.current) return;
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) return;
@@ -210,15 +247,21 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       }
     };
     rec.onerror = (e: any) => {
+      contRecActiveRef.current = false;
+      if (e.error === "network" || e.error === "not-allowed") {
+        // Stop retrying on network/permission errors
+        contRecRef.current = null;
+        if (e.error === "not-allowed") setMicPermission("denied");
+        return;
+      }
       if (e.error !== "no-speech" && e.error !== "aborted") {
         console.warn("Continuous rec error:", e.error);
       }
-      contRecActiveRef.current = false;
     };
     contRecRef.current = rec;
     contRecActiveRef.current = true;
     rec.start();
-  }, []);
+  }, [voiceEnabled]);
 
   const stopContinuousRec = useCallback(() => {
     contRecRef.current?.abort();
@@ -243,9 +286,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       hasSpokenRef.current = key;
       setRetryMessage(null);
       await speakAsync(text);
-      setTimeout(() => speech.start(), 400);
+      if (voiceEnabled) setTimeout(() => speech.start(), 400);
     },
-    [speech]
+    [speech, voiceEnabled]
   );
 
   /* ─── Step effects ─── */
@@ -285,7 +328,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       speakAsync("Would you like to enable Sign Language?").then(() => startContinuousRec());
     }
     return () => { if (step !== 1) stopContinuousRec(); };
-  }, [step, langSubStep, wantSecondary, startContinuousRec, stopContinuousRec]);
+  }, [step, langSubStep, wantSecondary, voiceEnabled, startContinuousRec, stopContinuousRec]);
 
   // STEP 2: Communication
   useEffect(() => {
@@ -554,6 +597,28 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 1: Language ─── */}
         {step === 1 && (
           <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4">
+            {/* Microphone permission gate */}
+            {micPermission === "prompt" && (
+              <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-3">
+                <div className="text-4xl">🎙️</div>
+                <p className="text-foreground font-semibold text-lg">Enable Voice?</p>
+                <p className="text-muted-foreground text-sm">Tap below to allow your microphone so you can speak your answers.</p>
+                <Button onClick={requestMicPermission} size="lg" className="text-lg px-8 py-6 rounded-2xl">
+                  🎙️ Tap to allow microphone
+                </Button>
+                <p className="text-xs text-muted-foreground">Or just tap your answers below — no microphone needed</p>
+              </div>
+            )}
+            {micPermission === "denied" && (
+              <div className="bg-destructive/10 border border-destructive/30 rounded-2xl p-4 text-center space-y-1">
+                <p className="text-sm text-destructive font-medium">🔇 Voice not available — please tap your answers below</p>
+              </div>
+            )}
+            {micPermission === "unavailable" && (
+              <div className="bg-muted border border-border rounded-2xl p-4 text-center space-y-1">
+                <p className="text-sm text-muted-foreground">Voice not supported on this device — tap your answers below</p>
+              </div>
+            )}
             {inputMethodsBar}
 
             {langSubStep === 0 && (
