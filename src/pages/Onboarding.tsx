@@ -597,6 +597,28 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 1: Language ─── */}
         {step === 1 && (
           <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4">
+            {/* Microphone permission gate */}
+            {micPermission === "prompt" && (
+              <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-3">
+                <div className="text-4xl">🎙️</div>
+                <p className="text-foreground font-semibold text-lg">Enable Voice?</p>
+                <p className="text-muted-foreground text-sm">Tap below to allow your microphone so you can speak your answers.</p>
+                <Button onClick={requestMicPermission} size="lg" className="text-lg px-8 py-6 rounded-2xl">
+                  🎙️ Tap to allow microphone
+                </Button>
+                <p className="text-xs text-muted-foreground">Or just tap your answers below — no microphone needed</p>
+              </div>
+            )}
+            {micPermission === "denied" && (
+              <div className="bg-destructive/10 border border-destructive/30 rounded-2xl p-4 text-center space-y-1">
+                <p className="text-sm text-destructive font-medium">🔇 Voice not available — please tap your answers below</p>
+              </div>
+            )}
+            {micPermission === "unavailable" && (
+              <div className="bg-muted border border-border rounded-2xl p-4 text-center space-y-1">
+                <p className="text-sm text-muted-foreground">Voice not supported on this device — tap your answers below</p>
+              </div>
+            )}
             {inputMethodsBar}
 
             {langSubStep === 0 && (
