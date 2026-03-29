@@ -665,7 +665,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                         aria-selected={primaryLang === lang.code}
                         aria-label={`${lang.name} — tap to select`}
                       >
-                        <span className="text-4xl sm:text-5xl">{lang.flag}</span>
+                        <img src={`https://flagcdn.com/48x36/${lang.cc}.png`} alt={lang.name} className="w-12 h-9 object-cover rounded-sm" />
                         <span className="text-xs sm:text-sm font-medium text-gray-800">{lang.name}</span>
                       </button>
                     ))}
@@ -714,7 +714,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                           aria-selected={secondaryLang === lang.code}
                           aria-label={`${lang.name} — tap to select`}
                         >
-                          <span className="text-4xl sm:text-5xl">{lang.flag}</span>
+                          <img src={`https://flagcdn.com/48x36/${lang.cc}.png`} alt={lang.name} className="w-12 h-9 object-cover rounded-sm" />
                           <span className="text-xs sm:text-sm font-medium text-gray-800">{lang.name}</span>
                         </button>
                       ))}
