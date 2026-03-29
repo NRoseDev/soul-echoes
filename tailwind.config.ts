@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        display: ["Nunito", "sans-serif"],
+        body: ["Atkinson Hyperlegible", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -57,6 +61,22 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        healing: {
+          journal: "hsl(var(--healing-journal))",
+          breathe: "hsl(var(--healing-breathe))",
+          unspoken: "hsl(var(--healing-unspoken))",
+          shadow: "hsl(var(--healing-shadow))",
+          wisdom: "hsl(var(--healing-wisdom))",
+          tools: "hsl(var(--healing-tools))",
+          community: "hsl(var(--healing-community))",
+          practitioner: "hsl(var(--healing-practitioner))",
+          crisis: "hsl(var(--healing-crisis))",
+        },
+        warm: {
+          surface: "hsl(var(--surface-warm))",
+          sage: "hsl(var(--surface-sage))",
+          indigo: "hsl(var(--surface-indigo))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,25 +85,27 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "gentle-pulse": {
+          "0%, 100%": { opacity: "0.6" },
+          "50%": { opacity: "1" },
+        },
+        "float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-6px)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "gentle-pulse": "gentle-pulse 3s ease-in-out infinite",
+        "float": "float 4s ease-in-out infinite",
       },
     },
   },
