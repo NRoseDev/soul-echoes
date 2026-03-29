@@ -450,7 +450,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 1: Language ─── */}
         {step === 1 && (
           <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4">
-            <InputMethodsBar />
+            {inputMethodsBar}
 
             {langSubStep === 0 && (
               <div className="space-y-3">
@@ -577,7 +577,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 2: Communication ─── */}
         {step === 2 && (
           <motion.div key="communication" {...fadeSlide} className="w-full max-w-2xl mx-auto space-y-4">
-            <InputMethodsBar />
+            {inputMethodsBar}
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
               How do you like to communicate?
             </h2>
@@ -634,7 +634,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 3: Safety Angel Setup ─── */}
         {step === 3 && (
           <motion.div key="safety" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[85vh] overflow-y-auto">
-            <InputMethodsBar />
+            {inputMethodsBar}
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
               🦄 Your Safety Angel
             </h2>
@@ -814,7 +814,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 4: Voice Setup ─── */}
         {step === 4 && (
           <motion.div key="voice" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[80vh] overflow-y-auto">
-            <InputMethodsBar />
+            {inputMethodsBar}
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
               Choose Your AI Voice
             </h2>
