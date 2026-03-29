@@ -1,68 +1,54 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-const VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; // Rachel
+const PREFERRED_VOICES = [
+  "microsoft jenny",
+  "microsoft aria",
+  "microsoft natasha",
+  "samantha",
+  "karen",
+  "google uk english female",
+  "google us english female",
+];
+
+function getBestVoice(): SpeechSynthesisVoice | null {
+  const voices = window.speechSynthesis.getVoices();
+  for (const pref of PREFERRED_VOICES) {
+    const match = voices.find((v) => v.name.toLowerCase().includes(pref));
+    if (match) return match;
+  }
+  return voices.find((v) => v.lang.startsWith("en")) || null;
+}
 
 export function useTTS() {
+  const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
   const [speaking, setSpeaking] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const speak = useCallback(async (text: string) => {
-    if (!text) return;
+  useEffect(() => {
+    return () => synthRef.current?.cancel();
+  }, []);
 
-    // Stop any current playback
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
+  const speak = useCallback((text: string) => {
+    const synth = synthRef.current;
+    if (!synth) return;
 
-    setSpeaking(true);
+    synth.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
 
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ text, voiceId: VOICE_ID }),
-        }
-      );
+    const selectedVoice = getBestVoice();
+    if (selectedVoice) utterance.voice = selectedVoice;
 
-      if (!response.ok) {
-        throw new Error(`TTS request failed: ${response.status}`);
-      }
+    utterance.rate = 0.85;
+    utterance.pitch = 1.0;
+    utterance.volume = 1;
+    utterance.onstart = () => setSpeaking(true);
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
 
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-
-      audio.onended = () => {
-        setSpeaking(false);
-        URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
-      };
-      audio.onerror = () => {
-        setSpeaking(false);
-        URL.revokeObjectURL(audioUrl);
-        audioRef.current = null;
-      };
-
-      await audio.play();
-    } catch (err) {
-      console.error("ElevenLabs TTS error:", err);
-      setSpeaking(false);
-    }
+    synth.speak(utterance);
   }, []);
 
   const stop = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
+    synthRef.current?.cancel();
     setSpeaking(false);
   }, []);
 
