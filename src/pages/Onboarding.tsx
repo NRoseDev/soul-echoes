@@ -660,13 +660,13 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                       <button
                         key={lang.code}
                         onClick={() => { stopContinuousRec(); setPrimaryLang(lang.code); setPendingLang(null); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Got it — ${lang.name} selected.`).then(() => setLangSubStep(1)); }}
-                        className={`flex flex-col items-center justify-center gap-1 p-3 sm:p-4 rounded-2xl border-2 transition-all ${primaryLang === lang.code ? "border-primary bg-primary/20 scale-105" : "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30"}`}
+                        className={`flex flex-col items-center justify-center gap-1 p-3 sm:p-4 rounded-2xl border-2 transition-all ${primaryLang === lang.code ? "border-primary bg-white scale-105 shadow-lg" : "border-white/20 bg-white/90 hover:bg-white hover:border-white/50 shadow-sm"}`}
                         role="option"
                         aria-selected={primaryLang === lang.code}
                         aria-label={`${lang.name} — tap to select`}
                       >
                         <span className="text-4xl sm:text-5xl">{lang.flag}</span>
-                        <span className="text-xs sm:text-sm font-medium text-white/90">{lang.name}</span>
+                        <span className="text-xs sm:text-sm font-medium text-gray-800">{lang.name}</span>
                       </button>
                     ))}
                   </div>
@@ -709,13 +709,13 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                         <button
                           key={lang.code}
                           onClick={() => { stopContinuousRec(); setSecondaryLang(lang.code); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Selected ${lang.name}`).then(() => setLangSubStep(2)); }}
-                          className={`flex flex-col items-center justify-center gap-1 p-3 sm:p-4 rounded-2xl border-2 transition-all ${secondaryLang === lang.code ? "border-primary bg-primary/20 scale-105" : "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30"}`}
+                          className={`flex flex-col items-center justify-center gap-1 p-3 sm:p-4 rounded-2xl border-2 transition-all ${secondaryLang === lang.code ? "border-primary bg-white scale-105 shadow-lg" : "border-white/20 bg-white/90 hover:bg-white hover:border-white/50 shadow-sm"}`}
                           role="option"
                           aria-selected={secondaryLang === lang.code}
                           aria-label={`${lang.name} — tap to select`}
                         >
                           <span className="text-4xl sm:text-5xl">{lang.flag}</span>
-                          <span className="text-xs sm:text-sm font-medium text-white/90">{lang.name}</span>
+                          <span className="text-xs sm:text-sm font-medium text-gray-800">{lang.name}</span>
                         </button>
                       ))}
                     </div>
