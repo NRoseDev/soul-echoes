@@ -286,9 +286,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       hasSpokenRef.current = key;
       setRetryMessage(null);
       await speakAsync(text);
-      setTimeout(() => speech.start(), 400);
+      if (voiceEnabled) setTimeout(() => speech.start(), 400);
     },
-    [speech]
+    [speech, voiceEnabled]
   );
 
   /* ─── Step effects ─── */
