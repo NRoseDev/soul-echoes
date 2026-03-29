@@ -182,6 +182,42 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const hasSpokenRef = useRef<string>("");
   const speech = useSpeechRecognition();
 
+  // Microphone permission state: "prompt" | "granted" | "denied" | "unavailable"
+  const [micPermission, setMicPermission] = useState<"prompt" | "granted" | "denied" | "unavailable">("prompt");
+  const micCheckedRef = useRef(false);
+
+  // Check mic permission on mount
+  useEffect(() => {
+    if (micCheckedRef.current) return;
+    micCheckedRef.current = true;
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { setMicPermission("unavailable"); return; }
+    // Check permissions API if available
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: "microphone" as PermissionName }).then((result) => {
+        if (result.state === "granted") setMicPermission("granted");
+        else if (result.state === "denied") setMicPermission("denied");
+        // else stays "prompt"
+        result.onchange = () => {
+          if (result.state === "granted") setMicPermission("granted");
+          else if (result.state === "denied") setMicPermission("denied");
+        };
+      }).catch(() => { /* permissions API not supported, stay as prompt */ });
+    }
+  }, []);
+
+  const requestMicPermission = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((t) => t.stop());
+      setMicPermission("granted");
+    } catch {
+      setMicPermission("denied");
+    }
+  }, []);
+
+  const voiceEnabled = micPermission === "granted";
+
   // Continuous recognition for language step
   const contRecRef = useRef<any>(null);
   const contRecActiveRef = useRef(false);
