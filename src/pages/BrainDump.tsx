@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, Palette, MessageSquare } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { streamChat, type ChatMessage } from "@/lib/chat";
 import { useToast } from "@/hooks/use-toast";
+import ColorSymbolCanvas from "@/components/ColorSymbolCanvas";
 
 const WELCOME_MESSAGE: ChatMessage = {
   role: "assistant",
