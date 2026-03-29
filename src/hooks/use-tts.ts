@@ -10,42 +10,62 @@ const PREFERRED_VOICES = [
   "google us english female",
 ];
 
-function getBestVoice(): SpeechSynthesisVoice | null {
-  const voices = window.speechSynthesis.getVoices();
-  for (const pref of PREFERRED_VOICES) {
-    const match = voices.find((v) => v.name.toLowerCase().includes(pref));
-    if (match) return match;
-  }
-  return voices.find((v) => v.lang.startsWith("en")) || null;
-}
-
 export function useTTS() {
-  const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
+  const synthRef = useRef<SpeechSynthesis | null>(null);
   const [speaking, setSpeaking] = useState(false);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   useEffect(() => {
-    return () => synthRef.current?.cancel();
+    if (typeof window === "undefined") return;
+    synthRef.current = window.speechSynthesis;
+
+    const updateVoices = () => {
+      const v = synthRef.current?.getVoices() || [];
+      if (v.length > 0) setVoices(v);
+    };
+
+    updateVoices();
+    synthRef.current?.addEventListener("voiceschanged", updateVoices);
+
+    return () => {
+      synthRef.current?.cancel();
+      synthRef.current?.removeEventListener("voiceschanged", updateVoices);
+    };
   }, []);
 
-  const speak = useCallback((text: string) => {
-    const synth = synthRef.current;
-    if (!synth) return;
+  const getBestVoice = useCallback((): SpeechSynthesisVoice | null => {
+    const available = voices.length > 0 ? voices : (synthRef.current?.getVoices() || []);
+    if (available.length === 0) return null;
 
-    synth.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
+    for (const pref of PREFERRED_VOICES) {
+      const match = available.find((v) => v.name.toLowerCase().includes(pref));
+      if (match) return match;
+    }
+    return available.find((v) => v.lang.startsWith("en")) || null;
+  }, [voices]);
 
-    const selectedVoice = getBestVoice();
-    if (selectedVoice) utterance.voice = selectedVoice;
+  const speak = useCallback(
+    (text: string) => {
+      const synth = synthRef.current;
+      if (!synth) return;
 
-    utterance.rate = 0.85;
-    utterance.pitch = 1.0;
-    utterance.volume = 1;
-    utterance.onstart = () => setSpeaking(true);
-    utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
+      synth.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
 
-    synth.speak(utterance);
-  }, []);
+      const selectedVoice = getBestVoice();
+      if (selectedVoice) utterance.voice = selectedVoice;
+
+      utterance.rate = 0.85;
+      utterance.pitch = 1.0;
+      utterance.volume = 1;
+      utterance.onstart = () => setSpeaking(true);
+      utterance.onend = () => setSpeaking(false);
+      utterance.onerror = () => setSpeaking(false);
+
+      synth.speak(utterance);
+    },
+    [getBestVoice]
+  );
 
   const stop = useCallback(() => {
     synthRef.current?.cancel();
