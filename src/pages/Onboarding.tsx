@@ -247,15 +247,21 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       }
     };
     rec.onerror = (e: any) => {
+      contRecActiveRef.current = false;
+      if (e.error === "network" || e.error === "not-allowed") {
+        // Stop retrying on network/permission errors
+        contRecRef.current = null;
+        if (e.error === "not-allowed") setMicPermission("denied");
+        return;
+      }
       if (e.error !== "no-speech" && e.error !== "aborted") {
         console.warn("Continuous rec error:", e.error);
       }
-      contRecActiveRef.current = false;
     };
     contRecRef.current = rec;
     contRecActiveRef.current = true;
     rec.start();
-  }, []);
+  }, [voiceEnabled]);
 
   const stopContinuousRec = useCallback(() => {
     contRecRef.current?.abort();
