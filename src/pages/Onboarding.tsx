@@ -66,7 +66,7 @@ function matchLanguage(transcript: string) {
 function matchYesNo(transcript: string): boolean | null {
   const lower = transcript.toLowerCase().trim();
   if (["yes", "yeah", "yep", "sure", "okay", "ok", "si", "oui", "ja", "da"].some((w) => lower.includes(w))) return true;
-  if (["no", "nah", "nope", "not", "non", "nein", "nyet"].some((w) => lower.includes(w))) return false;
+  if (["no", "nah", "nope", "not", "non", "nein", "nyet", "skip", "pass", "no thanks", "don't", "do not"].some((w) => lower.includes(w))) return false;
   return null;
 }
 
@@ -222,9 +222,10 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   // STEP 1: Language
   useEffect(() => {
     if (step === 1 && langSubStep === 0) speakThenListen("What is your primary language?", "lang-primary");
-    if (step === 1 && langSubStep === 1) speakThenListen("Would you like to add a second language?", "lang-secondary");
+    if (step === 1 && langSubStep === 1 && wantSecondary !== true) speakThenListen("Would you like to add a second language?", "lang-secondary-decision");
+    if (step === 1 && langSubStep === 1 && wantSecondary === true) speakThenListen("Which second language would you like to add?", "lang-secondary-pick");
     if (step === 1 && langSubStep === 2) speakThenListen("Would you like to enable Sign Language?", "lang-sign");
-  }, [step, langSubStep, speakThenListen]);
+  }, [step, langSubStep, wantSecondary, speakThenListen]);
 
   // STEP 2: Communication
   useEffect(() => {
@@ -290,17 +291,21 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       const yn = matchYesNo(t);
       if (yn === true) {
         setWantSecondary(true);
-        speak("Which language?");
-        setTimeout(() => speech.start(), 2000);
+        setRetryMessage(null);
+        hasSpokenRef.current = "";
       } else if (yn === false) {
         setWantSecondary(false);
         setSecondaryLang(null);
+        setRetryMessage(null);
+        hasSpokenRef.current = "";
         setLangSubStep(2);
       } else {
         const match = matchLanguage(t);
         if (match) {
           setWantSecondary(true);
           setSecondaryLang(match.code);
+          setRetryMessage(null);
+          hasSpokenRef.current = "";
           speakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
         } else {
           setRetryMessage(`I heard "${t}". Say yes, no, or a language name.`);
@@ -496,7 +501,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                   <Button
                     size="lg"
                     className="text-lg px-8 py-6 rounded-2xl min-w-[120px] gap-2"
-                    onClick={() => { speech.stop(); setWantSecondary(true); setRetryMessage(null); }}
+                     onClick={() => { speech.stop(); setWantSecondary(true); setRetryMessage(null); hasSpokenRef.current = ""; }}
                     variant={wantSecondary === true ? "default" : "outline"}
                     aria-label="Yes, add second language"
                     style={{ borderLeftWidth: 4, borderLeftColor: "hsl(140,60%,45%)" }}
@@ -506,7 +511,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                   <Button
                     size="lg"
                     className="text-lg px-8 py-6 rounded-2xl min-w-[120px] gap-2"
-                    onClick={() => { speech.stop(); setWantSecondary(false); setSecondaryLang(null); setRetryMessage(null); setLangSubStep(2); }}
+                     onClick={() => { speech.stop(); setWantSecondary(false); setSecondaryLang(null); setRetryMessage(null); hasSpokenRef.current = ""; setLangSubStep(2); }}
                     variant={wantSecondary === false ? "default" : "outline"}
                     aria-label="No second language"
                     style={{ borderLeftWidth: 4, borderLeftColor: "hsl(0,60%,45%)" }}
