@@ -277,7 +277,8 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       const match = matchLanguage(t);
       if (match) {
         setPrimaryLang(match.code);
-        speakAsync(`Got it — ${match.name} selected.`).then(() => setLangSubStep(1));
+        setPendingLang(match.code);
+        speakAsync(`You said ${match.name}. Is that correct? Say yes to confirm or no to try again.`);
       } else {
         setRetryMessage(`I heard "${t}" but couldn't match a language.`);
         speak(`I didn't catch that — please try again or tap below.`);
@@ -469,7 +470,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                   {filteredLangs(searchPrimary).map((lang) => (
                     <button
                       key={lang.code}
-                      onClick={() => { speech.stop(); setPrimaryLang(lang.code); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Got it — ${lang.name} selected.`).then(() => setLangSubStep(1)); }}
+                      onClick={() => { speech.stop(); setPrimaryLang(lang.code); setPendingLang(lang.code); setRetryMessage(null); }}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors ${primaryLang === lang.code ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"}`}
                       role="option"
                       aria-selected={primaryLang === lang.code}
