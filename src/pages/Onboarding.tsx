@@ -156,6 +156,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [wantSecondary, setWantSecondary] = useState<boolean | null>(null);
   const [signLanguage, setSignLanguage] = useState<boolean | null>(null);
   const [langSubStep, setLangSubStep] = useState(0);
+  const [pendingLang, setPendingLang] = useState<string | null>(null);
   const [searchPrimary, setSearchPrimary] = useState("");
   const [searchSecondary, setSearchSecondary] = useState("");
 
@@ -272,11 +273,30 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     if (!speech.transcript) return;
     const t = speech.transcript;
 
-    if (step === 1 && langSubStep === 0) {
+    if (step === 1 && langSubStep === 0 && pendingLang) {
+      // Confirming the pending language selection
+      const yn = matchYesNo(t);
+      if (yn === true) {
+        setPendingLang(null);
+        hasSpokenRef.current = "";
+        speakAsync(`Got it — ${getLangName(pendingLang)} confirmed.`).then(() => setLangSubStep(1));
+      } else if (yn === false) {
+        setPendingLang(null);
+        setPrimaryLang("en");
+        hasSpokenRef.current = "";
+        speakThenListen("No problem. What is your primary language?", "lang-primary-retry");
+      } else {
+        speakAsync("Please say yes to confirm, or no to choose again.");
+        setTimeout(() => speech.start(), 2500);
+      }
+    } else if (step === 1 && langSubStep === 0) {
       const match = matchLanguage(t);
       if (match) {
         setPrimaryLang(match.code);
-        speakAsync(`Got it — ${match.name} selected.`).then(() => setLangSubStep(1));
+        setPendingLang(match.code);
+        speakAsync(`You said ${match.name}. Is that correct? Say yes to confirm or no to try again.`).then(() => {
+          setTimeout(() => speech.start(), 400);
+        });
       } else {
         setRetryMessage(`I heard "${t}" but couldn't match a language.`);
         speak(`I didn't catch that — please try again or tap below.`);
@@ -468,7 +488,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                   {filteredLangs(searchPrimary).map((lang) => (
                     <button
                       key={lang.code}
-                      onClick={() => { speech.stop(); setPrimaryLang(lang.code); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Got it — ${lang.name} selected.`).then(() => setLangSubStep(1)); }}
+                      onClick={() => { speech.stop(); setPrimaryLang(lang.code); setPendingLang(lang.code); setRetryMessage(null); }}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors ${primaryLang === lang.code ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"}`}
                       role="option"
                       aria-selected={primaryLang === lang.code}
@@ -480,6 +500,44 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     </button>
                   ))}
                 </div>
+                {pendingLang && (
+                  <div className="mt-4 p-4 rounded-2xl border border-primary/30 bg-primary/5 space-y-3" aria-live="polite">
+                    <p className="text-center text-lg font-medium text-foreground">
+                      You selected <span className="font-bold text-primary">{getLangName(pendingLang)}</span>. Is that correct?
+                    </p>
+                    <div className="flex gap-4 justify-center">
+                      <Button
+                        size="lg"
+                        className="text-lg px-8 py-5 rounded-2xl min-w-[120px] gap-2"
+                        onClick={() => {
+                          speech.stop();
+                          setPendingLang(null);
+                          hasSpokenRef.current = "";
+                          speakAsync(`Got it — ${getLangName(pendingLang)} confirmed.`).then(() => setLangSubStep(1));
+                        }}
+                        aria-label="Yes, confirm language"
+                      >
+                        <span className="text-xl" aria-hidden="true">✅</span> Yes
+                      </Button>
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="text-lg px-8 py-5 rounded-2xl min-w-[120px] gap-2"
+                        onClick={() => {
+                          speech.stop();
+                          setPendingLang(null);
+                          setPrimaryLang("en");
+                          setRetryMessage(null);
+                          hasSpokenRef.current = "";
+                          speakThenListen("No problem. What is your primary language?", "lang-primary-retry");
+                        }}
+                        aria-label="No, choose again"
+                      >
+                        <span className="text-xl" aria-hidden="true">❌</span> No
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
