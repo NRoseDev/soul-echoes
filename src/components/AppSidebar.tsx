@@ -1,43 +1,25 @@
 import {
-  BookOpen,
-  Wind,
-  VolumeX,
-  Eclipse,
-  Sparkles,
-  Compass,
-  Users,
-  Stethoscope,
-  ShieldAlert,
-  Brain,
-  Volume2,
+  BookOpen, Wind, VolumeX, Eclipse, Sparkles, Compass, Users, Stethoscope,
+  ShieldAlert, Brain, Volume2, Settings, Lock,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarHeader,
-  SidebarFooter,
-  useSidebar,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 
 const healingRooms = [
-  { title: "Brain Dump", url: "/", icon: Brain, color: "text-primary" },
-  { title: "Journal", url: "/journal", icon: BookOpen, color: "text-healing-journal" },
-  { title: "Breathe", url: "/breathe", icon: Wind, color: "text-healing-breathe" },
-  { title: "Unspoken Chamber", url: "/unspoken", icon: VolumeX, color: "text-healing-unspoken" },
-  { title: "Shadow Work", url: "/shadow-work", icon: Eclipse, color: "text-healing-shadow" },
-  { title: "Wisdom", url: "/wisdom", icon: Sparkles, color: "text-healing-wisdom" },
-  { title: "Spiritual Tools", url: "/spiritual-tools", icon: Compass, color: "text-healing-tools" },
-  { title: "Community", url: "/community", icon: Users, color: "text-healing-community" },
-  { title: "Practitioner Connect", url: "/practitioner", icon: Stethoscope, color: "text-healing-practitioner" },
-  { title: "Crisis Counselor", url: "/crisis", icon: ShieldAlert, color: "text-healing-crisis" },
+  { title: "Brain Dump", url: "/", icon: Brain, color: "text-primary", free: true },
+  { title: "Journal", url: "/journal", icon: BookOpen, color: "text-healing-journal", free: false },
+  { title: "Breathe", url: "/breathe", icon: Wind, color: "text-healing-breathe", free: false },
+  { title: "Unspoken Chamber", url: "/unspoken", icon: VolumeX, color: "text-healing-unspoken", free: false },
+  { title: "Shadow Work", url: "/shadow-work", icon: Eclipse, color: "text-healing-shadow", free: false },
+  { title: "Wisdom", url: "/wisdom", icon: Sparkles, color: "text-healing-wisdom", free: false },
+  { title: "Spiritual Tools", url: "/spiritual-tools", icon: Compass, color: "text-healing-tools", free: false },
+  { title: "Community", url: "/community", icon: Users, color: "text-healing-community", free: false },
+  { title: "Practitioner Connect", url: "/practitioner", icon: Stethoscope, color: "text-healing-practitioner", free: false },
+  { title: "Crisis Counselor", url: "/crisis", icon: ShieldAlert, color: "text-healing-crisis", free: true },
 ];
 
 export function AppSidebar() {
@@ -48,20 +30,17 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
-        {!collapsed && (
+        {!collapsed ? (
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+              <Sparkles className="h-4 w-4 text-primary" />
             </div>
-            <span className="font-display text-lg font-bold text-sidebar-foreground">
-              Soul Echoes
-            </span>
+            <span className="font-display text-lg font-bold text-sidebar-foreground">Soul Echoes</span>
           </div>
-        )}
-        {collapsed && (
+        ) : (
           <div className="flex justify-center">
             <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+              <Sparkles className="h-4 w-4 text-primary" />
             </div>
           </div>
         )}
@@ -89,9 +68,13 @@ export function AppSidebar() {
                       >
                         <item.icon
                           className={`h-5 w-5 shrink-0 ${isActive ? "text-sidebar-primary" : item.color}`}
-                          aria-hidden="true"
                         />
-                        {!collapsed && <span className="text-sm">{item.title}</span>}
+                        {!collapsed && (
+                          <span className="text-sm flex-1">{item.title}</span>
+                        )}
+                        {!collapsed && !item.free && (
+                          <Lock className="h-3 w-3 text-muted-foreground/40 shrink-0" />
+                        )}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -102,26 +85,27 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 space-y-3">
+      <SidebarFooter className="p-4 space-y-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <NavLink
-                to="/voice-settings"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent"
-                activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
-                aria-label="Voice Settings"
-              >
-                <Volume2 className={`h-5 w-5 shrink-0 ${location.pathname === "/voice-settings" ? "text-sidebar-primary" : "text-muted-foreground"}`} aria-hidden="true" />
+              <NavLink to="/voice-settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
+                <Volume2 className={`h-5 w-5 shrink-0 ${location.pathname === "/voice-settings" ? "text-sidebar-primary" : "text-muted-foreground"}`} />
                 {!collapsed && <span className="text-sm">Voice Settings</span>}
+              </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <NavLink to="/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
+                <Settings className={`h-5 w-5 shrink-0 ${location.pathname === "/settings" ? "text-sidebar-primary" : "text-muted-foreground"}`} />
+                {!collapsed && <span className="text-sm">Settings</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
         {!collapsed && (
-          <p className="text-xs text-sidebar-foreground/40 text-center" role="contentinfo">
-            You are seen. You are heard.
-          </p>
+          <p className="text-xs text-sidebar-foreground/40 text-center">You are seen. You are heard.</p>
         )}
       </SidebarFooter>
     </Sidebar>
