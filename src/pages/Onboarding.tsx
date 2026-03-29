@@ -18,6 +18,31 @@ import {
   type AccessMethod,
 } from "@/lib/safetySettings";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+
+const FLAG_LANGUAGES = [
+  { code: "en", name: "English", flag: "🇺🇸" },
+  { code: "es", name: "Spanish", flag: "🇪🇸" },
+  { code: "fr", name: "French", flag: "🇫🇷" },
+  { code: "pt", name: "Portuguese", flag: "🇧🇷" },
+  { code: "zh", name: "Mandarin", flag: "🇨🇳" },
+  { code: "ar", name: "Arabic", flag: "🇸🇦" },
+  { code: "hi", name: "Hindi", flag: "🇮🇳" },
+  { code: "ru", name: "Russian", flag: "🇷🇺" },
+  { code: "de", name: "German", flag: "🇩🇪" },
+  { code: "ja", name: "Japanese", flag: "🇯🇵" },
+  { code: "ko", name: "Korean", flag: "🇰🇷" },
+  { code: "it", name: "Italian", flag: "🇮🇹" },
+  { code: "nl", name: "Dutch", flag: "🇳🇱" },
+  { code: "tr", name: "Turkish", flag: "🇹🇷" },
+  { code: "pl", name: "Polish", flag: "🇵🇱" },
+  { code: "vi", name: "Vietnamese", flag: "🇻🇳" },
+  { code: "th", name: "Thai", flag: "🇹🇭" },
+  { code: "el", name: "Greek", flag: "🇬🇷" },
+  { code: "he", name: "Hebrew", flag: "🇮🇱" },
+  { code: "fil", name: "Filipino", flag: "🇵🇭" },
+  { code: "uk", name: "Ukrainian", flag: "🇺🇦" },
+  { code: "sw", name: "Swahili", flag: "🇿🇦" },
+];
 import ListeningIndicator from "@/components/ListeningIndicator";
 import angelMichaelImg from "@/assets/angel-michael.png";
 import angelFaithImg from "@/assets/angel-faith.png";
