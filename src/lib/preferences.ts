@@ -5,7 +5,8 @@ export interface UserPreferences {
   primaryLanguage: string;
   secondaryLanguage: string | null;
   signLanguageEnabled: boolean;
-  communicationMethod: string;
+  communicationMethods: string[]; // up to 3
+  autoReadEnabled: boolean;
 }
 
 const defaults: UserPreferences = {
@@ -13,14 +14,21 @@ const defaults: UserPreferences = {
   primaryLanguage: "en",
   secondaryLanguage: null,
   signLanguageEnabled: false,
-  communicationMethod: "speak",
+  communicationMethods: ["type"],
+  autoReadEnabled: true,
 };
 
 export function getPreferences(): UserPreferences {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaults;
-    return { ...defaults, ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    // Migration: old single communicationMethod → array
+    if (parsed.communicationMethod && !parsed.communicationMethods) {
+      parsed.communicationMethods = [parsed.communicationMethod];
+      delete parsed.communicationMethod;
+    }
+    return { ...defaults, ...parsed };
   } catch {
     return defaults;
   }
@@ -150,8 +158,8 @@ export const COMMUNICATION_METHODS = [
   { id: "speak", label: "I speak", icon: "🗣️" },
   { id: "type", label: "I type", icon: "⌨️" },
   { id: "sign", label: "I sign (ASL or other)", icon: "🤟" },
-  { id: "colors", label: "I express through colors and symbols", icon: "🎨" },
   { id: "pictures", label: "I point to pictures or cards", icon: "🖼️" },
+  { id: "colors", label: "I express through colors and symbols", icon: "🎨" },
   { id: "braille", label: "I use braille or assistive device", icon: "⠿" },
   { id: "aac", label: "I use a computer or device that speaks for me", icon: "💻" },
   { id: "eyetrack", label: "I use eye tracking or switch access", icon: "👁️" },

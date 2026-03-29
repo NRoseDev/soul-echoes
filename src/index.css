@@ -1,62 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 30 25% 97%;
-    --foreground: 25 20% 15%;
+    /* Dark sanctuary theme */
+    --background: 220 20% 8%;
+    --foreground: 35 25% 90%;
 
-    --card: 30 20% 95%;
-    --card-foreground: 25 20% 15%;
+    --card: 220 18% 12%;
+    --card-foreground: 35 25% 90%;
 
-    --popover: 30 25% 97%;
-    --popover-foreground: 25 20% 15%;
+    --popover: 220 18% 12%;
+    --popover-foreground: 35 25% 90%;
 
-    --primary: 25 65% 52%;
-    --primary-foreground: 30 25% 97%;
+    --primary: 30 70% 50%;
+    --primary-foreground: 220 20% 8%;
 
-    --secondary: 155 30% 45%;
-    --secondary-foreground: 30 25% 97%;
+    --secondary: 155 35% 40%;
+    --secondary-foreground: 35 25% 95%;
 
-    --muted: 30 15% 90%;
-    --muted-foreground: 25 10% 45%;
+    --muted: 220 15% 16%;
+    --muted-foreground: 35 15% 55%;
 
-    --accent: 220 45% 35%;
-    --accent-foreground: 30 25% 97%;
+    --accent: 230 40% 45%;
+    --accent-foreground: 35 25% 95%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 30 25% 97%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 35 25% 95%;
 
-    --border: 30 15% 85%;
-    --input: 30 15% 85%;
-    --ring: 25 65% 52%;
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 30 70% 50%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 25 18% 12%;
-    --sidebar-foreground: 30 20% 85%;
-    --sidebar-primary: 25 65% 52%;
-    --sidebar-primary-foreground: 30 25% 97%;
-    --sidebar-accent: 25 15% 18%;
-    --sidebar-accent-foreground: 30 20% 85%;
-    --sidebar-border: 25 12% 20%;
-    --sidebar-ring: 25 65% 52%;
+    --sidebar-background: 220 22% 6%;
+    --sidebar-foreground: 35 20% 80%;
+    --sidebar-primary: 30 70% 50%;
+    --sidebar-primary-foreground: 220 20% 8%;
+    --sidebar-accent: 220 18% 14%;
+    --sidebar-accent-foreground: 35 20% 85%;
+    --sidebar-border: 220 15% 15%;
+    --sidebar-ring: 30 70% 50%;
 
     /* Custom tokens */
-    --glow-primary: 25 70% 60%;
-    --surface-warm: 30 30% 93%;
-    --surface-sage: 155 20% 92%;
-    --surface-indigo: 220 30% 92%;
-    --healing-journal: 45 60% 50%;
-    --healing-breathe: 175 45% 45%;
-    --healing-unspoken: 280 35% 50%;
-    --healing-shadow: 250 30% 35%;
-    --healing-wisdom: 35 55% 55%;
-    --healing-tools: 320 40% 50%;
-    --healing-community: 155 40% 45%;
-    --healing-practitioner: 200 50% 45%;
-    --healing-crisis: 0 60% 50%;
+    --glow-primary: 30 75% 55%;
+    --surface-warm: 25 25% 14%;
+    --surface-sage: 155 15% 14%;
+    --surface-indigo: 230 20% 14%;
+
+    --healing-journal: 42 65% 55%;
+    --healing-breathe: 175 50% 45%;
+    --healing-unspoken: 280 40% 55%;
+    --healing-shadow: 250 35% 40%;
+    --healing-wisdom: 38 60% 55%;
+    --healing-tools: 320 45% 55%;
+    --healing-community: 155 45% 45%;
+    --healing-practitioner: 200 55% 50%;
+    --healing-crisis: 0 65% 55%;
 
     --font-display: 'Nunito', sans-serif;
     --font-body: 'Atkinson Hyperlegible', sans-serif;
@@ -73,5 +77,20 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
+  }
+
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
   }
 }

@@ -1,13 +1,18 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Loader2, Palette, MessageSquare } from "lucide-react";
+import { Send, Loader2, Mic, MicOff, Volume2, VolumeX, Camera } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { streamChat, type ChatMessage } from "@/lib/chat";
 import { useToast } from "@/hooks/use-toast";
 import ColorSymbolCanvas from "@/components/ColorSymbolCanvas";
+import PointToItCards from "@/components/PointToItCards";
 import { useTTS } from "@/hooks/use-tts";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+import { getPreferences } from "@/lib/preferences";
+import ListeningIndicator from "@/components/ListeningIndicator";
 
 const WELCOME_MESSAGE: ChatMessage = {
   role: "assistant",
@@ -22,15 +27,41 @@ const prompts = [
   "I'm feeling overwhelmed",
 ];
 
+// Map comm method IDs to tab labels and icons
+const COMM_TABS: Record<string, { label: string; icon: string }> = {
+  type: { label: "Type It", icon: "⌨️" },
+  speak: { label: "Speak It", icon: "🗣️" },
+  sign: { label: "Sign It", icon: "🤟" },
+  pictures: { label: "Point To It", icon: "🖼️" },
+  colors: { label: "Colors & Symbols", icon: "🎨" },
+  braille: { label: "Braille", icon: "⠿" },
+  aac: { label: "AAC Device", icon: "💻" },
+  eyetrack: { label: "Eye Track", icon: "👁️" },
+};
+
 export default function BrainDump() {
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [expressionMode, setExpressionMode] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
-  const { speak: ttsSpeak } = useTTS();
+  const { speak: ttsSpeak, stop: ttsStop, speaking: ttsSpeaking } = useTTS();
+  const prefs = getPreferences();
+  const [autoRead, setAutoRead] = useState(prefs.autoReadEnabled);
+
+  const activeMethods = prefs.communicationMethods.length > 0
+    ? prefs.communicationMethods
+    : ["type"];
+
+  const [activeTab, setActiveTab] = useState(activeMethods[0]);
+
+  // Speech recognition for "Speak It" tab
+  const speech = useSpeechRecognition({
+    onResult: (transcript) => {
+      send(transcript);
+    },
+  });
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -63,8 +94,7 @@ export default function BrainDump() {
       onDelta: upsertAssistant,
       onDone: () => {
         setIsLoading(false);
-        // Speak the complete assistant response
-        ttsSpeak(assistantSoFar);
+        if (autoRead) ttsSpeak(assistantSoFar);
       },
       onError: (err) => {
         setIsLoading(false);
@@ -80,6 +110,11 @@ export default function BrainDump() {
       e.preventDefault();
       send(input);
     }
+  };
+
+  const replayMessage = (text: string) => {
+    ttsStop();
+    ttsSpeak(text);
   };
 
   return (
@@ -101,11 +136,19 @@ export default function BrainDump() {
                     ? "bg-primary text-primary-foreground rounded-br-sm"
                     : "bg-card text-card-foreground border border-border rounded-bl-sm"
                 }`}
-                role={msg.role === "assistant" ? "status" : undefined}
               >
                 {msg.role === "assistant" ? (
-                  <div className="prose prose-sm max-w-none prose-p:my-1 prose-headings:font-display">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  <div className="space-y-2">
+                    <div className="prose prose-sm prose-invert max-w-none prose-p:my-1 prose-headings:font-display">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                    <button
+                      onClick={() => replayMessage(msg.content)}
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mt-1"
+                      aria-label="Replay this message"
+                    >
+                      <Volume2 className="h-3 w-3" /> Replay
+                    </button>
                   </div>
                 ) : (
                   <p>{msg.content}</p>
@@ -124,7 +167,7 @@ export default function BrainDump() {
         )}
       </div>
 
-      {/* Quick prompts — only show at start */}
+      {/* Quick prompts */}
       {messages.length === 1 && (
         <div className="px-4 pb-3 flex flex-wrap gap-2" role="group" aria-label="Suggested prompts">
           {prompts.map((p) => (
@@ -139,34 +182,58 @@ export default function BrainDump() {
         </div>
       )}
 
-      {/* Color/Symbol Canvas */}
-      {expressionMode && (
-        <div className="border-t border-border bg-background">
-          <ColorSymbolCanvas onSend={(msg) => send(msg)} disabled={isLoading} />
-        </div>
-      )}
-
-      {/* Input */}
-      <div className="border-t border-border px-4 py-3 bg-background">
-        <div className="flex gap-2 items-end max-w-3xl mx-auto">
-          <Button
-            type="button"
-            size="icon"
-            variant={expressionMode ? "default" : "outline"}
-            onClick={() => setExpressionMode(!expressionMode)}
-            className="shrink-0 h-12 w-12 rounded-xl"
-            aria-label={expressionMode ? "Switch to text input" : "Express through colors and symbols"}
-            title={expressionMode ? "Switch to text" : "Colors & symbols"}
+      {/* Communication tabs */}
+      <div className="border-t border-border bg-background">
+        {/* Auto-read toggle */}
+        <div className="flex items-center justify-end px-4 pt-2">
+          <button
+            onClick={() => {
+              setAutoRead(!autoRead);
+              if (ttsSpeaking) ttsStop();
+            }}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            aria-label={autoRead ? "Turn off auto-read" : "Turn on auto-read"}
           >
-            {expressionMode ? <MessageSquare className="h-5 w-5" /> : <Palette className="h-5 w-5" />}
-          </Button>
-          {!expressionMode && (
+            {autoRead ? <Volume2 className="h-3 w-3" /> : <VolumeX className="h-3 w-3" />}
+            {autoRead ? "Auto-read on" : "Auto-read off"}
+          </button>
+        </div>
+
+        {activeMethods.length > 1 ? (
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mx-4 mt-2 bg-muted">
+              {activeMethods.map((m) => (
+                <TabsTrigger key={m} value={m} className="text-xs gap-1">
+                  <span>{COMM_TABS[m]?.icon}</span>
+                  <span className="hidden sm:inline">{COMM_TABS[m]?.label}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            {activeMethods.map((m) => (
+              <TabsContent key={m} value={m} className="mt-0">
+                {renderInputMethod(m)}
+              </TabsContent>
+            ))}
+          </Tabs>
+        ) : (
+          renderInputMethod(activeMethods[0])
+        )}
+      </div>
+    </div>
+  );
+
+  function renderInputMethod(method: string) {
+    switch (method) {
+      case "type":
+      case "braille":
+      case "aac":
+      case "eyetrack":
+        return (
+          <div className="px-4 py-3">
             <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                send(input);
-              }}
-              className="flex gap-2 items-end flex-1"
+              onSubmit={(e) => { e.preventDefault(); send(input); }}
+              className="flex gap-2 items-end max-w-3xl mx-auto"
             >
               <Textarea
                 ref={textareaRef}
@@ -183,15 +250,73 @@ export default function BrainDump() {
                 type="submit"
                 size="icon"
                 disabled={!input.trim() || isLoading}
-                className="shrink-0 h-12 w-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
+                className="shrink-0 h-12 w-12 rounded-xl"
                 aria-label="Send message"
               >
-                <Send className="h-5 w-5" aria-hidden="true" />
+                <Send className="h-5 w-5" />
               </Button>
             </form>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+          </div>
+        );
+
+      case "speak":
+        return (
+          <div className="px-4 py-4 space-y-3">
+            <div className="flex flex-col items-center gap-3">
+              <ListeningIndicator visible={speech.listening} />
+              {!speech.listening ? (
+                <Button
+                  onClick={() => speech.start(prefs.primaryLanguage)}
+                  size="lg"
+                  className="rounded-2xl px-8 gap-2"
+                  disabled={isLoading}
+                >
+                  <Mic className="h-5 w-5" /> Tap to Speak
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => speech.stop()}
+                  size="lg"
+                  variant="destructive"
+                  className="rounded-2xl px-8 gap-2"
+                >
+                  <MicOff className="h-5 w-5" /> Stop
+                </Button>
+              )}
+              {speech.transcript && (
+                <p className="text-sm text-muted-foreground text-center">
+                  Heard: "{speech.transcript}"
+                </p>
+              )}
+            </div>
+          </div>
+        );
+
+      case "sign":
+        return (
+          <div className="px-4 py-6 text-center space-y-3">
+            <Camera className="h-10 w-10 text-muted-foreground mx-auto" />
+            <p className="text-sm text-muted-foreground">
+              Sign language video interpretation is coming soon. ✨
+            </p>
+            <p className="text-xs text-muted-foreground/60">
+              For now, you can use another input method.
+            </p>
+          </div>
+        );
+
+      case "pictures":
+        return <PointToItCards onSend={send} disabled={isLoading} />;
+
+      case "colors":
+        return <ColorSymbolCanvas onSend={send} disabled={isLoading} />;
+
+      default:
+        return (
+          <div className="px-4 py-4 text-center text-sm text-muted-foreground">
+            This input method is coming soon.
+          </div>
+        );
+    }
+  }
 }
