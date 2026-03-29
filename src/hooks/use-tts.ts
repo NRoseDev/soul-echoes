@@ -1,11 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getVoiceSettings } from "@/lib/voiceSettings";
 
+const PREFERRED_VOICES = ["samantha", "karen", "moira", "google uk english female", "google us english female", "microsoft zira"];
+function getSoftFemaleVoice(): SpeechSynthesisVoice | null {
+  const voices = window.speechSynthesis.getVoices();
+  for (const pref of PREFERRED_VOICES) {
+    const match = voices.find((v) => v.name.toLowerCase().includes(pref));
+    if (match) return match;
+  }
+  return voices.find((v) => v.lang.startsWith("en") && /female|zira|samantha|karen/i.test(v.name)) || null;
+}
+
 export function useTTS() {
   const synthRef = useRef(typeof window !== "undefined" ? window.speechSynthesis : null);
   const [speaking, setSpeaking] = useState(false);
 
-  // Cancel on unmount
   useEffect(() => {
     return () => synthRef.current?.cancel();
   }, []);
@@ -18,15 +27,18 @@ export function useTTS() {
     const settings = getVoiceSettings();
     const utterance = new SpeechSynthesisUtterance(text);
 
-    // Find the saved voice
+    // Use saved voice, or fall back to soft female
     const voices = synth.getVoices();
+    let selectedVoice: SpeechSynthesisVoice | null = null;
     if (settings.voiceURI) {
-      const match = voices.find((v) => v.voiceURI === settings.voiceURI);
-      if (match) utterance.voice = match;
+      selectedVoice = voices.find((v) => v.voiceURI === settings.voiceURI) || null;
     }
+    if (!selectedVoice) selectedVoice = getSoftFemaleVoice();
+    if (selectedVoice) utterance.voice = selectedVoice;
 
-    utterance.rate = settings.speed;
-    utterance.volume = settings.volume;
+    utterance.rate = settings.speed ?? 0.9;
+    utterance.volume = settings.volume ?? 1;
+    utterance.pitch = 1.1;
     utterance.onstart = () => setSpeaking(true);
     utterance.onend = () => setSpeaking(false);
     utterance.onerror = () => setSpeaking(false);

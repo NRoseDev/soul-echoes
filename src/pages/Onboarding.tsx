@@ -47,13 +47,28 @@ import ListeningIndicator from "@/components/ListeningIndicator";
 import angelMichaelImg from "@/assets/angel-michael.png";
 import angelFaithImg from "@/assets/angel-faith.png";
 
+/* ─── Soft female voice picker ─── */
+const PREFERRED_VOICES = ["samantha", "karen", "moira", "google uk english female", "google us english female", "microsoft zira"];
+function getSoftFemaleVoice(): SpeechSynthesisVoice | null {
+  const voices = window.speechSynthesis.getVoices();
+  for (const pref of PREFERRED_VOICES) {
+    const match = voices.find((v) => v.name.toLowerCase().includes(pref));
+    if (match) return match;
+  }
+  // Fallback: any female-sounding English voice
+  return voices.find((v) => v.lang.startsWith("en") && /female|zira|samantha|karen/i.test(v.name)) || null;
+}
+
 /* ─── TTS helpers ─── */
 function speakAsync(text: string): Promise<void> {
   return new Promise((resolve) => {
     if (!("speechSynthesis" in window)) { resolve(); return; }
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
+    const voice = getSoftFemaleVoice();
+    if (voice) u.voice = voice;
     u.rate = 0.9;
+    u.pitch = 1.1;
     u.onend = () => resolve();
     u.onerror = () => resolve();
     window.speechSynthesis.speak(u);
@@ -65,7 +80,10 @@ function speak(text: string) {
   if (!("speechSynthesis" in window)) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
+  const voice = getSoftFemaleVoice();
+  if (voice) u.voice = voice;
   u.rate = 0.9;
+  u.pitch = 1.1;
   window.speechSynthesis.speak(u);
 }
 
