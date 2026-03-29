@@ -6,51 +6,51 @@
 
 @layer base {
   :root {
-    /* Dark sanctuary theme */
-    --background: 220 20% 8%;
-    --foreground: 35 25% 90%;
+    /* Deep purple-to-blue sanctuary theme */
+    --background: 260 40% 8%;
+    --foreground: 220 20% 95%;
 
-    --card: 220 18% 12%;
-    --card-foreground: 35 25% 90%;
+    --card: 260 35% 12%;
+    --card-foreground: 220 20% 95%;
 
-    --popover: 220 18% 12%;
-    --popover-foreground: 35 25% 90%;
+    --popover: 260 35% 12%;
+    --popover-foreground: 220 20% 95%;
 
-    --primary: 30 70% 50%;
-    --primary-foreground: 220 20% 8%;
+    --primary: 280 60% 55%;
+    --primary-foreground: 260 40% 8%;
 
-    --secondary: 155 35% 40%;
-    --secondary-foreground: 35 25% 95%;
+    --secondary: 200 55% 50%;
+    --secondary-foreground: 220 20% 95%;
 
-    --muted: 220 15% 16%;
-    --muted-foreground: 35 15% 55%;
+    --muted: 260 30% 16%;
+    --muted-foreground: 220 15% 60%;
 
-    --accent: 230 40% 45%;
-    --accent-foreground: 35 25% 95%;
+    --accent: 230 50% 50%;
+    --accent-foreground: 220 20% 95%;
 
     --destructive: 0 65% 50%;
-    --destructive-foreground: 35 25% 95%;
+    --destructive-foreground: 220 20% 95%;
 
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
-    --ring: 30 70% 50%;
+    --border: 260 25% 18%;
+    --input: 260 25% 18%;
+    --ring: 280 60% 55%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 220 22% 6%;
-    --sidebar-foreground: 35 20% 80%;
-    --sidebar-primary: 30 70% 50%;
-    --sidebar-primary-foreground: 220 20% 8%;
-    --sidebar-accent: 220 18% 14%;
-    --sidebar-accent-foreground: 35 20% 85%;
-    --sidebar-border: 220 15% 15%;
-    --sidebar-ring: 30 70% 50%;
+    --sidebar-background: 260 40% 6%;
+    --sidebar-foreground: 220 15% 80%;
+    --sidebar-primary: 280 60% 55%;
+    --sidebar-primary-foreground: 260 40% 8%;
+    --sidebar-accent: 260 30% 14%;
+    --sidebar-accent-foreground: 220 15% 85%;
+    --sidebar-border: 260 25% 15%;
+    --sidebar-ring: 280 60% 55%;
 
     /* Custom tokens */
-    --glow-primary: 30 75% 55%;
-    --surface-warm: 25 25% 14%;
-    --surface-sage: 155 15% 14%;
-    --surface-indigo: 230 20% 14%;
+    --glow-primary: 280 65% 60%;
+    --surface-warm: 260 20% 14%;
+    --surface-sage: 200 20% 14%;
+    --surface-indigo: 240 25% 14%;
 
     --healing-journal: 42 65% 55%;
     --healing-breathe: 175 50% 45%;
@@ -61,6 +61,9 @@
     --healing-community: 155 45% 45%;
     --healing-practitioner: 200 55% 50%;
     --healing-crisis: 0 65% 55%;
+
+    /* Bottom nav */
+    --nav-background: 260 40% 5%;
 
     --font-display: 'Nunito', sans-serif;
     --font-body: 'Atkinson Hyperlegible', sans-serif;
@@ -73,6 +76,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    background: linear-gradient(135deg, hsl(270, 50%, 10%), hsl(230, 50%, 12%), hsl(250, 45%, 8%));
+    min-height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6 {
