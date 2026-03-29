@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { streamChat, type ChatMessage } from "@/lib/chat";
 import { useToast } from "@/hooks/use-toast";
 import ColorSymbolCanvas from "@/components/ColorSymbolCanvas";
+import { useTTS } from "@/hooks/use-tts";
 
 const WELCOME_MESSAGE: ChatMessage = {
   role: "assistant",
@@ -29,6 +30,7 @@ export default function BrainDump() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
+  const { speak: ttsSpeak } = useTTS();
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -59,7 +61,11 @@ export default function BrainDump() {
     await streamChat({
       messages: [...messages, userMsg].filter((m) => m !== WELCOME_MESSAGE),
       onDelta: upsertAssistant,
-      onDone: () => setIsLoading(false),
+      onDone: () => {
+        setIsLoading(false);
+        // Speak the complete assistant response
+        ttsSpeak(assistantSoFar);
+      },
       onError: (err) => {
         setIsLoading(false);
         toast({ title: "Connection interrupted", description: err, variant: "destructive" });
