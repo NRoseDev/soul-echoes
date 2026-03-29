@@ -18,6 +18,31 @@ import {
   type AccessMethod,
 } from "@/lib/safetySettings";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+
+const FLAG_LANGUAGES = [
+  { code: "en", name: "English", flag: "🇺🇸" },
+  { code: "es", name: "Spanish", flag: "🇪🇸" },
+  { code: "fr", name: "French", flag: "🇫🇷" },
+  { code: "pt", name: "Portuguese", flag: "🇧🇷" },
+  { code: "zh", name: "Mandarin", flag: "🇨🇳" },
+  { code: "ar", name: "Arabic", flag: "🇸🇦" },
+  { code: "hi", name: "Hindi", flag: "🇮🇳" },
+  { code: "ru", name: "Russian", flag: "🇷🇺" },
+  { code: "de", name: "German", flag: "🇩🇪" },
+  { code: "ja", name: "Japanese", flag: "🇯🇵" },
+  { code: "ko", name: "Korean", flag: "🇰🇷" },
+  { code: "it", name: "Italian", flag: "🇮🇹" },
+  { code: "nl", name: "Dutch", flag: "🇳🇱" },
+  { code: "tr", name: "Turkish", flag: "🇹🇷" },
+  { code: "pl", name: "Polish", flag: "🇵🇱" },
+  { code: "vi", name: "Vietnamese", flag: "🇻🇳" },
+  { code: "th", name: "Thai", flag: "🇹🇭" },
+  { code: "el", name: "Greek", flag: "🇬🇷" },
+  { code: "he", name: "Hebrew", flag: "🇮🇱" },
+  { code: "fil", name: "Filipino", flag: "🇵🇭" },
+  { code: "uk", name: "Ukrainian", flag: "🇺🇦" },
+  { code: "sw", name: "Swahili", flag: "🇿🇦" },
+];
 import ListeningIndicator from "@/components/ListeningIndicator";
 import angelMichaelImg from "@/assets/angel-michael.png";
 import angelFaithImg from "@/assets/angel-faith.png";
@@ -596,7 +621,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
         {/* ─── STEP 1: Language ─── */}
         {step === 1 && (
-          <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4">
+          <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 bg-gradient-to-b from-[hsl(220,60%,12%)] to-[hsl(230,50%,18%)] rounded-3xl p-4 sm:p-6">
             {/* Microphone permission gate */}
             {micPermission === "prompt" && (
               <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-3">
@@ -629,24 +654,22 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 <p className="text-xs text-muted-foreground text-center" aria-live="polite">
                   Say it, tap a flag, point to the color, or sign it
                 </p>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" aria-hidden="true" />
-                  <Input value={searchPrimary} onChange={(e) => setSearchPrimary(e.target.value)} placeholder="Search languages..." className="pl-10 text-lg h-12" aria-label="Search languages by typing" />
-                </div>
-                <div className="max-h-64 overflow-y-auto rounded-xl border border-border bg-card space-y-1 p-2" role="listbox" aria-label="Language list — tap any flag to select">
-                  {filteredLangs(searchPrimary).map((lang) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => { stopContinuousRec(); setPrimaryLang(lang.code); setPendingLang(null); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Got it — ${lang.name} selected.`).then(() => setLangSubStep(1)); }}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors ${primaryLang === lang.code ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"}`}
-                      role="option"
-                      aria-selected={primaryLang === lang.code}
-                      aria-label={`${lang.flag} ${lang.name} — tap to select`}
-                    >
-                      <span className="text-2xl">{lang.flag}</span>
-                      <span className="flex-1 text-left">{lang.name}</span>
-                    </button>
-                  ))}
+                <div className="max-h-[420px] overflow-y-auto rounded-xl p-1" role="listbox" aria-label="Language list — tap any flag to select">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                    {FLAG_LANGUAGES.map((lang) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => { stopContinuousRec(); setPrimaryLang(lang.code); setPendingLang(null); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Got it — ${lang.name} selected.`).then(() => setLangSubStep(1)); }}
+                        className={`flex flex-col items-center justify-center gap-1 p-3 sm:p-4 rounded-2xl border-2 transition-all ${primaryLang === lang.code ? "border-primary bg-primary/20 scale-105" : "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30"}`}
+                        role="option"
+                        aria-selected={primaryLang === lang.code}
+                        aria-label={`${lang.name} — tap to select`}
+                      >
+                        <span className="text-4xl sm:text-5xl">{lang.flag}</span>
+                        <span className="text-xs sm:text-sm font-medium text-white/90">{lang.name}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -680,23 +703,19 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                   </Button>
                 </div>
                 {wantSecondary && (
-                  <div className="space-y-3">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" aria-hidden="true" />
-                      <Input value={searchSecondary} onChange={(e) => setSearchSecondary(e.target.value)} placeholder="Search languages..." className="pl-10 text-lg h-12" aria-label="Search second language" />
-                    </div>
-                    <div className="max-h-48 overflow-y-auto rounded-xl border border-border bg-card space-y-1 p-2" role="listbox">
-                      {filteredLangs(searchSecondary).filter((l) => l.code !== primaryLang).map((lang) => (
+                  <div className="max-h-[320px] overflow-y-auto rounded-xl p-1">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3" role="listbox">
+                      {FLAG_LANGUAGES.filter((l) => l.code !== primaryLang).map((lang) => (
                         <button
                           key={lang.code}
                           onClick={() => { stopContinuousRec(); setSecondaryLang(lang.code); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Selected ${lang.name}`).then(() => setLangSubStep(2)); }}
-                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-base transition-colors ${secondaryLang === lang.code ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"}`}
+                          className={`flex flex-col items-center justify-center gap-1 p-3 sm:p-4 rounded-2xl border-2 transition-all ${secondaryLang === lang.code ? "border-primary bg-primary/20 scale-105" : "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30"}`}
                           role="option"
                           aria-selected={secondaryLang === lang.code}
-                          aria-label={`${lang.flag} ${lang.name} — tap to select`}
+                          aria-label={`${lang.name} — tap to select`}
                         >
-                          <span className="text-2xl">{lang.flag}</span>
-                          <span className="flex-1 text-left">{lang.name}</span>
+                          <span className="text-4xl sm:text-5xl">{lang.flag}</span>
+                          <span className="text-xs sm:text-sm font-medium text-white/90">{lang.name}</span>
                         </button>
                       ))}
                     </div>
