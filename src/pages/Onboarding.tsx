@@ -20,28 +20,28 @@ import {
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 
 const FLAG_LANGUAGES = [
-  { code: "en", name: "English", flag: "🇺🇸" },
-  { code: "es", name: "Spanish", flag: "🇪🇸" },
-  { code: "fr", name: "French", flag: "🇫🇷" },
-  { code: "pt", name: "Portuguese", flag: "🇧🇷" },
-  { code: "zh", name: "Mandarin", flag: "🇨🇳" },
-  { code: "ar", name: "Arabic", flag: "🇸🇦" },
-  { code: "hi", name: "Hindi", flag: "🇮🇳" },
-  { code: "ru", name: "Russian", flag: "🇷🇺" },
-  { code: "de", name: "German", flag: "🇩🇪" },
-  { code: "ja", name: "Japanese", flag: "🇯🇵" },
-  { code: "ko", name: "Korean", flag: "🇰🇷" },
-  { code: "it", name: "Italian", flag: "🇮🇹" },
-  { code: "nl", name: "Dutch", flag: "🇳🇱" },
-  { code: "tr", name: "Turkish", flag: "🇹🇷" },
-  { code: "pl", name: "Polish", flag: "🇵🇱" },
-  { code: "vi", name: "Vietnamese", flag: "🇻🇳" },
-  { code: "th", name: "Thai", flag: "🇹🇭" },
-  { code: "el", name: "Greek", flag: "🇬🇷" },
-  { code: "he", name: "Hebrew", flag: "🇮🇱" },
-  { code: "fil", name: "Filipino", flag: "🇵🇭" },
-  { code: "uk", name: "Ukrainian", flag: "🇺🇦" },
-  { code: "sw", name: "Swahili", flag: "🇿🇦" },
+  { code: "en", name: "English", cc: "us" },
+  { code: "es", name: "Spanish", cc: "es" },
+  { code: "fr", name: "French", cc: "fr" },
+  { code: "pt", name: "Portuguese", cc: "br" },
+  { code: "zh", name: "Mandarin", cc: "cn" },
+  { code: "ar", name: "Arabic", cc: "sa" },
+  { code: "hi", name: "Hindi", cc: "in" },
+  { code: "ru", name: "Russian", cc: "ru" },
+  { code: "de", name: "German", cc: "de" },
+  { code: "ja", name: "Japanese", cc: "jp" },
+  { code: "ko", name: "Korean", cc: "kr" },
+  { code: "it", name: "Italian", cc: "it" },
+  { code: "nl", name: "Dutch", cc: "nl" },
+  { code: "tr", name: "Turkish", cc: "tr" },
+  { code: "pl", name: "Polish", cc: "pl" },
+  { code: "vi", name: "Vietnamese", cc: "vn" },
+  { code: "th", name: "Thai", cc: "th" },
+  { code: "el", name: "Greek", cc: "gr" },
+  { code: "he", name: "Hebrew", cc: "il" },
+  { code: "fil", name: "Filipino", cc: "ph" },
+  { code: "uk", name: "Ukrainian", cc: "ua" },
+  { code: "sw", name: "Swahili", cc: "za" },
 ];
 import ListeningIndicator from "@/components/ListeningIndicator";
 import angelMichaelImg from "@/assets/angel-michael.png";
@@ -586,11 +586,19 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             tabIndex={0}
             onKeyDown={(e) => e.key === "Enter" && setStep(1)}
           >
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="inline-block px-5 py-1.5 rounded-full border border-purple-400/30 bg-purple-500/10 backdrop-blur-sm shadow-[0_0_20px_rgba(168,85,247,0.15)]"
+            >
+              <span className="text-sm font-medium text-purple-300">Your sanctuary for healing</span>
+            </motion.div>
             <motion.h1
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8 }}
-              className="font-display text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-tight"
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-tight bg-gradient-to-r from-teal-400 via-pink-400 to-purple-500 bg-clip-text text-transparent"
             >
               Soul Echoes
             </motion.h1>
@@ -665,7 +673,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                         aria-selected={primaryLang === lang.code}
                         aria-label={`${lang.name} — tap to select`}
                       >
-                        <span className="text-4xl sm:text-5xl">{lang.flag}</span>
+                        <img src={`https://flagcdn.com/48x36/${lang.cc}.png`} alt={lang.name} className="w-12 h-9 object-cover rounded-sm" />
                         <span className="text-xs sm:text-sm font-medium text-gray-800">{lang.name}</span>
                       </button>
                     ))}
@@ -714,7 +722,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                           aria-selected={secondaryLang === lang.code}
                           aria-label={`${lang.name} — tap to select`}
                         >
-                          <span className="text-4xl sm:text-5xl">{lang.flag}</span>
+                          <img src={`https://flagcdn.com/48x36/${lang.cc}.png`} alt={lang.name} className="w-12 h-9 object-cover rounded-sm" />
                           <span className="text-xs sm:text-sm font-medium text-gray-800">{lang.name}</span>
                         </button>
                       ))}
