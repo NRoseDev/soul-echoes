@@ -394,12 +394,8 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     }
   }, [step, langSubStep, wantSecondary, stopContinuousRec]);
 
-  // Wire handleLangVoice into continuous rec
-  const handleLangVoiceRef = useRef(handleLangVoice);
+  // Keep ref in sync with latest handler
   handleLangVoiceRef.current = handleLangVoice;
-
-  // Patch startContinuousRec to use latest handler — done via ref in onresult above
-  // We need to update the onresult callback. Let's use a ref pattern instead.
 
   /* ─── Speech results handler (non-language steps) ─── */
   useEffect(() => {
