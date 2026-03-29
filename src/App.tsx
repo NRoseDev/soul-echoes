@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import Onboarding from "./pages/Onboarding";
 import VoiceSettings from "./pages/VoiceSettings";
 import Settings from "./pages/Settings";
+import PractitionerSignup from "./pages/PractitionerSignup";
 import DistressSignal from "./components/DistressSignal";
 import { getPreferences } from "./lib/preferences";
 
@@ -46,6 +47,7 @@ const App = () => {
               <Route path="/spiritual-tools" element={<HealingRoom />} />
               <Route path="/community" element={<HealingRoom />} />
               <Route path="/practitioner" element={<HealingRoom />} />
+              <Route path="/practitioner/signup" element={<PractitionerSignup />} />
               <Route path="/crisis" element={<HealingRoom />} />
               <Route path="/voice-settings" element={<VoiceSettings />} />
               <Route path="/settings" element={<Settings />} />
