@@ -8,6 +8,27 @@ import {
   WORLD_LANGUAGES,
   COMMUNICATION_METHODS,
 } from "@/lib/preferences";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+import ListeningIndicator from "@/components/ListeningIndicator";
+
+/** Speak text and return a promise that resolves when done */
+function speakAsync(text: string): Promise<void> {
+  return new Promise((resolve) => {
+    if (!("speechSynthesis" in window)) {
+      resolve();
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.onend = () => resolve();
+    utterance.onerror = () => resolve();
+    window.speechSynthesis.speak(utterance);
+    // Safety timeout in case onend never fires
+    setTimeout(resolve, text.length * 80 + 2000);
+  });
+}
 
 function speak(text: string) {
   if (!("speechSynthesis" in window)) return;
@@ -25,29 +46,92 @@ const fadeSlide = {
   transition: { duration: 0.5 },
 };
 
+/** Fuzzy match a spoken transcript to the closest language name */
+function matchLanguage(transcript: string): { code: string; name: string } | null {
+  const lower = transcript.toLowerCase().trim();
+  // Exact match first
+  const exact = WORLD_LANGUAGES.find(
+    (l) => l.name.toLowerCase() === lower
+  );
+  if (exact) return exact;
+
+  // Starts with
+  const startsWith = WORLD_LANGUAGES.find(
+    (l) => l.name.toLowerCase().startsWith(lower)
+  );
+  if (startsWith) return startsWith;
+
+  // Contains
+  const contains = WORLD_LANGUAGES.find(
+    (l) => l.name.toLowerCase().includes(lower) || lower.includes(l.name.toLowerCase())
+  );
+  if (contains) return contains;
+
+  return null;
+}
+
+/** Match spoken answer to yes/no */
+function matchYesNo(transcript: string): boolean | null {
+  const lower = transcript.toLowerCase().trim();
+  const yesWords = ["yes", "yeah", "yep", "sure", "okay", "ok", "si", "oui", "ja", "da", "affirmative"];
+  const noWords = ["no", "nah", "nope", "not", "non", "nein", "nyet", "negative"];
+  if (yesWords.some((w) => lower.includes(w))) return true;
+  if (noWords.some((w) => lower.includes(w))) return false;
+  return null;
+}
+
+/** Match spoken communication method */
+function matchCommMethod(transcript: string): string | null {
+  const lower = transcript.toLowerCase().trim();
+  const mapping: [string[], string][] = [
+    [["speak", "talk", "voice", "verbal"], "speak"],
+    [["type", "typing", "keyboard", "text"], "type"],
+    [["sign", "asl", "signing"], "sign"],
+    [["color", "colour", "symbol", "paint", "art"], "colors"],
+    [["picture", "card", "point", "pointing", "image"], "pictures"],
+    [["braille", "assistive", "device"], "braille"],
+    [["computer", "aac", "device speaks", "augmentative"], "aac"],
+    [["eye", "tracking", "switch", "gaze"], "eyetrack"],
+  ];
+  for (const [keywords, id] of mapping) {
+    if (keywords.some((k) => lower.includes(k))) return id;
+  }
+  return null;
+}
+
 export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState(0);
-
-  // Step 1 state
   const [welcomeDone, setWelcomeDone] = useState(false);
-
-  // Step 2 state
   const [primaryLang, setPrimaryLang] = useState("en");
   const [secondaryLang, setSecondaryLang] = useState<string | null>(null);
   const [wantSecondary, setWantSecondary] = useState<boolean | null>(null);
   const [signLanguage, setSignLanguage] = useState<boolean | null>(null);
   const [langSubStep, setLangSubStep] = useState(0);
-
-  // Step 3 state
   const [commMethod, setCommMethod] = useState<string | null>(null);
-
-  // Search
   const [searchPrimary, setSearchPrimary] = useState("");
   const [searchSecondary, setSearchSecondary] = useState("");
+  const [retryMessage, setRetryMessage] = useState<string | null>(null);
 
   const welcomeTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const hasSpokenRef = useRef<string>("");
 
-  // Step 0: Welcome — speak and show
+  // Speech recognition
+  const speech = useSpeechRecognition();
+
+  // Helper: speak then listen
+  const speakThenListen = useCallback(
+    async (text: string, key: string) => {
+      if (hasSpokenRef.current === key) return;
+      hasSpokenRef.current = key;
+      setRetryMessage(null);
+      await speakAsync(text);
+      // Small delay before activating mic
+      setTimeout(() => speech.start(), 400);
+    },
+    [speech]
+  );
+
+  // ---- STEP 0: Welcome ----
   useEffect(() => {
     if (step === 0) {
       const text =
@@ -60,36 +144,30 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     }
   }, [step]);
 
-  // Step 1: Speak language question
+  // ---- STEP 1: Language sub-steps — speak then listen ----
   useEffect(() => {
     if (step === 1 && langSubStep === 0) {
-      speak("What is your primary language?");
+      speakThenListen("What is your primary language?", "lang-primary");
     }
     if (step === 1 && langSubStep === 1) {
-      speak("Would you like to add a second language?");
+      speakThenListen("Would you like to add a second language?", "lang-secondary");
     }
     if (step === 1 && langSubStep === 2) {
-      speak("Would you like to enable Sign Language?");
+      speakThenListen("Would you like to enable Sign Language?", "lang-sign");
     }
-  }, [step, langSubStep]);
+  }, [step, langSubStep, speakThenListen]);
 
-  // Step 2: Speak communication options
+  // ---- STEP 2: Communication ----
   useEffect(() => {
     if (step === 2) {
-      speak("How do you prefer to communicate?");
-      // Speak each option with delay
-      const timer = setTimeout(() => {
-        COMMUNICATION_METHODS.forEach((m, i) => {
-          setTimeout(() => speak(m.label), i * 1800);
-        });
-      }, 2000);
-      return () => clearTimeout(timer);
+      speakThenListen("How do you prefer to communicate? You can say: I speak, I type, I sign, colors and symbols, pictures, braille, computer speaks for me, or eye tracking.", "comm-method");
     }
-  }, [step]);
+  }, [step, speakThenListen]);
 
-  // Step 3: Confirm
+  // ---- STEP 3: Confirm ----
   useEffect(() => {
     if (step === 3) {
+      speech.stop();
       const text =
         "Perfect. Soul Echoes is set up for you. You can change these settings anytime. Let's begin.";
       speak(text);
@@ -105,7 +183,74 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       }, 4500);
       return () => clearTimeout(timer);
     }
-  }, [step, primaryLang, secondaryLang, signLanguage, commMethod, onComplete]);
+  }, [step, primaryLang, secondaryLang, signLanguage, commMethod, onComplete, speech]);
+
+  // ---- Handle speech results based on current step ----
+  useEffect(() => {
+    if (!speech.transcript) return;
+    const t = speech.transcript;
+
+    if (step === 1 && langSubStep === 0) {
+      const match = matchLanguage(t);
+      if (match) {
+        setPrimaryLang(match.code);
+        speakAsync(`Selected ${match.name}`).then(() => setLangSubStep(1));
+      } else {
+        setRetryMessage(`I heard "${t}" but couldn't match a language. Please try again or select manually.`);
+        speak(`I heard "${t}" but couldn't match a language. Please try again or tap to select.`);
+        setTimeout(() => speech.start(), 3500);
+      }
+    } else if (step === 1 && langSubStep === 1) {
+      const yn = matchYesNo(t);
+      if (yn === true) {
+        setWantSecondary(true);
+        speak("Which language? Say the name.");
+        // We'll handle the follow-up in a secondary listen
+        setTimeout(() => speech.start(), 2000);
+      } else if (yn === false) {
+        setWantSecondary(false);
+        setSecondaryLang(null);
+        setLangSubStep(2);
+      } else {
+        // Maybe they said a language name directly
+        const match = matchLanguage(t);
+        if (match) {
+          setWantSecondary(true);
+          setSecondaryLang(match.code);
+          speakAsync(`Selected ${match.name} as your second language`).then(() => setLangSubStep(2));
+        } else {
+          setRetryMessage(`I heard "${t}". Please say yes or no, or say a language name.`);
+          speak(`I heard "${t}". Please say yes or no, or say a language name.`);
+          setTimeout(() => speech.start(), 3500);
+        }
+      }
+    } else if (step === 1 && langSubStep === 2) {
+      const yn = matchYesNo(t);
+      if (yn === true) {
+        setSignLanguage(true);
+        setStep(2);
+      } else if (yn === false) {
+        setSignLanguage(false);
+        setStep(2);
+      } else {
+        setRetryMessage(`I heard "${t}". Please say yes or no.`);
+        speak(`I heard "${t}". Please say yes or no.`);
+        setTimeout(() => speech.start(), 3000);
+      }
+    } else if (step === 2) {
+      const method = matchCommMethod(t);
+      if (method) {
+        setCommMethod(method);
+        const label = COMMUNICATION_METHODS.find((m) => m.id === method)?.label || method;
+        speakAsync(`Selected: ${label}. Continuing.`).then(() => setStep(3));
+      } else {
+        setRetryMessage(`I heard "${t}" but couldn't match a communication method. Try again or tap to select.`);
+        speak(`I heard "${t}" but couldn't match a method. Please try again or tap to select.`);
+        setTimeout(() => speech.start(), 3500);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speech.transcript]);
 
   const filteredLangs = (search: string) =>
     WORLD_LANGUAGES.filter((l) =>
@@ -149,7 +294,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             {welcomeDone && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
                 <Button
-                  onClick={() => setStep(1)}
+                  onClick={() => { speech.stop(); setStep(1); }}
                   size="lg"
                   className="text-lg px-8 py-6 rounded-2xl"
                   aria-label="Continue to setup"
@@ -169,6 +314,10 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
                   What is your primary language?
                 </h2>
+                <ListeningIndicator visible={speech.listening} />
+                {retryMessage && (
+                  <p className="text-sm text-center text-destructive font-body">{retryMessage}</p>
+                )}
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
                   <Input
@@ -184,7 +333,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     <button
                       key={lang.code}
                       onClick={() => {
+                        speech.stop();
                         setPrimaryLang(lang.code);
+                        setRetryMessage(null);
                         setLangSubStep(1);
                       }}
                       className={`w-full text-left px-4 py-3 rounded-lg text-base transition-colors focus:outline-none focus:ring-2 focus:ring-ring ${
@@ -207,11 +358,15 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
                   Would you like to add a second language?
                 </h2>
+                <ListeningIndicator visible={speech.listening} />
+                {retryMessage && (
+                  <p className="text-sm text-center text-destructive font-body">{retryMessage}</p>
+                )}
                 <div className="flex gap-4 justify-center">
                   <Button
                     size="lg"
                     className="text-lg px-8 py-6 rounded-2xl"
-                    onClick={() => setWantSecondary(true)}
+                    onClick={() => { speech.stop(); setWantSecondary(true); setRetryMessage(null); }}
                     variant={wantSecondary === true ? "default" : "outline"}
                   >
                     Yes
@@ -220,8 +375,10 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     size="lg"
                     className="text-lg px-8 py-6 rounded-2xl"
                     onClick={() => {
+                      speech.stop();
                       setWantSecondary(false);
                       setSecondaryLang(null);
+                      setRetryMessage(null);
                       setLangSubStep(2);
                     }}
                     variant={wantSecondary === false ? "default" : "outline"}
@@ -248,7 +405,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                           <button
                             key={lang.code}
                             onClick={() => {
+                              speech.stop();
                               setSecondaryLang(lang.code);
+                              setRetryMessage(null);
                               setLangSubStep(2);
                             }}
                             className={`w-full text-left px-4 py-3 rounded-lg text-base transition-colors focus:outline-none focus:ring-2 focus:ring-ring ${
@@ -273,12 +432,18 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
                   Would you like to enable Sign Language?
                 </h2>
+                <ListeningIndicator visible={speech.listening} />
+                {retryMessage && (
+                  <p className="text-sm text-center text-destructive font-body">{retryMessage}</p>
+                )}
                 <div className="flex gap-4 justify-center">
                   <Button
                     size="lg"
                     className="text-xl px-10 py-7 rounded-2xl min-w-[120px]"
                     onClick={() => {
+                      speech.stop();
                       setSignLanguage(true);
+                      setRetryMessage(null);
                       setStep(2);
                     }}
                     variant={signLanguage === true ? "default" : "outline"}
@@ -290,7 +455,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     size="lg"
                     className="text-xl px-10 py-7 rounded-2xl min-w-[120px]"
                     onClick={() => {
+                      speech.stop();
                       setSignLanguage(false);
+                      setRetryMessage(null);
                       setStep(2);
                     }}
                     variant={signLanguage === false ? "default" : "outline"}
@@ -314,12 +481,18 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
               How do you prefer to communicate?
             </h2>
+            <ListeningIndicator visible={speech.listening} />
+            {retryMessage && (
+              <p className="text-sm text-center text-destructive font-body">{retryMessage}</p>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Communication preference">
               {COMMUNICATION_METHODS.map((method) => (
                 <button
                   key={method.id}
                   onClick={() => {
+                    speech.stop();
                     setCommMethod(method.id);
+                    setRetryMessage(null);
                   }}
                   className={`flex items-center gap-4 px-5 py-5 rounded-2xl border-2 text-left text-base sm:text-lg font-medium transition-all focus:outline-none focus:ring-2 focus:ring-ring ${
                     commMethod === method.id
@@ -342,7 +515,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 <Button
                   size="lg"
                   className="text-lg px-8 py-6 rounded-2xl"
-                  onClick={() => setStep(3)}
+                  onClick={() => { speech.stop(); setStep(3); }}
                 >
                   Continue <ChevronRight className="ml-2 h-5 w-5" />
                 </Button>
