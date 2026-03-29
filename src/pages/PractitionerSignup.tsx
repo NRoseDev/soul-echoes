@@ -56,7 +56,7 @@ export default function PractitionerSignup() {
 
     try {
       const { supabase } = await import("@/integrations/supabase/client");
-      await supabase.from("practitioner_applications").insert({
+      await (supabase as any).from("practitioner_applications").insert({
         role: selectedRole,
         answers: JSON.stringify(answers),
         scenario_answer: scenarioAnswer || null,

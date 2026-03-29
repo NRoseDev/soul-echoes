@@ -147,7 +147,7 @@ export default function DistressSignal() {
     try {
       if (navigator.onLine) {
         const { supabase } = await import("@/integrations/supabase/client");
-        await supabase.from("distress_signals").insert({
+        await (supabase as any).from("distress_signals").insert({
           angel: signal.angel,
           situation_code: signal.situationCode,
           situation_label: signal.situationLabel,

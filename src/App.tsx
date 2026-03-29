@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import Onboarding from "./pages/Onboarding";
 import VoiceSettings from "./pages/VoiceSettings";
 import Settings from "./pages/Settings";
+import PractitionerSignup from "./pages/PractitionerSignup";
 import DistressSignal from "./components/DistressSignal";
 import { getPreferences } from "./lib/preferences";
 
