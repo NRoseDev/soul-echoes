@@ -7,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppLayout } from "@/components/AppLayout";
 import BrainDump from "./pages/BrainDump";
 import HealingRoom from "./pages/HealingRoom";
+import BreathePage from "./pages/BreathePage";
+import BreatheDetail from "./pages/BreatheDetail";
 import NotFound from "./pages/NotFound";
 import Onboarding from "./pages/Onboarding";
 import VoiceSettings from "./pages/VoiceSettings";
@@ -40,7 +42,8 @@ const App = () => {
             <Routes>
               <Route path="/" element={<BrainDump />} />
               <Route path="/journal" element={<HealingRoom />} />
-              <Route path="/breathe" element={<HealingRoom />} />
+              <Route path="/breathe" element={<BreathePage />} />
+              <Route path="/breathe/:section" element={<BreatheDetail />} />
               <Route path="/unspoken" element={<HealingRoom />} />
               <Route path="/shadow-work" element={<HealingRoom />} />
               <Route path="/wisdom" element={<HealingRoom />} />
