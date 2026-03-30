@@ -456,12 +456,14 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
   // STEP 2: Voice Setup (moved before Communication)
   useEffect(() => {
-    if (step === 2 && voiceEnabled) {
-      setRetryMessage(null);
-      const timer = setTimeout(() => speech.start(), 400);
-      return () => clearTimeout(timer);
-    }
-  }, [step, voiceEnabled, speech]);
+    if (step !== 2 || !voiceEnabled) return;
+    setRetryMessage(null);
+    const timer = setTimeout(() => speech.start(), 400);
+    return () => {
+      clearTimeout(timer);
+      speech.stop();
+    };
+  }, [step, voiceEnabled, speech.start, speech.stop]);
 
   // STEP 3: Communication
   useEffect(() => {
