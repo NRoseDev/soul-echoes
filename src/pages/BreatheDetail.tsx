@@ -1,0 +1,320 @@
+import { useParams, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ArrowLeft, ShoppingBag, CalendarCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+/* ───────── CONTENT DATA ───────── */
+
+const meditationContent = {
+  title: "Meditation",
+  intro: "Meditation is the practice of training your attention and awareness to achieve a mentally clear, emotionally calm, and stable state. It's not about stopping your thoughts — it's about observing them without judgment and gently returning to your anchor (breath, mantra, or visualization).",
+  types: [
+    {
+      name: "Breath Focus Meditation",
+      steps: ["Find a comfortable seat and close your eyes.", "Breathe in slowly through your nose for 4 counts.", "Hold gently for 2 counts.", "Exhale through your mouth for 6 counts.", "When your mind wanders, gently return focus to your breath."],
+      tip: "Start with just 3 minutes. Consistency matters more than duration.",
+    },
+    {
+      name: "Chakra Color Visualization",
+      steps: ["Sit comfortably and close your eyes.", "Visualize a red glowing light at the base of your spine (Root Chakra).", "Slowly move upward through each chakra, imagining its color growing brighter.", "Spend 30 seconds on each chakra, breathing into it.", "End at the crown with brilliant white or violet light."],
+      tip: "Pair this with soft 528 Hz music for deeper effect.",
+    },
+    {
+      name: "Body Scan Meditation",
+      steps: ["Lie down or sit comfortably.", "Starting at the top of your head, bring attention to each body part.", "Notice any tension, tingling, or sensation without trying to change it.", "Move slowly downward — forehead, jaw, shoulders, arms, chest, belly, legs, feet.", "Breathe into any areas of tightness and imagine them softening."],
+      tip: "This is especially helpful before sleep or after a stressful day.",
+    },
+    {
+      name: "Affirmation Meditation",
+      steps: ["Choose one affirmation that resonates (e.g., 'I am safe, I am loved').", "Close your eyes and repeat it silently or aloud.", "Feel the words in your body — let them settle in your heart space.", "If doubt arises, acknowledge it and return to the affirmation.", "Continue for 5–10 minutes."],
+      tip: "Write your affirmation on a sticky note and place it where you'll see it daily.",
+    },
+    {
+      name: "Sound Bath Meditation",
+      steps: ["Find a quiet space and lie down comfortably.", "Play a sound bath track (singing bowls, gongs, or tuning forks).", "Close your eyes and let the vibrations wash over you.", "Don't try to focus — let the sound carry your awareness.", "Stay still for a few minutes after the sound ends."],
+      tip: "Use headphones for the most immersive experience.",
+    },
+  ],
+};
+
+const chakrasContent = [
+  { num: 0, name: "Earth Star Chakra", location: "6–12 inches below your feet", color: "Deep Brown / Black", blocked: "Feeling ungrounded, disconnected from nature, existential dread", tip: "Walk barefoot on earth or grass for 10 minutes daily.", affirmation: "I am deeply rooted to the Earth and all of creation.", hz: 68.05 },
+  { num: 1, name: "Root Chakra (Muladhara)", location: "Base of the spine", color: "Red", blocked: "Anxiety, fear, financial insecurity, lower back pain", tip: "Stomp your feet on the ground and say 'I am safe' three times.", affirmation: "I am safe, secure, and grounded in this moment.", hz: 396 },
+  { num: 2, name: "Sacral Chakra (Svadhisthana)", location: "Lower abdomen, below the navel", color: "Orange", blocked: "Guilt, emotional numbness, creative blocks, low libido", tip: "Move your hips — dance freely for 5 minutes.", affirmation: "I honor my emotions and allow pleasure to flow through me.", hz: 417 },
+  { num: 3, name: "Solar Plexus Chakra (Manipura)", location: "Upper abdomen, stomach area", color: "Yellow", blocked: "Low self-esteem, indecisiveness, digestive issues, feeling powerless", tip: "Stand in a power pose for 2 minutes and breathe deeply.", affirmation: "I am confident, powerful, and in control of my life.", hz: 528 },
+  { num: 4, name: "Heart Chakra (Anahata)", location: "Center of the chest", color: "Green", blocked: "Grief, jealousy, inability to forgive, chest tightness", tip: "Place your hand on your heart and say 'I forgive and I am forgiven.'", affirmation: "I give and receive love freely and unconditionally.", hz: 639 },
+  { num: 5, name: "Throat Chakra (Vishuddha)", location: "Throat", color: "Blue", blocked: "Fear of speaking up, sore throat, feeling unheard, dishonesty", tip: "Hum or sing for 5 minutes to vibrate and open this chakra.", affirmation: "I speak my truth with clarity and confidence.", hz: 741 },
+  { num: 6, name: "Third Eye Chakra (Ajna)", location: "Between the eyebrows", color: "Indigo", blocked: "Confusion, lack of intuition, headaches, overthinking", tip: "Gaze softly at a candle flame for 3 minutes, then close your eyes.", affirmation: "I trust my intuition and see clearly beyond illusion.", hz: 852 },
+  { num: 7, name: "Crown Chakra (Sahasrara)", location: "Top of the head", color: "Violet / White", blocked: "Spiritual disconnection, close-mindedness, depression, isolation", tip: "Sit in silence for 5 minutes and imagine white light pouring in through the top of your head.", affirmation: "I am connected to the divine source of all that is.", hz: 963 },
+  { num: 8, name: "Soul Star Chakra", location: "6 inches above the head", color: "White / Magenta", blocked: "Feeling lost in life purpose, spiritual apathy", tip: "Meditate on the question: 'What is my soul here to do?'", affirmation: "I am aligned with my soul's highest purpose.", hz: 1074 },
+  { num: 9, name: "Spirit Chakra", location: "12 inches above the head", color: "Gold", blocked: "Disconnection from higher self, lack of spiritual growth", tip: "Journal about moments when you felt guided by something greater.", affirmation: "I am a vessel of divine light and wisdom.", hz: 1185 },
+  { num: 10, name: "Universal Chakra", location: "18 inches above the head", color: "Pearlescent", blocked: "Feeling separate from the universe, cosmic loneliness", tip: "Stargaze for 10 minutes and feel your connection to the cosmos.", affirmation: "I am one with the universe and all living things.", hz: 1296 },
+  { num: 11, name: "Galactic Chakra", location: "24 inches above the head", color: "Pink-Orange", blocked: "Inability to access past-life wisdom, feeling stuck in cycles", tip: "Practice a past-life regression meditation.", affirmation: "I carry the wisdom of all my lifetimes within me.", hz: 1407 },
+  { num: 12, name: "Divine Gateway Chakra", location: "36 inches above the head", color: "Diamond White", blocked: "Complete spiritual disconnection, inability to channel or receive", tip: "Pray or set an intention to open yourself to divine guidance.", affirmation: "I am a pure channel for divine love, light, and healing.", hz: 1518 },
+];
+
+const breathworkContent = [
+  { name: "Box Breathing", steps: ["Inhale through your nose for 4 counts.", "Hold your breath for 4 counts.", "Exhale slowly through your mouth for 4 counts.", "Hold again (lungs empty) for 4 counts.", "Repeat for 4–8 cycles."] },
+  { name: "4-7-8 Breathing", steps: ["Inhale quietly through your nose for 4 counts.", "Hold your breath for 7 counts.", "Exhale completely through your mouth (whoosh sound) for 8 counts.", "Repeat for 3–4 cycles.", "Best done before sleep or when anxious."] },
+  { name: "Belly Breathing (Diaphragmatic)", steps: ["Place one hand on your chest, one on your belly.", "Breathe in slowly through your nose — your belly should rise, not your chest.", "Exhale slowly through pursed lips.", "Focus on making the exhale longer than the inhale.", "Continue for 5 minutes."] },
+  { name: "Alternate Nostril Breathing (Nadi Shodhana)", steps: ["Sit comfortably. Use your right thumb to close your right nostril.", "Inhale through your left nostril for 4 counts.", "Close your left nostril with your ring finger, release your thumb.", "Exhale through your right nostril for 4 counts.", "Inhale through the right, close it, exhale through the left. Repeat for 5–10 cycles."] },
+  { name: "Humming Breath (Bhramari)", steps: ["Sit comfortably and close your eyes.", "Place your index fingers gently on the cartilage of your ears (tragus).", "Inhale deeply through your nose.", "As you exhale, make a steady humming sound like a bee.", "Feel the vibration in your head and chest. Repeat 5–7 times."] },
+];
+
+const vagusNerveContent = {
+  explanation: "The vagus nerve is the longest cranial nerve in your body, running from your brainstem all the way down to your gut. It controls your parasympathetic nervous system — your body's 'rest and digest' mode. When your vagus nerve is activated (stimulated), it tells your body: 'You are safe. You can relax.' This lowers heart rate, reduces inflammation, improves digestion, and calms anxiety.",
+  techniques: [
+    { name: "Cold Water on Face", how: "Splash cold water on your face or hold a cold, wet towel against your cheeks and forehead for 30 seconds. This triggers the 'dive reflex,' which immediately slows your heart rate and activates the vagus nerve." },
+    { name: "Humming or Chanting", how: "Hum your favorite tune or chant 'Om' for 2–3 minutes. The vibration in your throat directly stimulates the vagus nerve. You'll feel calmer almost immediately." },
+    { name: "Slow, Extended Exhales", how: "Breathe in for 4 counts, then exhale for 8 counts. The long exhale activates the parasympathetic response. Do this for 5–10 breaths." },
+    { name: "Gargling", how: "Take a sip of water and gargle vigorously for 30 seconds. The muscles in the back of your throat are connected to the vagus nerve. This is one of the simplest activation techniques." },
+    { name: "Laughter", how: "Watch something funny, call a friend who makes you laugh, or practice laughter yoga. Genuine belly laughter stimulates the vagus nerve, releases endorphins, and shifts your nervous system into safety mode." },
+  ],
+};
+
+const soundHealingContent = [
+  { hz: 174, chakra: "Earth Star / Root foundation", effect: "Reduces pain, gives organs a sense of security and comfort. Foundation frequency." },
+  { hz: 285, chakra: "Sacral energy field", effect: "Heals and restores tissues. Influences the body's energy field to restructure damaged organs." },
+  { hz: 396, chakra: "Root Chakra", effect: "Liberates guilt and fear. Turns grief into joy and helps release deep-seated emotional patterns." },
+  { hz: 417, chakra: "Sacral Chakra", effect: "Facilitates change and undoing situations. Cleanses traumatic experiences and clears negative influences." },
+  { hz: 528, chakra: "Solar Plexus Chakra", effect: "Known as the 'Love Frequency.' Repairs DNA, brings transformation, miracles, and clarity of purpose." },
+  { hz: 639, chakra: "Heart Chakra", effect: "Enhances communication, understanding, tolerance, and love. Heals relationships and connects you to others." },
+  { hz: 741, chakra: "Throat Chakra", effect: "Awakens intuition and self-expression. Cleanses cells of toxins and electromagnetic radiation." },
+];
+
+const auraCleansingContent = [
+  { name: "Salt Bath Cleanse", steps: ["Fill a warm bath with 1–2 cups of sea salt or Himalayan pink salt.", "Add a few drops of essential oil (lavender, frankincense, or sage).", "Soak for 20–30 minutes. Visualize dark or heavy energy dissolving into the water.", "As you drain the tub, imagine all negativity flowing away.", "Pat dry gently and say: 'My energy is clear, my aura is bright.'"] },
+  { name: "Smoke Cleansing (Smudging)", steps: ["Light a bundle of dried sage, palo santo, or cedar.", "Hold it at arm's length and let the smoke billow.", "Starting at your feet, slowly wave the smoke upward around your body.", "Pay extra attention to areas that feel heavy (head, heart, stomach).", "Open a window to let the smoke and released energy flow out."] },
+  { name: "Visualization & Breathwork", steps: ["Stand or sit comfortably. Close your eyes.", "Imagine a brilliant white or golden light above your head.", "As you inhale, pull that light down through your crown, filling your entire body.", "As you exhale, imagine grey or dark smoke leaving through your feet into the earth.", "Repeat for 3–5 minutes until you feel lighter and brighter."] },
+];
+
+const cordCuttingContent = {
+  explanation: "Energy cords are invisible emotional and energetic connections between you and another person. They form through close relationships, trauma bonds, or unresolved emotional experiences. Soul ties are deeper spiritual connections — often formed through intimacy, shared trauma, or karmic contracts. Not all cords and soul ties are negative, but unhealthy ones can drain your energy, keep you stuck in the past, and prevent you from moving forward.",
+  signs: [
+    "You can't stop thinking about someone even though the relationship is over.",
+    "You feel emotionally drained after interacting with (or even thinking about) a specific person.",
+    "You repeat the same toxic relationship patterns with different people.",
+    "You feel physically sick, anxious, or heavy when you think of someone from your past.",
+    "You dream about someone frequently, especially in distressing scenarios.",
+  ],
+  ritual: [
+    { step: "Set Your Space", detail: "Find a quiet, private space. Light a candle (white for purity or black for protection). You may also burn sage or palo santo to cleanse the area." },
+    { step: "Ground Yourself", detail: "Sit comfortably, close your eyes, and take 5 deep breaths. Visualize roots growing from your body into the earth, anchoring you." },
+    { step: "Visualize the Cord", detail: "Imagine the person you want to cut cords with standing in front of you. See the cord connecting you — it may be thick or thin, dark or light. Notice where it attaches to your body." },
+    { step: "Cut the Cord", detail: "Visualize a sword of golden light, a pair of scissors, or Archangel Michael's blade. See yourself cutting through the cord with love, not anger. Say: 'I release this cord with love. I am free, and so are you.'" },
+    { step: "Seal and Heal", detail: "Imagine golden light flooding the area where the cord was attached, healing and sealing it. Place your hand there and say your healing affirmation. Blow out the candle to close the ritual." },
+  ],
+  affirmation: "I release all cords and ties that no longer serve my highest good. I am free, whole, and sovereign in my energy. I send love and move forward in peace.",
+};
+
+/* ───────── SECTION MAP ───────── */
+
+type SectionKey = "meditation" | "chakras" | "breathwork" | "vagus-nerve" | "sound-healing" | "aura-cleansing" | "cord-cutting" | "connect-healer";
+
+const sectionTitles: Record<SectionKey, string> = {
+  meditation: "Meditation",
+  chakras: "The 13 Chakras",
+  breathwork: "Breathwork",
+  "vagus-nerve": "Vagus Nerve & Nervous System",
+  "sound-healing": "Sound Healing",
+  "aura-cleansing": "Aura Cleansing",
+  "cord-cutting": "Cord Cutting & Soul Ties",
+  "connect-healer": "Connect to a Healer",
+};
+
+/* ───────── DETAIL RENDERER ───────── */
+
+function SectionContent({ id }: { id: SectionKey }) {
+  switch (id) {
+    case "meditation":
+      return (
+        <div className="space-y-6">
+          <p className="text-muted-foreground leading-relaxed">{meditationContent.intro}</p>
+          {meditationContent.types.map((t) => (
+            <div key={t.name} className="bg-muted/40 rounded-xl p-4 space-y-3">
+              <h3 className="font-display text-lg font-bold text-foreground">{t.name}</h3>
+              <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
+                {t.steps.map((s, i) => <li key={i}>{s}</li>)}
+              </ol>
+              <p className="text-xs text-healing-breathe italic">💡 Tip: {t.tip}</p>
+            </div>
+          ))}
+        </div>
+      );
+
+    case "chakras":
+      return (
+        <div className="space-y-4">
+          <p className="text-muted-foreground text-sm mb-2">From Earth Star (below your feet) up to the Divine Gateway (above your head).</p>
+          {chakrasContent.map((c) => (
+            <div key={c.num} className="bg-muted/40 rounded-xl p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold bg-primary/20 text-primary rounded-full px-2 py-0.5">#{c.num}</span>
+                <h3 className="font-display text-base font-bold text-foreground">{c.name}</h3>
+              </div>
+              <p className="text-xs text-muted-foreground"><strong>Location:</strong> {c.location}</p>
+              <p className="text-xs text-muted-foreground"><strong>Color:</strong> {c.color}</p>
+              <p className="text-xs text-muted-foreground"><strong>When blocked:</strong> {c.blocked}</p>
+              <p className="text-xs text-healing-breathe"><strong>Healing tip:</strong> {c.tip}</p>
+              <p className="text-xs text-healing-wisdom italic">✨ "{c.affirmation}"</p>
+              <p className="text-xs text-muted-foreground"><strong>Tuning Fork:</strong> {c.hz} Hz</p>
+            </div>
+          ))}
+        </div>
+      );
+
+    case "breathwork":
+      return (
+        <div className="space-y-6">
+          {breathworkContent.map((b) => (
+            <div key={b.name} className="bg-muted/40 rounded-xl p-4 space-y-3">
+              <h3 className="font-display text-lg font-bold text-foreground">{b.name}</h3>
+              <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
+                {b.steps.map((s, i) => <li key={i}>{s}</li>)}
+              </ol>
+            </div>
+          ))}
+        </div>
+      );
+
+    case "vagus-nerve":
+      return (
+        <div className="space-y-6">
+          <p className="text-muted-foreground leading-relaxed">{vagusNerveContent.explanation}</p>
+          <h3 className="font-display text-lg font-bold text-foreground">5 Quick Activation Techniques</h3>
+          {vagusNerveContent.techniques.map((t) => (
+            <div key={t.name} className="bg-muted/40 rounded-xl p-4 space-y-2">
+              <h4 className="font-display font-bold text-foreground">{t.name}</h4>
+              <p className="text-sm text-muted-foreground">{t.how}</p>
+            </div>
+          ))}
+        </div>
+      );
+
+    case "sound-healing":
+      return (
+        <div className="space-y-4">
+          <p className="text-muted-foreground text-sm mb-2">The 7 Solfeggio Frequencies — ancient tones used for spiritual and physical healing.</p>
+          {soundHealingContent.map((s) => (
+            <div key={s.hz} className="bg-muted/40 rounded-xl p-4 space-y-2">
+              <h3 className="font-display text-lg font-bold text-foreground">{s.hz} Hz</h3>
+              <p className="text-xs text-healing-tools"><strong>Chakra:</strong> {s.chakra}</p>
+              <p className="text-sm text-muted-foreground">{s.effect}</p>
+            </div>
+          ))}
+        </div>
+      );
+
+    case "aura-cleansing":
+      return (
+        <div className="space-y-6">
+          <p className="text-muted-foreground text-sm">3 simple techniques anyone can do at home to cleanse and protect their aura.</p>
+          {auraCleansingContent.map((a) => (
+            <div key={a.name} className="bg-muted/40 rounded-xl p-4 space-y-3">
+              <h3 className="font-display text-lg font-bold text-foreground">{a.name}</h3>
+              <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
+                {a.steps.map((s, i) => <li key={i}>{s}</li>)}
+              </ol>
+            </div>
+          ))}
+        </div>
+      );
+
+    case "cord-cutting":
+      return (
+        <div className="space-y-6">
+          <p className="text-muted-foreground leading-relaxed">{cordCuttingContent.explanation}</p>
+          <div className="bg-muted/40 rounded-xl p-4 space-y-2">
+            <h3 className="font-display text-lg font-bold text-foreground">5 Signs You Need Cord Cutting</h3>
+            <ul className="list-disc list-inside space-y-1 text-muted-foreground text-sm">
+              {cordCuttingContent.signs.map((s, i) => <li key={i}>{s}</li>)}
+            </ul>
+          </div>
+          <h3 className="font-display text-lg font-bold text-foreground">The 5-Step Cord Cutting Ritual</h3>
+          {cordCuttingContent.ritual.map((r, i) => (
+            <div key={i} className="bg-muted/40 rounded-xl p-4 space-y-2">
+              <h4 className="font-display font-bold text-foreground">Step {i + 1}: {r.step}</h4>
+              <p className="text-sm text-muted-foreground">{r.detail}</p>
+            </div>
+          ))}
+          <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
+            <p className="text-sm text-foreground italic text-center">🕊️ "{cordCuttingContent.affirmation}"</p>
+          </div>
+        </div>
+      );
+
+    case "connect-healer":
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[40vh] space-y-6 text-center">
+          <p className="text-muted-foreground text-lg leading-relaxed max-w-sm">
+            Ready to go deeper? Connect with a verified spiritual practitioner, energy healer, or holistic therapist for personalized guidance.
+          </p>
+          <Button
+            size="lg"
+            className="bg-gradient-to-r from-primary to-secondary text-primary-foreground font-display text-lg px-8 py-6 rounded-2xl shadow-lg"
+            onClick={() => {}}
+          >
+            <CalendarCheck className="h-5 w-5 mr-2" />
+            Book a One-on-One Session
+          </Button>
+        </div>
+      );
+  }
+}
+
+/* ───────── MAIN COMPONENT ───────── */
+
+export default function BreatheDetail() {
+  const { section } = useParams<{ section: string }>();
+  const navigate = useNavigate();
+  const id = section as SectionKey;
+  const title = sectionTitles[id];
+
+  if (!title) {
+    navigate("/breathe", { replace: true });
+    return null;
+  }
+
+  const showShop = ["meditation", "chakras", "sound-healing", "aura-cleansing"].includes(id);
+  const showBook = ["breathwork", "vagus-nerve", "cord-cutting"].includes(id);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 40 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -40 }}
+      transition={{ duration: 0.3 }}
+      className="flex-1 flex flex-col min-h-0"
+    >
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/breathe")} aria-label="Back">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="font-display text-xl font-bold text-foreground truncate">{title}</h1>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-4 pb-32">
+        <SectionContent id={id} />
+      </div>
+
+      {/* Bottom CTA */}
+      {(showShop || showBook) && (
+        <div className="sticky bottom-0 p-4 bg-background/90 backdrop-blur-md border-t border-border">
+          <Button
+            className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground font-display rounded-xl py-6 text-base"
+            size="lg"
+            onClick={() => showBook ? navigate("/practitioner") : undefined}
+          >
+            {showBook ? (
+              <><CalendarCheck className="h-5 w-5 mr-2" /> Book a Session</>
+            ) : (
+              <><ShoppingBag className="h-5 w-5 mr-2" /> Shop Healing Tools</>
+            )}
+          </Button>
+        </div>
+      )}
+    </motion.div>
+  );
+}
