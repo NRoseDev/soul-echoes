@@ -81,10 +81,53 @@ export default function VoiceSettingsPage() {
 
   const sortedLangs = Object.keys(groupedByLang).sort();
 
+  const PREVIEW_PHRASES: Record<string, string> = {
+    en: "Hello, I will be your voice.",
+    es: "Hola, seré tu voz.",
+    fr: "Bonjour, je serai votre voix.",
+    pt: "Olá, eu serei sua voz.",
+    de: "Hallo, ich werde deine Stimme sein.",
+    it: "Ciao, sarò la tua voce.",
+    ja: "こんにちは、私があなたの声になります。",
+    ko: "안녕하세요, 제가 당신의 목소리가 되겠습니다.",
+    zh: "你好，我将成为你的声音。",
+    ar: "مرحبا، سأكون صوتك.",
+    hi: "नमस्ते, मैं आपकी आवाज़ बनूँगा।",
+    ru: "Здравствуйте, я буду вашим голосом.",
+    nl: "Hallo, ik zal uw stem zijn.",
+    pl: "Cześć, będę twoim głosem.",
+    sv: "Hej, jag kommer att vara din röst.",
+    da: "Hej, jeg vil være din stemme.",
+    fi: "Hei, minä olen äänesi.",
+    nb: "Hei, jeg vil være din stemme.",
+    tr: "Merhaba, sesiniz ben olacağım.",
+    th: "สวัสดี ฉันจะเป็นเสียงของคุณ",
+    vi: "Xin chào, tôi sẽ là giọng nói của bạn.",
+    id: "Halo, saya akan menjadi suaramu.",
+    ms: "Hello, saya akan menjadi suara anda.",
+    ro: "Bună, voi fi vocea ta.",
+    uk: "Привіт, я буду вашим голосом.",
+    cs: "Ahoj, budu tvůj hlas.",
+    el: "Γεια σου, θα είμαι η φωνή σου.",
+    he: "שלום, אני אהיה הקול שלך.",
+    hu: "Helló, én leszek a hangod.",
+    ca: "Hola, seré la teva veu.",
+    sk: "Ahoj, budem tvoj hlas.",
+    bg: "Здравей, аз ще бъда твоят глас.",
+    hr: "Bok, ja ću biti tvoj glas.",
+  };
+
+  const getPreviewText = (voice: SpeechSynthesisVoice): string => {
+    const langBase = voice.lang.split("-")[0].toLowerCase();
+    return PREVIEW_PHRASES[langBase] || PREVIEW_PHRASES.en;
+  };
+
   const playPreview = (voice: SpeechSynthesisVoice) => {
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance("Hello, I am " + voice.name);
+    const text = getPreviewText(voice);
+    const u = new SpeechSynthesisUtterance(text);
     u.voice = voice;
+    u.lang = voice.lang;
     u.rate = settings.speed;
     u.volume = settings.volume;
     window.speechSynthesis.speak(u);
@@ -92,10 +135,15 @@ export default function VoiceSettingsPage() {
 
   const testVoice = () => {
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(WELCOME_TEXT);
+    let selectedVoice: SpeechSynthesisVoice | undefined;
     if (settings.voiceURI) {
-      const match = voices.find((v) => v.voiceURI === settings.voiceURI);
-      if (match) u.voice = match;
+      selectedVoice = voices.find((v) => v.voiceURI === settings.voiceURI);
+    }
+    const text = selectedVoice ? getPreviewText(selectedVoice) : WELCOME_TEXT;
+    const u = new SpeechSynthesisUtterance(text);
+    if (selectedVoice) {
+      u.voice = selectedVoice;
+      u.lang = selectedVoice.lang;
     }
     u.rate = settings.speed;
     u.volume = settings.volume;
