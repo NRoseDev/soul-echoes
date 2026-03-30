@@ -30,10 +30,11 @@ const prompts = [
 
 // Map comm method IDs to tab labels and icons
 const COMM_TABS: Record<string, { label: string; icon: string }> = {
-  type: { label: "Type It", icon: "⌨️" },
   speak: { label: "Speak It", icon: "🗣️" },
   sign: { label: "Sign It", icon: "🤟" },
-  pictures: { label: "Point To It", icon: "🖼️" },
+  pictures: { label: "Point It", icon: "👆" },
+  type: { label: "Type It", icon: "⌨️" },
+  device: { label: "Connect Device", icon: "🔌" },
   colors: { label: "Colors & Symbols", icon: "🎨" },
   braille: { label: "Braille", icon: "⠿" },
   aac: { label: "AAC Device", icon: "💻" },
@@ -301,6 +302,16 @@ export default function BrainDump() {
 
       case "colors":
         return <ColorSymbolCanvas onSend={send} disabled={isLoading} />;
+
+      case "device":
+        return (
+          <div className="px-4 py-6 text-center space-y-2">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+              🔌 Connect your AAC device, eye gaze tracker, or external communication equipment via Bluetooth or USB.
+            </p>
+            <p className="text-xs text-muted-foreground/60 italic">Device pairing coming soon.</p>
+          </div>
+        );
 
       default:
         return (
