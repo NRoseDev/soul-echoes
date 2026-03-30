@@ -49,6 +49,27 @@ import angelFaithImg from "@/assets/angel-faith.png";
 
 /* ─── Soft female voice picker ─── */
 const PREFERRED_VOICES = ["samantha", "karen", "moira", "google uk english female", "google us english female", "microsoft zira"];
+const PREVIEW_PHRASES: Record<string, string> = {
+  ar: "مرحبا، أنا هنا معك.",
+  de: "Hallo, ich bin für dich da.",
+  en: "Hello, I am here with you.",
+  es: "Hola, estoy aquí contigo.",
+  fr: "Bonjour, je suis là avec vous.",
+  hi: "नमस्ते, मैं आपके साथ हूँ।",
+  it: "Ciao, sono qui con te.",
+  ja: "こんにちは、あなたと一緒にいます。",
+  ko: "안녕하세요, 제가 함께할게요.",
+  nl: "Hallo, ik ben hier bij je.",
+  pl: "Cześć, jestem tutaj z tobą.",
+  pt: "Olá, estou aqui com você.",
+  ru: "Здравствуйте, я рядом с вами.",
+  th: "สวัสดี ฉันอยู่ตรงนี้กับคุณ",
+  tr: "Merhaba, seninleyim.",
+  uk: "Привіт, я поруч із вами.",
+  vi: "Xin chào, tôi ở đây cùng bạn.",
+  zh: "你好，我在这里陪着你。",
+};
+
 function getSoftFemaleVoice(): SpeechSynthesisVoice | null {
   const voices = window.speechSynthesis.getVoices();
   for (const pref of PREFERRED_VOICES) {
@@ -57,6 +78,11 @@ function getSoftFemaleVoice(): SpeechSynthesisVoice | null {
   }
   // Fallback: any female-sounding English voice
   return voices.find((v) => v.lang.startsWith("en") && /female|zira|samantha|karen/i.test(v.name)) || null;
+}
+
+function getPreviewText(voice?: SpeechSynthesisVoice | null) {
+  const langBase = voice?.lang?.split("-")[0]?.toLowerCase() || "en";
+  return PREVIEW_PHRASES[langBase] || PREVIEW_PHRASES.en;
 }
 
 /* ─── TTS helpers ─── */
@@ -85,6 +111,26 @@ function speak(text: string) {
   u.rate = 0.9;
   u.pitch = 1.1;
   window.speechSynthesis.speak(u);
+}
+
+function speakSelectedVoicePreview(voice: SpeechSynthesisVoice | null, settings: VoiceSettings) {
+  if (!("speechSynthesis" in window)) return;
+
+  const synth = window.speechSynthesis;
+  synth.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(getPreviewText(voice));
+  if (voice) {
+    utterance.voice = voice;
+    utterance.lang = voice.lang;
+  }
+  utterance.pitch = 1.0;
+  utterance.rate = settings.speed;
+  utterance.volume = settings.volume;
+
+  const speakNow = () => synth.speak(utterance);
+  if (synth.speaking || synth.pending) setTimeout(speakNow, 120);
+  else speakNow();
 }
 
 /* ─── Animations ─── */
@@ -223,7 +269,42 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [activeInputMethod, setActiveInputMethod] = useState<"voice" | "tap" | "sign" | "point" | "color">("voice");
   const welcomeTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const hasSpokenRef = useRef<string>("");
-  const speech = useSpeechRecognition();
+  const speech = useSpeechRecognition({
+    onResult: (transcript) => {
+      const normalized = transcript.toLowerCase().trim();
+
+      if (step === 2) {
+        const matchingVoice = filteredVoices.find((voice) => {
+          const name = voice.name.toLowerCase();
+          const lang = voice.lang.toLowerCase();
+          return normalized.includes(name) || name.includes(normalized) || normalized.includes(lang);
+        });
+
+        if (matchingVoice) {
+          const nextSettings = { ...voiceSettings, voiceURI: matchingVoice.voiceURI };
+          setVoiceSettings(nextSettings);
+          setRetryMessage(null);
+          speakSelectedVoicePreview(matchingVoice, nextSettings);
+          return;
+        }
+
+        if (["test", "play", "preview", "try voice", "test voice"].some((phrase) => normalized.includes(phrase))) {
+          const selectedVoice = voices.find((v) => v.voiceURI === voiceSettings.voiceURI) || null;
+          setRetryMessage(null);
+          speakSelectedVoicePreview(selectedVoice, voiceSettings);
+          return;
+        }
+
+        if (["continue", "next"].some((phrase) => normalized.includes(phrase))) {
+          setRetryMessage(null);
+          setStep(3);
+          return;
+        }
+
+        setRetryMessage(`I heard "${transcript}" — say a voice name, say test voice, or tap below.`);
+      }
+    },
+  });
 
   // Microphone permission state: "prompt" | "granted" | "denied" | "unavailable"
   const [micPermission, setMicPermission] = useState<"prompt" | "granted" | "denied" | "unavailable">("prompt");
@@ -374,7 +455,15 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   }, [step, langSubStep, wantSecondary, voiceEnabled, startContinuousRec, stopContinuousRec]);
 
   // STEP 2: Voice Setup (moved before Communication)
-  // (No special effect needed — voice list loads via voiceschanged event)
+  useEffect(() => {
+    if (step !== 2 || !voiceEnabled) return;
+    setRetryMessage(null);
+    const timer = setTimeout(() => speech.start(), 400);
+    return () => {
+      clearTimeout(timer);
+      speech.stop();
+    };
+  }, [step, voiceEnabled, speech.start, speech.stop]);
 
   // STEP 3: Communication
   useEffect(() => {
@@ -526,15 +615,8 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   });
 
   const testVoice = () => {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance("Soul Echoes — Your daily healing advocate. A sacred space to release, heal, and find closure.");
-    if (voiceSettings.voiceURI) {
-      const match = voices.find((v) => v.voiceURI === voiceSettings.voiceURI);
-      if (match) u.voice = match;
-    }
-    u.rate = voiceSettings.speed;
-    u.volume = voiceSettings.volume;
-    window.speechSynthesis.speak(u);
+    const selectedVoice = voices.find((v) => v.voiceURI === voiceSettings.voiceURI) || null;
+    speakSelectedVoicePreview(selectedVoice, voiceSettings);
   };
 
   const canFinishSafety = safetyAngel && accessMethod && (
@@ -853,12 +935,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        window.speechSynthesis.cancel();
-                        const u = new SpeechSynthesisUtterance("Hello, I am " + voice.name + ". Welcome to Soul Echoes.");
-                        u.voice = voice;
-                        u.rate = voiceSettings.speed;
-                        u.volume = voiceSettings.volume;
-                        window.speechSynthesis.speak(u);
+                        speakSelectedVoicePreview(voice, voiceSettings);
                       }}
                       className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20"
                       aria-label={`Preview voice: ${voice.name}`}
