@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export type ChatMessage = {
   role: "user" | "assistant";
   content: string;
@@ -17,15 +19,23 @@ export async function streamChat({
   onError: (error: string) => void;
 }) {
   try {
+    // Get the current user's session token
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
     const resp = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ messages }),
     });
 
+    if (resp.status === 401) {
+      onError("Please sign in to use the chat.");
+      return;
+    }
     if (resp.status === 429) {
       onError("I need a moment to rest. Please try again shortly.");
       return;
