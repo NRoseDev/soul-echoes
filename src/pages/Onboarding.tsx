@@ -256,6 +256,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     contRecRef.current?.abort();
     contRecRef.current = null;
     contRecActiveRef.current = false;
+    setIsListening(false);
   }, []);
 
   // Load voices
