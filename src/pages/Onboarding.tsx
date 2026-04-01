@@ -856,7 +856,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 4: Communication ─── */}
         {step === 4 && (
           <motion.div key="communication" {...fadeSlide} className="w-full max-w-2xl mx-auto space-y-4">
-            {isSpeakMode && <ListeningIndicator visible={contRecActiveRef.current} />}
+            {isSpeakMode && <ListeningIndicator visible={isListening} />}
             {retryMessage && <p className="text-sm text-center text-destructive">{retryMessage}</p>}
 
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
