@@ -767,7 +767,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 3: Voice Setup ─── */}
         {step === 3 && (
           <motion.div key="voice" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[80vh] overflow-y-auto">
-            {isSpeakMode && <ListeningIndicator visible={contRecActiveRef.current} />}
+            {isSpeakMode && <ListeningIndicator visible={isListening} />}
             {retryMessage && <p className="text-sm text-center text-destructive">{retryMessage}</p>}
 
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
