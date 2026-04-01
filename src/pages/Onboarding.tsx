@@ -50,24 +50,82 @@ import angelFaithImg from "@/assets/angel-faith.png";
 /* ─── Soft female voice picker ─── */
 const PREFERRED_VOICES = ["samantha", "karen", "moira", "google uk english female", "google us english female", "microsoft zira"];
 const PREVIEW_PHRASES: Record<string, string> = {
+  af: "Hallo, ek is hier by jou.",
+  am: "ሰላም፣ እኔ ከአንተ ጋር ነኝ።",
   ar: "مرحبا، أنا هنا معك.",
+  az: "Salam, mən sizinləyəm.",
+  be: "Прывітанне, я тут з вамі.",
+  bg: "Здравейте, аз съм тук с вас.",
+  bn: "হ্যালো, আমি আপনার সাথে আছি।",
+  bs: "Zdravo, ja sam ovdje s tobom.",
+  ca: "Hola, sóc aquí amb tu.",
+  cs: "Ahoj, jsem tady s tebou.",
+  cy: "Helo, rydw i yma gyda chi.",
+  da: "Hej, jeg er her hos dig.",
   de: "Hallo, ich bin für dich da.",
+  el: "Γεια σου, είμαι εδώ μαζί σου.",
   en: "Hello, I am here with you.",
   es: "Hola, estoy aquí contigo.",
+  et: "Tere, ma olen sinuga siin.",
+  eu: "Kaixo, hemen nago zurekin.",
+  fa: "سلام، من اینجا با شما هستم.",
+  fi: "Hei, olen täällä kanssasi.",
+  fil: "Kumusta, nandito ako para sa iyo.",
   fr: "Bonjour, je suis là avec vous.",
+  ga: "Dia duit, táim anseo leat.",
+  gl: "Ola, estou aquí contigo.",
+  gu: "નમસ્તે, હું તમારી સાથે છું.",
+  he: "שלום, אני כאן איתך.",
   hi: "नमस्ते, मैं आपके साथ हूँ।",
+  hr: "Bok, ja sam ovdje s tobom.",
+  hu: "Szia, itt vagyok veled.",
+  hy: "Բարեdelays, ես այստեղ եմ քեզ հետ.",
+  id: "Halo, saya di sini bersamamu.",
+  is: "Halló, ég er hér með þér.",
   it: "Ciao, sono qui con te.",
   ja: "こんにちは、あなたと一緒にいます。",
+  ka: "გამარჯობა, მე აქ ვარ შენთან.",
+  kk: "Сәлем, мен сенімен біргемін.",
+  km: "សួស្តី ខ្ញុំនៅទីនេះជាមួយអ្នក។",
+  kn: "ನಮಸ್ಕಾರ, ನಾನು ನಿಮ್ಮೊಂದಿಗಿದ್ದೇನೆ.",
   ko: "안녕하세요, 제가 함께할게요.",
+  lo: "ສະບາຍດີ, ຂ້ອຍຢູ່ທີ່ນີ້ກັບເຈົ້າ.",
+  lt: "Sveiki, aš čia su jumis.",
+  lv: "Sveiki, es esmu šeit ar jums.",
+  mk: "Здраво, јас сум тука со тебе.",
+  ml: "ഹലോ, ഞാൻ നിങ്ങളോടൊപ്പമുണ്ട്.",
+  mn: "Сайн байна уу, би тантай хамт байна.",
+  mr: "नमस्कार, मी तुमच्यासोबत आहे.",
+  ms: "Halo, saya di sini bersama anda.",
+  my: "မင်္ဂလာပါ၊ ကျွန်တော် ခင်ဗျားနဲ့ ရှိနေပါတယ်။",
+  nb: "Hei, jeg er her med deg.",
+  ne: "नमस्ते, म तपाईंसँग छु।",
   nl: "Hallo, ik ben hier bij je.",
+  nn: "Hei, eg er her med deg.",
+  no: "Hei, jeg er her med deg.",
+  pa: "ਸਤ ਸ੍ਰੀ ਅਕਾਲ, ਮੈਂ ਤੁਹਾਡੇ ਨਾਲ ਹਾਂ।",
   pl: "Cześć, jestem tutaj z tobą.",
   pt: "Olá, estou aqui com você.",
+  ro: "Bună, sunt aici cu tine.",
   ru: "Здравствуйте, я рядом с вами.",
+  si: "ආයුබෝවන්, මම ඔබ සමඟ මෙහි සිටිමි.",
+  sk: "Ahoj, som tu s tebou.",
+  sl: "Živjo, tukaj sem s tabo.",
+  so: "Salaan, waan kula joogaa.",
+  sq: "Përshëndetje, unë jam këtu me ty.",
+  sr: "Здраво, ја сам овде с тобом.",
+  sv: "Hej, jag är här med dig.",
+  sw: "Habari, niko hapa nawe.",
+  ta: "வணக்கம், நான் உங்களுடன் இருக்கிறேன்.",
+  te: "నమస్కారం, నేను మీతో ఉన్నాను.",
   th: "สวัสดี ฉันอยู่ตรงนี้กับคุณ",
   tr: "Merhaba, seninleyim.",
   uk: "Привіт, я поруч із вами.",
+  ur: "ہیلو، میں آپ کے ساتھ ہوں۔",
+  uz: "Salom, men siz bilan birgaman.",
   vi: "Xin chào, tôi ở đây cùng bạn.",
   zh: "你好，我在这里陪着你。",
+  zu: "Sawubona, ngilapha nawe.",
 };
 
 function getSoftFemaleVoice(): SpeechSynthesisVoice | null {
@@ -81,8 +139,12 @@ function getSoftFemaleVoice(): SpeechSynthesisVoice | null {
 }
 
 function getPreviewText(voice?: SpeechSynthesisVoice | null) {
-  const langBase = voice?.lang?.split("-")[0]?.toLowerCase() || "en";
-  return PREVIEW_PHRASES[langBase] || PREVIEW_PHRASES.en;
+  if (!voice) return PREVIEW_PHRASES.en;
+  const lang = voice.lang || "en";
+  // Try exact match first (e.g. "zh-TW"), then base language (e.g. "zh")
+  const exact = lang.toLowerCase().replace("_", "-");
+  const base = exact.split("-")[0];
+  return PREVIEW_PHRASES[exact] || PREVIEW_PHRASES[base] || PREVIEW_PHRASES.en;
 }
 
 /* ─── TTS helpers ─── */
