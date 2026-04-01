@@ -19,6 +19,7 @@ const defaults: UserPreferences = {
   signLanguageEnabled: false,
   communicationMethods: ["type"],
   autoReadEnabled: true,
+  inputMethod: "type",
 };
 
 export function getPreferences(): UserPreferences {
