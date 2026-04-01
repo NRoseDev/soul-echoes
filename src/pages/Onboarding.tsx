@@ -10,7 +10,8 @@ import {
   COMMUNICATION_METHODS,
   type InputMethod,
 } from "@/lib/preferences";
-import { getVoiceSettings, saveVoiceSettings, type VoiceSettings } from "@/lib/voiceSettings";
+import { getVoiceSettings, saveVoiceSettings, ELEVENLABS_VOICES, type VoiceSettings } from "@/lib/voiceSettings";
+import { supabase } from "@/integrations/supabase/client";
 import ListeningIndicator from "@/components/ListeningIndicator";
 
 const FLAG_LANGUAGES = [
