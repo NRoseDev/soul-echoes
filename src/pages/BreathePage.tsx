@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Brain, Circle, Wind, Zap, Music, Sparkles, Scissors, Users } from "lucide-react";
+import { Brain, Circle, Wind, Zap, Music, Sparkles, Scissors, Users, Activity } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const sections = [
