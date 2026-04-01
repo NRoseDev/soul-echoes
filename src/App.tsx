@@ -14,6 +14,7 @@ import Onboarding from "./pages/Onboarding";
 import VoiceSettings from "./pages/VoiceSettings";
 import Settings from "./pages/Settings";
 import PractitionerSignup from "./pages/PractitionerSignup";
+import Pricing from "./pages/Pricing";
 import DistressSignal from "./components/DistressSignal";
 import { getPreferences } from "./lib/preferences";
 
