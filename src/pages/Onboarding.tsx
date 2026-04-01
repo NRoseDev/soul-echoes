@@ -1057,7 +1057,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     const labels = commMethods.map((m) => COMMUNICATION_METHODS.find((cm) => cm.id === m)?.label || m).join(", ");
                     speakAsync(`Perfect — I have set up ${labels} for you. You can change this anytime in settings.`).then(() => setStep(4));
                   }}
-                  aria-label="Continue to safety setup"
+                  aria-label="Continue"
                 >
                   Continue <ChevronRight className="ml-2 h-5 w-5" />
                 </Button>
