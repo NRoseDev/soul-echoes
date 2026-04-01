@@ -55,7 +55,7 @@ export const FAITH_SITUATIONS = [
 // Symbols for symbol-based access method
 export const ACCESS_SYMBOLS = [
   "🌙", "⭐", "🔥", "🌊", "🌸", "🦋", "🕊️", "🐉",
-  "💎", "🌿", "☀️", "🌈", "🦄", "🪷", "🔮", "🫧",
+  "💎", "🌿", "☀️", "🌈", "🪷", "🔮", "🫧", "🍃",
 ];
 
 // Colors for color-sequence access method

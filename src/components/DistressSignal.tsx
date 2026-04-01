@@ -10,6 +10,7 @@ import {
   type AngelType,
 } from "@/lib/safetySettings";
 import GlitterBurst from "@/components/GlitterBurst";
+import { encryptSignal } from "@/lib/encryption";
 import angelMichaelImg from "@/assets/angel-michael.png";
 import angelFaithImg from "@/assets/angel-faith.png";
 
@@ -34,7 +35,7 @@ function queueSignal(signal: DistressSignalData) {
 }
 
 export default function DistressSignal() {
-  const [phase, setPhase] = useState<"closed" | "verify" | "angel" | "situation" | "sent">("closed");
+  const [phase, setPhase] = useState<"closed" | "verify" | "angel" | "situation" | "sent" | "confirmed">("closed");
   const [accessInput, setAccessInput] = useState("");
   const [accessError, setAccessError] = useState(false);
   const [selectedAngel, setSelectedAngel] = useState<AngelType | null>(null);
@@ -140,8 +141,23 @@ export default function DistressSignal() {
       offlineFlag: !navigator.onLine,
     };
 
-    // Queue locally (works offline)
-    queueSignal(signal);
+    // Encrypt the signal payload
+    const signalPayload = JSON.stringify({
+      angel: signal.angel,
+      situationCode: signal.situationCode,
+      situationLabel: signal.situationLabel,
+      gpsLat: signal.gpsLat,
+      gpsLng: signal.gpsLng,
+    });
+    let encryptedPayload: string;
+    try {
+      encryptedPayload = await encryptSignal(signalPayload);
+    } catch {
+      encryptedPayload = signalPayload; // fallback if crypto unavailable
+    }
+
+    // Queue locally (works offline) — store encrypted
+    queueSignal({ ...signal, situationLabel: encryptedPayload });
 
     // Try to send to backend
     try {
@@ -153,7 +169,7 @@ export default function DistressSignal() {
             user_id: user.id,
             angel: signal.angel,
             situation_code: signal.situationCode,
-            situation_label: signal.situationLabel,
+            situation_label: encryptedPayload,
             gps_lat: signal.gpsLat,
             gps_lng: signal.gpsLng,
             offline_flag: signal.offlineFlag,
@@ -169,11 +185,13 @@ export default function DistressSignal() {
       navigator.vibrate([100, 50, 100, 50, 200]);
     }
 
+    // Show unicorn confirmation
+    setPhase("confirmed");
     setTimeout(() => {
       setPhase("closed");
       setAccessInput("");
       setSelectedAngel(null);
-    }, 1200);
+    }, 2500);
   };
 
   const situations = selectedAngel === "michael" ? MICHAEL_SITUATIONS : FAITH_SITUATIONS;
@@ -183,15 +201,14 @@ export default function DistressSignal() {
     <>
       <GlitterBurst trigger={glitterCount} />
 
-      {/* Unicorn icon — always visible */}
+      {/* Safety trigger — always visible */}
       <button
         onClick={() => setPhase("verify")}
-        className="fixed bottom-4 right-4 z-50 h-12 w-12 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
-        aria-label="Safety angel — get help"
-        title="🦄"
-        style={{ fontSize: "1.75rem" }}
+        className="fixed bottom-4 right-4 z-50 h-12 w-12 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-muted/50 backdrop-blur-sm border border-border/30"
+        aria-label="Safety — get help"
+        style={{ fontSize: "1.25rem" }}
       >
-        🦄
+        🛡️
       </button>
 
       <AnimatePresence>
@@ -222,7 +239,7 @@ export default function DistressSignal() {
               {/* VERIFY phase */}
               {phase === "verify" && (
                 <div className="space-y-6 text-center">
-                  <p className="text-2xl">🦄</p>
+                  <p className="text-2xl">🛡️</p>
                   {safety.setupComplete ? (
                     <>
                       <p className="font-display text-lg text-foreground">
@@ -259,7 +276,7 @@ export default function DistressSignal() {
               {/* ANGEL selection */}
               {phase === "angel" && (
                 <div className="space-y-6 text-center">
-                  <p className="font-display text-xl font-bold text-foreground">Choose your angel</p>
+                  <p className="font-display text-xl font-bold text-foreground">Choose Your Guide</p>
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       onClick={() => selectAngel("michael")}
@@ -301,6 +318,15 @@ export default function DistressSignal() {
                       </button>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* CONFIRMED — unicorn appears only here */}
+              {phase === "confirmed" && (
+                <div className="space-y-6 text-center py-8">
+                  <p className="text-6xl animate-pulse">🦄</p>
+                  <p className="font-display text-lg font-bold text-foreground">Signal received.</p>
+                  <p className="text-sm text-muted-foreground">Help is on the way.</p>
                 </div>
               )}
             </motion.div>
