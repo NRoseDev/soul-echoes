@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Brain, Circle, Wind, Zap, Music, Sparkles, Scissors, Users } from "lucide-react";
+import { Brain, Circle, Wind, Zap, Music, Sparkles, Scissors, Users, Activity } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const sections = [
@@ -11,6 +11,7 @@ const sections = [
   { id: "sound-healing", title: "Sound Healing", description: "All 7 Solfeggio frequencies — which chakra each heals and what it does.", icon: Music, colorClass: "text-healing-tools" },
   { id: "aura-cleansing", title: "Aura Cleansing", description: "3 simple techniques anyone can do at home to cleanse and protect your energy.", icon: Sparkles, colorClass: "text-healing-unspoken" },
   { id: "cord-cutting", title: "Cord Cutting & Soul Ties", description: "Identify unhealthy attachments and perform a powerful 5-step cord cutting ritual.", icon: Scissors, colorClass: "text-healing-crisis" },
+  { id: "movement", title: "Movement as Medicine", description: "11 powerful movement practices that release stuck emotions and restore flow.", icon: Activity, colorClass: "text-healing-journal" },
   { id: "connect-healer", title: "Connect to a Healer", description: "Book a one-on-one session with a verified spiritual practitioner.", icon: Users, colorClass: "text-healing-practitioner" },
 ];
 

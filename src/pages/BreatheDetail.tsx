@@ -107,9 +107,23 @@ const cordCuttingContent = {
   affirmation: "I release all cords and ties that no longer serve my highest good. I am free, whole, and sovereign in my energy. I send love and move forward in peace.",
 };
 
+const movementContent = [
+  { emoji: "💃", name: "Intuitive Dance", what: "Free-form dance with no choreography — you move however your body wants to move, guided by music and emotion rather than technique.", why: "Dance bypasses the thinking mind and goes straight into the body where emotions are stored. When you let your body lead, suppressed feelings like grief, rage, and joy can surface and release through movement.", beginner: ["Put on a song that matches your current mood — or one that feels opposite to shift your energy.", "Close your eyes. Stand with feet hip-width apart.", "Let your body sway, shake, stomp, or flow — no rules.", "If you feel stuck, start by swaying your hips or rolling your shoulders.", "Dance for one full song (3–5 minutes). Build up over time."] },
+  { emoji: "🌊", name: "Interpretive Movement", what: "Using your body to physically express an emotion, story, or experience — almost like acting through movement instead of words.", why: "Many emotions are 'unspeakable' — they live in the body as tension, numbness, or heaviness. Interpretive movement gives them a language without words, helping process trauma and grief that talk therapy can't always reach.", beginner: ["Choose one emotion you're feeling right now (sadness, anger, relief, etc.).", "Stand in an open space and close your eyes.", "Ask yourself: 'If this feeling had a movement, what would it look like?'", "Move slowly — reach, curl, push, collapse, expand.", "There is no wrong way. Let the movement be ugly, beautiful, or strange."] },
+  { emoji: "🤸", name: "Fluid Calisthenics", what: "Bodyweight exercises performed slowly and fluidly — combining strength, flexibility, and breath in flowing sequences rather than rigid reps.", why: "Fluid calisthenics builds a strong, resilient body while teaching you to move through resistance with grace — a physical metaphor for emotional resilience. The slow, intentional movement calms the nervous system.", beginner: ["Start with 3 movements: slow push-ups, deep squats, and flowing lunges.", "Move at half speed — focus on smooth transitions between each move.", "Breathe deeply: inhale on the easy part, exhale on the effort.", "Flow between the 3 moves without stopping for 5 minutes.", "Add gentle music to keep the rhythm slow and intentional."] },
+  { emoji: "🧘", name: "Yoga Flow", what: "A series of yoga poses linked together with breath, creating a moving meditation that stretches, strengthens, and calms the body and mind.", why: "Yoga targets the fascia and connective tissue where emotional trauma is physically stored. Hip openers release grief, backbends release fear, and twists wring out tension. The breathwork component activates the parasympathetic nervous system.", beginner: ["Start with a simple Sun Salutation (5 minutes).", "Move slowly: Mountain Pose → Forward Fold → Halfway Lift → Plank → Cobra → Downward Dog.", "Hold each pose for 3–5 breaths before transitioning.", "Focus on your breath more than perfect form.", "End in Child's Pose for 1–2 minutes to integrate."] },
+  { emoji: "🫨", name: "Shaking / Tremoring Release (TRE)", what: "Trauma Release Exercises — a series of simple exercises that activate your body's natural tremor mechanism to release deep muscular tension caused by stress, trauma, or PTSD.", why: "Animals in the wild shake after a threat to discharge stress hormones. Humans suppress this reflex. TRE reactivates it, allowing the body to complete its natural stress cycle and release trapped fight-or-flight energy.", beginner: ["Stand with feet shoulder-width apart. Do 10 slow squats.", "Hold a wall sit for 1–2 minutes until your legs start trembling.", "Lie on your back with knees bent, feet flat on the floor.", "Let your knees fall open slightly — the trembling will start naturally.", "Allow the shaking for 5–15 minutes. Stop anytime if it feels too intense."] },
+  { emoji: "☯️", name: "Tai Chi", what: "An ancient Chinese martial art practiced as a slow, graceful sequence of movements combined with deep breathing and mental focus — often called 'meditation in motion.'", why: "Tai Chi regulates the flow of qi (life force energy) through your body's meridian system. Blocked qi manifests as emotional stagnation, anxiety, and physical pain. The slow, deliberate movements unblock these pathways.", beginner: ["Start with the 'Commencement' form: stand with feet shoulder-width, arms at sides.", "Slowly raise both arms to shoulder height as you inhale.", "Lower them back down as you exhale.", "Repeat 10 times, making each movement slower than the last.", "Search for 'Tai Chi for Beginners — 8 Form' on YouTube for a guided sequence."] },
+  { emoji: "🥋", name: "Qigong", what: "An ancient Chinese practice combining slow, rhythmic movements, controlled breathing, and focused meditation to cultivate and balance life energy (qi).", why: "Qigong works directly with your body's energy system. Stagnant emotions create energetic blockages that manifest as pain, fatigue, and emotional numbness. Qigong's gentle movements and breathwork clear these blockages.", beginner: ["Stand with feet hip-width apart, knees slightly bent.", "Place both hands over your lower belly (dan tian — your energy center).", "Breathe in slowly, imagining warm golden light filling your belly.", "As you exhale, slowly raise your hands to chest height, palms up.", "Lower them back down on the next inhale. Repeat for 5 minutes."] },
+  { emoji: "🚶", name: "Walking Meditation", what: "Extremely slow, intentional walking where every step is a meditation — focusing on the sensation of your feet touching the ground, your weight shifting, and your breath.", why: "Walking meditation grounds you in the present moment and reconnects you to your body. It's especially powerful for people who find sitting meditation too difficult or triggering.", beginner: ["Find a quiet space — indoors or outdoors, about 10–20 feet of straight path.", "Stand still for 3 breaths. Feel your feet on the ground.", "Lift one foot very slowly. Notice the sensation of lifting, moving, placing.", "Take 10 steps in one direction, then turn around slowly.", "Walk for 5–10 minutes. Speed is not the goal — awareness is."] },
+  { emoji: "🌀", name: "Somatic Movement", what: "Gentle, internally-focused movements designed to retrain your brain's control over your muscles — releasing chronic tension patterns caused by stress, trauma, and habitual postures.", why: "Trauma lives in the body as chronic muscle tension (called Sensory Motor Amnesia). Your brain 'forgets' how to relax certain muscles. Somatic movement gently re-educates the nervous system to release this holding.", beginner: ["Lie on your back with knees bent.", "Slowly arch your lower back (inhale), then flatten it to the floor (exhale).", "Make the movement tiny and slow — focus on sensation, not stretch.", "Do this 10 times, making each rep slower.", "Notice any areas that feel 'stuck' — breathe into them without forcing."] },
+  { emoji: "🎭", name: "Expressive Movement Therapy", what: "A therapeutic approach that uses creative movement, gestures, and body expression to explore and process emotions — often guided by a trained therapist but can be practiced solo.", why: "When words fail, the body speaks. Expressive movement allows unconscious emotions to surface through physical expression, making the invisible visible and the unspeakable expressible.", beginner: ["Choose a prompt: 'Show me what your anxiety looks like in your body.'", "Stand in an open space and begin moving in response — no thinking.", "Use your arms, torso, legs, and face to express the feeling.", "After 2–3 minutes, shift the prompt: 'Now show me what peace looks like.'", "Notice the difference in your body. Journal about what you discovered."] },
+  { emoji: "👐", name: "EFT Tapping", what: "Emotional Freedom Technique — tapping on specific acupressure points (meridian endpoints) on your face and body while speaking about emotional issues, combining ancient Chinese medicine with modern psychology.", why: "Tapping sends calming signals to the amygdala (your brain's fear center), reducing the emotional charge of traumatic memories and negative beliefs. It literally rewires your stress response.", beginner: ["Identify your issue and rate its intensity 0–10.", "Tap the side of your hand (karate chop point) while saying: 'Even though I feel [emotion], I deeply and completely accept myself.' Repeat 3 times.", "Tap 5–7 times on each point: top of head, eyebrow, side of eye, under eye, under nose, chin, collarbone, under arm.", "While tapping, describe what you feel: 'This tightness in my chest, this sadness.'", "After 2–3 rounds, re-rate your intensity. Repeat until it drops."] },
+];
+
 /* ───────── SECTION MAP ───────── */
 
-type SectionKey = "meditation" | "chakras" | "breathwork" | "vagus-nerve" | "sound-healing" | "aura-cleansing" | "cord-cutting" | "connect-healer";
+type SectionKey = "meditation" | "chakras" | "breathwork" | "vagus-nerve" | "sound-healing" | "aura-cleansing" | "cord-cutting" | "movement" | "connect-healer";
 
 const sectionTitles: Record<SectionKey, string> = {
   meditation: "Meditation",
@@ -119,6 +133,7 @@ const sectionTitles: Record<SectionKey, string> = {
   "sound-healing": "Sound Healing",
   "aura-cleansing": "Aura Cleansing",
   "cord-cutting": "Cord Cutting & Soul Ties",
+  movement: "Movement as Medicine",
   "connect-healer": "Connect to a Healer",
 };
 
@@ -240,6 +255,39 @@ function SectionContent({ id }: { id: SectionKey }) {
           <div className="bg-primary/10 border border-primary/20 rounded-xl p-4">
             <p className="text-sm text-foreground italic text-center">🕊️ "{cordCuttingContent.affirmation}"</p>
           </div>
+        </div>
+      );
+
+    case "movement":
+      return (
+        <div className="space-y-6">
+          <p className="text-muted-foreground leading-relaxed">Movement is one of the most ancient and effective ways to release emotions trapped in the body. When we experience stress, trauma, or grief, the energy often gets stuck in our muscles, fascia, and nervous system. These 11 practices help you move that energy out — no gym required, no experience needed.</p>
+          {movementContent.map((m) => (
+            <div key={m.name} className="bg-muted/40 rounded-xl p-4 space-y-3">
+              <h3 className="font-display text-lg font-bold text-foreground">{m.emoji} {m.name}</h3>
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-foreground">What it is</h4>
+                <p className="text-sm text-muted-foreground">{m.what}</p>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-foreground">Why it moves stuck emotions</h4>
+                <p className="text-sm text-muted-foreground">{m.why}</p>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-foreground">How to start as a beginner</h4>
+                <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
+                  {m.beginner.map((s, i) => <li key={i}>{s}</li>)}
+                </ol>
+              </div>
+              <Button
+                className="w-full mt-2 bg-gradient-to-r from-primary to-secondary text-primary-foreground font-display rounded-xl"
+                onClick={() => {}}
+              >
+                <CalendarCheck className="h-4 w-4 mr-2" />
+                Connect with a Healer or Teacher
+              </Button>
+            </div>
+          ))}
         </div>
       );
 
