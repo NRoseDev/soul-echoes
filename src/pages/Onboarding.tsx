@@ -1058,13 +1058,22 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           </motion.div>
         )}
 
-        {/* ─── STEP 4: Safety Angel Setup ─── */}
+        {/* ─── STEP 4: Safety Info (Quiet Screen) ─── */}
         {step === 4 && (
-          <motion.div key="safety" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[85vh] overflow-y-auto">
-            {inputMethodsBar}
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center" aria-live="polite">
-              🦄 Your Safety Angel
-            </h2>
+          <motion.div key="safety-info" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-8 text-center">
+            <p className="text-lg sm:text-xl text-foreground leading-relaxed">
+              This app includes a private safety feature. You can access it anytime from the main menu. Only you will know what it does.
+            </p>
+            <Button
+              size="lg"
+              className="text-lg px-10 py-6 rounded-2xl"
+              onClick={() => setStep(5)}
+              aria-label="Got it — continue"
+            >
+              Got it
+            </Button>
+          </motion.div>
+        )}
             <p className="text-center text-muted-foreground text-sm">This is just between us. Tap, point, sign, or say your choice.</p>
 
             {/* Angel selection */}
