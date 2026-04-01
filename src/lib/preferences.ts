@@ -1,5 +1,7 @@
 const STORAGE_KEY = "soul-echoes-preferences";
 
+export type InputMethod = "speak" | "sign" | "point" | "type" | "connect";
+
 export interface UserPreferences {
   onboardingComplete: boolean;
   primaryLanguage: string;
@@ -7,6 +9,7 @@ export interface UserPreferences {
   signLanguageEnabled: boolean;
   communicationMethods: string[]; // up to 3
   autoReadEnabled: boolean;
+  inputMethod: InputMethod;
 }
 
 const defaults: UserPreferences = {
@@ -16,6 +19,7 @@ const defaults: UserPreferences = {
   signLanguageEnabled: false,
   communicationMethods: ["type"],
   autoReadEnabled: true,
+  inputMethod: "type",
 };
 
 export function getPreferences(): UserPreferences {
