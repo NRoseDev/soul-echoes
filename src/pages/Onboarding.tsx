@@ -806,37 +806,67 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               <Slider value={[voiceSettings.volume]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, volume: v }))} min={0.1} max={1} step={0.05} />
             </div>
 
-            {/* Voice list */}
+            {/* Voice list — ElevenLabs voices */}
             <div className="space-y-1 max-h-48 overflow-y-auto rounded-xl border border-border bg-card p-2">
-              {filteredVoices.length === 0 && <p className="text-sm text-muted-foreground p-3">Loading voices…</p>}
-              {filteredVoices.map((voice) => {
-                const isSelected = voiceSettings.voiceURI === voice.voiceURI;
+              {ELEVENLABS_VOICES.filter((v) => {
+                if (voiceSettings.genderPref === "neutral") return true;
+                return v.gender === voiceSettings.genderPref || v.gender === "neutral";
+              }).map((elVoice) => {
+                const isSelected = voiceSettings.elevenLabsVoiceId === elVoice.id;
                 return (
                   <div
-                    key={voice.voiceURI}
-                    onClick={() => setVoiceSettings((s) => ({ ...s, voiceURI: voice.voiceURI }))}
+                    key={elVoice.id}
+                    onClick={() => setVoiceSettings((s) => ({ ...s, elevenLabsVoiceId: elVoice.id, elevenLabsVoiceName: elVoice.name }))}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${
                       isSelected ? "bg-primary/15 border border-primary/30" : "hover:bg-muted"
                     }`}
                   >
                     <button
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation();
-                        window.speechSynthesis.cancel();
-                        const u = new SpeechSynthesisUtterance("Hello, I am here with you.");
-                        u.voice = voice;
-                        u.lang = voice.lang;
-                        u.rate = voiceSettings.speed;
-                        u.volume = voiceSettings.volume;
-                        window.speechSynthesis.speak(u);
+                        setTestingVoice(true);
+                        try {
+                          const { data: { session } } = await supabase.auth.getSession();
+                          const token = session?.access_token;
+                          if (!token) throw new Error("No auth");
+                          const response = await fetch(
+                            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+                            {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                                Authorization: `Bearer ${token}`,
+                              },
+                              body: JSON.stringify({ text: "Hello, I am here with you.", voiceId: elVoice.id }),
+                            }
+                          );
+                          if (!response.ok) throw new Error("TTS failed");
+                          const blob = await response.blob();
+                          const url = URL.createObjectURL(blob);
+                          const audio = new Audio(url);
+                          audio.volume = voiceSettings.volume;
+                          audio.onended = () => URL.revokeObjectURL(url);
+                          await audio.play();
+                        } catch {
+                          // Fallback to browser TTS
+                          window.speechSynthesis.cancel();
+                          const u = new SpeechSynthesisUtterance("Hello, I am here with you.");
+                          u.rate = voiceSettings.speed;
+                          u.volume = voiceSettings.volume;
+                          window.speechSynthesis.speak(u);
+                        } finally {
+                          setTestingVoice(false);
+                        }
                       }}
-                      className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20"
+                      disabled={testingVoice}
+                      className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20 disabled:opacity-50"
                     >
                       <Play className="h-3 w-3 text-foreground" />
                     </button>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{voice.name}</p>
-                      <p className="text-xs text-muted-foreground">{voice.lang}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{elVoice.name}</p>
+                      <p className="text-xs text-muted-foreground">{elVoice.accent} · {elVoice.description}</p>
                     </div>
                     {isSelected && <Check className="h-4 w-4 text-primary shrink-0" />}
                   </div>
@@ -846,7 +876,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
             {/* Continue */}
             <div className="flex gap-3">
-              <Button onClick={() => setStep(4)} className="flex-1 rounded-2xl">
+              <Button onClick={() => { stopContinuousRec(); setStep(4); }} className="flex-1 rounded-2xl">
                 Continue <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
