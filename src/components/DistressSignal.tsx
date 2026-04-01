@@ -258,7 +258,7 @@ export default function DistressSignal() {
               {/* ANGEL selection */}
               {phase === "angel" && (
                 <div className="space-y-6 text-center">
-                  <p className="font-display text-xl font-bold text-foreground">Choose your angel</p>
+                  <p className="font-display text-xl font-bold text-foreground">Choose Your Guide</p>
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       onClick={() => selectAngel("michael")}
