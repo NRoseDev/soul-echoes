@@ -141,8 +141,23 @@ export default function DistressSignal() {
       offlineFlag: !navigator.onLine,
     };
 
-    // Queue locally (works offline)
-    queueSignal(signal);
+    // Encrypt the signal payload
+    const signalPayload = JSON.stringify({
+      angel: signal.angel,
+      situationCode: signal.situationCode,
+      situationLabel: signal.situationLabel,
+      gpsLat: signal.gpsLat,
+      gpsLng: signal.gpsLng,
+    });
+    let encryptedPayload: string;
+    try {
+      encryptedPayload = await encryptSignal(signalPayload);
+    } catch {
+      encryptedPayload = signalPayload; // fallback if crypto unavailable
+    }
+
+    // Queue locally (works offline) — store encrypted
+    queueSignal({ ...signal, situationLabel: encryptedPayload });
 
     // Try to send to backend
     try {
@@ -154,7 +169,7 @@ export default function DistressSignal() {
             user_id: user.id,
             angel: signal.angel,
             situation_code: signal.situationCode,
-            situation_label: signal.situationLabel,
+            situation_label: encryptedPayload,
             gps_lat: signal.gpsLat,
             gps_lng: signal.gpsLng,
             offline_flag: signal.offlineFlag,
