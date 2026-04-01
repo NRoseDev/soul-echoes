@@ -341,8 +341,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       hasSpokenRef.current = "comm-method";
       speakAsync("How do you like to communicate? Choose up to 3.").then(() => startContinuousRec());
     }
-    return () => { if (step !== 4) stopContinuousRec(); };
-  }, [step, isSpeakMode, startContinuousRec, stopContinuousRec]);
+  }, [step, isSpeakMode, startContinuousRec]);
 
   // STEP 6: Confirmation
   useEffect(() => {
