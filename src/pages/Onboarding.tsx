@@ -10,13 +10,7 @@ import {
   COMMUNICATION_METHODS,
 } from "@/lib/preferences";
 import { getVoiceSettings, saveVoiceSettings, type VoiceSettings } from "@/lib/voiceSettings";
-import {
-  saveSafetySettings,
-  ACCESS_SYMBOLS,
-  ACCESS_COLORS,
-  type AngelType,
-  type AccessMethod,
-} from "@/lib/safetySettings";
+import { saveSafetySettings } from "@/lib/safetySettings";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 
 const FLAG_LANGUAGES = [
