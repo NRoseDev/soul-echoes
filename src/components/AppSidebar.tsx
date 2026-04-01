@@ -1,6 +1,6 @@
 import {
   BookOpen, Wind, VolumeX, Eclipse, Sparkles, Compass, Users, Stethoscope,
-  ShieldAlert, Brain, Volume2, Settings, Lock,
+  ShieldAlert, Brain, Volume2, Settings, Lock, CreditCard,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
