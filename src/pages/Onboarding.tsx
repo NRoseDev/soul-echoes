@@ -38,8 +38,6 @@ const FLAG_LANGUAGES = [
   { code: "sw", name: "Swahili", cc: "za" },
 ];
 import ListeningIndicator from "@/components/ListeningIndicator";
-import angelMichaelImg from "@/assets/angel-michael.png";
-import angelFaithImg from "@/assets/angel-faith.png";
 
 /* ─── Soft female voice picker ─── */
 const PREFERRED_VOICES = ["samantha", "karen", "moira", "google uk english female", "google us english female", "microsoft zira"];
