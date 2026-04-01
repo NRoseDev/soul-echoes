@@ -236,8 +236,13 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     };
     rec.onend = () => {
       contRecActiveRef.current = false;
-      setIsListening(false);
-      if (contRecRef.current === rec) setTimeout(() => startContinuousRec(), 300);
+      // Only hide indicator if we're NOT about to restart
+      if (contRecRef.current === rec) {
+        // Keep isListening true — we're restarting momentarily
+        setTimeout(() => startContinuousRec(), 300);
+      } else {
+        setIsListening(false);
+      }
     };
     rec.onerror = (e: any) => {
       contRecActiveRef.current = false;
