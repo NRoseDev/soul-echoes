@@ -1,13 +1,19 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { Volume2, Play, Save, Check } from "lucide-react";
+import { Volume2, Play, Save, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { getVoiceSettings, saveVoiceSettings, type VoiceSettings } from "@/lib/voiceSettings";
+import {
+  getVoiceSettings,
+  saveVoiceSettings,
+  ELEVENLABS_VOICES,
+  type VoiceSettings,
+  type ElevenLabsVoice,
+} from "@/lib/voiceSettings";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-const WELCOME_TEXT =
-  "Soul Echoes — Your daily healing advocate. A sacred space to release, heal, and find closure. Let the tools of the universe guide you home to your heart, where your journey began.";
+const PREVIEW_TEXT = "Hello, I am here with you. Let me be your voice on this healing journey.";
 
 const GENDER_OPTIONS: { id: VoiceSettings["genderPref"]; label: string }[] = [
   { id: "feminine", label: "Feminine" },
@@ -15,185 +21,82 @@ const GENDER_OPTIONS: { id: VoiceSettings["genderPref"]; label: string }[] = [
   { id: "neutral", label: "Neutral" },
 ];
 
-function guessGender(name: string): VoiceSettings["genderPref"] {
-  const lower = name.toLowerCase();
-  const feminineNames = ["samantha", "karen", "moira", "tessa", "fiona", "victoria", "alice", "amelie", "anna", "ellen", "ioana", "joana", "kanya", "kyoko", "lekha", "luciana", "mariska", "mei-jia", "melina", "milena", "monica", "nora", "paulina", "sara", "satu", "sin-ji", "ting-ting", "xander", "yelda", "yuna", "zosia", "zuzana", "google us english", "female"];
-  const masculineNames = ["daniel", "alex", "fred", "jorge", "juan", "luca", "thomas", "xander", "male", "david", "mark", "ralph"];
-  if (feminineNames.some((n) => lower.includes(n))) return "feminine";
-  if (masculineNames.some((n) => lower.includes(n))) return "masculine";
-  return "neutral";
-}
-
-function getAccentLabel(voice: SpeechSynthesisVoice): string {
-  const lang = voice.lang;
-  const accents: Record<string, string> = {
-    "en-US": "US", "en-GB": "UK", "en-AU": "Australian", "en-IN": "Indian",
-    "en-ZA": "South African", "en-IE": "Irish", "en-NZ": "New Zealand",
-    "en-CA": "Canadian", "en-PH": "Filipino", "en-SG": "Singaporean",
-    "es-ES": "Spain", "es-MX": "Mexican", "es-AR": "Argentine", "es-CO": "Colombian",
-    "fr-FR": "France", "fr-CA": "Canadian", "fr-BE": "Belgian",
-    "pt-BR": "Brazilian", "pt-PT": "Portugal",
-    "zh-CN": "Mandarin", "zh-TW": "Taiwanese", "zh-HK": "Cantonese",
-    "ar-SA": "Saudi", "ar-EG": "Egyptian",
-  };
-  return accents[lang] || lang;
-}
-
-function getLanguageName(langCode: string): string {
-  try {
-    const display = new Intl.DisplayNames(["en"], { type: "language" });
-    return display.of(langCode.split("-")[0]) || langCode;
-  } catch {
-    return langCode;
-  }
-}
-
 export default function VoiceSettingsPage() {
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [settings, setSettings] = useState<VoiceSettings>(getVoiceSettings);
   const [saved, setSaved] = useState(false);
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
-  // Load voices (may load async)
-  const loadVoices = useCallback(() => {
-    const v = window.speechSynthesis.getVoices();
-    if (v.length > 0) setVoices(v);
-  }, []);
-
-  useEffect(() => {
-    loadVoices();
-    window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
-    return () => window.speechSynthesis.removeEventListener("voiceschanged", loadVoices);
-  }, [loadVoices]);
-
-  // Group voices by language
-  const filteredVoices = voices.filter((v) => {
+  const filteredVoices = ELEVENLABS_VOICES.filter((v) => {
     if (settings.genderPref === "neutral") return true;
-    return guessGender(v.name) === settings.genderPref || guessGender(v.name) === "neutral";
+    return v.gender === settings.genderPref || v.gender === "neutral";
   });
 
-  const groupedByLang = filteredVoices.reduce<Record<string, SpeechSynthesisVoice[]>>((acc, v) => {
-    const lang = getLanguageName(v.lang);
-    if (!acc[lang]) acc[lang] = [];
-    acc[lang].push(v);
-    return acc;
-  }, {});
-
-  const sortedLangs = Object.keys(groupedByLang).sort();
-
-  const PREVIEW_PHRASES: Record<string, string> = {
-    af: "Hallo, ek sal jou stem wees.",
-    am: "ሰላም፣ እኔ ድምጽህ እሆናለሁ።",
-    ar: "مرحبا، سأكون صوتك.",
-    az: "Salam, mən sizin səsiniz olacağam.",
-    be: "Прывітанне, я буду вашым голасам.",
-    bg: "Здравей, аз ще бъда твоят глас.",
-    bn: "হ্যালো, আমি আপনার কণ্ঠস্বর হব।",
-    bs: "Zdravo, ja ću biti tvoj glas.",
-    ca: "Hola, seré la teva veu.",
-    cs: "Ahoj, budu tvůj hlas.",
-    cy: "Helo, fi fydd eich llais.",
-    da: "Hej, jeg vil være din stemme.",
-    de: "Hallo, ich werde deine Stimme sein.",
-    el: "Γεια σου, θα είμαι η φωνή σου.",
-    en: "Hello, I will be your voice.",
-    es: "Hola, seré tu voz.",
-    et: "Tere, ma olen sinu hääl.",
-    eu: "Kaixo, zure ahotsa izango naiz.",
-    fa: "سلام، من صدای شما خواهم بود.",
-    fi: "Hei, minä olen äänesi.",
-    fil: "Kumusta, ako ang magiging boses mo.",
-    fr: "Bonjour, je serai votre voix.",
-    ga: "Dia duit, beidh mé mar do ghuth.",
-    gl: "Ola, serei a túa voz.",
-    gu: "નમસ્તે, હું તમારો અવાજ બનીશ.",
-    he: "שלום, אני אהיה הקול שלך.",
-    hi: "नमस्ते, मैं आपकी आवाज़ बनूँगा।",
-    hr: "Bok, ja ću biti tvoj glas.",
-    hu: "Helló, én leszek a hangod.",
-    hy: "Բարև, ես կլինեմ ձեր ձայնը.",
-    id: "Halo, saya akan menjadi suaramu.",
-    is: "Halló, ég verð röddin þín.",
-    it: "Ciao, sarò la tua voce.",
-    ja: "こんにちは、私があなたの声になります。",
-    ka: "გამარჯობა, მე ვიქნები შენი ხმა.",
-    kk: "Сәлем, мен сенің дауысың боламын.",
-    km: "សួស្តី ខ្ញុំនឹងជាសំឡេងរបស់អ្នក។",
-    kn: "ನಮಸ್ಕಾರ, ನಾನು ನಿಮ್ಮ ಧ್ವನಿಯಾಗುತ್ತೇನೆ.",
-    ko: "안녕하세요, 제가 당신의 목소리가 되겠습니다.",
-    lo: "ສະບາຍດີ, ຂ້ອຍຈະເປັນສຽງຂອງເຈົ້າ.",
-    lt: "Sveiki, aš būsiu jūsų balsas.",
-    lv: "Sveiki, es būšu jūsu balss.",
-    mk: "Здраво, јас ќе бидам твојот глас.",
-    ml: "ഹലോ, ഞാൻ നിങ്ങളുടെ ശബ്ദമാകും.",
-    mn: "Сайн байна уу, би таны дуу хоолой болно.",
-    mr: "नमस्कार, मी तुमचा आवाज होईन.",
-    ms: "Hello, saya akan menjadi suara anda.",
-    my: "မင်္ဂလာပါ၊ ကျွန်တော် သင့်အသံ ဖြစ်ပါမယ်။",
-    nb: "Hei, jeg vil være din stemme.",
-    ne: "नमस्ते, म तपाईंको आवाज बन्नेछु।",
-    nl: "Hallo, ik zal uw stem zijn.",
-    nn: "Hei, eg vil vere di stemme.",
-    no: "Hei, jeg vil være din stemme.",
-    pa: "ਸਤ ਸ੍ਰੀ ਅਕਾਲ, ਮੈਂ ਤੁਹਾਡੀ ਆਵਾਜ਼ ਬਣਾਂਗਾ।",
-    pl: "Cześć, będę twoim głosem.",
-    pt: "Olá, eu serei sua voz.",
-    ro: "Bună, voi fi vocea ta.",
-    ru: "Здравствуйте, я буду вашим голосом.",
-    si: "ආයුබෝවන්, මම ඔබේ හඬ වේවි.",
-    sk: "Ahoj, budem tvoj hlas.",
-    sl: "Živjo, bom tvoj glas.",
-    so: "Salaan, waxaan noqon doonaa codkaaga.",
-    sq: "Përshëndetje, unë do të jem zëri yt.",
-    sr: "Здраво, ја ћу бити твој глас.",
-    sv: "Hej, jag kommer att vara din röst.",
-    sw: "Habari, nitakuwa sauti yako.",
-    ta: "வணக்கம், நான் உங்கள் குரலாக இருப்பேன்.",
-    te: "నమస్కారం, నేను మీ గొంతుకగా ఉంటాను.",
-    th: "สวัสดี ฉันจะเป็นเสียงของคุณ",
-    tr: "Merhaba, sesiniz ben olacağım.",
-    uk: "Привіт, я буду вашим голосом.",
-    ur: "ہیلو، میں آپ کی آواز بنوں گا۔",
-    uz: "Salom, men sizning ovozingiz bo'laman.",
-    vi: "Xin chào, tôi sẽ là giọng nói của bạn.",
-    zh: "你好，我将成为你的声音。",
-    zu: "Sawubona, ngizoba yizwi lakho.",
-  };
-
-  const getPreviewText = (voice: SpeechSynthesisVoice): string => {
-    const lang = voice.lang || "en";
-    const exact = lang.toLowerCase().replace("_", "-");
-    const base = exact.split("-")[0];
-    return PREVIEW_PHRASES[exact] || PREVIEW_PHRASES[base] || PREVIEW_PHRASES.en;
-  };
-
-  const playPreview = (voice: SpeechSynthesisVoice) => {
-    window.speechSynthesis.cancel();
-    const text = getPreviewText(voice);
-    const u = new SpeechSynthesisUtterance(text);
-    u.voice = voice;
-    u.lang = voice.lang;
-    u.rate = settings.speed;
-    u.volume = settings.volume;
-    window.speechSynthesis.speak(u);
-  };
-
-  const testVoice = () => {
-    window.speechSynthesis.cancel();
-    let selectedVoice: SpeechSynthesisVoice | undefined;
-    if (settings.voiceURI) {
-      selectedVoice = voices.find((v) => v.voiceURI === settings.voiceURI);
+  const playElevenLabs = useCallback(async (voice: ElevenLabsVoice) => {
+    // Stop any currently playing audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
     }
-    const text = selectedVoice ? getPreviewText(selectedVoice) : WELCOME_TEXT;
-    const u = new SpeechSynthesisUtterance(text);
-    if (selectedVoice) {
-      u.voice = selectedVoice;
-      u.lang = selectedVoice.lang;
+    setPlayingId(voice.id);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      if (!token) {
+        toast({ title: "Please sign in", description: "Voice preview requires authentication.", variant: "destructive" });
+        setPlayingId(null);
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ text: PREVIEW_TEXT, voiceId: voice.id }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`TTS failed: ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audio.volume = settings.volume;
+      audioRef.current = audio;
+
+      audio.onended = () => {
+        setPlayingId(null);
+        URL.revokeObjectURL(audioUrl);
+      };
+      audio.onerror = () => {
+        setPlayingId(null);
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      await audio.play();
+    } catch (err) {
+      console.error("ElevenLabs preview error:", err);
+      toast({ title: "Preview failed", description: "Could not play voice preview. Please try again.", variant: "destructive" });
+      setPlayingId(null);
     }
-    u.rate = settings.speed;
-    u.volume = settings.volume;
-    window.speechSynthesis.speak(u);
-  };
+  }, [settings.volume, toast]);
+
+  const testVoice = useCallback(() => {
+    const selectedVoice = settings.elevenLabsVoiceId
+      ? ELEVENLABS_VOICES.find((v) => v.id === settings.elevenLabsVoiceId)
+      : ELEVENLABS_VOICES[0]; // default to Sarah
+    if (selectedVoice) playElevenLabs(selectedVoice);
+  }, [settings.elevenLabsVoiceId, playElevenLabs]);
 
   const handleSave = () => {
     saveVoiceSettings(settings);
@@ -274,66 +177,72 @@ export default function VoiceSettingsPage() {
         </div>
       </section>
 
-      {/* Voice Picker */}
+      {/* ElevenLabs Voice Picker */}
       <section className="space-y-3">
         <h2 className="font-display text-lg font-semibold text-foreground">
           Available Voices
         </h2>
         <p className="text-sm text-muted-foreground">
-          Tap the play button to preview, then select a voice.
+          Tap the play button to preview, then select a voice. Powered by ElevenLabs — works on every device.
         </p>
-        {voices.length === 0 && (
-          <p className="text-sm text-muted-foreground italic">Loading voices from your device…</p>
-        )}
-        <div className="space-y-4 max-h-[360px] overflow-y-auto pr-1">
-          {sortedLangs.map((lang) => (
-            <div key={lang}>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                {lang}
-              </p>
-              <div className="space-y-1">
-                {groupedByLang[lang].map((voice) => {
-                  const isSelected = settings.voiceURI === voice.voiceURI;
-                  const accent = getAccentLabel(voice);
-                  return (
-                    <div
-                      key={voice.voiceURI}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all cursor-pointer ${
-                        isSelected
-                          ? "border-primary bg-primary/10"
-                          : "border-border bg-card hover:border-primary/40"
-                      }`}
-                      onClick={() => setSettings((s) => ({ ...s, voiceURI: voice.voiceURI }))}
-                      role="radio"
-                      aria-checked={isSelected}
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          setSettings((s) => ({ ...s, voiceURI: voice.voiceURI }));
-                        }
-                      }}
-                    >
-                      <button
-                        onClick={(e) => { e.stopPropagation(); playPreview(voice); }}
-                        className="shrink-0 h-8 w-8 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20 transition-colors"
-                        aria-label={`Preview ${voice.name}`}
-                      >
-                        <Play className="h-3.5 w-3.5 text-foreground" />
-                      </button>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{voice.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {accent} · {voice.lang}
-                        </p>
-                      </div>
-                      {isSelected && <Check className="h-5 w-5 text-primary shrink-0" />}
-                    </div>
-                  );
-                })}
+        <div className="space-y-1 max-h-[360px] overflow-y-auto pr-1">
+          {filteredVoices.map((voice) => {
+            const isSelected = settings.elevenLabsVoiceId === voice.id;
+            const isPlaying = playingId === voice.id;
+            return (
+              <div
+                key={voice.id}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all cursor-pointer ${
+                  isSelected
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card hover:border-primary/40"
+                }`}
+                onClick={() =>
+                  setSettings((s) => ({
+                    ...s,
+                    elevenLabsVoiceId: voice.id,
+                    elevenLabsVoiceName: voice.name,
+                  }))
+                }
+                role="radio"
+                aria-checked={isSelected}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSettings((s) => ({
+                      ...s,
+                      elevenLabsVoiceId: voice.id,
+                      elevenLabsVoiceName: voice.name,
+                    }));
+                  }
+                }}
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    playElevenLabs(voice);
+                  }}
+                  disabled={isPlaying}
+                  className="shrink-0 h-8 w-8 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20 transition-colors disabled:opacity-50"
+                  aria-label={`Preview ${voice.name}`}
+                >
+                  {isPlaying ? (
+                    <Loader2 className="h-3.5 w-3.5 text-foreground animate-spin" />
+                  ) : (
+                    <Play className="h-3.5 w-3.5 text-foreground" />
+                  )}
+                </button>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{voice.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {voice.accent} · {voice.description}
+                  </p>
+                </div>
+                {isSelected && <Check className="h-5 w-5 text-primary shrink-0" />}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -344,8 +253,14 @@ export default function VoiceSettingsPage() {
           variant="outline"
           size="lg"
           className="flex-1 rounded-2xl text-base"
+          disabled={playingId !== null}
         >
-          <Play className="h-4 w-4 mr-2" /> Test Voice
+          {playingId ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Play className="h-4 w-4 mr-2" />
+          )}
+          Test Voice
         </Button>
         <Button
           onClick={handleSave}
