@@ -183,15 +183,14 @@ export default function DistressSignal() {
     <>
       <GlitterBurst trigger={glitterCount} />
 
-      {/* Unicorn icon — always visible */}
+      {/* Safety trigger — always visible */}
       <button
         onClick={() => setPhase("verify")}
-        className="fixed bottom-4 right-4 z-50 h-12 w-12 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
-        aria-label="Safety angel — get help"
-        title="🦄"
-        style={{ fontSize: "1.75rem" }}
+        className="fixed bottom-4 right-4 z-50 h-12 w-12 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-muted/50 backdrop-blur-sm border border-border/30"
+        aria-label="Safety — get help"
+        style={{ fontSize: "1.25rem" }}
       >
-        🦄
+        🛡️
       </button>
 
       <AnimatePresence>
