@@ -35,7 +35,7 @@ function queueSignal(signal: DistressSignalData) {
 }
 
 export default function DistressSignal() {
-  const [phase, setPhase] = useState<"closed" | "verify" | "angel" | "situation" | "sent">("closed");
+  const [phase, setPhase] = useState<"closed" | "verify" | "angel" | "situation" | "sent" | "confirmed">("closed");
   const [accessInput, setAccessInput] = useState("");
   const [accessError, setAccessError] = useState(false);
   const [selectedAngel, setSelectedAngel] = useState<AngelType | null>(null);
