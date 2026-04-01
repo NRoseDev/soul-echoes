@@ -320,6 +320,15 @@ export default function DistressSignal() {
                   </div>
                 </div>
               )}
+
+              {/* CONFIRMED — unicorn appears only here */}
+              {phase === "confirmed" && (
+                <div className="space-y-6 text-center py-8">
+                  <p className="text-6xl animate-pulse">🦄</p>
+                  <p className="font-display text-lg font-bold text-foreground">Signal received.</p>
+                  <p className="text-sm text-muted-foreground">Help is on the way.</p>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
