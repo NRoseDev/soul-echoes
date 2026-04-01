@@ -68,34 +68,16 @@ export default function DistressSignal() {
     return () => window.removeEventListener("devicemotion", handleMotion);
   }, []);
 
-  // Voice trigger — listen for "angel" keyword
+  // Voice trigger — listen for global distress event from AlwaysOnVoice
   useEffect(() => {
-    if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) return;
-    const SpeechAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const recognition = new SpeechAPI();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = "en-US";
-
-    recognition.onresult = (event: any) => {
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript.toLowerCase();
-        if (transcript.includes("angel")) {
-          setPhase("verify");
-        }
+    const handleDistress = () => {
+      if (phase === "closed") {
+        setPhase("verify");
       }
     };
-
-    recognition.onerror = () => {
-      setTimeout(() => { try { recognition.start(); } catch {} }, 5000);
-    };
-    recognition.onend = () => {
-      setTimeout(() => { try { recognition.start(); } catch {} }, 1000);
-    };
-
-    try { recognition.start(); } catch {}
-    return () => { try { recognition.abort(); } catch {} };
-  }, []);
+    window.addEventListener("soul-echoes-distress-trigger", handleDistress);
+    return () => window.removeEventListener("soul-echoes-distress-trigger", handleDistress);
+  }, [phase]);
 
   const verifyAccess = useCallback(() => {
     if (!safety.setupComplete) {

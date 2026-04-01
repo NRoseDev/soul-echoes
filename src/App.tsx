@@ -16,6 +16,8 @@ import Settings from "./pages/Settings";
 import PractitionerSignup from "./pages/PractitionerSignup";
 import Pricing from "./pages/Pricing";
 import DistressSignal from "./components/DistressSignal";
+import AIGuideAnnouncer from "./components/AIGuideAnnouncer";
+import AlwaysOnVoice from "./components/AlwaysOnVoice";
 import { getPreferences } from "./lib/preferences";
 
 const queryClient = new QueryClient();
@@ -39,6 +41,8 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AIGuideAnnouncer />
+          <AlwaysOnVoice />
           <AppLayout>
             <Routes>
               <Route path="/" element={<BrainDump />} />
