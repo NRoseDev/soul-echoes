@@ -258,6 +258,39 @@ function SectionContent({ id }: { id: SectionKey }) {
         </div>
       );
 
+    case "movement":
+      return (
+        <div className="space-y-6">
+          <p className="text-muted-foreground leading-relaxed">Movement is one of the most ancient and effective ways to release emotions trapped in the body. When we experience stress, trauma, or grief, the energy often gets stuck in our muscles, fascia, and nervous system. These 11 practices help you move that energy out — no gym required, no experience needed.</p>
+          {movementContent.map((m) => (
+            <div key={m.name} className="bg-muted/40 rounded-xl p-4 space-y-3">
+              <h3 className="font-display text-lg font-bold text-foreground">{m.emoji} {m.name}</h3>
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-foreground">What it is</h4>
+                <p className="text-sm text-muted-foreground">{m.what}</p>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-foreground">Why it moves stuck emotions</h4>
+                <p className="text-sm text-muted-foreground">{m.why}</p>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-foreground">How to start as a beginner</h4>
+                <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
+                  {m.beginner.map((s, i) => <li key={i}>{s}</li>)}
+                </ol>
+              </div>
+              <Button
+                className="w-full mt-2 bg-gradient-to-r from-primary to-secondary text-primary-foreground font-display rounded-xl"
+                onClick={() => {}}
+              >
+                <CalendarCheck className="h-4 w-4 mr-2" />
+                Connect with a Healer or Teacher
+              </Button>
+            </div>
+          ))}
+        </div>
+      );
+
     case "connect-healer":
       return (
         <div className="flex flex-col items-center justify-center min-h-[40vh] space-y-6 text-center">
