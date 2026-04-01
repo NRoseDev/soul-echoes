@@ -236,6 +236,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     };
     rec.onend = () => {
       contRecActiveRef.current = false;
+      setIsListening(false);
       if (contRecRef.current === rec) setTimeout(() => startContinuousRec(), 300);
     };
     rec.onerror = (e: any) => {
