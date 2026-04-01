@@ -664,14 +664,6 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     speakSelectedVoicePreview(selectedVoice, voiceSettings);
   };
 
-  const canFinishSafety = safetyAngel && accessMethod && (
-    (accessMethod === "pin" && accessValue.length === 4) ||
-    (accessMethod === "codeword" && accessValue.length >= 2) ||
-    (accessMethod === "symbol" && selectedSymbol) ||
-    (accessMethod === "colorseq" && colorSequence.length === 3) ||
-    (accessMethod === "sign") ||
-    (accessMethod === "pattern" && accessValue.length >= 1)
-  );
 
   /* ─── Input method switcher + shared bar ─── */
   const INPUT_METHODS = [
