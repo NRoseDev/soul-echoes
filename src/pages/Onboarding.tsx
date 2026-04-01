@@ -303,7 +303,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
   // STEP 2: Language — auto-listen for speak mode
   useEffect(() => {
-    if (step !== 2) { stopContinuousRec(); return; }
+    if (step !== 2) return;
     if (!isSpeakMode) return;
 
     if (langSubStep === 0 && hasSpokenRef.current !== "lang-primary") {
@@ -322,8 +322,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       hasSpokenRef.current = "lang-sign";
       speakAsync("Would you like to enable Sign Language?").then(() => startContinuousRec());
     }
-    return () => { if (step !== 2) stopContinuousRec(); };
-  }, [step, langSubStep, wantSecondary, isSpeakMode, startContinuousRec, stopContinuousRec]);
+  }, [step, langSubStep, wantSecondary, isSpeakMode, startContinuousRec]);
 
   // STEP 3: Voice Setup — auto-listen for speak mode
   useEffect(() => {
