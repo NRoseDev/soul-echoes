@@ -332,8 +332,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       hasSpokenRef.current = "voice-setup";
       speakAsync("Choose your AI voice. Say a voice name, or say continue to skip.").then(() => startContinuousRec());
     }
-    return () => { if (step !== 3) stopContinuousRec(); };
-  }, [step, isSpeakMode, startContinuousRec, stopContinuousRec]);
+  }, [step, isSpeakMode, startContinuousRec]);
 
   // STEP 4: Communication — auto-listen
   useEffect(() => {
