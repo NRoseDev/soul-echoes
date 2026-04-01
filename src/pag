@@ -13,7 +13,7 @@ import {
 import { getVoiceSettings, saveVoiceSettings, ELEVENLABS_VOICES, type VoiceSettings } from "@/lib/voiceSettings";
 import { supabase } from "@/integrations/supabase/client";
 import ListeningIndicator from "@/components/ListeningIndicator";
-
+import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 const FLAG_LANGUAGES = [
   { code: "en", name: "English", cc: "us" },
   { code: "es", name: "Spanish", cc: "es" },
@@ -218,7 +218,10 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const handleVoiceRef = useRef<(t: string) => void>(() => {});
 
   const isSpeakMode = inputMethod === "speak";
-
+useAlwaysOnListening({
+  onTranscript: (t) => handleVoiceRef.current(t),
+  enabled: true,
+});
   const startContinuousRec = useCallback(() => {
     if (!isSpeakMode) return;
     if (contRecActiveRef.current) return;
