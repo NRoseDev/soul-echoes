@@ -221,7 +221,7 @@ export default function DistressSignal() {
               {/* VERIFY phase */}
               {phase === "verify" && (
                 <div className="space-y-6 text-center">
-                  <p className="text-2xl">🦄</p>
+                  <p className="text-2xl">🛡️</p>
                   {safety.setupComplete ? (
                     <>
                       <p className="font-display text-lg text-foreground">
