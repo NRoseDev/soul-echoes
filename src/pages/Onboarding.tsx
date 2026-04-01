@@ -315,6 +315,17 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     return () => { if (step !== 2) stopContinuousRec(); };
   }, [step, langSubStep, wantSecondary, isSpeakMode, startContinuousRec, stopContinuousRec]);
 
+  // STEP 3: Voice Setup — auto-listen for speak mode
+  useEffect(() => {
+    if (step !== 3) return;
+    if (!isSpeakMode) return;
+    if (hasSpokenRef.current !== "voice-setup") {
+      hasSpokenRef.current = "voice-setup";
+      speakAsync("Choose your AI voice. Say a voice name, or say continue to skip.").then(() => startContinuousRec());
+    }
+    return () => { if (step !== 3) stopContinuousRec(); };
+  }, [step, isSpeakMode, startContinuousRec, stopContinuousRec]);
+
   // STEP 4: Communication — auto-listen
   useEffect(() => {
     if (step !== 4 || !isSpeakMode) return;
