@@ -542,12 +542,6 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           autoReadEnabled: true,
         });
         saveVoiceSettings(voiceSettings);
-        saveSafetySettings({
-          angel: safetyAngel,
-          accessMethod: accessMethod,
-          accessValue: accessMethod === "colorseq" ? colorSequence.join(",") : accessMethod === "symbol" ? (selectedSymbol || "") : accessValue,
-          setupComplete: true,
-        });
         onComplete();
       }, 4500);
       return () => clearTimeout(timer);
