@@ -240,15 +240,6 @@ function guessGender(name: string): VoiceSettings["genderPref"] {
   return "neutral";
 }
 
-/* ─── ACCESS METHOD options ─── */
-const ACCESS_METHOD_OPTIONS: { id: AccessMethod; label: string; icon: string; desc: string; color: string }[] = [
-  { id: "pin", label: "4-Digit PIN", icon: "🔢", desc: "Type a 4-digit code", color: "hsl(210,60%,50%)" },
-  { id: "codeword", label: "Code Word", icon: "🗣️", desc: "Speak or type a secret word", color: "hsl(30,70%,50%)" },
-  { id: "symbol", label: "Personal Symbol", icon: "✨", desc: "Select your sacred symbol", color: "hsl(280,50%,50%)" },
-  { id: "colorseq", label: "Color Sequence", icon: "🎨", desc: "Choose 3 colors in order", color: "hsl(340,60%,50%)" },
-  { id: "sign", label: "Sign Gesture", icon: "🤟", desc: "Show your sign on camera", color: "hsl(140,50%,45%)" },
-  { id: "pattern", label: "Drawn Pattern", icon: "✏️", desc: "Draw your pattern", color: "hsl(45,70%,50%)" },
-];
 
 /* ─── ASL Camera Panel — always visible when open ─── */
 function ASLCameraPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
