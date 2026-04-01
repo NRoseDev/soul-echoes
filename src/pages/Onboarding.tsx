@@ -247,6 +247,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     };
     contRecRef.current = rec;
     contRecActiveRef.current = true;
+    setIsListening(true);
     rec.start();
   }, [isSpeakMode]);
 
