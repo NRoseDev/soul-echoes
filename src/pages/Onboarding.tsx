@@ -208,6 +208,8 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   // Shared
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [testingVoice, setTestingVoice] = useState(false);
   const hasSpokenRef = useRef<string>("");
 
   /* ─── Continuous Speech Recognition (only for "speak" method) ─── */
