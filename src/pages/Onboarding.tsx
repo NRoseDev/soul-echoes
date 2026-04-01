@@ -520,12 +520,12 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     }
   }, [step, speakThenListen]);
 
-  // STEP 4: Safety
+  // STEP 4: Safety info (quiet screen)
   useEffect(() => {
-    if (step === 4 && !safetyAngel) {
-      speakThenListen("Let's set up your safety angel. This is just between us. Choose Michael for protection, or Faith for inner strength.", "safety-angel");
+    if (step === 4) {
+      // No voice on this screen — it's intentionally quiet
     }
-  }, [step, safetyAngel, speakThenListen]);
+  }, [step]);
 
   // STEP 5: Confirmation
   useEffect(() => {
