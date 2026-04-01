@@ -771,7 +771,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     {FLAG_LANGUAGES.map((lang) => (
                       <button
                         key={lang.code}
-                        onClick={() => { stopContinuousRec(); setPrimaryLang(lang.code); setPendingLang(null); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Got it — ${lang.name} selected.`).then(() => setLangSubStep(1)); }}
+                        onClick={() => { stopContinuousRec(); setPrimaryLang(lang.code); setPendingLang(null); setRetryMessage(null); hasSpokenRef.current = ""; savePreferences({ primaryLanguage: lang.code }); speakAsync(`Got it — ${lang.name} selected.`).then(() => setLangSubStep(1)); }}
                         className={`flex flex-col items-center justify-center gap-1 p-3 sm:p-4 rounded-2xl border-2 transition-all ${primaryLang === lang.code ? "border-primary bg-white scale-105 shadow-lg" : "border-white/20 bg-white/90 hover:bg-white hover:border-white/50 shadow-sm"}`}
                         role="option"
                         aria-selected={primaryLang === lang.code}
