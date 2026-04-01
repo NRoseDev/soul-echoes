@@ -1074,10 +1074,6 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             </Button>
           </motion.div>
         )}
-            <p className="text-center text-muted-foreground text-sm">This is just between us. Tap, point, sign, or say your choice.</p>
-
-            {/* Angel selection */}
-            {!safetyAngel && (
               <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={() => { setSafetyAngel("michael"); speak("Michael selected. Now choose your private access method."); }}
