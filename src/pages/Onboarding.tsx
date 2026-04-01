@@ -518,6 +518,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         setPendingLang(null);
         setRetryMessage(null);
         hasSpokenRef.current = "";
+        savePreferences({ primaryLanguage: match.code });
         speakAsync(`Got it — ${match.name} selected.`).then(() => setLangSubStep(1));
       } else {
         setRetryMessage(`I heard "${t}" — try again or tap below.`);
@@ -531,6 +532,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           setSecondaryLang(match.code);
           setRetryMessage(null);
           hasSpokenRef.current = "";
+          savePreferences({ secondaryLanguage: match.code });
           speakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
         } else {
           setRetryMessage(`I heard "${t}" — say a language name or tap below.`);
@@ -558,6 +560,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             setSecondaryLang(match.code);
             setRetryMessage(null);
             hasSpokenRef.current = "";
+            savePreferences({ secondaryLanguage: match.code });
             speakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
           } else {
             setRetryMessage(`I heard "${t}". Say yes, no, or a language name.`);
@@ -770,7 +773,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                     {FLAG_LANGUAGES.map((lang) => (
                       <button
                         key={lang.code}
-                        onClick={() => { stopContinuousRec(); setPrimaryLang(lang.code); setPendingLang(null); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Got it — ${lang.name} selected.`).then(() => setLangSubStep(1)); }}
+                        onClick={() => { stopContinuousRec(); setPrimaryLang(lang.code); setPendingLang(null); setRetryMessage(null); hasSpokenRef.current = ""; savePreferences({ primaryLanguage: lang.code }); speakAsync(`Got it — ${lang.name} selected.`).then(() => setLangSubStep(1)); }}
                         className={`flex flex-col items-center justify-center gap-1 p-3 sm:p-4 rounded-2xl border-2 transition-all ${primaryLang === lang.code ? "border-primary bg-white scale-105 shadow-lg" : "border-white/20 bg-white/90 hover:bg-white hover:border-white/50 shadow-sm"}`}
                         role="option"
                         aria-selected={primaryLang === lang.code}
@@ -819,7 +822,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                       {FLAG_LANGUAGES.filter((l) => l.code !== primaryLang).map((lang) => (
                         <button
                           key={lang.code}
-                          onClick={() => { stopContinuousRec(); setSecondaryLang(lang.code); setRetryMessage(null); hasSpokenRef.current = ""; speakAsync(`Selected ${lang.name}`).then(() => setLangSubStep(2)); }}
+                          onClick={() => { stopContinuousRec(); setSecondaryLang(lang.code); setRetryMessage(null); hasSpokenRef.current = ""; savePreferences({ secondaryLanguage: lang.code }); speakAsync(`Selected ${lang.name}`).then(() => setLangSubStep(2)); }}
                           className={`flex flex-col items-center justify-center gap-1 p-3 sm:p-4 rounded-2xl border-2 transition-all ${secondaryLang === lang.code ? "border-primary bg-white scale-105 shadow-lg" : "border-white/20 bg-white/90 hover:bg-white hover:border-white/50 shadow-sm"}`}
                           role="option"
                           aria-selected={secondaryLang === lang.code}
