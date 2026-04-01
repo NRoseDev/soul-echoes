@@ -185,11 +185,13 @@ export default function DistressSignal() {
       navigator.vibrate([100, 50, 100, 50, 200]);
     }
 
+    // Show unicorn confirmation
+    setPhase("confirmed");
     setTimeout(() => {
       setPhase("closed");
       setAccessInput("");
       setSelectedAngel(null);
-    }, 1200);
+    }, 2500);
   };
 
   const situations = selectedAngel === "michael" ? MICHAEL_SITUATIONS : FAITH_SITUATIONS;
