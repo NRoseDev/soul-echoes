@@ -306,12 +306,6 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   // Communication
   const [commMethods, setCommMethods] = useState<string[]>([]);
 
-  // Safety
-  const [safetyAngel, setSafetyAngel] = useState<AngelType | null>(null);
-  const [accessMethod, setAccessMethod] = useState<AccessMethod | null>(null);
-  const [accessValue, setAccessValue] = useState("");
-  const [colorSequence, setColorSequence] = useState<string[]>([]);
-  const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null);
 
   // Voice
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
