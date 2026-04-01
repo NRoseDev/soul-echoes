@@ -571,7 +571,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 bg-gradient-to-b from-[hsl(220,60%,12%)] to-[hsl(230,50%,18%)] rounded-3xl p-4 sm:p-6">
             {/* Speak mode indicator */}
             {isSpeakMode && (
-              <ListeningIndicator visible={contRecActiveRef.current} />
+              <ListeningIndicator visible={isListening} />
             )}
             {retryMessage && <p className="text-sm text-center text-destructive" role="alert">{retryMessage}</p>}
 
