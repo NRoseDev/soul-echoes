@@ -10,6 +10,7 @@ import {
   type AngelType,
 } from "@/lib/safetySettings";
 import GlitterBurst from "@/components/GlitterBurst";
+import { encryptSignal } from "@/lib/encryption";
 import angelMichaelImg from "@/assets/angel-michael.png";
 import angelFaithImg from "@/assets/angel-faith.png";
 
