@@ -55,6 +55,7 @@ const App = () => {
               <Route path="/crisis" element={<HealingRoom />} />
               <Route path="/voice-settings" element={<VoiceSettings />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>
