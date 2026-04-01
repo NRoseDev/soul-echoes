@@ -139,8 +139,12 @@ function getSoftFemaleVoice(): SpeechSynthesisVoice | null {
 }
 
 function getPreviewText(voice?: SpeechSynthesisVoice | null) {
-  const langBase = voice?.lang?.split("-")[0]?.toLowerCase() || "en";
-  return PREVIEW_PHRASES[langBase] || PREVIEW_PHRASES.en;
+  if (!voice) return PREVIEW_PHRASES.en;
+  const lang = voice.lang || "en";
+  // Try exact match first (e.g. "zh-TW"), then base language (e.g. "zh")
+  const exact = lang.toLowerCase().replace("_", "-");
+  const base = exact.split("-")[0];
+  return PREVIEW_PHRASES[exact] || PREVIEW_PHRASES[base] || PREVIEW_PHRASES.en;
 }
 
 /* ─── TTS helpers ─── */
