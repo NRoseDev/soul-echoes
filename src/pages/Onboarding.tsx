@@ -10,7 +10,8 @@ import {
   COMMUNICATION_METHODS,
   type InputMethod,
 } from "@/lib/preferences";
-import { getVoiceSettings, saveVoiceSettings, type VoiceSettings } from "@/lib/voiceSettings";
+import { getVoiceSettings, saveVoiceSettings, ELEVENLABS_VOICES, type VoiceSettings } from "@/lib/voiceSettings";
+import { supabase } from "@/integrations/supabase/client";
 import ListeningIndicator from "@/components/ListeningIndicator";
 
 const FLAG_LANGUAGES = [
@@ -207,6 +208,8 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   // Shared
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [testingVoice, setTestingVoice] = useState(false);
   const hasSpokenRef = useRef<string>("");
 
   /* ─── Continuous Speech Recognition (only for "speak" method) ─── */
@@ -233,6 +236,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     };
     rec.onend = () => {
       contRecActiveRef.current = false;
+      setIsListening(false);
       if (contRecRef.current === rec) setTimeout(() => startContinuousRec(), 300);
     };
     rec.onerror = (e: any) => {
@@ -244,6 +248,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     };
     contRecRef.current = rec;
     contRecActiveRef.current = true;
+    setIsListening(true);
     rec.start();
   }, [isSpeakMode]);
 
@@ -251,6 +256,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     contRecRef.current?.abort();
     contRecRef.current = null;
     contRecActiveRef.current = false;
+    setIsListening(false);
   }, []);
 
   // Load voices
@@ -308,6 +314,17 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     }
     return () => { if (step !== 2) stopContinuousRec(); };
   }, [step, langSubStep, wantSecondary, isSpeakMode, startContinuousRec, stopContinuousRec]);
+
+  // STEP 3: Voice Setup — auto-listen for speak mode
+  useEffect(() => {
+    if (step !== 3) return;
+    if (!isSpeakMode) return;
+    if (hasSpokenRef.current !== "voice-setup") {
+      hasSpokenRef.current = "voice-setup";
+      speakAsync("Choose your AI voice. Say a voice name, or say continue to skip.").then(() => startContinuousRec());
+    }
+    return () => { if (step !== 3) stopContinuousRec(); };
+  }, [step, isSpeakMode, startContinuousRec, stopContinuousRec]);
 
   // STEP 4: Communication — auto-listen
   useEffect(() => {
@@ -554,7 +571,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 bg-gradient-to-b from-[hsl(220,60%,12%)] to-[hsl(230,50%,18%)] rounded-3xl p-4 sm:p-6">
             {/* Speak mode indicator */}
             {isSpeakMode && (
-              <ListeningIndicator visible={contRecActiveRef.current} />
+              <ListeningIndicator visible={isListening} />
             )}
             {retryMessage && <p className="text-sm text-center text-destructive" role="alert">{retryMessage}</p>}
 
@@ -750,7 +767,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 3: Voice Setup ─── */}
         {step === 3 && (
           <motion.div key="voice" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[80vh] overflow-y-auto">
-            {isSpeakMode && <ListeningIndicator visible={contRecActiveRef.current} />}
+            {isSpeakMode && <ListeningIndicator visible={isListening} />}
             {retryMessage && <p className="text-sm text-center text-destructive">{retryMessage}</p>}
 
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
@@ -789,37 +806,67 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               <Slider value={[voiceSettings.volume]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, volume: v }))} min={0.1} max={1} step={0.05} />
             </div>
 
-            {/* Voice list */}
+            {/* Voice list — ElevenLabs voices */}
             <div className="space-y-1 max-h-48 overflow-y-auto rounded-xl border border-border bg-card p-2">
-              {filteredVoices.length === 0 && <p className="text-sm text-muted-foreground p-3">Loading voices…</p>}
-              {filteredVoices.map((voice) => {
-                const isSelected = voiceSettings.voiceURI === voice.voiceURI;
+              {ELEVENLABS_VOICES.filter((v) => {
+                if (voiceSettings.genderPref === "neutral") return true;
+                return v.gender === voiceSettings.genderPref || v.gender === "neutral";
+              }).map((elVoice) => {
+                const isSelected = voiceSettings.elevenLabsVoiceId === elVoice.id;
                 return (
                   <div
-                    key={voice.voiceURI}
-                    onClick={() => setVoiceSettings((s) => ({ ...s, voiceURI: voice.voiceURI }))}
+                    key={elVoice.id}
+                    onClick={() => setVoiceSettings((s) => ({ ...s, elevenLabsVoiceId: elVoice.id, elevenLabsVoiceName: elVoice.name }))}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${
                       isSelected ? "bg-primary/15 border border-primary/30" : "hover:bg-muted"
                     }`}
                   >
                     <button
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation();
-                        window.speechSynthesis.cancel();
-                        const u = new SpeechSynthesisUtterance("Hello, I am here with you.");
-                        u.voice = voice;
-                        u.lang = voice.lang;
-                        u.rate = voiceSettings.speed;
-                        u.volume = voiceSettings.volume;
-                        window.speechSynthesis.speak(u);
+                        setTestingVoice(true);
+                        try {
+                          const { data: { session } } = await supabase.auth.getSession();
+                          const token = session?.access_token;
+                          if (!token) throw new Error("No auth");
+                          const response = await fetch(
+                            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+                            {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                                Authorization: `Bearer ${token}`,
+                              },
+                              body: JSON.stringify({ text: "Hello, I am here with you.", voiceId: elVoice.id }),
+                            }
+                          );
+                          if (!response.ok) throw new Error("TTS failed");
+                          const blob = await response.blob();
+                          const url = URL.createObjectURL(blob);
+                          const audio = new Audio(url);
+                          audio.volume = voiceSettings.volume;
+                          audio.onended = () => URL.revokeObjectURL(url);
+                          await audio.play();
+                        } catch {
+                          // Fallback to browser TTS
+                          window.speechSynthesis.cancel();
+                          const u = new SpeechSynthesisUtterance("Hello, I am here with you.");
+                          u.rate = voiceSettings.speed;
+                          u.volume = voiceSettings.volume;
+                          window.speechSynthesis.speak(u);
+                        } finally {
+                          setTestingVoice(false);
+                        }
                       }}
-                      className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20"
+                      disabled={testingVoice}
+                      className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20 disabled:opacity-50"
                     >
                       <Play className="h-3 w-3 text-foreground" />
                     </button>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{voice.name}</p>
-                      <p className="text-xs text-muted-foreground">{voice.lang}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{elVoice.name}</p>
+                      <p className="text-xs text-muted-foreground">{elVoice.accent} · {elVoice.description}</p>
                     </div>
                     {isSelected && <Check className="h-4 w-4 text-primary shrink-0" />}
                   </div>
@@ -829,7 +876,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
             {/* Continue */}
             <div className="flex gap-3">
-              <Button onClick={() => setStep(4)} className="flex-1 rounded-2xl">
+              <Button onClick={() => { stopContinuousRec(); setStep(4); }} className="flex-1 rounded-2xl">
                 Continue <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
@@ -839,7 +886,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* ─── STEP 4: Communication ─── */}
         {step === 4 && (
           <motion.div key="communication" {...fadeSlide} className="w-full max-w-2xl mx-auto space-y-4">
-            {isSpeakMode && <ListeningIndicator visible={contRecActiveRef.current} />}
+            {isSpeakMode && <ListeningIndicator visible={isListening} />}
             {retryMessage && <p className="text-sm text-center text-destructive">{retryMessage}</p>}
 
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
