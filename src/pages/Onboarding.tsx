@@ -275,13 +275,18 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     return () => window.speechSynthesis?.removeEventListener("voiceschanged", load);
   }, []);
 
-  /* ─── Auto-request mic when speak is chosen ─── */
+  /* ─── Auto-request mic and start listening when speak is chosen ─── */
   useEffect(() => {
     if (inputMethod !== "speak") return;
     navigator.mediaDevices.getUserMedia({ audio: true })
-      .then((stream) => stream.getTracks().forEach((t) => t.stop()))
+      .then((stream) => {
+        stream.getTracks().forEach((t) => t.stop());
+        // Start listening immediately after permission granted
+        startContinuousRec();
+      })
       .catch(() => {});
-  }, [inputMethod]);
+    return () => stopContinuousRec();
+  }, [inputMethod, startContinuousRec, stopContinuousRec]);
 
   /* ─── Step effects ─── */
 
