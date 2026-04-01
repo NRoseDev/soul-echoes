@@ -236,8 +236,13 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     };
     rec.onend = () => {
       contRecActiveRef.current = false;
-      setIsListening(false);
-      if (contRecRef.current === rec) setTimeout(() => startContinuousRec(), 300);
+      // Only hide indicator if we're NOT about to restart
+      if (contRecRef.current === rec) {
+        // Keep isListening true — we're restarting momentarily
+        setTimeout(() => startContinuousRec(), 300);
+      } else {
+        setIsListening(false);
+      }
     };
     rec.onerror = (e: any) => {
       contRecActiveRef.current = false;
@@ -270,13 +275,18 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     return () => window.speechSynthesis?.removeEventListener("voiceschanged", load);
   }, []);
 
-  /* ─── Auto-request mic when speak is chosen ─── */
+  /* ─── Auto-request mic and start listening when speak is chosen ─── */
   useEffect(() => {
     if (inputMethod !== "speak") return;
     navigator.mediaDevices.getUserMedia({ audio: true })
-      .then((stream) => stream.getTracks().forEach((t) => t.stop()))
+      .then((stream) => {
+        stream.getTracks().forEach((t) => t.stop());
+        // Start listening immediately after permission granted
+        startContinuousRec();
+      })
       .catch(() => {});
-  }, [inputMethod]);
+    return () => stopContinuousRec();
+  }, [inputMethod, startContinuousRec, stopContinuousRec]);
 
   /* ─── Step effects ─── */
 
@@ -293,7 +303,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
   // STEP 2: Language — auto-listen for speak mode
   useEffect(() => {
-    if (step !== 2) { stopContinuousRec(); return; }
+    if (step !== 2) return;
     if (!isSpeakMode) return;
 
     if (langSubStep === 0 && hasSpokenRef.current !== "lang-primary") {
@@ -312,8 +322,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       hasSpokenRef.current = "lang-sign";
       speakAsync("Would you like to enable Sign Language?").then(() => startContinuousRec());
     }
-    return () => { if (step !== 2) stopContinuousRec(); };
-  }, [step, langSubStep, wantSecondary, isSpeakMode, startContinuousRec, stopContinuousRec]);
+  }, [step, langSubStep, wantSecondary, isSpeakMode, startContinuousRec]);
 
   // STEP 3: Voice Setup — auto-listen for speak mode
   useEffect(() => {
@@ -323,8 +332,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       hasSpokenRef.current = "voice-setup";
       speakAsync("Choose your AI voice. Say a voice name, or say continue to skip.").then(() => startContinuousRec());
     }
-    return () => { if (step !== 3) stopContinuousRec(); };
-  }, [step, isSpeakMode, startContinuousRec, stopContinuousRec]);
+  }, [step, isSpeakMode, startContinuousRec]);
 
   // STEP 4: Communication — auto-listen
   useEffect(() => {
@@ -333,8 +341,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       hasSpokenRef.current = "comm-method";
       speakAsync("How do you like to communicate? Choose up to 3.").then(() => startContinuousRec());
     }
-    return () => { if (step !== 4) stopContinuousRec(); };
-  }, [step, isSpeakMode, startContinuousRec, stopContinuousRec]);
+  }, [step, isSpeakMode, startContinuousRec]);
 
   // STEP 6: Confirmation
   useEffect(() => {
