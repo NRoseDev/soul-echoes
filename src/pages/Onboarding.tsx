@@ -532,6 +532,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           setSecondaryLang(match.code);
           setRetryMessage(null);
           hasSpokenRef.current = "";
+          savePreferences({ secondaryLanguage: match.code });
           speakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
         } else {
           setRetryMessage(`I heard "${t}" — say a language name or tap below.`);
