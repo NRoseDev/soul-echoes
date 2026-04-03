@@ -45,7 +45,9 @@ serve(async (req) => {
       });
     }
 
-    const ELEVENLABS_API_KEY = (Deno.env.get("ELEVENLABS_API_KEY") || "").trim();
+    const rawKey = Deno.env.get("ELEVENLABS_API_KEY") || "";
+    // Strip any non-ASCII characters that break ByteString headers
+    const ELEVENLABS_API_KEY = rawKey.replace(/[^\x00-\x7F]/g, "").trim();
     if (!ELEVENLABS_API_KEY) {
       console.error("ELEVENLABS_API_KEY is not configured");
       return new Response(JSON.stringify({ error: "Service configuration error" }), {
