@@ -11,7 +11,7 @@ import {
   type ElevenLabsVoice,
 } from "@/lib/voiceSettings";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+
 
 const PREVIEW_TEXT = "Hello, I am here with you. Let me be your voice on this healing journey.";
 
