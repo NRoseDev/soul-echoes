@@ -7,9 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const ASL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => ({
   id: letter,
   label: letter,
-  emoji: letter,
+  img: `https://www.lifeprint.com/asl101/fingerspelling/abc-signs/${letter}.gif`,
 }));
-
 // Common ASL word cards
 const ASL_COMMON_WORDS = [
   { id: "hello", label: "Hello", emoji: "👋" },
