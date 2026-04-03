@@ -54,14 +54,15 @@ serve(async (req) => {
       });
     }
 
+    const headers = new Headers();
+    headers.set("Content-Type", "application/json");
+    headers.set("xi-api-key", ELEVENLABS_API_KEY);
+
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`,
       {
         method: "POST",
-        headers: {
-          "xi-api-key": ELEVENLABS_API_KEY,
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           text: text.trim(),
           model_id: "eleven_multilingual_v2",
