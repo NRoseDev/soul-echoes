@@ -42,31 +42,21 @@ export default function VoiceSettingsPage() {
     setPlayingId(voice.id);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-
-      if (!token) {
-        toast({ title: "Please sign in", description: "Voice preview requires authentication.", variant: "destructive" });
-        setPlayingId(null);
-        return;
-      }
-
+      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${token}`,
+            apikey: anonKey,
+            Authorization: `Bearer ${anonKey}`,
           },
           body: JSON.stringify({ text: PREVIEW_TEXT, voiceId: voice.id }),
         }
       );
 
-      if (!response.ok) {
-        throw new Error(`TTS failed: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`TTS failed: ${response.status}`);
 
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
@@ -74,20 +64,32 @@ export default function VoiceSettingsPage() {
       audio.volume = settings.volume;
       audioRef.current = audio;
 
-      audio.onended = () => {
-        setPlayingId(null);
-        URL.revokeObjectURL(audioUrl);
-      };
-      audio.onerror = () => {
-        setPlayingId(null);
-        URL.revokeObjectURL(audioUrl);
-      };
+      audio.onended = () => { setPlayingId(null); URL.revokeObjectURL(audioUrl); };
+      audio.onerror = () => { setPlayingId(null); URL.revokeObjectURL(audioUrl); };
 
       await audio.play();
     } catch (err) {
-      console.error("ElevenLabs preview error:", err);
-      toast({ title: "Preview failed", description: "Could not play voice preview. Please try again.", variant: "destructive" });
-      setPlayingId(null);
+      console.warn("ElevenLabs failed, falling back to browser voice:", err);
+      // --- Browser speechSynthesis fallback ---
+      try {
+        const synth = window.speechSynthesis;
+        synth.cancel();
+        const utterance = new SpeechSynthesisUtterance(PREVIEW_TEXT);
+        const allVoices = synth.getVoices();
+        const browserVoice = allVoices.find(v => v.name.toLowerCase().includes(voice.name.toLowerCase()))
+          || allVoices.find(v => v.lang.startsWith("en"))
+          || null;
+        if (browserVoice) utterance.voice = browserVoice;
+        utterance.rate = settings.speed;
+        utterance.volume = settings.volume;
+        utterance.onend = () => setPlayingId(null);
+        utterance.onerror = () => setPlayingId(null);
+        synth.speak(utterance);
+      } catch (fallbackErr) {
+        console.error("Browser voice fallback also failed:", fallbackErr);
+        toast({ title: "Preview failed", description: "Could not play voice preview.", variant: "destructive" });
+        setPlayingId(null);
+      }
     }
   }, [settings.volume, toast]);
 
