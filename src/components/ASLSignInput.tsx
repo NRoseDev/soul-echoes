@@ -109,7 +109,7 @@ export default function ASLSignInput({ onSend, disabled }: ASLSignInputProps) {
   }, []);
 
   const sendCard = (label: string) => {
-    if (!disabled) onSend(`[ASL Sign] ${label}`);
+  if (!disabled) { setLastSent(label); onSend(`[ASL Sign] ${label}`); }
   };
 
   const sendSpelledWord = () => {
