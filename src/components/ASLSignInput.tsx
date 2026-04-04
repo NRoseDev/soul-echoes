@@ -80,6 +80,7 @@ export default function ASLSignInput({ onSend, disabled }: ASLSignInputProps) {
   const [cameraActive, setCameraActive] = useState(false);
   const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
   const [cardTab, setCardTab] = useState("words");
+  const [lastSent, setLastSent] = useState("");
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
