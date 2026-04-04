@@ -46,33 +46,25 @@ const COMMUNICATION_METHODS = [
 export default function Onboarding() {
   const { toast } = useToast();
   
-  // Current step (1 = Welcome, 2 = Language, 3 = Voice, 4 = Communication, 5 = Safety, 6 = Done)
   const [currentStep, setCurrentStep] = useState(1);
-  
-  // User preferences
   const [language, setLanguage] = useState("en-US");
   const [voiceGender, setVoiceGender] = useState("female");
   const [accent, setAccent] = useState("us");
-  const [communicationMethods, setCommunicationMethods] = useState<string[]>(["speak"]); // Multiple methods allowed
+  const [communicationMethods, setCommunicationMethods] = useState<string[]>(["speak"]);
   const [userName, setUserName] = useState("");
-  
-  // Voice settings
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [voiceSpeed, setVoiceSpeed] = useState(0.9);
   const [voicePitch, setVoicePitch] = useState(1.1);
   
-  // Speech recognition
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  // Initialize speech synthesis and recognition
   useEffect(() => {
     if (typeof window !== "undefined") {
       synthRef.current = window.speechSynthesis;
       
-      // Initialize speech recognition
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SpeechRecognition) {
         recognitionRef.current = new SpeechRecognition();
@@ -92,7 +84,6 @@ export default function Onboarding() {
 
         recognitionRef.current.onend = () => {
           setIsListening(false);
-          // Auto-restart listening after AI speaks (continuous conversation)
           setTimeout(() => {
             if (!isSpeaking && currentStep < 6) {
               startListening();
@@ -112,14 +103,12 @@ export default function Onboarding() {
     };
   }, []);
 
-  // Update recognition language when language changes
   useEffect(() => {
     if (recognitionRef.current) {
       recognitionRef.current.lang = language;
     }
   }, [language]);
 
-  // AI speaks on every step change
   useEffect(() => {
     const messages = {
       1: "Welcome to Soul Echoes, a place to find your voice and heal your heart. Let's get started.",
@@ -136,11 +125,9 @@ export default function Onboarding() {
     }
   }, [currentStep]);
 
-  // Speak function - AI always speaks regardless of user's input method
   const speak = useCallback((text: string) => {
     if (!synthRef.current) return;
 
-    // Cancel any ongoing speech
     synthRef.current.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
@@ -149,7 +136,6 @@ export default function Onboarding() {
     utterance.pitch = voicePitch;
     utterance.volume = 1.0;
 
-    // Select voice based on user preferences
     const voices = synthRef.current.getVoices();
     const selectedVoice = voices.find(
       (voice) =>
@@ -163,7 +149,6 @@ export default function Onboarding() {
 
     utterance.onstart = () => {
       setIsSpeaking(true);
-      // Stop listening while AI is speaking
       if (recognitionRef.current && isListening) {
         recognitionRef.current.stop();
       }
@@ -172,7 +157,6 @@ export default function Onboarding() {
     utterance.onend = () => {
       setIsSpeaking(false);
       currentUtteranceRef.current = null;
-      // Auto-start listening after AI finishes speaking
       setTimeout(() => {
         if (currentStep < 6) {
           startListening();
@@ -184,7 +168,6 @@ export default function Onboarding() {
     synthRef.current.speak(utterance);
   }, [language, voiceSpeed, voicePitch, voiceGender, accent, currentStep, isListening]);
 
-  // Start listening for voice commands
   const startListening = useCallback(() => {
     if (!recognitionRef.current || isListening || isSpeaking) return;
 
@@ -196,7 +179,6 @@ export default function Onboarding() {
     }
   }, [isListening, isSpeaking]);
 
-  // Stop listening
   const stopListening = useCallback(() => {
     if (recognitionRef.current && isListening) {
       recognitionRef.current.stop();
@@ -204,11 +186,9 @@ export default function Onboarding() {
     }
   }, [isListening]);
 
-  // Handle voice commands based on current step
   const handleVoiceCommand = useCallback((command: string) => {
     console.log("Voice command received:", command);
 
-    // Step 2: Language selection
     if (currentStep === 2) {
       const matchedLang = LANGUAGES.find(
         (lang) => command.includes(lang.label.toLowerCase()) || command.includes(lang.code.toLowerCase())
@@ -221,7 +201,6 @@ export default function Onboarding() {
       }
     }
 
-    // Step 3: Voice gender selection
     if (currentStep === 3) {
       if (command.includes("male") && !command.includes("female")) {
         setVoiceGender("male");
@@ -237,7 +216,6 @@ export default function Onboarding() {
       }
     }
 
-    // Step 4: Communication methods
     if (currentStep === 4) {
       const methods: string[] = [];
       if (command.includes("speak")) methods.push("speak");
@@ -254,7 +232,6 @@ export default function Onboarding() {
       }
     }
 
-    // Step 5: Name entry
     if (currentStep === 5) {
       if (command.length > 0) {
         setUserName(command);
@@ -264,7 +241,6 @@ export default function Onboarding() {
       }
     }
 
-    // Navigation commands (work on any step)
     if (command.includes("next") || command.includes("continue")) {
       handleNext();
       return;
@@ -274,11 +250,9 @@ export default function Onboarding() {
       return;
     }
 
-    // If command not recognized, ask again
     speak("I didn't catch that. Could you repeat?");
   }, [currentStep, speak]);
 
-  // Handle Next button
   const handleNext = () => {
     if (currentStep === 2 && !language) {
       toast({ title: "Please select a language", variant: "destructive" });
@@ -300,7 +274,6 @@ export default function Onboarding() {
     if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Save preferences and complete onboarding
       localStorage.setItem("onboardingComplete", "true");
       localStorage.setItem("userPreferences", JSON.stringify({
         language,
@@ -311,18 +284,16 @@ export default function Onboarding() {
         voiceSpeed,
         voicePitch,
       }));
-      window.location.href = "/brain-dump"; // Navigate to app
+      window.location.href = "/brain-dump";
     }
   };
 
-  // Handle Back button
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
 
-  // Toggle communication method (multiple can be selected)
   const toggleCommunicationMethod = (methodId: string) => {
     setCommunicationMethods(prev => 
       prev.includes(methodId) 
@@ -338,7 +309,6 @@ export default function Onboarding() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-2xl bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl"
       >
-        {/* Progress indicator */}
         <div className="flex justify-between mb-8">
           {[1, 2, 3, 4, 5, 6].map((step) => (
             <div
@@ -360,7 +330,6 @@ export default function Onboarding() {
           ))}
         </div>
 
-        {/* Listening indicator */}
         {isListening && (
           <div className="mb-4 p-3 bg-green-500/20 rounded-lg flex items-center gap-3">
             <Mic className="w-5 h-5 text-green-400 animate-pulse" />
@@ -368,7 +337,6 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* Speaking indicator */}
         {isSpeaking && (
           <div className="mb-4 p-3 bg-blue-500/20 rounded-lg flex items-center gap-3">
             <div className="w-5 h-5 rounded-full bg-blue-400 animate-pulse"></div>
@@ -377,7 +345,6 @@ export default function Onboarding() {
         )}
 
         <AnimatePresence mode="wait">
-          {/* Step 1: Welcome */}
           {currentStep === 1 && (
             <motion.div
               key="welcome"
@@ -404,7 +371,6 @@ export default function Onboarding() {
             </motion.div>
           )}
 
-          {/* Step 2: Language Selection */}
           {currentStep === 2 && (
             <motion.div
               key="language"
@@ -438,7 +404,6 @@ export default function Onboarding() {
             </motion.div>
           )}
 
-          {/* Step 3: Voice Gender & Accent */}
           {currentStep === 3 && (
             <motion.div
               key="voice"
@@ -451,7 +416,6 @@ export default function Onboarding() {
                 Choose Your Guide's Voice
               </h2>
               
-              {/* Voice Gender */}
               <div className="space-y-3">
                 <label className="text-white font-medium">Voice Gender</label>
                 <div className="grid grid-cols-2 gap-4">
@@ -475,7 +439,6 @@ export default function Onboarding() {
                 </div>
               </div>
 
-              {/* Accent Selection */}
               <div className="space-y-3">
                 <label className="text-white font-medium">Accent</label>
                 <div className="grid grid-cols-3 gap-3">
@@ -498,7 +461,6 @@ export default function Onboarding() {
                 </div>
               </div>
 
-              {/* Voice Speed */}
               <div className="space-y-3">
                 <label className="text-white font-medium">
                   Speaking Speed: {voiceSpeed.toFixed(1)}x
@@ -513,7 +475,6 @@ export default function Onboarding() {
                 />
               </div>
 
-              {/* Test Voice Button */}
               <Button
                 onClick={() => speak("This is how I sound with your current settings.")}
                 className="w-full bg-purple-500 hover:bg-purple-600"
@@ -523,7 +484,6 @@ export default function Onboarding() {
             </motion.div>
           )}
 
-          {/* Step 4: Communication Methods */}
           {currentStep === 4 && (
             <motion.div
               key="communication"
@@ -567,7 +527,6 @@ export default function Onboarding() {
             </motion.div>
           )}
 
-          {/* Step 5: Safety & Account Setup */}
           {currentStep === 5 && (
             <motion.div
               key="safety"
@@ -600,7 +559,6 @@ export default function Onboarding() {
             </motion.div>
           )}
 
-          {/* Step 6: Complete */}
           {currentStep === 6 && (
             <motion.div
               key="complete"
@@ -619,9 +577,7 @@ export default function Onboarding() {
           )}
         </AnimatePresence>
 
-        {/* Navigation Buttons */}
         <div className="mt-8 flex justify-between items-center gap-4">
-          {/* Back Button */}
           {currentStep > 1 && currentStep < 6 && (
             <Button
               onClick={handleBack}
@@ -632,7 +588,6 @@ export default function Onboarding() {
             </Button>
           )}
 
-          {/* Voice Control Button */}
           <button
             onClick={isListening ? stopListening : startListening}
             className={`p-4 rounded-full transition-all ${
@@ -649,7 +604,6 @@ export default function Onboarding() {
             )}
           </button>
 
-          {/* Next Button */}
           {currentStep < 6 && (
             <Button
               onClick={handleNext}
@@ -660,7 +614,6 @@ export default function Onboarding() {
             </Button>
           )}
 
-          {/* Begin Button */}
           {currentStep === 6 && (
             <Button
               onClick={handleNext}
