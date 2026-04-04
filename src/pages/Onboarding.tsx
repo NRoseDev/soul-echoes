@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
+useAlwaysOnListening({
+  onTranscript: (t) => handleVoiceRef.current(t),
+  onDistress: () => setStep(6),
+  enabled: true,
+});
 
 interface AIGuideIndicatorProps {
   inputMethod?: string;
