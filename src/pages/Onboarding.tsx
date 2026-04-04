@@ -12,7 +12,6 @@ import {
 } from "@/lib/preferences";
 import { getVoiceSettings, saveVoiceSettings, ELEVENLABS_VOICES, type VoiceSettings } from "@/lib/voiceSettings";
 import ListeningIndicator from "@/components/ListeningIndicator";
-import AIGuideIndicator from "@/components/AIGuideIndicator";
 import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 
 const FLAG_LANGUAGES = [
@@ -124,10 +123,14 @@ function matchCommMethod(transcript: string): string | null {
 function ASLCameraPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
   useEffect(() => {
     if (open) {
       navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 320 }, height: { ideal: 240 } } })
-        .then((stream) => { streamRef.current = stream; if (videoRef.current) videoRef.current.srcObject = stream; })
+        .then((stream) => {
+          streamRef.current = stream;
+          if (videoRef.current) videoRef.current.srcObject = stream;
+        })
         .catch(() => {});
     } else {
       streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -135,7 +138,9 @@ function ASLCameraPanel({ open, onClose }: { open: boolean; onClose: () => void 
     }
     return () => { streamRef.current?.getTracks().forEach((t) => t.stop()); };
   }, [open]);
+
   if (!open) return null;
+
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       <div className="relative">
@@ -185,19 +190,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
   const isSpeakMode = inputMethod === "speak";
 
-  // Always-on listening active during entire onboarding
+  // Always-on listening — routes to handleVoiceRef
   useAlwaysOnListening({
     onTranscript: (t) => handleVoiceRef.current(t),
-    onDistress: () => {
-      // Save what we have and advance to safety step
-      savePreferences({
-        onboardingComplete: false,
-        primaryLanguage: primaryLang,
-        inputMethod: inputMethod || "type",
-        communicationMethods: commMethods.length > 0 ? commMethods : [inputMethod || "type"],
-      });
-      window.dispatchEvent(new CustomEvent("soul-echoes-distress-trigger"));
-    },
     enabled: true,
   });
 
@@ -218,12 +213,18 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     };
     rec.onend = () => {
       contRecActiveRef.current = false;
-      if (contRecRef.current === rec) setTimeout(() => startContinuousRec(), 300);
-      else setIsListening(false);
+      if (contRecRef.current === rec) {
+        setTimeout(() => startContinuousRec(), 300);
+      } else {
+        setIsListening(false);
+      }
     };
     rec.onerror = (e: any) => {
       contRecActiveRef.current = false;
-      if (e.error === "not-allowed" || e.error === "network") { contRecRef.current = null; return; }
+      if (e.error === "not-allowed" || e.error === "network") {
+        contRecRef.current = null;
+        return;
+      }
     };
     contRecRef.current = rec;
     contRecActiveRef.current = true;
@@ -286,7 +287,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     if (step !== 4 || !isSpeakMode) return;
     if (hasSpokenRef.current !== "comm-method") {
       hasSpokenRef.current = "comm-method";
-      speakAsync("How do you like to communicate? You can choose all that apply. Say select all for everything.").then(() => startContinuousRec());
+      speakAsync("How do you like to communicate? You can choose all that apply.").then(() => startContinuousRec());
     }
   }, [step, isSpeakMode, startContinuousRec]);
 
@@ -322,7 +323,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           hasSpokenRef.current = "";
           savePreferences({ primaryLanguage: match.code });
           speakAsync(`Got it — ${match.name} selected.`).then(() => setLangSubStep(1));
-        } else { setRetryMessage(`I heard "${t}" — try again.`); }
+        } else {
+          setRetryMessage(`I heard "${t}" — try again.`);
+        }
       } else if (langSubStep === 1) {
         if (wantSecondary === true) {
           const match = matchLanguage(t);
@@ -333,7 +336,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             hasSpokenRef.current = "";
             savePreferences({ secondaryLanguage: match.code });
             speakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
-          } else { setRetryMessage(`I heard "${t}" — say a language name.`); }
+          } else {
+            setRetryMessage(`I heard "${t}" — say a language name.`);
+          }
         } else {
           const yn = matchYesNo(t);
           if (yn === true) { setWantSecondary(true); setRetryMessage(null); hasSpokenRef.current = ""; }
@@ -341,18 +346,23 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           else {
             const match = matchLanguage(t);
             if (match) {
-              stopContinuousRec(); setWantSecondary(true); setSecondaryLang(match.code);
-              setRetryMessage(null); hasSpokenRef.current = "";
+              stopContinuousRec();
+              setWantSecondary(true);
+              setSecondaryLang(match.code);
+              setRetryMessage(null);
+              hasSpokenRef.current = "";
               savePreferences({ secondaryLanguage: match.code });
               speakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
-            } else { setRetryMessage(`I heard "${t}". Say yes, no, or a language.`); }
+            } else {
+              setRetryMessage(`I heard "${t}". Say yes, no, or a language.`);
+            }
           }
         }
       } else if (langSubStep === 2) {
         const yn = matchYesNo(t);
         if (yn === true) { stopContinuousRec(); setSignLanguage(true); setStep(3); }
         else if (yn === false) { stopContinuousRec(); setSignLanguage(false); setStep(3); }
-        else { setRetryMessage(`I heard "${t}". Say yes or no.`); }
+        else setRetryMessage(`I heard "${t}". Say yes or no.`);
       }
     } else if (step === 3) {
       if (["continue", "next", "skip"].some((w) => lower.includes(w))) { stopContinuousRec(); setStep(4); return; }
@@ -360,7 +370,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       if (matchingVoice) {
         setVoiceSettings((s) => ({ ...s, elevenLabsVoiceId: matchingVoice.id, elevenLabsVoiceName: matchingVoice.name }));
         setRetryMessage(null);
-      } else { setRetryMessage(`I heard "${t}" — say a voice name or "continue".`); }
+      } else {
+        setRetryMessage(`I heard "${t}" — say a voice name or "continue".`);
+      }
     } else if (step === 4) {
       if (["all", "select all", "everything", "all of them"].some((w) => lower.includes(w))) {
         setCommMethods(COMMUNICATION_METHODS.map((m) => m.id));
@@ -381,7 +393,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
   const toggleComm = (id: string) => {
     setRetryMessage(null);
-    setCommMethods((prev) => prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]);
+    setCommMethods((prev) =>
+      prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]
+    );
   };
 
   const getLangName = (code: string) => WORLD_LANGUAGES.find((l) => l.code === code)?.name || code;
@@ -448,9 +462,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex items-center justify-center p-4 overflow-y-auto" role="main" aria-label="Soul Echoes Onboarding">
-     <AIGuideIndicator inputMethod={inputMethod || "speak"} currentRoom="onboarding" />
       <AnimatePresence mode="wait">
 
+        {/* STEP 0: Input Method */}
         {step === 0 && (
           <motion.div key="input-method" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-6 text-center">
             <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">How would you like to interact?</h1>
@@ -471,6 +485,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           </motion.div>
         )}
 
+        {/* STEP 1: Welcome */}
         {step === 1 && (
           <motion.div key="welcome" {...fadeSlide} className="text-center max-w-2xl mx-auto space-y-8 cursor-pointer"
             onClick={() => setStep(2)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && setStep(2)}>
@@ -484,6 +499,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           </motion.div>
         )}
 
+        {/* STEP 2: Language */}
         {step === 2 && (
           <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 bg-gradient-to-b from-[hsl(220,60%,12%)] to-[hsl(230,50%,18%)] rounded-3xl p-4 sm:p-6">
             {isSpeakMode && <ListeningIndicator visible={isListening} />}
@@ -495,6 +511,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 <p className="text-sm text-muted-foreground">Connect your AAC device, eye gaze tracker, or external communication equipment via Bluetooth or USB.</p>
               </div>
             )}
+
             {langSubStep === 0 && (
               <div className="space-y-3">
                 <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">What is your primary language?</h2>
@@ -529,6 +546,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 )}
               </div>
             )}
+
             {langSubStep === 1 && (
               <div className="space-y-4">
                 <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">Would you like to add a second language?</h2>
@@ -575,6 +593,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 )}
               </div>
             )}
+
             {langSubStep === 2 && (
               <div className="space-y-6">
                 <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">Would you like to enable Sign Language?</h2>
@@ -592,12 +611,14 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           </motion.div>
         )}
 
+        {/* STEP 3: Voice Setup */}
         {step === 3 && (
           <motion.div key="voice" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[80vh] overflow-y-auto">
             {isSpeakMode && <ListeningIndicator visible={isListening} />}
             {retryMessage && <p className="text-sm text-center text-destructive">{retryMessage}</p>}
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">Choose Your AI Voice</h2>
             <p className="text-center text-muted-foreground text-sm">Pick the voice Soul Echoes will use to speak to you.</p>
+
             <div className="flex gap-3">
               {(["feminine", "masculine", "neutral"] as const).map((g) => {
                 const gIcons = { feminine: "♀️", masculine: "♂️", neutral: "⚧️" };
@@ -610,14 +631,17 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 );
               })}
             </div>
+
             <div className="space-y-2">
               <p className="text-sm font-medium text-foreground">Speed — {voiceSettings.speed <= 0.75 ? "Slow 🐢" : voiceSettings.speed >= 1.25 ? "Fast 🐇" : "Normal"}</p>
               <Slider value={[voiceSettings.speed]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, speed: v }))} min={0.5} max={1.5} step={0.1} />
             </div>
+
             <div className="space-y-2">
               <p className="text-sm font-medium text-foreground">Volume — {voiceSettings.volume <= 0.35 ? "Soft 🔈" : voiceSettings.volume >= 0.75 ? "Loud 🔊" : "Medium 🔉"}</p>
               <Slider value={[voiceSettings.volume]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, volume: v }))} min={0.1} max={1} step={0.05} />
             </div>
+
             <div className="space-y-1 max-h-48 overflow-y-auto rounded-xl border border-border bg-card p-2">
               {ELEVENLABS_VOICES.filter((v) => {
                 if (voiceSettings.genderPref === "neutral") return true;
@@ -640,26 +664,30 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 );
               })}
             </div>
+
             <Button onClick={() => { stopContinuousRec(); setStep(4); }} className="w-full rounded-2xl">
-              Continue <ChevronRight className="ml-2 h-5 w-5" />
+              Continue <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </motion.div>
         )}
 
-        {/* STEP 4: Communication Methods */}
+        {/* STEP 4: Communication */}
         {step === 4 && (
-          <motion.div key="comm" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4">
+          <motion.div key="communication" {...fadeSlide} className="w-full max-w-2xl mx-auto space-y-4">
             {isSpeakMode && <ListeningIndicator visible={isListening} />}
             {retryMessage && <p className="text-sm text-center text-destructive">{retryMessage}</p>}
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">How do you communicate?</h2>
-            <p className="text-center text-muted-foreground text-sm">Select all that apply. These help us tailor your experience.</p>
-            <div className="space-y-2">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">How do you like to communicate?</h2>
+            <p className="text-center text-muted-foreground text-sm">Choose all that apply — you can use any method at any time.</p>
+            <button onClick={() => setCommMethods(COMMUNICATION_METHODS.map((m) => m.id))}
+              className="mx-auto block text-sm text-primary underline underline-offset-2">
+              Select All
+            </button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {COMMUNICATION_METHODS.map((method) => {
                 const selected = commMethods.includes(method.id);
                 return (
-                  <button key={method.id}
-                    onClick={() => setCommMethods((prev) => selected ? prev.filter((m) => m !== method.id) : [...prev, method.id])}
-                    className={`w-full flex items-center gap-4 px-5 py-5 rounded-2xl border-2 text-left text-base font-medium transition-all ${selected ? "border-primary bg-primary/10 text-foreground shadow-md" : "border-border bg-card text-foreground hover:border-primary/50"}`}
+                  <button key={method.id} onClick={() => toggleComm(method.id)}
+                    className={`flex items-center gap-4 px-5 py-5 rounded-2xl border-2 text-left text-base font-medium transition-all ${selected ? "border-primary bg-primary/10 text-foreground shadow-md" : "border-border bg-card text-foreground hover:border-primary/50"}`}
                     style={{ borderLeftWidth: 5, borderLeftColor: method.color }}>
                     <span className="text-3xl">{method.picture}</span>
                     <span className="flex-1">{method.label}</span>
