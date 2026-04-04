@@ -46,8 +46,10 @@ export default function BrainDump() {
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const listenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
   const { speak: ttsSpeak, stop: ttsStop, speaking: ttsSpeaking } = useTTS();
   const prefs = getPreferences();
@@ -97,21 +99,36 @@ export default function BrainDump() {
     textareaRef.current?.focus();
   }, [isLoading, messages, autoRead, ttsSpeak, toast]);
 
-  // Auto-listen when speak tab is active
   const speech = useSpeechRecognition({
     onResult: (transcript) => {
+      setIsListening(false);
       send(transcript);
     },
-    continuous: true,
+    continuous: false,
   });
 
+  const startListening = useCallback(() => {
+    if (isLoading) return;
+    setIsListening(true);
+    speech.start(prefs.primaryLanguage);
+  }, [isLoading, speech, prefs.primaryLanguage]);
+
+  const stopListening = useCallback(() => {
+    setIsListening(false);
+    speech.stop();
+  }, [speech]);
+
+  // When speak tab becomes active, start listening after a short delay
   useEffect(() => {
+    if (listenTimerRef.current) clearTimeout(listenTimerRef.current);
     if (activeTab === "speak") {
-      speech.start(prefs.primaryLanguage);
+      listenTimerRef.current = setTimeout(() => startListening(), 800);
     } else {
-      speech.stop();
+      stopListening();
     }
-    return () => { speech.stop(); };
+    return () => {
+      if (listenTimerRef.current) clearTimeout(listenTimerRef.current);
+    };
   }, [activeTab]);
 
   useEffect(() => {
@@ -170,10 +187,13 @@ export default function BrainDump() {
         return (
           <div className="px-4 py-4 space-y-3">
             <div className="flex flex-col items-center gap-3">
-              <ListeningIndicator visible={speech.listening} />
-              {speech.listening ? (
+              <ListeningIndicator visible={isListening} />
+              <p className="text-sm text-muted-foreground text-center">
+                {isListening ? "Listening… speak your answer or tap to select" : "Tap to start speaking"}
+              </p>
+              {isListening ? (
                 <Button
-                  onClick={() => speech.stop()}
+                  onClick={stopListening}
                   size="lg"
                   variant="destructive"
                   className="rounded-2xl px-8 gap-2"
@@ -182,7 +202,7 @@ export default function BrainDump() {
                 </Button>
               ) : (
                 <Button
-                  onClick={() => speech.start(prefs.primaryLanguage)}
+                  onClick={startListening}
                   size="lg"
                   className="rounded-2xl px-8 gap-2"
                   disabled={isLoading}
