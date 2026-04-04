@@ -54,7 +54,23 @@ const ASL_FEELINGS = [
   { id: "ashamed", label: "Ashamed", emoji: "😔" },
   { id: "safe-feeling", label: "Safe", emoji: "🛡️" },
 ];
-
+function AISignResponse({ word }: { word: string }) {
+  const letters = word.toUpperCase().replace(/[^A-Z]/g, "").split("");
+  if (letters.length === 0) return null;
+  return (
+    <div className="rounded-xl border border-border bg-card p-3 space-y-2">
+      <p className="text-xs text-muted-foreground text-center">AI signing: <span className="text-foreground font-medium">{word}</span></p>
+      <div className="flex flex-wrap gap-1 justify-center">
+        {letters.map((letter, i) => (
+          <div key={i} className="flex flex-col items-center">
+            <img src={`https://www.lifeprint.com/asl101/fingerspelling/abc-signs/${letter.toLowerCase()}.gif`} alt={letter} className="h-10 w-10 object-contain" />
+            <span className="text-[10px] text-muted-foreground">{letter}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 interface ASLSignInputProps {
   onSend: (text: string) => void;
   disabled?: boolean;
