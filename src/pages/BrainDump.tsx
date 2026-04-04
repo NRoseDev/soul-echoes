@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Loader2, Mic, MicOff, Volume2, VolumeX, Hand } from "lucide-react";
+import { Send, Loader2, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,12 +28,13 @@ const prompts = [
   "I'm feeling overwhelmed",
 ];
 
-// Map comm method IDs to tab labels and icons
 const COMM_TABS: Record<string, { label: string; icon: string }> = {
   speak: { label: "Speak It", icon: "🗣️" },
   sign: { label: "Sign It", icon: "🤟" },
+  point: { label: "Point It", icon: "👆" },
   pictures: { label: "Point It", icon: "👆" },
   type: { label: "Type It", icon: "⌨️" },
+  connect: { label: "Connect Device", icon: "🔌" },
   device: { label: "Connect Device", icon: "🔌" },
   colors: { label: "Colors & Symbols", icon: "🎨" },
   braille: { label: "Braille", icon: "⠿" },
@@ -58,18 +59,7 @@ export default function BrainDump() {
 
   const [activeTab, setActiveTab] = useState(activeMethods[0]);
 
-  // Speech recognition for "Speak It" tab
-  const speech = useSpeechRecognition({
-    onResult: (transcript) => {
-      send(transcript);
-    },
-  });
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
-
-  const send = async (text: string) => {
+  const send = useCallback(async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || isLoading) return;
 
@@ -105,7 +95,28 @@ export default function BrainDump() {
     });
 
     textareaRef.current?.focus();
-  };
+  }, [isLoading, messages, autoRead, ttsSpeak, toast]);
+
+  // Auto-listen when speak tab is active
+  const speech = useSpeechRecognition({
+    onResult: (transcript) => {
+      send(transcript);
+    },
+    continuous: true,
+  });
+
+  useEffect(() => {
+    if (activeTab === "speak") {
+      speech.start(prefs.primaryLanguage);
+    } else {
+      speech.stop();
+    }
+    return () => { speech.stop(); };
+  }, [activeTab]);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -119,9 +130,107 @@ export default function BrainDump() {
     ttsSpeak(text);
   };
 
+  function renderInputMethod(method: string) {
+    switch (method) {
+      case "type":
+      case "braille":
+      case "aac":
+      case "eyetrack":
+        return (
+          <div className="px-4 py-3">
+            <form
+              onSubmit={(e) => { e.preventDefault(); send(input); }}
+              className="flex gap-2 items-end max-w-3xl mx-auto"
+            >
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Let it out… type what's on your mind"
+                className="min-h-[48px] max-h-[160px] resize-none bg-card border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary text-base"
+                rows={1}
+                aria-label="Type your message"
+                disabled={isLoading}
+              />
+              <Button
+                type="submit"
+                size="icon"
+                disabled={!input.trim() || isLoading}
+                className="shrink-0 h-12 w-12 rounded-xl"
+                aria-label="Send message"
+              >
+                <Send className="h-5 w-5" />
+              </Button>
+            </form>
+          </div>
+        );
+
+      case "speak":
+        return (
+          <div className="px-4 py-4 space-y-3">
+            <div className="flex flex-col items-center gap-3">
+              <ListeningIndicator visible={speech.listening} />
+              {speech.listening ? (
+                <Button
+                  onClick={() => speech.stop()}
+                  size="lg"
+                  variant="destructive"
+                  className="rounded-2xl px-8 gap-2"
+                >
+                  <MicOff className="h-5 w-5" /> Stop Listening
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => speech.start(prefs.primaryLanguage)}
+                  size="lg"
+                  className="rounded-2xl px-8 gap-2"
+                  disabled={isLoading}
+                >
+                  <Mic className="h-5 w-5" /> Tap to Speak
+                </Button>
+              )}
+              {speech.transcript && (
+                <p className="text-sm text-muted-foreground text-center">
+                  Heard: "{speech.transcript}"
+                </p>
+              )}
+            </div>
+          </div>
+        );
+
+      case "sign":
+        return <ASLSignInput onSend={send} disabled={isLoading} />;
+
+      case "point":
+      case "pictures":
+        return <PointToItCards onSend={send} disabled={isLoading} />;
+
+      case "colors":
+        return <ColorSymbolCanvas onSend={send} disabled={isLoading} />;
+
+      case "connect":
+      case "device":
+        return (
+          <div className="px-4 py-6 text-center space-y-2">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+              🔌 Connect your AAC device, eye gaze tracker, or external communication equipment via Bluetooth or USB.
+            </p>
+            <p className="text-xs text-muted-foreground/60 italic">Device pairing coming soon.</p>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="px-4 py-4 text-center text-sm text-muted-foreground">
+            This input method is coming soon.
+          </div>
+        );
+    }
+  }
+
   return (
     <div className="flex flex-col h-full">
-      {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-4" role="log" aria-label="Conversation" aria-live="polite">
         <AnimatePresence initial={false}>
           {messages.map((msg, i) => (
@@ -169,14 +278,13 @@ export default function BrainDump() {
         )}
       </div>
 
-      {/* Quick prompts */}
       {messages.length === 1 && (
         <div className="px-4 pb-3 flex flex-wrap gap-2" role="group" aria-label="Suggested prompts">
           {prompts.map((p) => (
             <button
               key={p}
               onClick={() => send(p)}
-              className="text-xs px-3 py-1.5 rounded-full border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+              className="text-xs px-3 py-1.5 rounded-full border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             >
               {p}
             </button>
@@ -184,17 +292,11 @@ export default function BrainDump() {
         </div>
       )}
 
-      {/* Communication tabs */}
       <div className="border-t border-border bg-background">
-        {/* Auto-read toggle */}
         <div className="flex items-center justify-end px-4 pt-2">
           <button
-            onClick={() => {
-              setAutoRead(!autoRead);
-              if (ttsSpeaking) ttsStop();
-            }}
+            onClick={() => { setAutoRead(!autoRead); if (ttsSpeaking) ttsStop(); }}
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            aria-label={autoRead ? "Turn off auto-read" : "Turn on auto-read"}
           >
             {autoRead ? <Volume2 className="h-3 w-3" /> : <VolumeX className="h-3 w-3" />}
             {autoRead ? "Auto-read on" : "Auto-read off"}
@@ -211,7 +313,6 @@ export default function BrainDump() {
                 </TabsTrigger>
               ))}
             </TabsList>
-
             {activeMethods.map((m) => (
               <TabsContent key={m} value={m} className="mt-0">
                 {renderInputMethod(m)}
@@ -224,101 +325,4 @@ export default function BrainDump() {
       </div>
     </div>
   );
-
-  function renderInputMethod(method: string) {
-    switch (method) {
-      case "type":
-      case "braille":
-      case "aac":
-      case "eyetrack":
-        return (
-          <div className="px-4 py-3">
-            <form
-              onSubmit={(e) => { e.preventDefault(); send(input); }}
-              className="flex gap-2 items-end max-w-3xl mx-auto"
-            >
-              <Textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Let it out… type what's on your mind"
-                className="min-h-[48px] max-h-[160px] resize-none bg-card border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary text-base"
-                rows={1}
-                aria-label="Type your message"
-                disabled={isLoading}
-              />
-              <Button
-                type="submit"
-                size="icon"
-                disabled={!input.trim() || isLoading}
-                className="shrink-0 h-12 w-12 rounded-xl"
-                aria-label="Send message"
-              >
-                <Send className="h-5 w-5" />
-              </Button>
-            </form>
-          </div>
-        );
-
-      case "speak":
-        return (
-          <div className="px-4 py-4 space-y-3">
-            <div className="flex flex-col items-center gap-3">
-              <ListeningIndicator visible={speech.listening} />
-              {!speech.listening ? (
-                <Button
-                  onClick={() => speech.start(prefs.primaryLanguage)}
-                  size="lg"
-                  className="rounded-2xl px-8 gap-2"
-                  disabled={isLoading}
-                >
-                  <Mic className="h-5 w-5" /> Tap to Speak
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => speech.stop()}
-                  size="lg"
-                  variant="destructive"
-                  className="rounded-2xl px-8 gap-2"
-                >
-                  <MicOff className="h-5 w-5" /> Stop
-                </Button>
-              )}
-              {speech.transcript && (
-                <p className="text-sm text-muted-foreground text-center">
-                  Heard: "{speech.transcript}"
-                </p>
-              )}
-            </div>
-          </div>
-        );
-
-      case "sign":
-        return <ASLSignInput onSend={send} disabled={isLoading} />;
-
-      case "pictures":
-        return <PointToItCards onSend={send} disabled={isLoading} />;
-
-      case "colors":
-        return <ColorSymbolCanvas onSend={send} disabled={isLoading} />;
-
-      case "device":
-        return (
-          <div className="px-4 py-6 text-center space-y-2">
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
-              🔌 Connect your AAC device, eye gaze tracker, or external communication equipment via Bluetooth or USB.
-            </p>
-            <p className="text-xs text-muted-foreground/60 italic">Device pairing coming soon.</p>
-          </div>
-        );
-
-      default:
-        return (
-          <div className="px-4 py-4 text-center text-sm text-muted-foreground">
-            This input method is coming soon.
-          </div>
-        );
-    }
-  }
 }
