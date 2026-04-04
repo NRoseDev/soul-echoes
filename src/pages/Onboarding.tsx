@@ -12,6 +12,7 @@ import {
 } from "@/lib/preferences";
 import { getVoiceSettings, saveVoiceSettings, ELEVENLABS_VOICES, type VoiceSettings } from "@/lib/voiceSettings";
 import ListeningIndicator from "@/components/ListeningIndicator";
+import AIGuideIndicator from "@/components/AIGuideIndicator";
 import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 
 const FLAG_LANGUAGES = [
@@ -447,6 +448,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-background flex items-center justify-center p-4 overflow-y-auto" role="main" aria-label="Soul Echoes Onboarding">
+     <AIGuideIndicator inputMethod={inputMethod || "speak"} currentRoom="onboarding" />
       <AnimatePresence mode="wait">
 
         {step === 0 && (
