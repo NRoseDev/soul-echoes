@@ -1,630 +1,243 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ChevronRight, Mic, MicOff } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
-import { useToast } from "@/hooks/use-toast";
+import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 
-const LANGUAGES = [
-  { code: "en-US", label: "English (US)", flag: "🇺🇸" },
-  { code: "en-GB", label: "English (UK)", flag: "🇬🇧" },
-  { code: "es-ES", label: "Español", flag: "🇪🇸" },
-  { code: "fr-FR", label: "Français", flag: "🇫🇷" },
-  { code: "de-DE", label: "Deutsch", flag: "🇩🇪" },
-  { code: "it-IT", label: "Italiano", flag: "🇮🇹" },
-  { code: "pt-BR", label: "Português", flag: "🇧🇷" },
-  { code: "zh-CN", label: "中文", flag: "🇨🇳" },
-  { code: "ja-JP", label: "日本語", flag: "🇯🇵" },
-  { code: "ko-KR", label: "한국어", flag: "🇰🇷" },
-  { code: "ar-SA", label: "العربية", flag: "🇸🇦" },
-  { code: "hi-IN", label: "हिन्दी", flag: "🇮🇳" },
-];
+interface AIGuideIndicatorProps {
+  inputMethod?: string;
+  currentRoom?: string;
+  onNavigate?: (path: string) => void;
+  onDistress?: () => void;
+}
 
-const VOICE_GENDERS = [
-  { id: "female", label: "Female Voice", icon: "👩" },
-  { id: "male", label: "Male Voice", icon: "👨" },
-];
+type IndicatorState = "idle" | "suggest" | "important" | "distress";
 
-const ACCENTS = [
-  { id: "us", label: "US", region: "en-US" },
-  { id: "uk", label: "UK", region: "en-GB" },
-  { id: "australian", label: "Australian", region: "en-AU" },
-  { id: "indian", label: "Indian", region: "en-IN" },
-  { id: "irish", label: "Irish", region: "en-IE" },
-  { id: "scottish", label: "Scottish", region: "en-GB" },
-];
+const ROOM_SUGGESTIONS: Record<string, { text: string; card: string; emoji: string }[]> = {
+  "/": [
+    { text: "Would you like to breathe first?", card: "Take me to Breathe", emoji: "🌬️" },
+    { text: "Ready to do some shadow work?", card: "Take me to Shadow Work", emoji: "🌑" },
+    { text: "Something unspoken? I can help.", card: "Take me to Unspoken", emoji: "🌊" },
+  ],
+  "/breathe": [
+    { text: "Great work. Want to journal this?", card: "Take me to Journal", emoji: "📓" },
+    { text: "Ready to go deeper?", card: "Connect to a Healer", emoji: "💆" },
+  ],
+  "/shadow-work": [
+    { text: "Heavy work. Want to breathe?", card: "Take me to Breathe", emoji: "🌬️" },
+    { text: "Want support from a healer?", card: "Connect to a Healer", emoji: "💆" },
+  ],
+  "/journal": [
+    { text: "Want to explore this deeper?", card: "Take me to Shadow Work", emoji: "🌑" },
+    { text: "Need support?", card: "Connect to a Healer", emoji: "💆" },
+  ],
+  "/unspoken": [
+    { text: "Want to breathe through this?", card: "Take me to Breathe", emoji: "🌬️" },
+    { text: "Ready for healer support?", card: "Connect to a Healer", emoji: "💆" },
+  ],
+};
 
-const COMMUNICATION_METHODS = [
-  { id: "speak", label: "Speak It", icon: "🗣️", description: "Use your voice" },
-  { id: "type", label: "Type It", icon: "⌨️", description: "Type your responses" },
-  { id: "point", label: "Point It", icon: "👆", description: "Tap visual cards" },
-  { id: "sign", label: "Sign It", icon: "🤟", description: "Use sign language" },
-  { id: "device", label: "Connect Device", icon: "📱", description: "AAC device" },
-];
+const DISTRESS_CARD = {
+  text: "I'm here. You are safe. Do you need help?",
+  card: "Get Crisis Support",
+  emoji: "🆘",
+};
 
-export default function Onboarding() {
-  const { toast } = useToast();
-  
-  const [currentStep, setCurrentStep] = useState(1);
-  const [language, setLanguage] = useState("en-US");
-  const [voiceGender, setVoiceGender] = useState("female");
-  const [accent, setAccent] = useState("us");
-  const [communicationMethods, setCommunicationMethods] = useState<string[]>(["speak"]);
-  const [userName, setUserName] = useState("");
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [voiceSpeed, setVoiceSpeed] = useState(0.9);
-  const [voicePitch, setVoicePitch] = useState(1.1);
-  
-  const recognitionRef = useRef<any>(null);
-  const synthRef = useRef<SpeechSynthesis | null>(null);
-  const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+export default function AIGuideIndicator({
+  inputMethod = "speak",
+  currentRoom = "/",
+  onNavigate,
+  onDistress,
+}: AIGuideIndicatorProps) {
+  const [indicatorState, setIndicatorState] = useState<IndicatorState>("idle");
+  const [expanded, setExpanded] = useState(false);
+  const [currentSuggestion, setCurrentSuggestion] = useState<{
+    text: string;
+    card: string;
+    emoji: string;
+  } | null>(null);
+  const [spokenResponse, setSpokenResponse] = useState<string | null>(null);
+  const suggestionIndexRef = useRef(0);
+  const suggestionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasDistressRef = useRef(false);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      synthRef.current = window.speechSynthesis;
-      
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = false;
-        recognitionRef.current.interimResults = false;
-        recognitionRef.current.lang = language;
-
-        recognitionRef.current.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript.toLowerCase().trim();
-          handleVoiceCommand(transcript);
-        };
-
-        recognitionRef.current.onerror = (event: any) => {
-          console.error("Speech recognition error:", event.error);
-          setIsListening(false);
-        };
-
-        recognitionRef.current.onend = () => {
-          setIsListening(false);
-          setTimeout(() => {
-            if (!isSpeaking && currentStep < 6) {
-              startListening();
-            }
-          }, 500);
-        };
-      }
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      if (synthRef.current) {
-        synthRef.current.cancel();
-      }
-    };
+  // speak helper
+  const speak = useCallback((text: string) => {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.9;
+    u.pitch = 1.1;
+    window.speechSynthesis.speak(u);
   }, []);
 
+  // rotate suggestions every 2 minutes
   useEffect(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.lang = language;
-    }
-  }, [language]);
-
-  useEffect(() => {
-    const messages = {
-      1: "Welcome to Soul Echoes, a place to find your voice and heal your heart. Let's get started.",
-      2: "What language would you like the app in? Say or tap your choice.",
-      3: `Great! Now, would you like a male or female voice to guide you?`,
-      4: "You can communicate with me in many ways. All methods are always available. Which do you prefer right now? You can change anytime.",
-      5: "Almost done! Let's set up your account for safety. What should I call you?",
-      6: "Perfect! You're all set. Let's begin your healing journey.",
+    const suggestions = ROOM_SUGGESTIONS[currentRoom] || ROOM_SUGGESTIONS["/"];
+    suggestionTimerRef.current = setTimeout(() => {
+      const idx = suggestionIndexRef.current % suggestions.length;
+      setCurrentSuggestion(suggestions[idx]);
+      suggestionIndexRef.current++;
+      setIndicatorState("suggest");
+    }, 120000);
+    return () => {
+      if (suggestionTimerRef.current) clearTimeout(suggestionTimerRef.current);
     };
+  }, [currentRoom]);
 
-    const message = messages[currentStep as keyof typeof messages];
-    if (message) {
-      speak(message);
-    }
-  }, [currentStep]);
+  // handle distress
+  const handleDistress = useCallback(() => {
+    if (hasDistressRef.current) return;
+    hasDistressRef.current = true;
+    setIndicatorState("distress");
+    setCurrentSuggestion(DISTRESS_CARD);
+    setExpanded(true);
+    onDistress?.();
+    if (inputMethod === "speak") speak(DISTRESS_CARD.text);
+  }, [inputMethod, onDistress, speak]);
 
-  const speak = useCallback((text: string) => {
-    if (!synthRef.current) return;
+  // handle transcript
+  const handleTranscript = useCallback((transcript: string) => {
+    const lower = transcript.toLowerCase().trim();
+    const suggestions = ROOM_SUGGESTIONS[currentRoom] || ROOM_SUGGESTIONS["/"];
 
-    synthRef.current.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language;
-    utterance.rate = voiceSpeed;
-    utterance.pitch = voicePitch;
-    utterance.volume = 1.0;
-
-    const voices = synthRef.current.getVoices();
-    const selectedVoice = voices.find(
-      (voice) =>
-        voice.lang.startsWith(ACCENTS.find(a => a.id === accent)?.region || language) &&
-        voice.name.toLowerCase().includes(voiceGender)
-    ) || voices.find(voice => voice.lang.startsWith(language));
-
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
-
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-      if (recognitionRef.current && isListening) {
-        recognitionRef.current.stop();
-      }
-    };
-
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      currentUtteranceRef.current = null;
-      setTimeout(() => {
-        if (currentStep < 6) {
-          startListening();
-        }
-      }, 500);
-    };
-
-    currentUtteranceRef.current = utterance;
-    synthRef.current.speak(utterance);
-  }, [language, voiceSpeed, voicePitch, voiceGender, accent, currentStep, isListening]);
-
-  const startListening = useCallback(() => {
-    if (!recognitionRef.current || isListening || isSpeaking) return;
-
-    try {
-      recognitionRef.current.start();
-      setIsListening(true);
-    } catch (error) {
-      console.error("Failed to start recognition:", error);
-    }
-  }, [isListening, isSpeaking]);
-
-  const stopListening = useCallback(() => {
-    if (recognitionRef.current && isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    }
-  }, [isListening]);
-
-  const handleVoiceCommand = useCallback((command: string) => {
-    console.log("Voice command received:", command);
-
-    if (currentStep === 2) {
-      const matchedLang = LANGUAGES.find(
-        (lang) => command.includes(lang.label.toLowerCase()) || command.includes(lang.code.toLowerCase())
-      );
-      if (matchedLang) {
-        setLanguage(matchedLang.code);
-        speak(`${matchedLang.label} selected.`);
-        setTimeout(() => setCurrentStep(3), 1500);
-        return;
+    // check for help phrases
+    if (["tired", "exhausted", "overwhelmed", "can't breathe", "breaking down"].some(p => lower.includes(p))) {
+      const idx = suggestionIndexRef.current % suggestions.length;
+      setCurrentSuggestion(suggestions[idx]);
+      setIndicatorState("important");
+      setExpanded(false);
+      if (inputMethod === "speak") {
+        setTimeout(() => speak("I noticed something. Tap the star when you're ready."), 1000);
       }
     }
+  }, [currentRoom, inputMethod, speak]);
 
-    if (currentStep === 3) {
-      if (command.includes("male") && !command.includes("female")) {
-        setVoiceGender("male");
-        speak("Male voice selected.");
-        setTimeout(() => setCurrentStep(4), 1500);
-        return;
+  useAlwaysOnListening({
+    onDistress: handleDistress,
+    onTranscript: handleTranscript,
+    enabled: true,
+  });
+
+  // user taps the indicator
+  const handleTap = useCallback(() => {
+    if (!expanded) {
+      setExpanded(true);
+      if (indicatorState === "idle") {
+        const suggestions = ROOM_SUGGESTIONS[currentRoom] || ROOM_SUGGESTIONS["/"];
+        const idx = suggestionIndexRef.current % suggestions.length;
+        setCurrentSuggestion(suggestions[idx]);
+        suggestionIndexRef.current++;
       }
-      if (command.includes("female")) {
-        setVoiceGender("female");
-        speak("Female voice selected.");
-        setTimeout(() => setCurrentStep(4), 1500);
-        return;
+      if (inputMethod === "speak" && currentSuggestion) {
+        speak(currentSuggestion.text);
       }
-    }
-
-    if (currentStep === 4) {
-      const methods: string[] = [];
-      if (command.includes("speak")) methods.push("speak");
-      if (command.includes("type")) methods.push("type");
-      if (command.includes("point")) methods.push("point");
-      if (command.includes("sign")) methods.push("sign");
-      if (command.includes("device")) methods.push("device");
-      
-      if (methods.length > 0) {
-        setCommunicationMethods(methods);
-        speak("Communication methods set.");
-        setTimeout(() => setCurrentStep(5), 1500);
-        return;
+      if (inputMethod === "point" && currentSuggestion) {
+        setSpokenResponse(currentSuggestion.text);
       }
-    }
-
-    if (currentStep === 5) {
-      if (command.length > 0) {
-        setUserName(command);
-        speak(`Nice to meet you, ${command}.`);
-        setTimeout(() => setCurrentStep(6), 1500);
-        return;
-      }
-    }
-
-    if (command.includes("next") || command.includes("continue")) {
-      handleNext();
-      return;
-    }
-    if (command.includes("back") || command.includes("previous")) {
-      handleBack();
-      return;
-    }
-
-    speak("I didn't catch that. Could you repeat?");
-  }, [currentStep, speak]);
-
-  const handleNext = () => {
-    if (currentStep === 2 && !language) {
-      toast({ title: "Please select a language", variant: "destructive" });
-      return;
-    }
-    if (currentStep === 3 && !voiceGender) {
-      toast({ title: "Please select a voice", variant: "destructive" });
-      return;
-    }
-    if (currentStep === 4 && communicationMethods.length === 0) {
-      toast({ title: "Please select at least one communication method", variant: "destructive" });
-      return;
-    }
-    if (currentStep === 5 && !userName.trim()) {
-      toast({ title: "Please enter your name", variant: "destructive" });
-      return;
-    }
-
-    if (currentStep < 6) {
-      setCurrentStep(currentStep + 1);
     } else {
-      localStorage.setItem("onboardingComplete", "true");
-      localStorage.setItem("userPreferences", JSON.stringify({
-        language,
-        voiceGender,
-        accent,
-        communicationMethods,
-        userName,
-        voiceSpeed,
-        voicePitch,
-      }));
-      window.location.href = "/brain-dump";
+      setExpanded(false);
+      setSpokenResponse(null);
+      if (indicatorState !== "distress") setIndicatorState("idle");
     }
+  }, [expanded, indicatorState, currentRoom, inputMethod, currentSuggestion, speak]);
+
+  // user selects suggestion card
+  const handleCardSelect = useCallback((card: string) => {
+    setExpanded(false);
+    setIndicatorState("idle");
+    setSpokenResponse(null);
+    hasDistressRef.current = false;
+    if (card === "Connect to a Healer" || card === "Get Crisis Support") {
+      onNavigate?.("/practitioner");
+    } else {
+      const roomMap: Record<string, string> = {
+        "Take me to Breathe": "/breathe",
+        "Take me to Shadow Work": "/shadow-work",
+        "Take me to Journal": "/journal",
+        "Take me to Unspoken": "/unspoken",
+      };
+      if (roomMap[card]) onNavigate?.(roomMap[card]);
+    }
+  }, [onNavigate]);
+
+  // indicator colors
+  const stateStyles = {
+    idle:      { bg: "bg-white/10",      border: "border-white/20",    text: "text-white/40",  glow: "" },
+    suggest:   { bg: "bg-purple-500/20", border: "border-purple-400/40", text: "text-purple-300", glow: "shadow-purple-500/30 shadow-lg" },
+    important: { bg: "bg-yellow-500/20", border: "border-yellow-400/40", text: "text-yellow-300", glow: "shadow-yellow-500/40 shadow-lg" },
+    distress:  { bg: "bg-red-500/20",    border: "border-red-400/60",   text: "text-red-300",  glow: "shadow-red-500/50 shadow-xl" },
   };
 
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
+  const style = stateStyles[indicatorState];
 
-  const toggleCommunicationMethod = (methodId: string) => {
-    setCommunicationMethods(prev => 
-      prev.includes(methodId) 
-        ? prev.filter(m => m !== methodId)
-        : [...prev, methodId]
-    );
+  const pulseVariants = {
+    idle:      { scale: [1, 1], opacity: [0.4, 0.4] },
+    suggest:   { scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7], transition: { duration: 2, repeat: Infinity } },
+    important: { scale: [1, 1.2, 1], opacity: [0.8, 1, 0.8], transition: { duration: 1.5, repeat: Infinity } },
+    distress:  { scale: [1, 1.3, 1], opacity: [0.9, 1, 0.9], transition: { duration: 0.8, repeat: Infinity } },
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-2xl bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl"
-      >
-        <div className="flex justify-between mb-8">
-          {[1, 2, 3, 4, 5, 6].map((step) => (
-            <div
-              key={step}
-              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                step < currentStep
-                  ? "bg-green-500"
-                  : step === currentStep
-                  ? "bg-purple-500 ring-4 ring-purple-300"
-                  : "bg-white/20"
-              }`}
-            >
-              {step < currentStep ? (
-                <Check className="w-6 h-6 text-white" />
-              ) : (
-                <span className="text-white font-semibold">{step}</span>
-              )}
-            </div>
-          ))}
-        </div>
+    <div className="fixed bottom-24 right-4 z-50 flex flex-col items-end gap-2">
 
-        {isListening && (
-          <div className="mb-4 p-3 bg-green-500/20 rounded-lg flex items-center gap-3">
-            <Mic className="w-5 h-5 text-green-400 animate-pulse" />
-            <span className="text-green-200">Listening... Speak now</span>
-          </div>
-        )}
-
-        {isSpeaking && (
-          <div className="mb-4 p-3 bg-blue-500/20 rounded-lg flex items-center gap-3">
-            <div className="w-5 h-5 rounded-full bg-blue-400 animate-pulse"></div>
-            <span className="text-blue-200">Speaking...</span>
-          </div>
-        )}
-
-        <AnimatePresence mode="wait">
-          {currentStep === 1 && (
-            <motion.div
-              key="welcome"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-6"
-            >
-              <h1 className="text-4xl font-bold text-white text-center">
-                Welcome to Soul Echoes
-              </h1>
-              <p className="text-xl text-purple-200 text-center">
-                A place to find your voice and heal your heart
-              </p>
-              <div className="flex justify-center">
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="text-8xl"
-                >
-                  ✨
-                </motion.div>
-              </div>
-            </motion.div>
-          )}
-
-          {currentStep === 2 && (
-            <motion.div
-              key="language"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-6"
-            >
-              <h2 className="text-3xl font-bold text-white text-center">
-                Choose Your Language
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {LANGUAGES.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => {
-                      setLanguage(lang.code);
-                      speak(`${lang.label} selected.`);
-                    }}
-                    className={`p-4 rounded-xl transition-all ${
-                      language === lang.code
-                        ? "bg-purple-500 ring-4 ring-purple-300"
-                        : "bg-white/10 hover:bg-white/20"
-                    }`}
-                  >
-                    <div className="text-4xl mb-2">{lang.flag}</div>
-                    <div className="text-white font-medium">{lang.label}</div>
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {currentStep === 3 && (
-            <motion.div
-              key="voice"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-6"
-            >
-              <h2 className="text-3xl font-bold text-white text-center">
-                Choose Your Guide's Voice
-              </h2>
-              
-              <div className="space-y-3">
-                <label className="text-white font-medium">Voice Gender</label>
-                <div className="grid grid-cols-2 gap-4">
-                  {VOICE_GENDERS.map((voice) => (
-                    <button
-                      key={voice.id}
-                      onClick={() => {
-                        setVoiceGender(voice.id);
-                        speak(`${voice.label} selected.`);
-                      }}
-                      className={`p-4 rounded-xl transition-all ${
-                        voiceGender === voice.id
-                          ? "bg-purple-500 ring-4 ring-purple-300"
-                          : "bg-white/10 hover:bg-white/20"
-                      }`}
-                    >
-                      <div className="text-4xl mb-2">{voice.icon}</div>
-                      <div className="text-white font-medium">{voice.label}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-white font-medium">Accent</label>
-                <div className="grid grid-cols-3 gap-3">
-                  {ACCENTS.map((acc) => (
-                    <button
-                      key={acc.id}
-                      onClick={() => {
-                        setAccent(acc.id);
-                        speak(`${acc.label} accent selected.`);
-                      }}
-                      className={`p-3 rounded-lg transition-all ${
-                        accent === acc.id
-                          ? "bg-purple-500 ring-2 ring-purple-300"
-                          : "bg-white/10 hover:bg-white/20"
-                      }`}
-                    >
-                      <div className="text-white font-medium">{acc.label}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-white font-medium">
-                  Speaking Speed: {voiceSpeed.toFixed(1)}x
-                </label>
-                <Slider
-                  value={[voiceSpeed]}
-                  onValueChange={([value]) => setVoiceSpeed(value)}
-                  min={0.5}
-                  max={2.0}
-                  step={0.1}
-                  className="w-full"
-                />
-              </div>
-
-              <Button
-                onClick={() => speak("This is how I sound with your current settings.")}
-                className="w-full bg-purple-500 hover:bg-purple-600"
-              >
-                Test Voice
-              </Button>
-            </motion.div>
-          )}
-
-          {currentStep === 4 && (
-            <motion.div
-              key="communication"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-6"
-            >
-              <h2 className="text-3xl font-bold text-white text-center">
-                How Do You Want to Communicate?
-              </h2>
-              <p className="text-purple-200 text-center">
-                All methods are always available. Choose your preferences:
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {COMMUNICATION_METHODS.map((method) => (
-                  <button
-                    key={method.id}
-                    onClick={() => toggleCommunicationMethod(method.id)}
-                    className={`p-6 rounded-xl transition-all text-left ${
-                      communicationMethods.includes(method.id)
-                        ? "bg-purple-500 ring-4 ring-purple-300"
-                        : "bg-white/10 hover:bg-white/20"
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="text-5xl">{method.icon}</div>
-                      <div>
-                        <div className="text-white font-bold text-lg">{method.label}</div>
-                        <div className="text-purple-200 text-sm">{method.description}</div>
-                      </div>
-                    </div>
-                    {communicationMethods.includes(method.id) && (
-                      <div className="mt-2 flex justify-end">
-                        <Check className="w-6 h-6 text-white" />
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {currentStep === 5 && (
-            <motion.div
-              key="safety"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-6"
-            >
-              <h2 className="text-3xl font-bold text-white text-center">
-                Let's Set Up Your Account
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-white font-medium block mb-2">
-                    What should I call you?
-                  </label>
-                  <Input
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    placeholder="Enter your name"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                  />
-                </div>
-                <div className="p-4 bg-purple-500/20 rounded-lg">
-                  <p className="text-purple-200 text-sm">
-                    🔒 Your privacy and safety are our top priority. Your information is encrypted and never shared.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {currentStep === 6 && (
-            <motion.div
-              key="complete"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="space-y-6 text-center"
-            >
-              <div className="text-8xl">🎉</div>
-              <h2 className="text-3xl font-bold text-white">
-                You're All Set, {userName}!
-              </h2>
-              <p className="text-xl text-purple-200">
-                Let's begin your healing journey
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="mt-8 flex justify-between items-center gap-4">
-          {currentStep > 1 && currentStep < 6 && (
-            <Button
-              onClick={handleBack}
-              variant="outline"
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-            >
-              Back
-            </Button>
-          )}
-
-          <button
-            onClick={isListening ? stopListening : startListening}
-            className={`p-4 rounded-full transition-all ${
-              isListening
-                ? "bg-red-500 animate-pulse"
-                : "bg-purple-500 hover:bg-purple-600"
-            }`}
-            title={isListening ? "Stop Listening" : "Start Listening"}
+      {/* Expanded suggestion panel */}
+      <AnimatePresence>
+        {expanded && currentSuggestion && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="mb-2 w-64 rounded-2xl border border-white/20 bg-background/90 backdrop-blur-md p-4 shadow-2xl space-y-3"
           >
-            {isListening ? (
-              <MicOff className="w-6 h-6 text-white" />
-            ) : (
-              <Mic className="w-6 h-6 text-white" />
+            {/* text or card based on input method */}
+            {(inputMethod === "speak" || inputMethod === "type") && (
+              <p className="text-sm text-foreground text-center leading-relaxed">
+                {currentSuggestion.text}
+              </p>
             )}
-          </button>
 
-          {currentStep < 6 && (
-            <Button
-              onClick={handleNext}
-              className="bg-purple-500 hover:bg-purple-600 text-white"
-            >
-              {currentStep === 5 ? "Complete" : "Next"}
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </Button>
-          )}
+            {(inputMethod === "point" || inputMethod === "sign") && spokenResponse && (
+              <div className="text-center space-y-1">
+                <p className="text-xs text-muted-foreground">Soul Echoes suggests:</p>
+                <p className="text-sm text-foreground leading-relaxed">{currentSuggestion.text}</p>
+              </div>
+            )}
 
-          {currentStep === 6 && (
-            <Button
-              onClick={handleNext}
-              className="bg-green-500 hover:bg-green-600 text-white w-full text-lg py-6"
+            {/* action card — always shown */}
+            <button
+              onClick={() => handleCardSelect(currentSuggestion.card)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-primary/30 bg-primary/10 hover:bg-primary/20 transition-all"
             >
-              Begin Your Journey
-              <ChevronRight className="w-6 h-6 ml-2" />
-            </Button>
-          )}
-        </div>
-      </motion.div>
+              <span className="text-2xl">{currentSuggestion.emoji}</span>
+              <span className="text-sm font-medium text-foreground">{currentSuggestion.card}</span>
+            </button>
+
+            {/* stay option */}
+            <button
+              onClick={() => { setExpanded(false); setSpokenResponse(null); }}
+              className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors text-center py-1"
+            >
+              I'll stay here for now
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* The ✨ indicator button */}
+      <motion.button
+        variants={pulseVariants}
+        animate={indicatorState}
+        onClick={handleTap}
+        aria-label="AI Guide — tap for suggestion"
+        className={`
+          w-12 h-12 rounded-full border-2 flex items-center justify-center
+          backdrop-blur-md transition-all cursor-pointer
+          ${style.bg} ${style.border} ${style.glow}
+        `}
+      >
+        <span className={`text-xl ${style.text}`}>✨</span>
+      </motion.button>
+
     </div>
   );
 }
