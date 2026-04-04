@@ -639,4 +639,67 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               })}
             </div>
             <Button onClick={() => { stopContinuousRec(); setStep(4); }} className="w-full rounded-2xl">
-              Continue <ChevronR
+              Continue <ChevronRight className="ml-2 h-5 w-5" />
+            </Button>
+          </motion.div>
+        )}
+
+        {/* STEP 4: Communication Methods */}
+        {step === 4 && (
+          <motion.div key="comm" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4">
+            {isSpeakMode && <ListeningIndicator visible={isListening} />}
+            {retryMessage && <p className="text-sm text-center text-destructive">{retryMessage}</p>}
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">How do you communicate?</h2>
+            <p className="text-center text-muted-foreground text-sm">Select all that apply. These help us tailor your experience.</p>
+            <div className="space-y-2">
+              {COMMUNICATION_METHODS.map((method) => {
+                const selected = commMethods.includes(method.id);
+                return (
+                  <button key={method.id}
+                    onClick={() => setCommMethods((prev) => selected ? prev.filter((m) => m !== method.id) : [...prev, method.id])}
+                    className={`w-full flex items-center gap-4 px-5 py-5 rounded-2xl border-2 text-left text-base font-medium transition-all ${selected ? "border-primary bg-primary/10 text-foreground shadow-md" : "border-border bg-card text-foreground hover:border-primary/50"}`}
+                    style={{ borderLeftWidth: 5, borderLeftColor: method.color }}>
+                    <span className="text-3xl">{method.picture}</span>
+                    <span className="flex-1">{method.label}</span>
+                    {selected && <Check className="h-5 w-5 text-primary shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+            {commMethods.length > 0 && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center pt-2">
+                <Button size="lg" className="text-lg px-8 py-6 rounded-2xl" onClick={() => { stopContinuousRec(); setStep(5); }}>
+                  Continue <ChevronRight className="ml-2 h-5 w-5" />
+                </Button>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* STEP 5: Safety Info */}
+        {step === 5 && (
+          <motion.div key="safety-info" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-8 text-center">
+            <p className="text-lg sm:text-xl text-foreground leading-relaxed">
+              This app includes a private safety feature. You can access it anytime from the main menu. Only you will know what it does.
+            </p>
+            <Button size="lg" className="text-lg px-10 py-6 rounded-2xl" onClick={() => setStep(6)}>Got it</Button>
+          </motion.div>
+        )}
+
+        {/* STEP 6: Confirmation */}
+        {step === 6 && (
+          <motion.div key="confirm" {...fadeSlide} className="text-center max-w-xl mx-auto space-y-6">
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 15 }}
+              className="w-20 h-20 rounded-full bg-secondary/20 flex items-center justify-center mx-auto">
+              <Check className="h-10 w-10 text-secondary" />
+            </motion.div>
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground">You are all set.</h2>
+            <p className="text-lg text-foreground">Welcome to Soul Echoes. I am here for you every day.</p>
+            <p className="text-xl font-display font-bold text-primary">Let's begin.</p>
+          </motion.div>
+        )}
+
+      </AnimatePresence>
+    </div>
+  );
+}
