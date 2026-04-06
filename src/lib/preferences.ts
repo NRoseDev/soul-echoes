@@ -17,7 +17,7 @@ const defaults: UserPreferences = {
   primaryLanguage: "en",
   secondaryLanguage: null,
   signLanguageEnabled: false,
-  communicationMethods: ["type"],
+  communicationMethods: ["speak", "type", "sign", "pictures", "colors", "braille", "aac", "eyetrack"],
   autoReadEnabled: true,
   inputMethod: "type",
 };

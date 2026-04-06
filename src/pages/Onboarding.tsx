@@ -177,7 +177,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [signLanguage, setSignLanguage] = useState<boolean | null>(null);
   const [langSubStep, setLangSubStep] = useState(0);
   const [typedLang, setTypedLang] = useState("");
-  const [commMethods, setCommMethods] = useState<string[]>([]);
+  const [commMethods, setCommMethods] = useState<string[]>(() => COMMUNICATION_METHODS.map((m) => m.id));
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(getVoiceSettings);
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
@@ -392,12 +392,18 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     }
   };
 
-  const INPUT_METHOD_CARDS: { id: InputMethod; label: string; emoji: string; desc: string }[] = [
+  const INPUT_METHOD_CARDS: { id: InputMethod; label: string; emoji: string; desc: string; detail?: string }[] = [
     { id: "speak", label: "Speak It", emoji: "🗣️", desc: "Use your voice" },
-    { id: "sign", label: "Sign It", emoji: "🤟", desc: "Use sign language" },
+    { id: "sign", label: "Sign It", emoji: "🤟", desc: "Use sign language with camera" },
     { id: "point", label: "Point It", emoji: "👆", desc: "Tap cards & pictures" },
-    { id: "type", label: "Type It", emoji: "⌨️", desc: "Use your keyboard" },
-    { id: "connect", label: "Connect Device", emoji: "🔌", desc: "AAC, eye gaze, Bluetooth" },
+    { id: "type", label: "Type It", emoji: "⌨️", desc: "Use your keyboard or on-screen text" },
+    {
+      id: "connect",
+      label: "Connect My Device",
+      emoji: "🔌",
+      desc: "Braille display, AAC device, eye gaze, or switch access",
+      detail: "Connect via USB, Bluetooth, or 3.5mm audio port",
+    },
   ];
 
   return (
@@ -406,9 +412,24 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
         {/* STEP 0: Input Method */}
         {step === 0 && (
-          <motion.div key="input-method" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-6 text-center">
-            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">How would you like to interact?</h1>
-            <p className="text-muted-foreground text-sm">Choose your preferred way to communicate. This will be used throughout the app.</p>
+          <motion.div key="input-method" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-5 text-center">
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">How shall we guide you through setup?</h1>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              This is just for this setup — not a permanent choice.<br />
+              <span className="text-foreground/80 font-medium">All communication options stay available everywhere, always.</span>
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 text-xs text-muted-foreground border border-border/50 rounded-2xl px-4 py-3 bg-muted/30">
+              <span>🗣️ Talk</span><span>·</span>
+              <span>⌨️ Type</span><span>·</span>
+              <span>🤟 Sign</span><span>·</span>
+              <span>👆 Point</span><span>·</span>
+              <span>🖼️ Cards</span><span>·</span>
+              <span>🎨 Colors</span><span>·</span>
+              <span>⠿ Braille</span><span>·</span>
+              <span>💻 AAC</span><span>·</span>
+              <span>👁️ Eye gaze</span>
+              <span className="w-full text-center mt-1 text-foreground/60">— switch any of these anytime, anywhere in the app</span>
+            </div>
             <div className="grid gap-3">
               {INPUT_METHOD_CARDS.map((m) => (
                 <button key={m.id}
@@ -418,6 +439,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                   <div>
                     <p className="text-lg font-semibold text-foreground">{m.label}</p>
                     <p className="text-sm text-muted-foreground">{m.desc}</p>
+                    {m.detail && <p className="text-xs text-primary/80 mt-0.5">{m.detail}</p>}
                   </div>
                 </button>
               ))}
@@ -616,18 +638,20 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           <motion.div key="communication" {...fadeSlide} className="w-full max-w-2xl mx-auto space-y-4">
             {isSpeakMode && <ListeningIndicator visible={isListening} />}
             {retryMessage && <p className="text-sm text-center text-destructive">{retryMessage}</p>}
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">How do you like to communicate?</h2>
-            <p className="text-center text-muted-foreground text-sm">Choose all that apply — you can use any method at any time.</p>
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">Your communication options</h2>
+            <p className="text-center text-muted-foreground text-sm leading-relaxed">
+              <span className="text-foreground font-medium">All options are on.</span> Uncheck any you never use — but you can always turn them back on. Switch methods anytime from anywhere in the app.
+            </p>
             <button onClick={() => setCommMethods(COMMUNICATION_METHODS.map((m) => m.id))}
               className="mx-auto block text-sm text-primary underline underline-offset-2">
-              Select All
+              Turn all on
             </button>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {COMMUNICATION_METHODS.map((method) => {
                 const selected = commMethods.includes(method.id);
                 return (
                   <button key={method.id} onClick={() => toggleComm(method.id)}
-                    className={`flex items-center gap-4 px-5 py-5 rounded-2xl border-2 text-left text-base font-medium transition-all ${selected ? "border-primary bg-primary/10 text-foreground shadow-md" : "border-border bg-card text-foreground hover:border-primary/50"}`}
+                    className={`flex items-center gap-4 px-5 py-5 rounded-2xl border-2 text-left text-base font-medium transition-all ${selected ? "border-primary bg-primary/10 text-foreground shadow-md" : "border-border bg-card text-foreground/50 hover:border-primary/50"}`}
                     style={{ borderLeftWidth: 5, borderLeftColor: method.color }}>
                     <span className="text-3xl">{method.picture}</span>
                     <span className="flex-1">{method.label}</span>
@@ -636,13 +660,27 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 );
               })}
             </div>
-            {commMethods.length > 0 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center pt-2">
-                <Button size="lg" className="text-lg px-8 py-6 rounded-2xl" onClick={() => { setStep(5); }}>
-                  Continue <ChevronRight className="ml-2 h-5 w-5" />
-                </Button>
-              </motion.div>
-            )}
+            {/* External device connection info */}
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+              <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                🔌 Connect an external device
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                If you use a device that speaks, reads, or moves for you — you can connect it anytime. This app works with:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+                <div className="flex items-start gap-2"><span>⠿</span><span><strong className="text-foreground">Braille display</strong> — USB or Bluetooth</span></div>
+                <div className="flex items-start gap-2"><span>💻</span><span><strong className="text-foreground">AAC / speech device</strong> — USB, Bluetooth, or audio port</span></div>
+                <div className="flex items-start gap-2"><span>👁️</span><span><strong className="text-foreground">Eye gaze tracker</strong> — USB</span></div>
+                <div className="flex items-start gap-2"><span>🔘</span><span><strong className="text-foreground">Switch access</strong> — 3.5mm audio port or Bluetooth</span></div>
+              </div>
+              <p className="text-xs text-muted-foreground">Pair or plug in your device first, then use the communication switcher (🔌) in the app header to activate it anytime.</p>
+            </div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center pt-2">
+              <Button size="lg" className="text-lg px-8 py-6 rounded-2xl" onClick={() => { setStep(5); }}>
+                Continue <ChevronRight className="ml-2 h-5 w-5" />
+              </Button>
+            </motion.div>
           </motion.div>
         )}
 
