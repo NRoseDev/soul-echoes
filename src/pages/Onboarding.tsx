@@ -181,71 +181,17 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(getVoiceSettings);
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
-  const [isListening, setIsListening] = useState(false);
   const [testingVoice, setTestingVoice] = useState(false);
   const hasSpokenRef = useRef<string>("");
-  const contRecRef = useRef<any>(null);
-  const contRecActiveRef = useRef(false);
   const handleVoiceRef = useRef<(t: string) => void>(() => {});
 
   const isSpeakMode = inputMethod === "speak";
 
   // Always-on listening — routes to handleVoiceRef
-  useAlwaysOnListening({
+  const { isListening } = useAlwaysOnListening({
     onTranscript: (t) => handleVoiceRef.current(t),
     enabled: true,
   });
-
-  const startContinuousRec = useCallback(() => {
-    if (!isSpeakMode) return;
-    if (contRecActiveRef.current) return;
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return;
-    contRecRef.current?.abort();
-    const rec = new SR();
-    rec.continuous = true;
-    rec.interimResults = false;
-    rec.lang = "en-US";
-    rec.maxAlternatives = 3;
-    rec.onresult = (e: any) => {
-      const last = e.results[e.results.length - 1];
-      if (last.isFinal) handleVoiceRef.current(last[0].transcript);
-    };
-    rec.onend = () => {
-      contRecActiveRef.current = false;
-      if (contRecRef.current === rec) {
-        setTimeout(() => startContinuousRec(), 300);
-      } else {
-        setIsListening(false);
-      }
-    };
-    rec.onerror = (e: any) => {
-      contRecActiveRef.current = false;
-      if (e.error === "not-allowed" || e.error === "network") {
-        contRecRef.current = null;
-        return;
-      }
-    };
-    contRecRef.current = rec;
-    contRecActiveRef.current = true;
-    setIsListening(true);
-    rec.start();
-  }, [isSpeakMode]);
-
-  const stopContinuousRec = useCallback(() => {
-    contRecRef.current?.abort();
-    contRecRef.current = null;
-    contRecActiveRef.current = false;
-    setIsListening(false);
-  }, []);
-
-  useEffect(() => {
-    if (inputMethod !== "speak") return;
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then((stream) => { stream.getTracks().forEach((t) => t.stop()); startContinuousRec(); })
-      .catch(() => {});
-    return () => stopContinuousRec();
-  }, [inputMethod, startContinuousRec, stopContinuousRec]);
 
   useEffect(() => {
     if (step !== 1) return;
@@ -259,41 +205,40 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     if (step !== 2 || !isSpeakMode) return;
     if (langSubStep === 0 && hasSpokenRef.current !== "lang-primary") {
       hasSpokenRef.current = "lang-primary";
-      speakAsync("What is your primary language?").then(() => startContinuousRec());
+      speakAsync("What is your primary language?");
     }
     if (langSubStep === 1 && wantSecondary === null && hasSpokenRef.current !== "lang-secondary-q") {
       hasSpokenRef.current = "lang-secondary-q";
-      speakAsync("Would you like to add a second language?").then(() => startContinuousRec());
+      speakAsync("Would you like to add a second language?");
     }
     if (langSubStep === 1 && wantSecondary === true && hasSpokenRef.current !== "lang-secondary-pick") {
       hasSpokenRef.current = "lang-secondary-pick";
-      speakAsync("Which second language?").then(() => startContinuousRec());
+      speakAsync("Which second language?");
     }
     if (langSubStep === 2 && hasSpokenRef.current !== "lang-sign") {
       hasSpokenRef.current = "lang-sign";
-      speakAsync("Would you like to enable Sign Language?").then(() => startContinuousRec());
+      speakAsync("Would you like to enable Sign Language?");
     }
-  }, [step, langSubStep, wantSecondary, isSpeakMode, startContinuousRec]);
+  }, [step, langSubStep, wantSecondary, isSpeakMode]);
 
   useEffect(() => {
     if (step !== 3 || !isSpeakMode) return;
     if (hasSpokenRef.current !== "voice-setup") {
       hasSpokenRef.current = "voice-setup";
-      speakAsync("Choose your AI voice. Say a voice name, or say continue to skip.").then(() => startContinuousRec());
+      speakAsync("Choose your AI voice. Say a voice name, or say continue to skip.");
     }
-  }, [step, isSpeakMode, startContinuousRec]);
+  }, [step, isSpeakMode]);
 
   useEffect(() => {
     if (step !== 4 || !isSpeakMode) return;
     if (hasSpokenRef.current !== "comm-method") {
       hasSpokenRef.current = "comm-method";
-      speakAsync("How do you like to communicate? You can choose all that apply.").then(() => startContinuousRec());
+      speakAsync("How do you like to communicate? You can choose all that apply.");
     }
-  }, [step, isSpeakMode, startContinuousRec]);
+  }, [step, isSpeakMode]);
 
   useEffect(() => {
     if (step !== 6) return;
-    stopContinuousRec();
     if (isSpeakMode) speak("You are all set. Welcome to Soul Echoes.");
     const timer = setTimeout(() => {
       savePreferences({
@@ -317,7 +262,6 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       if (langSubStep === 0) {
         const match = matchLanguage(t);
         if (match) {
-          stopContinuousRec();
           setPrimaryLang(match.code);
           setRetryMessage(null);
           hasSpokenRef.current = "";
@@ -330,7 +274,6 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         if (wantSecondary === true) {
           const match = matchLanguage(t);
           if (match) {
-            stopContinuousRec();
             setSecondaryLang(match.code);
             setRetryMessage(null);
             hasSpokenRef.current = "";
@@ -342,11 +285,10 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         } else {
           const yn = matchYesNo(t);
           if (yn === true) { setWantSecondary(true); setRetryMessage(null); hasSpokenRef.current = ""; }
-          else if (yn === false) { stopContinuousRec(); setWantSecondary(false); setRetryMessage(null); hasSpokenRef.current = ""; setLangSubStep(2); }
+          else if (yn === false) { setWantSecondary(false); setRetryMessage(null); hasSpokenRef.current = ""; setLangSubStep(2); }
           else {
             const match = matchLanguage(t);
             if (match) {
-              stopContinuousRec();
               setWantSecondary(true);
               setSecondaryLang(match.code);
               setRetryMessage(null);
@@ -360,12 +302,12 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         }
       } else if (langSubStep === 2) {
         const yn = matchYesNo(t);
-        if (yn === true) { stopContinuousRec(); setSignLanguage(true); setStep(3); }
-        else if (yn === false) { stopContinuousRec(); setSignLanguage(false); setStep(3); }
+        if (yn === true) { setSignLanguage(true); setStep(3); }
+        else if (yn === false) { setSignLanguage(false); setStep(3); }
         else setRetryMessage(`I heard "${t}". Say yes or no.`);
       }
     } else if (step === 3) {
-      if (["continue", "next", "skip"].some((w) => lower.includes(w))) { stopContinuousRec(); setStep(4); return; }
+      if (["continue", "next", "skip"].some((w) => lower.includes(w))) { setStep(4); return; }
       const matchingVoice = ELEVENLABS_VOICES.find((v) => lower.includes(v.name.toLowerCase()) || v.name.toLowerCase().includes(lower));
       if (matchingVoice) {
         setVoiceSettings((s) => ({ ...s, elevenLabsVoiceId: matchingVoice.id, elevenLabsVoiceName: matchingVoice.name }));
@@ -387,7 +329,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         speak(`Added: ${label}.`);
       }
     }
-  }, [step, langSubStep, wantSecondary, commMethods, stopContinuousRec, voiceSettings]);
+  }, [step, langSubStep, wantSecondary, commMethods, voiceSettings]);
 
   handleVoiceRef.current = handleVoiceInput;
 
@@ -401,7 +343,6 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const getLangName = (code: string) => WORLD_LANGUAGES.find((l) => l.code === code)?.name || code;
 
   const handleSelectLang = (code: string, name: string, next: () => void) => {
-    stopContinuousRec();
     setPrimaryLang(code);
     setRetryMessage(null);
     hasSpokenRef.current = "";
@@ -411,7 +352,6 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   };
 
   const handleSelectSecondaryLang = (code: string, name: string) => {
-    stopContinuousRec();
     setSecondaryLang(code);
     setRetryMessage(null);
     hasSpokenRef.current = "";
@@ -665,7 +605,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               })}
             </div>
 
-            <Button onClick={() => { stopContinuousRec(); setStep(4); }} className="w-full rounded-2xl">
+            <Button onClick={() => { setStep(4); }} className="w-full rounded-2xl">
               Continue <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </motion.div>
@@ -698,7 +638,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             </div>
             {commMethods.length > 0 && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center pt-2">
-                <Button size="lg" className="text-lg px-8 py-6 rounded-2xl" onClick={() => { stopContinuousRec(); setStep(5); }}>
+                <Button size="lg" className="text-lg px-8 py-6 rounded-2xl" onClick={() => { setStep(5); }}>
                   Continue <ChevronRight className="ml-2 h-5 w-5" />
                 </Button>
               </motion.div>

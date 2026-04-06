@@ -2,6 +2,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Home, BookOpen, Wind, MessageCircleOff, Moon, Sparkles, Flame } from "lucide-react";
+import AIGuideIndicator from "@/AIGuideIndicator";
+import { getPreferences } from "@/lib/preferences";
 
 const NAV_ITEMS = [
   { path: "/", label: "Home", icon: Home },
@@ -16,6 +18,7 @@ const NAV_ITEMS = [
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const inputMethod = getPreferences().inputMethod ?? "speak";
 
   return (
     <SidebarProvider>
@@ -34,6 +37,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </main>
           </div>
         </div>
+        <AIGuideIndicator inputMethod={inputMethod} />
         {/* Bottom Navigation Bar */}
         <nav
           className="shrink-0 flex items-center justify-around px-2 py-2 border-t border-white/10"
