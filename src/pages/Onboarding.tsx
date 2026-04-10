@@ -316,21 +316,31 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
     mountedRef.current = true;
 
-    if (inputMethod === "speak") {
-      startRecognition();
-    }
+    const introText =
+      "Welcome to Soul Echoes. This is your daily healing app — a safe space to release, heal, and find closure. " +
+      "You can communicate with me by speaking, signing, pointing to cards, typing, or connecting a device. " +
+      "All options are always available. How would you like to communicate today?";
+
+    const initialize = async () => {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch {
+        // microphone permission request was attempted
+      }
+
+      await speakAsync(introText, null);
+      if (mountedRef.current) {
+        startRecognition();
+      }
+    };
+
+    initialize();
 
     return () => {
       mountedRef.current = false;
       stopListening();
     };
-  }, [inputMethod, startRecognition, stopListening]);
-
-  // Step 0: greet as soon as onboarding mounts
-  useEffect(() => {
-    if (step !== 0) return;
-    ttsSpeakAsync("Welcome to Soul Echoes. How would you like to set things up?");
-  }, [step, ttsSpeakAsync]);
+  }, [startRecognition, stopListening]);
 
   useEffect(() => {
     if (step !== 1) return;
