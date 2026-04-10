@@ -11,7 +11,7 @@ import ColorSymbolCanvas from "@/components/ColorSymbolCanvas";
 import PointToItCards from "@/components/PointToItCards";
 import { useTTS } from "@/hooks/use-tts";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
-import { getPreferences } from "@/lib/preferences";
+import { getPreferences, COMMUNICATION_METHODS } from "@/lib/preferences";
 import ListeningIndicator from "@/components/ListeningIndicator";
 import ASLSignInput from "@/components/ASLSignInput";
 
@@ -55,9 +55,8 @@ export default function BrainDump() {
   const prefs = getPreferences();
   const [autoRead, setAutoRead] = useState(prefs.autoReadEnabled);
 
-  const activeMethods = prefs.communicationMethods.length > 0
-    ? prefs.communicationMethods
-    : ["type"];
+  // All communication methods are always available — never gated by onboarding choices
+  const activeMethods = COMMUNICATION_METHODS.map((m) => m.id);
 
   const [activeTab, setActiveTab] = useState(activeMethods[0]);
 

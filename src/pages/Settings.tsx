@@ -16,15 +16,6 @@ export default function SettingsPage() {
     l.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const toggleComm = (id: string) => {
-    setPrefs((p) => {
-      const methods = p.communicationMethods || [];
-      if (methods.includes(id)) return { ...p, communicationMethods: methods.filter((m) => m !== id) };
-      if (methods.length >= 3) return p;
-      return { ...p, communicationMethods: [...methods, id] };
-    });
-  };
-
   const handleSave = () => {
     savePreferences(prefs);
     setSaved(true);
@@ -65,29 +56,22 @@ export default function SettingsPage() {
 
       {/* Communication Methods */}
       <section className="space-y-3">
-        <h2 className="font-display text-lg font-semibold text-foreground">
-          Communication Methods ({prefs.communicationMethods?.length || 0}/3)
-        </h2>
+        <h2 className="font-display text-lg font-semibold text-foreground">Communication Methods</h2>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          All methods are always available to you — switch between them anytime from any room using the button in the app header. You are never locked into one way.
+        </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {COMMUNICATION_METHODS.map((method) => {
-            const selected = prefs.communicationMethods?.includes(method.id);
-            const disabled = !selected && (prefs.communicationMethods?.length || 0) >= 3;
-            return (
-              <button
-                key={method.id}
-                onClick={() => toggleComm(method.id)}
-                disabled={disabled}
-                className={`flex items-center gap-3 px-4 py-4 rounded-xl border-2 text-left transition-all ${
-                  selected ? "border-primary bg-primary/10 text-foreground" : disabled ? "border-border bg-card text-muted-foreground/50" : "border-border bg-card text-foreground hover:border-primary/50"
-                }`}
-                aria-pressed={selected}
-              >
-                <span className="text-xl">{method.icon}</span>
-                <span className="text-sm">{method.label}</span>
-                {selected && <Check className="ml-auto h-4 w-4 text-primary" />}
-              </button>
-            );
-          })}
+          {COMMUNICATION_METHODS.map((method) => (
+            <div
+              key={method.id}
+              className="flex items-center gap-3 px-4 py-4 rounded-xl border-2 border-primary bg-primary/10 text-foreground"
+              style={{ borderLeftWidth: 5, borderLeftColor: method.color }}
+            >
+              <span className="text-xl">{method.icon}</span>
+              <span className="text-sm flex-1">{method.label}</span>
+              <Check className="h-4 w-4 text-primary shrink-0" />
+            </div>
+          ))}
         </div>
       </section>
 

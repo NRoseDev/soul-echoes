@@ -7,7 +7,7 @@ export interface UserPreferences {
   primaryLanguage: string;
   secondaryLanguage: string | null;
   signLanguageEnabled: boolean;
-  communicationMethods: string[]; // up to 3
+  communicationMethods: string[];
   autoReadEnabled: boolean;
   inputMethod: InputMethod;
 }

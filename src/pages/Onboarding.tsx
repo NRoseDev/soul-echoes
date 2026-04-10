@@ -177,7 +177,6 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [signLanguage, setSignLanguage] = useState<boolean | null>(null);
   const [langSubStep, setLangSubStep] = useState(0);
   const [typedLang, setTypedLang] = useState("");
-  const [commMethods, setCommMethods] = useState<string[]>(() => COMMUNICATION_METHODS.map((m) => m.id));
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(getVoiceSettings);
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
@@ -246,7 +245,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         primaryLanguage: primaryLang,
         secondaryLanguage: secondaryLang,
         signLanguageEnabled: signLanguage === true,
-        communicationMethods: commMethods.length > 0 ? commMethods : [inputMethod || "type"],
+        communicationMethods: COMMUNICATION_METHODS.map((m) => m.id),
         autoReadEnabled: true,
         inputMethod: inputMethod || "type",
       });
@@ -316,29 +315,14 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         setRetryMessage(`I heard "${t}" — say a voice name or "continue".`);
       }
     } else if (step === 4) {
-      if (["all", "select all", "everything", "all of them"].some((w) => lower.includes(w))) {
-        setCommMethods(COMMUNICATION_METHODS.map((m) => m.id));
-        speak("All communication methods selected.");
-        return;
-      }
-      const method = matchCommMethod(t);
-      if (method && !commMethods.includes(method)) {
-        const updated = [...commMethods, method];
-        setCommMethods(updated);
-        const label = COMMUNICATION_METHODS.find((m) => m.id === method)?.label || method;
-        speak(`Added: ${label}.`);
+      // All methods are always on — just acknowledge and let user continue
+      if (["continue", "next", "okay", "ok", "got it", "yes"].some((w) => lower.includes(w))) {
+        setStep(5);
       }
     }
-  }, [step, langSubStep, wantSecondary, commMethods, voiceSettings]);
+  }, [step, langSubStep, wantSecondary, voiceSettings]);
 
   handleVoiceRef.current = handleVoiceInput;
-
-  const toggleComm = (id: string) => {
-    setRetryMessage(null);
-    setCommMethods((prev) =>
-      prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]
-    );
-  };
 
   const getLangName = (code: string) => WORLD_LANGUAGES.find((l) => l.code === code)?.name || code;
 
@@ -637,28 +621,20 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {step === 4 && (
           <motion.div key="communication" {...fadeSlide} className="w-full max-w-2xl mx-auto space-y-4">
             {isSpeakMode && <ListeningIndicator visible={isListening} />}
-            {retryMessage && <p className="text-sm text-center text-destructive">{retryMessage}</p>}
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">Your communication options</h2>
             <p className="text-center text-muted-foreground text-sm leading-relaxed">
-              <span className="text-foreground font-medium">All options are on.</span> Uncheck any you never use — but you can always turn them back on. Switch methods anytime from anywhere in the app.
+              <span className="text-foreground font-medium">Every method is always available to you.</span> Speak, sign, point, type, or connect a device — switch anytime, from any room, without ever leaving where you are.
             </p>
-            <button onClick={() => setCommMethods(COMMUNICATION_METHODS.map((m) => m.id))}
-              className="mx-auto block text-sm text-primary underline underline-offset-2">
-              Turn all on
-            </button>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {COMMUNICATION_METHODS.map((method) => {
-                const selected = commMethods.includes(method.id);
-                return (
-                  <button key={method.id} onClick={() => toggleComm(method.id)}
-                    className={`flex items-center gap-4 px-5 py-5 rounded-2xl border-2 text-left text-base font-medium transition-all ${selected ? "border-primary bg-primary/10 text-foreground shadow-md" : "border-border bg-card text-foreground/50 hover:border-primary/50"}`}
-                    style={{ borderLeftWidth: 5, borderLeftColor: method.color }}>
-                    <span className="text-3xl">{method.picture}</span>
-                    <span className="flex-1">{method.label}</span>
-                    {selected && <Check className="h-5 w-5 text-primary shrink-0" />}
-                  </button>
-                );
-              })}
+              {COMMUNICATION_METHODS.map((method) => (
+                <div key={method.id}
+                  className="flex items-center gap-4 px-5 py-5 rounded-2xl border-2 border-primary bg-primary/10 text-foreground shadow-md"
+                  style={{ borderLeftWidth: 5, borderLeftColor: method.color }}>
+                  <span className="text-3xl">{method.picture}</span>
+                  <span className="flex-1 text-base font-medium">{method.label}</span>
+                  <Check className="h-5 w-5 text-primary shrink-0" />
+                </div>
+              ))}
             </div>
             {/* External device connection info */}
             <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
