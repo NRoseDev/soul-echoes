@@ -317,8 +317,8 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     mountedRef.current = true;
 
     const introText =
-      "Welcome to Soul Echoes. This is your daily healing app — a safe space to release, heal, and find closure. " +
-      "You can communicate with me by speaking, signing, pointing to cards, typing, or connecting a device. " +
+      "If you use a communication device, AAC board, eye gaze tracker, or any assistive technology — you can connect it via Bluetooth or your phone's port and use it here. " +
+      "Soul Echoes works on iPhone, Android, and all computers worldwide. " +
       "All options are always available. How would you like to communicate today?";
 
     const initialize = async () => {
