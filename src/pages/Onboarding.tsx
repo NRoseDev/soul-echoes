@@ -10,7 +10,7 @@ import {
   COMMUNICATION_METHODS,
   type InputMethod,
 } from "@/lib/preferences";
-import { getVoiceSettings, saveVoiceSettings, ELEVENLABS_VOICES, type VoiceSettings } from "@/lib/voiceSettings";
+import { getVoiceSettings, saveVoiceSettings, type VoiceSettings } from "@/lib/voiceSettings";
 import ListeningIndicator from "@/components/ListeningIndicator";
 import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 
@@ -45,16 +45,24 @@ const PREFERRED_VOICES = [
   "google uk english female", "google us english female",
 ];
 
-/** Picks the best available English female voice, or the first English voice. */
-function pickFemaleVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+function pickBrowserVoice(
+  voices: SpeechSynthesisVoice[],
+  preferredVoiceURI: string | null = null
+): SpeechSynthesisVoice | null {
+  if (preferredVoiceURI) {
+    const selected = voices.find((v) => v.voiceURI === preferredVoiceURI);
+    if (selected) return selected;
+  }
+
   for (const pref of PREFERRED_VOICES) {
     const match = voices.find((v) => v.name.toLowerCase().includes(pref));
     if (match) return match;
   }
-  // Fallback: any voice whose name looks female or any English voice
+
   return (
     voices.find((v) => v.lang.startsWith("en") && /female|zira|samantha|karen|aria|jenny|natasha|moira|fiona/i.test(v.name)) ||
     voices.find((v) => v.lang.startsWith("en")) ||
+    voices[0] ||
     null
   );
 }
@@ -68,13 +76,11 @@ function getVoicesReady(): Promise<SpeechSynthesisVoice[]> {
     if (!("speechSynthesis" in window)) { resolve([]); return; }
     const voices = window.speechSynthesis.getVoices();
     if (voices.length > 0) { resolve(voices); return; }
-    // Voices not loaded yet — wait for the event (Chrome, Edge)
     const handler = () => {
       resolve(window.speechSynthesis.getVoices());
       window.speechSynthesis.removeEventListener("voiceschanged", handler);
     };
     window.speechSynthesis.addEventListener("voiceschanged", handler);
-    // Safety timeout: if voiceschanged never fires, resolve with whatever is available
     setTimeout(() => {
       window.speechSynthesis.removeEventListener("voiceschanged", handler);
       resolve(window.speechSynthesis.getVoices());
@@ -82,13 +88,13 @@ function getVoicesReady(): Promise<SpeechSynthesisVoice[]> {
   });
 }
 
-async function speakAsync(text: string): Promise<void> {
+async function speakAsync(text: string, preferredVoiceURI: string | null = null): Promise<void> {
   if (!("speechSynthesis" in window)) return;
   const voices = await getVoicesReady();
   window.speechSynthesis.cancel();
   return new Promise((resolve) => {
     const u = new SpeechSynthesisUtterance(text);
-    const voice = pickFemaleVoice(voices);
+    const voice = pickBrowserVoice(voices, preferredVoiceURI);
     if (voice) u.voice = voice;
     u.rate = 0.9;
     u.pitch = 1.1;
@@ -96,17 +102,16 @@ async function speakAsync(text: string): Promise<void> {
     u.onend = () => resolve();
     u.onerror = () => resolve();
     window.speechSynthesis.speak(u);
-    // Fallback: resolve after estimated read time so the app never hangs
     setTimeout(resolve, text.length * 80 + 3000);
   });
 }
 
-async function speak(text: string): Promise<void> {
+async function speak(text: string, preferredVoiceURI: string | null = null): Promise<void> {
   if (!("speechSynthesis" in window)) return;
   const voices = await getVoicesReady();
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  const voice = pickFemaleVoice(voices);
+  const voice = pickBrowserVoice(voices, preferredVoiceURI);
   if (voice) u.voice = voice;
   u.rate = 0.9;
   u.pitch = 1.1;
@@ -215,11 +220,32 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [langSubStep, setLangSubStep] = useState(0);
   const [typedLang, setTypedLang] = useState("");
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(getVoiceSettings);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [testingVoice, setTestingVoice] = useState(false);
   const hasSpokenRef = useRef<string>("");
   const handleVoiceRef = useRef<(t: string) => void>(() => {});
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const updateVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        setAvailableVoices(voices);
+      }
+    };
+    updateVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", updateVoices);
+    return () => window.speechSynthesis.removeEventListener("voiceschanged", updateVoices);
+  }, []);
+
+  const browserVoiceOptions = availableVoices
+    .filter((voice) => voice.lang.startsWith("en"))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const ttsSpeakAsync = useCallback((text: string) => speakAsync(text, voiceSettings.voiceURI), [voiceSettings.voiceURI]);
+  const ttsSpeak = useCallback((text: string) => speak(text, voiceSettings.voiceURI), [voiceSettings.voiceURI]);
 
   const isSpeakMode = inputMethod === "speak";
 
@@ -232,34 +258,34 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   // Step 0: greet as soon as onboarding mounts
   useEffect(() => {
     if (step !== 0) return;
-    speakAsync("Welcome to Soul Echoes. How would you like to set things up?");
-  }, []);
+    ttsSpeakAsync("Welcome to Soul Echoes. How would you like to set things up?");
+  }, [step, ttsSpeakAsync]);
 
   useEffect(() => {
     if (step !== 1) return;
-    speak("Soul Echoes. Your daily healing advocate. A sacred space to release, heal, and find closure.");
+    ttsSpeak("Soul Echoes. Your daily healing advocate. A sacred space to release, heal, and find closure.");
     const timer = setTimeout(() => setWelcomeDone(true), 4000);
     const autoAdvance = setTimeout(() => setStep(2), 8000);
     return () => { clearTimeout(timer); clearTimeout(autoAdvance); };
-  }, [step]);
+  }, [step, ttsSpeak]);
 
   useEffect(() => {
     if (step !== 2) return;
     if (langSubStep === 0 && hasSpokenRef.current !== "lang-primary") {
       hasSpokenRef.current = "lang-primary";
-      speakAsync("What is your primary language?");
+      ttsSpeakAsync("What is your primary language?");
     }
     if (langSubStep === 1 && wantSecondary === null && hasSpokenRef.current !== "lang-secondary-q") {
       hasSpokenRef.current = "lang-secondary-q";
-      speakAsync("Would you like to add a second language?");
+      ttsSpeakAsync("Would you like to add a second language?");
     }
     if (langSubStep === 1 && wantSecondary === true && hasSpokenRef.current !== "lang-secondary-pick") {
       hasSpokenRef.current = "lang-secondary-pick";
-      speakAsync("Which second language?");
+      ttsSpeakAsync("Which second language?");
     }
     if (langSubStep === 2 && hasSpokenRef.current !== "lang-sign") {
       hasSpokenRef.current = "lang-sign";
-      speakAsync("Would you like to enable sign language?");
+      ttsSpeakAsync("Would you like to enable sign language?");
     }
   }, [step, langSubStep, wantSecondary]);
 
@@ -267,26 +293,26 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     if (step !== 3) return;
     if (hasSpokenRef.current !== "voice-setup") {
       hasSpokenRef.current = "voice-setup";
-      speakAsync("Choose your AI guide voice. You can preview each one, then continue.");
+      ttsSpeakAsync("Choose your AI guide voice. You can preview each one, then continue.");
     }
-  }, [step]);
+  }, [step, ttsSpeakAsync]);
 
   useEffect(() => {
     if (step !== 4) return;
     if (hasSpokenRef.current !== "comm-method") {
       hasSpokenRef.current = "comm-method";
-      speakAsync("Every communication method is always available to you. Switch anytime, from any room.");
+      ttsSpeakAsync("Every communication method is always available to you. Switch anytime, from any room.");
     }
-  }, [step]);
+  }, [step, ttsSpeakAsync]);
 
   useEffect(() => {
     if (step !== 5) return;
-    speakAsync("This app includes a private safety feature. Only you will know what it does. You can access it anytime from the main menu.");
-  }, [step]);
+    ttsSpeakAsync("This app includes a private safety feature. Only you will know what it does. You can access it anytime from the main menu.");
+  }, [step, ttsSpeakAsync]);
 
   useEffect(() => {
     if (step !== 6) return;
-    speak("You are all set. Welcome to Soul Echoes.");
+    ttsSpeak("You are all set. Welcome to Soul Echoes.");
     const timer = setTimeout(() => {
       savePreferences({
         onboardingComplete: true,
@@ -313,7 +339,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           setRetryMessage(null);
           hasSpokenRef.current = "";
           savePreferences({ primaryLanguage: match.code });
-          speakAsync(`Got it — ${match.name} selected.`).then(() => setLangSubStep(1));
+          ttsSpeakAsync(`Got it — ${match.name} selected.`).then(() => setLangSubStep(1));
         } else {
           setRetryMessage(`I heard "${t}" — try again.`);
         }
@@ -325,7 +351,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             setRetryMessage(null);
             hasSpokenRef.current = "";
             savePreferences({ secondaryLanguage: match.code });
-            speakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
+            ttsSpeakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
           } else {
             setRetryMessage(`I heard "${t}" — say a language name.`);
           }
@@ -341,7 +367,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               setRetryMessage(null);
               hasSpokenRef.current = "";
               savePreferences({ secondaryLanguage: match.code });
-              speakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
+              ttsSpeakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
             } else {
               setRetryMessage(`I heard "${t}". Say yes, no, or a language.`);
             }
@@ -355,9 +381,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       }
     } else if (step === 3) {
       if (["continue", "next", "skip"].some((w) => lower.includes(w))) { setStep(4); return; }
-      const matchingVoice = ELEVENLABS_VOICES.find((v) => lower.includes(v.name.toLowerCase()) || v.name.toLowerCase().includes(lower));
+      const matchingVoice = availableVoices.find((v) => lower.includes(v.name.toLowerCase()) || v.name.toLowerCase().includes(lower));
       if (matchingVoice) {
-        setVoiceSettings((s) => ({ ...s, elevenLabsVoiceId: matchingVoice.id, elevenLabsVoiceName: matchingVoice.name }));
+        setVoiceSettings((s) => ({ ...s, voiceURI: matchingVoice.voiceURI, elevenLabsVoiceId: null, elevenLabsVoiceName: null }));
         setRetryMessage(null);
       } else {
         setRetryMessage(`I heard "${t}" — say a voice name or "continue".`);
@@ -379,7 +405,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     setRetryMessage(null);
     hasSpokenRef.current = "";
     savePreferences({ primaryLanguage: code });
-    if (isSpeakMode) speakAsync(`Got it — ${name} selected.`).then(next);
+    if (isSpeakMode) ttsSpeakAsync(`Got it — ${name} selected.`).then(next);
     else next();
   };
 
@@ -388,39 +414,16 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     setRetryMessage(null);
     hasSpokenRef.current = "";
     savePreferences({ secondaryLanguage: code });
-    if (isSpeakMode) speakAsync(`Selected ${name}`).then(() => setLangSubStep(2));
+    if (isSpeakMode) ttsSpeakAsync(`Selected ${name}`).then(() => setLangSubStep(2));
     else setLangSubStep(2);
   };
 
-  const testVoice = async (voiceId: string) => {
+  const testVoice = async (voiceURI: string | null) => {
     setTestingVoice(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ text: "Hello, I am here with you.", voiceId }),
-        }
-      );
-      if (!response.ok) throw new Error("TTS failed");
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      audio.onended = () => { URL.revokeObjectURL(url); setTestingVoice(false); };
-      audio.onerror = () => { URL.revokeObjectURL(url); setTestingVoice(false); };
-      await audio.play();
-    } catch {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance("Hello, I am here with you.");
-      u.rate = voiceSettings.speed;
-      u.volume = voiceSettings.volume;
-      u.onend = () => setTestingVoice(false);
-      window.speechSynthesis.speak(u);
+      await speakAsync("Hello, I am here with you.", voiceURI);
+    } finally {
+      setTestingVoice(false);
     }
   };
 
@@ -637,26 +640,25 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             </div>
 
             <div className="space-y-1 max-h-48 overflow-y-auto rounded-xl border border-border bg-card p-2">
-              {ELEVENLABS_VOICES.filter((v) => {
-                if (voiceSettings.genderPref === "neutral") return true;
-                return v.gender === voiceSettings.genderPref || v.gender === "neutral";
-              }).map((elVoice) => {
-                const isSelected = voiceSettings.elevenLabsVoiceId === elVoice.id;
+              {browserVoiceOptions.length > 0 ? browserVoiceOptions.map((browserVoice) => {
+                const isSelected = voiceSettings.voiceURI === browserVoice.voiceURI;
                 return (
-                  <div key={elVoice.id} onClick={() => setVoiceSettings((s) => ({ ...s, elevenLabsVoiceId: elVoice.id, elevenLabsVoiceName: elVoice.name }))}
+                  <div key={browserVoice.voiceURI} onClick={() => setVoiceSettings((s) => ({ ...s, voiceURI: browserVoice.voiceURI, elevenLabsVoiceId: null, elevenLabsVoiceName: null }))}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${isSelected ? "bg-primary/15 border border-primary/30" : "hover:bg-muted"}`}>
-                    <button onClick={(e) => { e.stopPropagation(); testVoice(elVoice.id); }} disabled={testingVoice}
+                    <button onClick={(e) => { e.stopPropagation(); testVoice(browserVoice.voiceURI); }} disabled={testingVoice}
                       className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20 disabled:opacity-50">
                       <Play className="h-3 w-3 text-foreground" />
                     </button>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{elVoice.name}</p>
-                      <p className="text-xs text-muted-foreground">{elVoice.accent} · {elVoice.description}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{browserVoice.name}</p>
+                      <p className="text-xs text-muted-foreground">{browserVoice.lang}</p>
                     </div>
                     {isSelected && <Check className="h-4 w-4 text-primary shrink-0" />}
                   </div>
                 );
-              })}
+              }) : (
+                <div className="p-4 text-sm text-muted-foreground">Loading your browser voices. If nothing appears, try refreshing the page or selecting a different input method.</div>
+              )}
             </div>
 
             <Button onClick={() => { setStep(4); }} className="w-full rounded-2xl">
