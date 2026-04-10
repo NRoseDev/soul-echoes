@@ -36,6 +36,7 @@ const NAV_COMMANDS: [string[], string][] = [
 export interface AlwaysOnListeningState {
   isListening: boolean;
   lastTranscript: string;
+  inputLevel: number;
   /** true when mic permission was denied */
   permissionDenied: boolean;
 }
@@ -55,11 +56,16 @@ export function useAlwaysOnListening(options: UseAlwaysOnListeningOptions = {}) 
   const [state, setState] = useState<AlwaysOnListeningState>({
     isListening: false,
     lastTranscript: "",
+    inputLevel: 0,
     permissionDenied: false,
   });
 
   const recRef = useRef<any>(null);
   const activeRef = useRef(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const rafRef = useRef<number | null>(null);
   const optionsRef = useRef(options);
   optionsRef.current = options;
   const mountedRef = useRef(true);
@@ -108,7 +114,7 @@ export function useAlwaysOnListening(options: UseAlwaysOnListeningOptions = {}) 
 
     const rec = new SR();
     rec.continuous = true;
-    rec.interimResults = false;
+    rec.interimResults = true;
     rec.lang = "en-US";
     rec.maxAlternatives = 1;
 
@@ -120,11 +126,11 @@ export function useAlwaysOnListening(options: UseAlwaysOnListeningOptions = {}) 
 
     rec.onresult = (e: any) => {
       const last = e.results[e.results.length - 1];
+      const transcript = last[0].transcript;
+      if (mountedRef.current) {
+        setState(s => ({ ...s, lastTranscript: transcript }));
+      }
       if (last.isFinal) {
-        const transcript = last[0].transcript;
-        if (mountedRef.current) {
-          setState(s => ({ ...s, lastTranscript: transcript }));
-        }
         processTranscript(transcript);
       }
     };
@@ -167,13 +173,64 @@ export function useAlwaysOnListening(options: UseAlwaysOnListeningOptions = {}) 
     }
   }, [isSupported, enabled, processTranscript]);
 
+  const stopAudioMeter = useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    analyserRef.current = null;
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+  }, []);
+
   const stopListening = useCallback(() => {
     try { recRef.current?.abort(); } catch {}
     recRef.current = null;
     activeRef.current = false;
+    stopAudioMeter();
     if (mountedRef.current) {
-      setState(s => ({ ...s, isListening: false }));
+      setState(s => ({ ...s, isListening: false, inputLevel: 0 }));
     }
+  }, [stopAudioMeter]);
+
+  const setupAudioMeter = useCallback((stream: MediaStream) => {
+    const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const audioContext = new AudioCtx();
+    const source = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    analyserRef.current = analyser;
+    audioContextRef.current = audioContext;
+    streamRef.current = stream;
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    const tick = () => {
+      if (!mountedRef.current) return;
+      const analyserNode = analyserRef.current;
+      if (!analyserNode) return;
+      analyserNode.getByteTimeDomainData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i += 1) {
+        const x = (dataArray[i] - 128) / 128;
+        sum += x * x;
+      }
+      const rms = Math.sqrt(sum / dataArray.length);
+      const level = Math.min(1, rms * 2);
+      if (mountedRef.current) {
+        setState((s) => ({ ...s, inputLevel: level }));
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
   }, []);
 
   // Start on mount, restart if enabled changes
@@ -182,23 +239,21 @@ export function useAlwaysOnListening(options: UseAlwaysOnListeningOptions = {}) 
     if (enabled && isSupported) {
       // Request mic permission first, then start
       navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-          stream.getTracks().forEach(t => t.stop());
+        .then((stream) => {
+          setupAudioMeter(stream);
           startListening();
         })
         .catch(() => {
-          setState(s => ({ ...s, permissionDenied: true }));
+          setState((s) => ({ ...s, permissionDenied: true }));
         });
     } else {
       stopListening();
     }
     return () => {
       mountedRef.current = false;
-      try { recRef.current?.abort(); } catch {}
-      recRef.current = null;
-      activeRef.current = false;
+      stopListening();
     };
-  }, [enabled, isSupported, startListening, stopListening]);
+  }, [enabled, isSupported, setupAudioMeter, startListening, stopListening]);
 
   return {
     ...state,
