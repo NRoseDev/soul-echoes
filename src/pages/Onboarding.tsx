@@ -209,7 +209,7 @@ const LANGUAGE_POINT_CARDS = [
   { code: "it", label: "Italiano", emoji: "🇮🇹" },
 ];
 
-export default function Onboarding({ onComplete }: { onComplete: () => void }) {
+export default function Onboarding({ onComplete }: { onComplete: () => void }) { /* v2 */
   const [step, setStep] = useState(0);
   const [inputMethod, setInputMethod] = useState<InputMethod | null>(null);
   const [welcomeDone, setWelcomeDone] = useState(false);
