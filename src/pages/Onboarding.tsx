@@ -253,91 +253,14 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const isSpeakMode = inputMethod === "speak";
 
   const [isListening, setIsListening] = useState(false);
-  const [inputLevel, setInputLevel] = useState(0);
+  const inputLevel = 0;
   const recognitionRef = useRef<any>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const dataArrayRef = useRef<Uint8Array | null>(null);
-  const rafRef = useRef<number | null>(null);
-  const resetTimerRef = useRef<number | null>(null);
-  const restartTimerRef = useRef<number | null>(null);
   const mountedRef = useRef(true);
 
   const stopListening = useCallback(() => {
-    if (resetTimerRef.current !== null) {
-      window.clearTimeout(resetTimerRef.current);
-      resetTimerRef.current = null;
-    }
-    if (restartTimerRef.current !== null) {
-      window.clearTimeout(restartTimerRef.current);
-      restartTimerRef.current = null;
-    }
     try { recognitionRef.current?.abort(); } catch {}
     recognitionRef.current = null;
     setIsListening(false);
-    setInputLevel(0);
-  }, []);
-
-  const stopAudioMeter = useCallback(() => {
-    if (rafRef.current !== null) {
-      window.cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-    analyserRef.current = null;
-    if (audioContextRef.current) {
-      audioContextRef.current.close().catch(() => {});
-      audioContextRef.current = null;
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-  }, []);
-
-  const resetListenTimeout = useCallback(() => {
-    if (resetTimerRef.current !== null) {
-      window.clearTimeout(resetTimerRef.current);
-    }
-    resetTimerRef.current = window.setTimeout(() => {
-      if (!mountedRef.current) return;
-      try { recognitionRef.current?.abort(); } catch {}
-      setIsListening(false);
-      setInputLevel(0);
-    }, 8000);
-  }, []);
-
-  const setupAudioMeter = useCallback((stream: MediaStream) => {
-    const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
-    const audioContext = new AudioCtx();
-    const source = audioContext.createMediaStreamSource(stream);
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 256;
-    source.connect(analyser);
-    analyserRef.current = analyser;
-    audioContextRef.current = audioContext;
-    streamRef.current = stream;
-    dataArrayRef.current = new Uint8Array(analyser.frequencyBinCount);
-
-    const tick = () => {
-      if (!mountedRef.current) return;
-      const analyserNode = analyserRef.current;
-      const dataArray = dataArrayRef.current;
-      if (!analyserNode || !dataArray) return;
-      analyserNode.getByteTimeDomainData(dataArray);
-      let sum = 0;
-      for (let i = 0; i < dataArray.length; i += 1) {
-        const x = (dataArray[i] - 128) / 128;
-        sum += x * x;
-      }
-      const rms = Math.sqrt(sum / dataArray.length);
-      const level = Math.min(1, rms * 2);
-      setInputLevel(level);
-      rafRef.current = window.requestAnimationFrame(tick);
-    };
-
-    rafRef.current = window.requestAnimationFrame(tick);
   }, []);
 
   const startRecognition = useCallback(() => {
@@ -354,36 +277,31 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     rec.onstart = () => {
       if (!mountedRef.current) return;
       setIsListening(true);
-      resetListenTimeout();
     };
 
-    rec.onresult = (e: any) => {
-      const last = e.results[e.results.length - 1];
-      const transcript = last[0].transcript;
+    rec.onresult = (event: any) => {
+      const last = event.results[event.results.length - 1];
+      if (!last || !last.isFinal) return;
+      const transcript = last[0]?.transcript?.trim();
+      if (!transcript) return;
       if (mountedRef.current) {
         setRetryMessage(null);
       }
-      resetListenTimeout();
-      if (last.isFinal) {
-        handleVoiceRef.current(transcript);
-      }
+      handleVoiceRef.current(transcript);
     };
 
-    rec.onerror = (e: any) => {
-      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+    rec.onerror = (event: any) => {
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
         setIsListening(false);
-        return;
-      }
-      if (mountedRef.current) {
-        restartTimerRef.current = window.setTimeout(() => startRecognition(), 1000);
       }
     };
 
     rec.onend = () => {
       recognitionRef.current = null;
+      if (!mountedRef.current) return;
       setIsListening(false);
-      if (mountedRef.current) {
-        restartTimerRef.current = window.setTimeout(() => startRecognition(), 300);
+      if (inputMethod === "speak") {
+        window.setTimeout(() => startRecognition(), 250);
       }
     };
 
@@ -391,37 +309,22 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     try {
       rec.start();
     } catch {
-      if (mountedRef.current) {
-        restartTimerRef.current = window.setTimeout(() => startRecognition(), 1000);
-      }
+      window.setTimeout(() => startRecognition(), 500);
     }
-  }, [resetListenTimeout]);
+  }, [inputMethod]);
 
   useEffect(() => {
     mountedRef.current = true;
-    if (typeof window === "undefined" || !navigator.mediaDevices?.getUserMedia) return;
 
-    navigator.mediaDevices.getUserMedia({
-      audio: {
-        noiseSuppression: true,
-        echoCancellation: true,
-        autoGainControl: true,
-      },
-    })
-      .then((stream) => {
-        setupAudioMeter(stream);
-        startRecognition();
-      })
-      .catch(() => {
-        setIsListening(false);
-      });
+    if (inputMethod === "speak") {
+      startRecognition();
+    }
 
     return () => {
       mountedRef.current = false;
       stopListening();
-      stopAudioMeter();
     };
-  }, [setupAudioMeter, startRecognition, stopAudioMeter, stopListening]);
+  }, [inputMethod, startRecognition, stopListening]);
 
   // Step 0: greet as soon as onboarding mounts
   useEffect(() => {
