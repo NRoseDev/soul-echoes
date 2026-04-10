@@ -224,8 +224,12 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [testingVoice, setTestingVoice] = useState(false);
-  const hasSpokenRef = useRef<string>("");
+  const spokenPromptsRef = useRef<Set<string>>(new Set());
   const handleVoiceRef = useRef<(t: string) => void>(() => {});
+
+  const hasSpoken = useCallback((key: string) => spokenPromptsRef.current.has(key), []);
+  const markSpoken = useCallback((key: string) => { spokenPromptsRef.current.add(key); }, []);
+  const clearSpoken = useCallback(() => { spokenPromptsRef.current.clear(); }, []);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -263,47 +267,51 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
   useEffect(() => {
     if (step !== 1) return;
-    ttsSpeak("Soul Echoes. Your daily healing advocate. A sacred space to release, heal, and find closure.");
-    const timer = setTimeout(() => setWelcomeDone(true), 4000);
-    const autoAdvance = setTimeout(() => setStep(2), 8000);
-    return () => { clearTimeout(timer); clearTimeout(autoAdvance); };
-  }, [step, ttsSpeak]);
+    if (hasSpoken("welcome")) return;
+    markSpoken("welcome");
+    markSpoken("lang-primary");
+    ttsSpeakAsync("Soul Echoes. Your daily healing advocate. A sacred space to release, heal, and find closure. What is your primary language?")
+      .then(() => {
+        setWelcomeDone(true);
+        setStep(2);
+      });
+  }, [step, ttsSpeakAsync, hasSpoken, markSpoken]);
 
   useEffect(() => {
     if (step !== 2) return;
-    if (langSubStep === 0 && hasSpokenRef.current !== "lang-primary") {
-      hasSpokenRef.current = "lang-primary";
+    if (langSubStep === 0 && !hasSpoken("lang-primary")) {
+      markSpoken("lang-primary");
       ttsSpeakAsync("What is your primary language?");
     }
-    if (langSubStep === 1 && wantSecondary === null && hasSpokenRef.current !== "lang-secondary-q") {
-      hasSpokenRef.current = "lang-secondary-q";
+    if (langSubStep === 1 && wantSecondary === null && !hasSpoken("lang-secondary-q")) {
+      markSpoken("lang-secondary-q");
       ttsSpeakAsync("Would you like to add a second language?");
     }
-    if (langSubStep === 1 && wantSecondary === true && hasSpokenRef.current !== "lang-secondary-pick") {
-      hasSpokenRef.current = "lang-secondary-pick";
+    if (langSubStep === 1 && wantSecondary === true && !hasSpoken("lang-secondary-pick")) {
+      markSpoken("lang-secondary-pick");
       ttsSpeakAsync("Which second language?");
     }
-    if (langSubStep === 2 && hasSpokenRef.current !== "lang-sign") {
-      hasSpokenRef.current = "lang-sign";
+    if (langSubStep === 2 && !hasSpoken("lang-sign")) {
+      markSpoken("lang-sign");
       ttsSpeakAsync("Would you like to enable sign language?");
     }
-  }, [step, langSubStep, wantSecondary]);
+  }, [step, langSubStep, wantSecondary, hasSpoken, markSpoken, ttsSpeakAsync]);
 
   useEffect(() => {
     if (step !== 3) return;
-    if (hasSpokenRef.current !== "voice-setup") {
-      hasSpokenRef.current = "voice-setup";
+    if (!hasSpoken("voice-setup")) {
+      markSpoken("voice-setup");
       ttsSpeakAsync("Choose your AI guide voice. You can preview each one, then continue.");
     }
-  }, [step, ttsSpeakAsync]);
+  }, [step, ttsSpeakAsync, hasSpoken, markSpoken]);
 
   useEffect(() => {
     if (step !== 4) return;
-    if (hasSpokenRef.current !== "comm-method") {
-      hasSpokenRef.current = "comm-method";
+    if (!hasSpoken("comm-method")) {
+      markSpoken("comm-method");
       ttsSpeakAsync("Every communication method is always available to you. Switch anytime, from any room.");
     }
-  }, [step, ttsSpeakAsync]);
+  }, [step, ttsSpeakAsync, hasSpoken, markSpoken]);
 
   useEffect(() => {
     if (step !== 5) return;
@@ -331,13 +339,26 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
   const handleVoiceInput = useCallback((t: string) => {
     const lower = t.toLowerCase().trim();
+    if (step === 0) {
+      const matched = matchCommMethod(t) as InputMethod | null;
+      if (matched && ["speak", "type", "sign", "point", "connect"].includes(matched)) {
+        setInputMethod(matched);
+        setRetryMessage(null);
+        clearSpoken();
+        if (matched === "sign") setCameraOpen(true);
+        setStep(1);
+        return;
+      }
+      setRetryMessage(`I heard "${t}" — say speak, type, sign, point, or connect.`);
+      return;
+    }
     if (step === 2) {
       if (langSubStep === 0) {
         const match = matchLanguage(t);
         if (match) {
           setPrimaryLang(match.code);
           setRetryMessage(null);
-          hasSpokenRef.current = "";
+          clearSpoken();
           savePreferences({ primaryLanguage: match.code });
           ttsSpeakAsync(`Got it — ${match.name} selected.`).then(() => setLangSubStep(1));
         } else {
@@ -349,7 +370,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           if (match) {
             setSecondaryLang(match.code);
             setRetryMessage(null);
-            hasSpokenRef.current = "";
+            clearSpoken();
             savePreferences({ secondaryLanguage: match.code });
             ttsSpeakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
           } else {
@@ -357,15 +378,15 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           }
         } else {
           const yn = matchYesNo(t);
-          if (yn === true) { setWantSecondary(true); setRetryMessage(null); hasSpokenRef.current = ""; }
-          else if (yn === false) { setWantSecondary(false); setRetryMessage(null); hasSpokenRef.current = ""; setLangSubStep(2); }
+          if (yn === true) { setWantSecondary(true); setRetryMessage(null); clearSpoken(); }
+          else if (yn === false) { setWantSecondary(false); setRetryMessage(null); clearSpoken(); setLangSubStep(2); }
           else {
             const match = matchLanguage(t);
             if (match) {
               setWantSecondary(true);
               setSecondaryLang(match.code);
               setRetryMessage(null);
-              hasSpokenRef.current = "";
+              clearSpoken();
               savePreferences({ secondaryLanguage: match.code });
               ttsSpeakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
             } else {
@@ -403,7 +424,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const handleSelectLang = (code: string, name: string, next: () => void) => {
     setPrimaryLang(code);
     setRetryMessage(null);
-    hasSpokenRef.current = "";
+    clearSpoken();
     savePreferences({ primaryLanguage: code });
     if (isSpeakMode) ttsSpeakAsync(`Got it — ${name} selected.`).then(next);
     else next();
@@ -412,7 +433,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const handleSelectSecondaryLang = (code: string, name: string) => {
     setSecondaryLang(code);
     setRetryMessage(null);
-    hasSpokenRef.current = "";
+    clearSpoken();
     savePreferences({ secondaryLanguage: code });
     if (isSpeakMode) ttsSpeakAsync(`Selected ${name}`).then(() => setLangSubStep(2));
     else setLangSubStep(2);
@@ -485,7 +506,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* STEP 1: Welcome */}
         {step === 1 && (
           <motion.div key="welcome" {...fadeSlide} className="text-center max-w-2xl mx-auto space-y-8 cursor-pointer"
-            onClick={() => setStep(2)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && setStep(2)}>
+            onClick={() => { window.speechSynthesis?.cancel(); setStep(2); }} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") { window.speechSynthesis?.cancel(); setStep(2); } }}>
             <div className="inline-block px-5 py-1.5 rounded-full border border-purple-400/30 bg-purple-500/10">
               <span className="text-sm font-medium text-purple-300">Your sanctuary for healing</span>
             </div>
@@ -548,10 +569,10 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               <div className="space-y-4">
                 <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">Would you like to add a second language?</h2>
                 <div className="flex gap-4 justify-center">
-                  <Button size="lg" className="text-lg px-8 py-6 rounded-2xl min-w-[120px] gap-2" onClick={() => { setWantSecondary(true); setRetryMessage(null); hasSpokenRef.current = ""; }} variant={wantSecondary === true ? "default" : "outline"}>
+                  <Button size="lg" className="text-lg px-8 py-6 rounded-2xl min-w-[120px] gap-2" onClick={() => { setWantSecondary(true); setRetryMessage(null); clearSpoken(); }} variant={wantSecondary === true ? "default" : "outline"}>
                     <span className="text-2xl">✅</span> Yes
                   </Button>
-                  <Button size="lg" className="text-lg px-8 py-6 rounded-2xl min-w-[120px] gap-2" onClick={() => { setWantSecondary(false); setSecondaryLang(null); setRetryMessage(null); hasSpokenRef.current = ""; setLangSubStep(2); }} variant={wantSecondary === false ? "default" : "outline"}>
+                  <Button size="lg" className="text-lg px-8 py-6 rounded-2xl min-w-[120px] gap-2" onClick={() => { setWantSecondary(false); setSecondaryLang(null); setRetryMessage(null); clearSpoken(); setLangSubStep(2); }} variant={wantSecondary === false ? "default" : "outline"}>
                     <span className="text-2xl">❌</span> No
                   </Button>
                 </div>
