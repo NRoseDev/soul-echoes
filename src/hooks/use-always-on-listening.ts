@@ -66,6 +66,7 @@ export function useAlwaysOnListening(options: UseAlwaysOnListeningOptions = {}) 
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number | null>(null);
+  const listenTimeoutRef = useRef<number | null>(null);
   const optionsRef = useRef(options);
   optionsRef.current = options;
   const mountedRef = useRef(true);
@@ -118,10 +119,23 @@ export function useAlwaysOnListening(options: UseAlwaysOnListeningOptions = {}) 
     rec.lang = "en-US";
     rec.maxAlternatives = 1;
 
+    const resetListenTimeout = () => {
+      if (listenTimeoutRef.current !== null) {
+        window.clearTimeout(listenTimeoutRef.current);
+      }
+      listenTimeoutRef.current = window.setTimeout(() => {
+        if (!mountedRef.current || !enabled) return;
+        try { recRef.current?.abort(); } catch {}
+        activeRef.current = false;
+        setState((s) => ({ ...s, isListening: false, inputLevel: 0 }));
+      }, 8000);
+    };
+
     rec.onstart = () => {
       if (!mountedRef.current) return;
       activeRef.current = true;
       setState(s => ({ ...s, isListening: true, permissionDenied: false }));
+      resetListenTimeout();
     };
 
     rec.onresult = (e: any) => {
@@ -130,6 +144,7 @@ export function useAlwaysOnListening(options: UseAlwaysOnListeningOptions = {}) 
       if (mountedRef.current) {
         setState(s => ({ ...s, lastTranscript: transcript }));
       }
+      resetListenTimeout();
       if (last.isFinal) {
         processTranscript(transcript);
       }
@@ -190,6 +205,10 @@ export function useAlwaysOnListening(options: UseAlwaysOnListeningOptions = {}) 
   }, []);
 
   const stopListening = useCallback(() => {
+    if (listenTimeoutRef.current !== null) {
+      window.clearTimeout(listenTimeoutRef.current);
+      listenTimeoutRef.current = null;
+    }
     try { recRef.current?.abort(); } catch {}
     recRef.current = null;
     activeRef.current = false;
@@ -238,7 +257,7 @@ export function useAlwaysOnListening(options: UseAlwaysOnListeningOptions = {}) 
     mountedRef.current = true;
     if (enabled && isSupported) {
       // Request mic permission first, then start
-      navigator.mediaDevices.getUserMedia({ audio: true })
+      navigator.mediaDevices.getUserMedia({ audio: { noiseSuppression: true, echoCancellation: true, autoGainControl: true } })
         .then((stream) => {
           setupAudioMeter(stream);
           startListening();
