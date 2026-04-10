@@ -39,41 +39,78 @@ const FLAG_LANGUAGES = [
   { code: "sw", name: "Swahili", cc: "za" },
 ];
 
-const PREFERRED_VOICES = ["samantha", "karen", "moira", "google uk english female", "google us english female", "microsoft zira"];
+const PREFERRED_VOICES = [
+  "samantha", "karen", "moira", "fiona",
+  "microsoft jenny", "microsoft aria", "microsoft zira", "microsoft natasha",
+  "google uk english female", "google us english female",
+];
 
-function getSoftFemaleVoice(): SpeechSynthesisVoice | null {
-  const voices = window.speechSynthesis.getVoices();
+/** Picks the best available English female voice, or the first English voice. */
+function pickFemaleVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
   for (const pref of PREFERRED_VOICES) {
     const match = voices.find((v) => v.name.toLowerCase().includes(pref));
     if (match) return match;
   }
-  return voices.find((v) => v.lang.startsWith("en") && /female|zira|samantha|karen/i.test(v.name)) || null;
+  // Fallback: any voice whose name looks female or any English voice
+  return (
+    voices.find((v) => v.lang.startsWith("en") && /female|zira|samantha|karen|aria|jenny|natasha|moira|fiona/i.test(v.name)) ||
+    voices.find((v) => v.lang.startsWith("en")) ||
+    null
+  );
 }
 
-function speakAsync(text: string): Promise<void> {
+/**
+ * Returns a Promise that resolves with the loaded voice list.
+ * Handles the async nature of speechSynthesis.getVoices() across browsers.
+ */
+function getVoicesReady(): Promise<SpeechSynthesisVoice[]> {
   return new Promise((resolve) => {
-    if (!("speechSynthesis" in window)) { resolve(); return; }
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    const voice = getSoftFemaleVoice();
-    if (voice) u.voice = voice;
-    u.rate = 0.9;
-    u.pitch = 1.1;
-    u.onend = () => resolve();
-    u.onerror = () => resolve();
-    window.speechSynthesis.speak(u);
-    setTimeout(resolve, text.length * 80 + 2000);
+    if (!("speechSynthesis" in window)) { resolve([]); return; }
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) { resolve(voices); return; }
+    // Voices not loaded yet — wait for the event (Chrome, Edge)
+    const handler = () => {
+      resolve(window.speechSynthesis.getVoices());
+      window.speechSynthesis.removeEventListener("voiceschanged", handler);
+    };
+    window.speechSynthesis.addEventListener("voiceschanged", handler);
+    // Safety timeout: if voiceschanged never fires, resolve with whatever is available
+    setTimeout(() => {
+      window.speechSynthesis.removeEventListener("voiceschanged", handler);
+      resolve(window.speechSynthesis.getVoices());
+    }, 2000);
   });
 }
 
-function speak(text: string) {
+async function speakAsync(text: string): Promise<void> {
   if (!("speechSynthesis" in window)) return;
+  const voices = await getVoicesReady();
+  window.speechSynthesis.cancel();
+  return new Promise((resolve) => {
+    const u = new SpeechSynthesisUtterance(text);
+    const voice = pickFemaleVoice(voices);
+    if (voice) u.voice = voice;
+    u.rate = 0.9;
+    u.pitch = 1.1;
+    u.volume = 1;
+    u.onend = () => resolve();
+    u.onerror = () => resolve();
+    window.speechSynthesis.speak(u);
+    // Fallback: resolve after estimated read time so the app never hangs
+    setTimeout(resolve, text.length * 80 + 3000);
+  });
+}
+
+async function speak(text: string): Promise<void> {
+  if (!("speechSynthesis" in window)) return;
+  const voices = await getVoicesReady();
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  const voice = getSoftFemaleVoice();
+  const voice = pickFemaleVoice(voices);
   if (voice) u.voice = voice;
   u.rate = 0.9;
   u.pitch = 1.1;
+  u.volume = 1;
   window.speechSynthesis.speak(u);
 }
 
@@ -192,16 +229,22 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     enabled: true,
   });
 
+  // Step 0: greet as soon as onboarding mounts
+  useEffect(() => {
+    if (step !== 0) return;
+    speakAsync("Welcome to Soul Echoes. How would you like to set things up?");
+  }, []);
+
   useEffect(() => {
     if (step !== 1) return;
-    if (isSpeakMode) speak("Soul Echoes — Your daily healing advocate. A sacred space to release, heal, and find closure.");
+    speak("Soul Echoes. Your daily healing advocate. A sacred space to release, heal, and find closure.");
     const timer = setTimeout(() => setWelcomeDone(true), 4000);
     const autoAdvance = setTimeout(() => setStep(2), 8000);
     return () => { clearTimeout(timer); clearTimeout(autoAdvance); };
-  }, [step, isSpeakMode]);
+  }, [step]);
 
   useEffect(() => {
-    if (step !== 2 || !isSpeakMode) return;
+    if (step !== 2) return;
     if (langSubStep === 0 && hasSpokenRef.current !== "lang-primary") {
       hasSpokenRef.current = "lang-primary";
       speakAsync("What is your primary language?");
@@ -216,29 +259,34 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     }
     if (langSubStep === 2 && hasSpokenRef.current !== "lang-sign") {
       hasSpokenRef.current = "lang-sign";
-      speakAsync("Would you like to enable Sign Language?");
+      speakAsync("Would you like to enable sign language?");
     }
-  }, [step, langSubStep, wantSecondary, isSpeakMode]);
+  }, [step, langSubStep, wantSecondary]);
 
   useEffect(() => {
-    if (step !== 3 || !isSpeakMode) return;
+    if (step !== 3) return;
     if (hasSpokenRef.current !== "voice-setup") {
       hasSpokenRef.current = "voice-setup";
-      speakAsync("Choose your AI voice. Say a voice name, or say continue to skip.");
+      speakAsync("Choose your AI guide voice. You can preview each one, then continue.");
     }
-  }, [step, isSpeakMode]);
+  }, [step]);
 
   useEffect(() => {
-    if (step !== 4 || !isSpeakMode) return;
+    if (step !== 4) return;
     if (hasSpokenRef.current !== "comm-method") {
       hasSpokenRef.current = "comm-method";
-      speakAsync("How do you like to communicate? You can choose all that apply.");
+      speakAsync("Every communication method is always available to you. Switch anytime, from any room.");
     }
-  }, [step, isSpeakMode]);
+  }, [step]);
+
+  useEffect(() => {
+    if (step !== 5) return;
+    speakAsync("This app includes a private safety feature. Only you will know what it does. You can access it anytime from the main menu.");
+  }, [step]);
 
   useEffect(() => {
     if (step !== 6) return;
-    if (isSpeakMode) speak("You are all set. Welcome to Soul Echoes.");
+    speak("You are all set. Welcome to Soul Echoes.");
     const timer = setTimeout(() => {
       savePreferences({
         onboardingComplete: true,
