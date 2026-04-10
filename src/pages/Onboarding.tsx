@@ -12,7 +12,6 @@ import {
 } from "@/lib/preferences";
 import { getVoiceSettings, saveVoiceSettings, type VoiceSettings } from "@/lib/voiceSettings";
 import ListeningIndicator from "@/components/ListeningIndicator";
-import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 
 const FLAG_LANGUAGES = [
   { code: "en", name: "English", cc: "us" },
@@ -253,11 +252,176 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
   const isSpeakMode = inputMethod === "speak";
 
-  // Always-on listening — routes to handleVoiceRef
-  const { isListening } = useAlwaysOnListening({
-    onTranscript: (t) => handleVoiceRef.current(t),
-    enabled: true,
-  });
+  const [isListening, setIsListening] = useState(false);
+  const [inputLevel, setInputLevel] = useState(0);
+  const recognitionRef = useRef<any>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const dataArrayRef = useRef<Uint8Array | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const resetTimerRef = useRef<number | null>(null);
+  const restartTimerRef = useRef<number | null>(null);
+  const mountedRef = useRef(true);
+
+  const stopListening = useCallback(() => {
+    if (resetTimerRef.current !== null) {
+      window.clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = null;
+    }
+    if (restartTimerRef.current !== null) {
+      window.clearTimeout(restartTimerRef.current);
+      restartTimerRef.current = null;
+    }
+    try { recognitionRef.current?.abort(); } catch {}
+    recognitionRef.current = null;
+    setIsListening(false);
+    setInputLevel(0);
+  }, []);
+
+  const stopAudioMeter = useCallback(() => {
+    if (rafRef.current !== null) {
+      window.cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    analyserRef.current = null;
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+  }, []);
+
+  const resetListenTimeout = useCallback(() => {
+    if (resetTimerRef.current !== null) {
+      window.clearTimeout(resetTimerRef.current);
+    }
+    resetTimerRef.current = window.setTimeout(() => {
+      if (!mountedRef.current) return;
+      try { recognitionRef.current?.abort(); } catch {}
+      setIsListening(false);
+      setInputLevel(0);
+    }, 8000);
+  }, []);
+
+  const setupAudioMeter = useCallback((stream: MediaStream) => {
+    const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const audioContext = new AudioCtx();
+    const source = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    analyserRef.current = analyser;
+    audioContextRef.current = audioContext;
+    streamRef.current = stream;
+    dataArrayRef.current = new Uint8Array(analyser.frequencyBinCount);
+
+    const tick = () => {
+      if (!mountedRef.current) return;
+      const analyserNode = analyserRef.current;
+      const dataArray = dataArrayRef.current;
+      if (!analyserNode || !dataArray) return;
+      analyserNode.getByteTimeDomainData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i += 1) {
+        const x = (dataArray[i] - 128) / 128;
+        sum += x * x;
+      }
+      const rms = Math.sqrt(sum / dataArray.length);
+      const level = Math.min(1, rms * 2);
+      setInputLevel(level);
+      rafRef.current = window.requestAnimationFrame(tick);
+    };
+
+    rafRef.current = window.requestAnimationFrame(tick);
+  }, []);
+
+  const startRecognition = useCallback(() => {
+    if (recognitionRef.current) return;
+    const SR = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    if (!SR) return;
+
+    const rec = new SR();
+    rec.continuous = true;
+    rec.interimResults = false;
+    rec.lang = "en-US";
+    rec.maxAlternatives = 1;
+
+    rec.onstart = () => {
+      if (!mountedRef.current) return;
+      setIsListening(true);
+      resetListenTimeout();
+    };
+
+    rec.onresult = (e: any) => {
+      const last = e.results[e.results.length - 1];
+      const transcript = last[0].transcript;
+      if (mountedRef.current) {
+        setRetryMessage(null);
+      }
+      resetListenTimeout();
+      if (last.isFinal) {
+        handleVoiceRef.current(transcript);
+      }
+    };
+
+    rec.onerror = (e: any) => {
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        setIsListening(false);
+        return;
+      }
+      if (mountedRef.current) {
+        restartTimerRef.current = window.setTimeout(() => startRecognition(), 1000);
+      }
+    };
+
+    rec.onend = () => {
+      recognitionRef.current = null;
+      setIsListening(false);
+      if (mountedRef.current) {
+        restartTimerRef.current = window.setTimeout(() => startRecognition(), 300);
+      }
+    };
+
+    recognitionRef.current = rec;
+    try {
+      rec.start();
+    } catch {
+      if (mountedRef.current) {
+        restartTimerRef.current = window.setTimeout(() => startRecognition(), 1000);
+      }
+    }
+  }, [resetListenTimeout]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    if (typeof window === "undefined" || !navigator.mediaDevices?.getUserMedia) return;
+
+    navigator.mediaDevices.getUserMedia({
+      audio: {
+        noiseSuppression: true,
+        echoCancellation: true,
+        autoGainControl: true,
+      },
+    })
+      .then((stream) => {
+        setupAudioMeter(stream);
+        startRecognition();
+      })
+      .catch(() => {
+        setIsListening(false);
+      });
+
+    return () => {
+      mountedRef.current = false;
+      stopListening();
+      stopAudioMeter();
+    };
+  }, [setupAudioMeter, startRecognition, stopAudioMeter, stopListening]);
 
   // Step 0: greet as soon as onboarding mounts
   useEffect(() => {
@@ -401,18 +565,35 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         else setRetryMessage(`I heard "${t}". Say yes or no.`);
       }
     } else if (step === 3) {
-      if (["continue", "next", "skip"].some((w) => lower.includes(w))) { setStep(4); return; }
+      if (["continue", "next", "skip"].some((w) => lower.includes(w))) {
+        clearSpoken();
+        setRetryMessage(null);
+        setStep(4);
+        return;
+      }
       const matchingVoice = availableVoices.find((v) => lower.includes(v.name.toLowerCase()) || v.name.toLowerCase().includes(lower));
       if (matchingVoice) {
         setVoiceSettings((s) => ({ ...s, voiceURI: matchingVoice.voiceURI, elevenLabsVoiceId: null, elevenLabsVoiceName: null }));
         setRetryMessage(null);
+        clearSpoken();
+        ttsSpeakAsync(`Great choice. Moving on to the next step.`).then(() => setStep(4));
       } else {
         setRetryMessage(`I heard "${t}" — say a voice name or "continue".`);
       }
     } else if (step === 4) {
-      // All methods are always on — just acknowledge and let user continue
       if (["continue", "next", "okay", "ok", "got it", "yes"].some((w) => lower.includes(w))) {
+        clearSpoken();
+        setRetryMessage(null);
         setStep(5);
+      }
+    } else if (step === 5) {
+      const yn = matchYesNo(t);
+      if (yn === true || ["got it", "continue", "ok", "okay", "yes"].some((w) => lower.includes(w))) {
+        clearSpoken();
+        setRetryMessage(null);
+        setStep(6);
+      } else {
+        setRetryMessage(`I heard "${t}" — say yes or got it to continue.`);
       }
     }
   }, [step, langSubStep, wantSecondary, voiceSettings]);
@@ -520,7 +701,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* STEP 2: Language */}
         {step === 2 && (
           <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 bg-gradient-to-b from-[hsl(220,60%,12%)] to-[hsl(230,50%,18%)] rounded-3xl p-4 sm:p-6">
-            {isSpeakMode && <ListeningIndicator visible={isListening} />}
+            {isSpeakMode && <ListeningIndicator visible={isListening} level={inputLevel} />}
             {retryMessage && <p className="text-sm text-center text-destructive" role="alert">{retryMessage}</p>}
             {inputMethod === "sign" && <ASLCameraPanel open={true} onClose={() => {}} />}
             {inputMethod === "connect" && (
@@ -632,7 +813,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* STEP 3: Voice Setup */}
         {step === 3 && (
           <motion.div key="voice" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[80vh] overflow-y-auto">
-            {isSpeakMode && <ListeningIndicator visible={isListening} />}
+            {isSpeakMode && <ListeningIndicator visible={isListening} level={inputLevel} />}
             {retryMessage && <p className="text-sm text-center text-destructive">{retryMessage}</p>}
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">Choose Your AI Voice</h2>
             <p className="text-center text-muted-foreground text-sm">Pick the voice Soul Echoes will use to speak to you.</p>
@@ -691,7 +872,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
         {/* STEP 4: Communication */}
         {step === 4 && (
           <motion.div key="communication" {...fadeSlide} className="w-full max-w-2xl mx-auto space-y-4">
-            {isSpeakMode && <ListeningIndicator visible={isListening} />}
+            {isSpeakMode && <ListeningIndicator visible={isListening} level={inputLevel} />}
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">Your communication options</h2>
             <p className="text-center text-muted-foreground text-sm leading-relaxed">
               <span className="text-foreground font-medium">Every method is always available to you.</span> Speak, sign, point, type, or connect a device — switch anytime, from any room, without ever leaving where you are.
