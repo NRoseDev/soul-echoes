@@ -522,8 +522,8 @@ export default function BrainDump() {
                 <button type="button" onClick={() => window.location.href = "/practitioner/signup"} className="rounded-3xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20">
                   Connect to Healer
                 </button>
-                <button type="button" onClick={() => toast({ title: "Recommended Books", description: "A reading list will be available soon.", variant: "default" })} className="rounded-3xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20">
-                  Recommended Books
+                <button type="button" onClick={() => window.location.href = "/resources"} className="rounded-3xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20">
+                  Healing Resources
                 </button>
                 <button type="button" onClick={() => window.location.href = "/breathe"} className="rounded-3xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20">
                   Healing Practice
