@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Heart, Sparkles, Users, Star, Shield, Leaf, HandHeart, ArrowLeft } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Heart, Sparkles, Users, Star, Shield, Leaf, HandHeart, ArrowLeft, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -206,6 +207,8 @@ const PROFESSIONAL_TIERS = [
 export default function Pricing() {
   const navigate = useNavigate();
   const [energyExchange, setEnergyExchange] = useState(false);
+  const [energyExchangeTerms, setEnergyExchangeTerms] = useState(false);
+  const [payItForwardTerms, setPayItForwardTerms] = useState(false);
   const [donationAmount, setDonationAmount] = useState(0);
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
 
@@ -280,19 +283,58 @@ export default function Pricing() {
 
         {/* Energy Exchange Agreement */}
         <Card className="border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-indigo-500/10">
-          <CardContent className="p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Sparkles className="text-purple-400" size={22} />
-                <span className="font-semibold text-foreground">Energy Exchange Agreement</span>
-              </div>
-              <Switch checked={energyExchange} onCheckedChange={setEnergyExchange} />
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-center gap-3">
+              <Sparkles className="text-purple-400 shrink-0" size={22} />
+              <span className="font-semibold text-foreground text-lg">Energy Exchange</span>
             </div>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Instead of — or in addition to — monetary payment, I agree to give back through acts of
-              kindness, volunteering, or sharing healing energy with others. This is a sacred agreement
-              between you and the universe. ✨
-            </p>
+
+            <div className="space-y-2">
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Energy exchange is a <strong className="text-foreground">private agreement between you and your healer</strong> — facilitated through Soul Echoes as a platform. It means you offer something of genuine value in return for the healing work you receive: time, skill, creative labor, care, or a reciprocal act of service. Soul Echoes does not set the terms, hold funds, or verify the exchange. We simply provide the space for it to be honoured.
+              </p>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                This option exists because we believe healing should never be withheld because of financial limitation — and that every exchange, whatever form it takes, carries its own integrity.
+              </p>
+            </div>
+
+            {/* Terms checkbox — required before enabling */}
+            <div className="flex items-start gap-3 bg-background/40 rounded-xl p-3 border border-purple-500/20">
+              <Checkbox
+                id="energy-exchange-terms"
+                checked={energyExchangeTerms}
+                onCheckedChange={(v) => {
+                  setEnergyExchangeTerms(!!v);
+                  if (!v) setEnergyExchange(false);
+                }}
+                className="mt-0.5"
+              />
+              <label htmlFor="energy-exchange-terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+                I understand that energy exchange is a private agreement between myself and my healer. Soul Echoes is a platform that facilitates connection — it is not a financial intermediary and does not manage, guarantee, or enforce exchange terms. I enter this agreement freely and in good faith.
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-foreground font-medium">
+                {energyExchange ? "Energy exchange active" : "Enable energy exchange for this session"}
+              </span>
+              <Switch
+                checked={energyExchange}
+                onCheckedChange={(v) => {
+                  if (v && !energyExchangeTerms) {
+                    toast.error("Please read and agree to the energy exchange terms first.");
+                    return;
+                  }
+                  setEnergyExchange(v);
+                }}
+              />
+            </div>
+
+            {energyExchange && (
+              <p className="text-xs text-purple-300 italic">
+                Energy exchange is noted. Your healer will receive this indication when you connect.
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -410,28 +452,60 @@ export default function Pricing() {
 
         {/* Pay It Forward */}
         <Card className="border-green-500/30 bg-gradient-to-r from-green-500/10 to-teal-500/10">
-          <CardContent className="p-5 space-y-3">
+          <CardContent className="p-5 space-y-4">
             <div className="flex items-center gap-3">
-              <Heart className="text-green-400" size={22} />
-              <span className="font-semibold text-foreground">Pay It Forward 💚</span>
+              <Heart className="text-green-400 shrink-0" size={22} />
+              <span className="font-semibold text-foreground text-lg">Pay It Forward — Honor System</span>
             </div>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Add a donation at checkout to fund someone else's healing journey. Every dollar
-              goes directly to keeping Soul Echoes accessible for those who can't afford it.
-            </p>
-            <div className="flex gap-2 flex-wrap">
-              {[0, 1, 3, 5, 11].map((amt) => (
-                <Button
-                  key={amt}
-                  size="sm"
-                  variant={donationAmount === amt ? "default" : "outline"}
-                  onClick={() => setDonationAmount(amt)}
-                  className="text-xs"
-                >
-                  {amt === 0 ? "None" : `+$${amt}`}
-                </Button>
-              ))}
+
+            <div className="space-y-2">
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                This is an <strong className="text-foreground">honor system</strong>. If Soul Echoes has helped you and you are in a season where you can give, consider adding a contribution to cover someone else's healing access. There is no obligation, no tracking, and no judgment for giving nothing.
+              </p>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Contributions go directly to the <strong className="text-foreground">Rise Up Healing</strong> nonprofit fund — keeping the platform free and accessible for those who need it most. Give when you can. Receive freely when you cannot. Both are welcome here.
+              </p>
             </div>
+
+            {/* Terms checkbox */}
+            <div className="flex items-start gap-3 bg-background/40 rounded-xl p-3 border border-green-500/20">
+              <Checkbox
+                id="pay-it-forward-terms"
+                checked={payItForwardTerms}
+                onCheckedChange={(v) => {
+                  setPayItForwardTerms(!!v);
+                  if (!v) setDonationAmount(0);
+                }}
+                className="mt-0.5"
+              />
+              <label htmlFor="pay-it-forward-terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+                I understand that Pay It Forward contributions are voluntary donations to the Rise Up Healing nonprofit. They are not refundable and are not exchanged for services. Soul Echoes is a platform, not a financial intermediary.
+              </label>
+            </div>
+
+            {payItForwardTerms && (
+              <div className="space-y-2">
+                <p className="text-xs text-foreground font-medium">Choose a contribution amount:</p>
+                <div className="flex gap-2 flex-wrap">
+                  {[0, 1, 3, 5, 11].map((amt) => (
+                    <Button
+                      key={amt}
+                      size="sm"
+                      variant={donationAmount === amt ? "default" : "outline"}
+                      onClick={() => setDonationAmount(amt)}
+                      className="text-xs"
+                    >
+                      {amt === 0 ? "None" : `+$${amt}`}
+                    </Button>
+                  ))}
+                </div>
+                {donationAmount > 0 && (
+                  <p className="text-xs text-green-400 italic">
+                    Thank you. Your +${donationAmount} contribution will be added at checkout.
+                  </p>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -476,6 +550,27 @@ export default function Pricing() {
             <p className="text-xs text-center text-muted-foreground italic">
               Honor system pricing means you are trusted to choose the tier that best matches your means and your healing work.
             </p>
+          </CardContent>
+        </Card>
+
+        {/* Platform Disclaimer */}
+        <Card className="border-muted bg-muted/30">
+          <CardContent className="p-5 space-y-3">
+            <div className="flex items-start gap-3">
+              <Info className="text-muted-foreground shrink-0 mt-0.5" size={18} />
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-foreground">Platform Disclaimer</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Soul Echoes is a digital platform that connects individuals with healing resources and practitioners. Soul Echoes is <strong className="text-foreground">not a financial intermediary, payment processor, or escrow service</strong>. Any energy exchange, monetary transaction, or contribution facilitated through or alongside this platform is a direct private agreement between the parties involved.
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Soul Echoes does not verify, guarantee, mediate, or take responsibility for the terms or outcomes of private energy exchange arrangements. Pay It Forward contributions are voluntary donations to the Rise Up Healing nonprofit and are processed through secure third-party payment infrastructure. Soul Echoes does not hold, transfer, or control user funds.
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  By engaging with any exchange feature on this platform, you confirm that you are doing so freely, with full understanding of these terms, and without expectation of financial guarantee or intervention from Soul Echoes.
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
