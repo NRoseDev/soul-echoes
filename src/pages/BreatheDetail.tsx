@@ -350,6 +350,25 @@ export default function BreatheDetail() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4 pb-32">
+        <div className="space-y-4 bg-muted/70 border border-border/80 rounded-3xl p-4 mb-6">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Some breathwork and energy practices can surface deep emotions or trauma. You are never alone here. Intercessors and healers are always available to support you. If you feel overwhelmed stop and reach out.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Button
+              className="w-full bg-white/10 text-foreground border border-border hover:bg-white/20"
+              onClick={() => navigate("/community")}
+            >
+              Talk to an Intercessor
+            </Button>
+            <Button
+              className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground"
+              onClick={() => navigate("/practitioner")}
+            >
+              Connect to a Healer
+            </Button>
+          </div>
+        </div>
         <SectionContent id={id} />
       </div>
 
