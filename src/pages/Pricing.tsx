@@ -18,6 +18,7 @@ const INDIVIDUAL_TIERS = [
     features: [
       "33-day full access trial",
       "Brain Dump — always unlimited",
+      "AI navigator always available",
       "1 use per healing room every 11 days after trial",
       "Access all 9 healing rooms",
     ],
@@ -28,10 +29,11 @@ const INDIVIDUAL_TIERS = [
   {
     name: "Seed",
     price: 1,
-    label: "$1/mo",
+    label: "$1/mo or $11/yr",
     description: "Plant the seed of your healing journey.",
     features: [
       "Everything in Free",
+      "AI navigator always available",
       "3 sessions per room per week",
       "Brain Dump unlimited",
       "Community access",
@@ -44,10 +46,11 @@ const INDIVIDUAL_TIERS = [
   {
     name: "Bloom",
     price: 3,
-    label: "$3/mo",
+    label: "$3/mo or $33/yr",
     description: "Watch your inner garden start to bloom.",
     features: [
       "Everything in Seed",
+      "AI navigator always available",
       "10 sessions per room per week",
       "Priority AI responses",
       "Journal history saved",
@@ -61,10 +64,11 @@ const INDIVIDUAL_TIERS = [
   {
     name: "Radiance",
     price: 5,
-    label: "$5/mo",
+    label: "$5/mo or $55/yr",
     description: "Step fully into your light.",
     features: [
       "Everything in Bloom",
+      "AI navigator always available",
       "25 sessions per room per week",
       "Advanced spiritual tools",
       "Shadow work deep dives",
@@ -77,10 +81,11 @@ const INDIVIDUAL_TIERS = [
   {
     name: "Sanctuary",
     price: 7,
-    label: "$7/mo",
+    label: "$7/mo or $77/yr",
     description: "Your all-inclusive healing sanctuary.",
     features: [
       "Everything in Radiance",
+      "AI navigator always available",
       "Unlimited sessions everywhere",
       "1-on-1 practitioner booking",
       "Crisis counselor priority",
@@ -93,10 +98,11 @@ const INDIVIDUAL_TIERS = [
   {
     name: "Ultimate",
     price: 9,
-    label: "$9/mo",
+    label: "$9/mo or $99/yr",
     description: "Everything plus early access to new features.",
     features: [
       "Everything in Sanctuary",
+      "AI navigator always available",
       "Beta feature access",
       "Exclusive healing circles",
       "Direct feedback channel",
@@ -301,6 +307,9 @@ export default function Pricing() {
             <p className="text-center text-muted-foreground text-sm">
               Your personal healing journey. Brain Dump is always free and unlimited. 💜
             </p>
+            <p className="text-center text-xs text-muted-foreground">
+              Annual membership options are available for individual tiers at $11, $33, $55, $77, and $99 per year.
+            </p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {INDIVIDUAL_TIERS.map((tier) => (
                 <Card
@@ -444,6 +453,8 @@ export default function Pricing() {
                 { icon: "🌱", title: "Community Programs", desc: "Free healing circles and workshops" },
                 { icon: "♿", title: "Accessibility", desc: "ASL, AAC, screen reader, and more" },
                 { icon: "🆘", title: "Crisis Services", desc: "24/7 crisis counselor availability" },
+                { icon: "💎", title: "Practitioner Store Share", desc: "Practitioners keep 97% of store sales and 3% supports Rise Up Healing." },
+                { icon: "🛍️", title: "Store Discount", desc: "Users receive 33% off all store products." },
                 { icon: "🌍", title: "Global Reach", desc: "Multilingual support and outreach" },
               ].map((item) => (
                 <div key={item.title} className="flex gap-3 items-start p-3 rounded-lg bg-card/50">
@@ -458,6 +469,9 @@ export default function Pricing() {
             <p className="text-xs text-center text-muted-foreground italic">
               Soul Echoes is a project of Rise Up Healing — a 501(c)(3) nonprofit organization.
               All proceeds go toward our mission of universal healing access. 🙏
+            </p>
+            <p className="text-xs text-center text-muted-foreground italic">
+              Honor system pricing means you are trusted to choose the tier that best matches your means and your healing work.
             </p>
           </CardContent>
         </Card>
