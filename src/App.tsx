@@ -18,6 +18,8 @@ import PractitionerSignup from "./pages/PractitionerSignup";
 import Pricing from "./pages/Pricing";
 import JournalRoom from "./pages/JournalRoom";
 import JournalSection from "./pages/JournalSection";
+import UnspokenRoom from "./pages/UnspokenRoom";
+import UnspokenDetail from "./pages/UnspokenDetail";
 import DistressSignal from "./components/DistressSignal";
 import AIGuideAnnouncer from "./components/AIGuideAnnouncer";
 import AlwaysOnVoice from "./components/AlwaysOnVoice";
@@ -53,7 +55,8 @@ const App = () => {
               <Route path="/journal/:section" element={<JournalSection />} />
               <Route path="/breathe" element={<BreathePage />} />
               <Route path="/breathe/:section" element={<BreatheDetail />} />
-              <Route path="/unspoken" element={<HealingRoom />} />
+              <Route path="/unspoken" element={<UnspokenRoom />} />
+              <Route path="/unspoken/:section" element={<UnspokenDetail />} />
               <Route path="/shadow-work" element={<HealingRoom />} />
               <Route path="/wisdom" element={<HealingRoom />} />
               <Route path="/spiritual-tools" element={<HealingRoom />} />
