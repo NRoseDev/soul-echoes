@@ -8,7 +8,7 @@ const relationshipCards = [
   "Mother", "Father", "Partner", "Sibling", "Child", "Grandparent", "Best Friend", "Mentor", "Teacher", "Therapist",
   "Coach", "Colleague", "Neighbor", "Ex-Partner", "Soulmate", "Twin Flame", "Ancestor", "Passed Loved One", "Spirit Guide", "Animal Companion",
   "Divine Presence", "Inner Child", "Future Self", "Past Self", "Stranger", "Boss", "Lover", "Parent of a Child", "Community Member", "Healer",
-  "Intercessor", "Prayer Partner", "Guardian Angel", "Higher Self",
+  "Intercessor", "Prayer Partner", "Guardian Angel",
 ];
 
 const aslSigns = [
