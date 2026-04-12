@@ -12,7 +12,7 @@ export default function JournalRoom() {
         <div className="flex flex-col gap-4 mb-8">
           <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-white/90 shadow-lg shadow-black/20">
             <span>📓</span>
-            <span>Journal room — eight focused sections to hold your thoughts, healing, and growth.</span>
+            <span>Journal room — nine focused sections to hold your thoughts, healing, and growth.</span>
           </div>
           <div className="space-y-3">
             <h1 className="text-3xl md:text-4xl font-display font-bold">Journal Room</h1>

@@ -9,7 +9,8 @@ export type JournalSectionKey =
   | "emotional-release"
   | "manifestation"
   | "letters-never-sent"
-  | "health-journal";
+  | "health-journal"
+  | "healer-session-journal";
 
 export type JournalFieldType = "text" | "textarea" | "date" | "select";
 
@@ -130,6 +131,19 @@ export const JOURNAL_SECTIONS: JournalSectionDefinition[] = [
       { name: "symptoms", label: "Symptoms", placeholder: "Record any symptoms or sensations.", type: "textarea", rows: 4 },
       { name: "painLevel", label: "Pain level", placeholder: "0 = no pain, 10 = intense pain.", type: "select", options: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"] },
       { name: "healingProgress", label: "Healing progress", placeholder: "How is your body or spirit moving toward ease?", type: "textarea", rows: 5 },
+    ],
+  },
+  {
+    id: "healer-session-journal",
+    title: "Healer Session Journal",
+    description: "Log session notes, homework, progress, and shared insights with your healer.",
+    emoji: "🧘",
+    fields: [
+      { name: "sessionDate", label: "Session date", placeholder: "Select the date of your session.", type: "date" },
+      { name: "sessionNotes", label: "Session notes", placeholder: "What did you discuss or learn during the session?", type: "textarea", rows: 6 },
+      { name: "homework", label: "Homework / practices", placeholder: "What did your healer assign?", type: "textarea", rows: 5 },
+      { name: "progress", label: "Progress", placeholder: "What shifts are you noticing from your work together?", type: "textarea", rows: 5 },
+      { name: "sharedNotes", label: "Shared notes", placeholder: "Shared notes visible to you and your connected healer.", type: "textarea", rows: 5 },
     ],
   },
 ];
