@@ -550,16 +550,28 @@ export default function BrainDump() {
       </div>
 
       {messages.length === 1 && (
-        <div className="px-4 pb-3 flex flex-wrap gap-2" role="group" aria-label="Suggested prompts">
-          {prompts.map((p) => (
-            <button
-              key={p}
-              onClick={() => send(p)}
-              className="text-xs px-3 py-1.5 rounded-full border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              {p}
-            </button>
-          ))}
+        <div className="space-y-4 px-4 pb-3">
+          <div className="rounded-3xl border border-border bg-card p-4 text-sm text-foreground shadow-sm">
+            <p className="font-semibold text-foreground">Your guided intro</p>
+            <ul className="mt-3 space-y-2 text-muted-foreground">
+              <li>• Brain Dump is always free and unlimited.</li>
+              <li>• Paid tiers unlock more room access, priority features, and yearly savings.</li>
+              <li>• The shop offers tools, books, and resources with options for free, paid, or pay-it-forward support.</li>
+              <li>• Connect to a healer anytime through the practitioner section.</li>
+              <li>• Intercessors are always available to support you in prayer and care.</li>
+            </ul>
+          </div>
+          <div className="px-4 pb-3 flex flex-wrap gap-2" role="group" aria-label="Suggested prompts">
+            {prompts.map((p) => (
+              <button
+                key={p}
+                onClick={() => send(p)}
+                className="text-xs px-3 py-1.5 rounded-full border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              >
+                {p}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
