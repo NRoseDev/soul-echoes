@@ -16,6 +16,8 @@ import VoiceSettings from "./pages/VoiceSettings";
 import Settings from "./pages/Settings";
 import PractitionerSignup from "./pages/PractitionerSignup";
 import Pricing from "./pages/Pricing";
+import JournalRoom from "./pages/JournalRoom";
+import JournalSection from "./pages/JournalSection";
 import DistressSignal from "./components/DistressSignal";
 import AIGuideAnnouncer from "./components/AIGuideAnnouncer";
 import AlwaysOnVoice from "./components/AlwaysOnVoice";
@@ -47,7 +49,8 @@ const App = () => {
           <AppLayout>
             <Routes>
               <Route path="/" element={<BrainDump />} />
-              <Route path="/journal" element={<HealingRoom />} />
+              <Route path="/journal" element={<JournalRoom />} />
+              <Route path="/journal/:section" element={<JournalSection />} />
               <Route path="/breathe" element={<BreathePage />} />
               <Route path="/breathe/:section" element={<BreatheDetail />} />
               <Route path="/unspoken" element={<HealingRoom />} />
