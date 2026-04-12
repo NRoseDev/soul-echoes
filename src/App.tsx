@@ -20,6 +20,8 @@ import JournalRoom from "./pages/JournalRoom";
 import JournalSection from "./pages/JournalSection";
 import UnspokenRoom from "./pages/UnspokenRoom";
 import UnspokenDetail from "./pages/UnspokenDetail";
+import ShadowWorkRoom from "./pages/ShadowWorkRoom";
+import ShadowWorkDetail from "./pages/ShadowWorkDetail";
 import DistressSignal from "./components/DistressSignal";
 import AIGuideAnnouncer from "./components/AIGuideAnnouncer";
 import AlwaysOnVoice from "./components/AlwaysOnVoice";
@@ -57,7 +59,8 @@ const App = () => {
               <Route path="/breathe/:section" element={<BreatheDetail />} />
               <Route path="/unspoken" element={<UnspokenRoom />} />
               <Route path="/unspoken/:section" element={<UnspokenDetail />} />
-              <Route path="/shadow-work" element={<HealingRoom />} />
+              <Route path="/shadow-work" element={<ShadowWorkRoom />} />
+              <Route path="/shadow-work/:module" element={<ShadowWorkDetail />} />
               <Route path="/wisdom" element={<HealingRoom />} />
               <Route path="/spiritual-tools" element={<HealingRoom />} />
               <Route path="/community" element={<HealingRoom />} />

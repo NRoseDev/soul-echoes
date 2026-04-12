@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Wind, Sparkles, Heart, Droplet, Hexagon, Tool } from "lucide-react";
+import { ArrowRight, BookOpen, Wind, Sparkles, Heart, Droplet, Hexagon, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const resources = [
@@ -43,7 +43,7 @@ const resources = [
     title: "Other healing tools",
     description: "Access rituals, journals, sound bowls, and supportive self-care practices.",
     tags: ["Free Tier", "Paid Tier"],
-    icon: Tool,
+    icon: Wrench,
   },
 ];
 
