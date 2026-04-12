@@ -59,6 +59,12 @@ const breathworkContent = [
   { name: "Belly Breathing (Diaphragmatic)", steps: ["Place one hand on your chest, one on your belly.", "Breathe in slowly through your nose — your belly should rise, not your chest.", "Exhale slowly through pursed lips.", "Focus on making the exhale longer than the inhale.", "Continue for 5 minutes."] },
   { name: "Alternate Nostril Breathing (Nadi Shodhana)", steps: ["Sit comfortably. Use your right thumb to close your right nostril.", "Inhale through your left nostril for 4 counts.", "Close your left nostril with your ring finger, release your thumb.", "Exhale through your right nostril for 4 counts.", "Inhale through the right, close it, exhale through the left. Repeat for 5–10 cycles."] },
   { name: "Humming Breath (Bhramari)", steps: ["Sit comfortably and close your eyes.", "Place your index fingers gently on the cartilage of your ears (tragus).", "Inhale deeply through your nose.", "As you exhale, make a steady humming sound like a bee.", "Feel the vibration in your head and chest. Repeat 5–7 times."] },
+  { name: "Ocean Breath (Ujjayi)", steps: ["Sit tall and relax your shoulders.", "Inhale through your nose while slightly constricting the back of your throat.", "Exhale through your nose with the same gentle constriction, making a soft ocean sound.", "Keep the breath smooth and even.", "Continue for 5–10 cycles, staying aware of the sound and rhythm."] },
+  { name: "Triangle Breathing", steps: ["Inhale through your nose for 4 counts.", "Hold your breath for 4 counts.", "Exhale through your nose for 4 counts.", "Hold again for 4 counts.", "Imagine tracing a triangle with each phase. Repeat for 3–5 minutes."] },
+  { name: "Cooling Breath (Sheetali)", steps: ["Sit comfortably with your spine straight.", "Curl the sides of your tongue upward into a tube or keep lips slightly parted if needed.", "Inhale slowly through the tongue or mouth with a cooling sensation.", "Close your mouth and exhale through your nose.", "Repeat for 8–10 breaths until you feel calm and cool."] },
+  { name: "Power Breathing", steps: ["Stand or sit tall with shoulders relaxed.", "Inhale deeply through your nose, filling belly and chest.", "Exhale quickly and forcefully through your mouth.", "Continue with strong, active breaths for 30 seconds to 1 minute.", "Slow down and rest with normal breath after each round."] },
+  { name: "Heart Coherence", steps: ["Place one hand on your heart and one on your belly.", "Inhale slowly for 5 counts, feeling your heart expand.", "Exhale gently for 5 counts, releasing tension from your chest.", "Imagine your breath flowing in and out through your heart center.", "Continue for 3–5 minutes while thinking of a positive feeling (gratitude, love, safety)."] },
+  { name: "Grounding Breath", steps: ["Sit with both feet on the floor and hands resting on your thighs.", "Inhale deeply through your nose, drawing energy up from the earth through your feet.", "Exhale slowly through your nose, releasing tension down through your legs into the ground.", "With each breath, imagine roots extending from your feet into the earth.", "Repeat for 5–10 breaths until you feel stable and centered."] },
 ];
 
 const vagusNerveContent = {
@@ -332,7 +338,7 @@ export default function BreatheDetail() {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -40 }}
       transition={{ duration: 0.3 }}
-      className="flex-1 flex flex-col min-h-0"
+      className="flex-1 flex flex-col min-h-0 bg-gradient-to-br from-violet-950 via-slate-950 to-sky-950"
     >
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 flex items-center gap-3">
