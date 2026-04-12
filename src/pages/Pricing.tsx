@@ -14,44 +14,44 @@ const INDIVIDUAL_TIERS = [
     name: "Free Forever",
     price: 0,
     label: "$0",
-    description: "33-day full trial, then 1 use per space every 11 days. Brain Dump always unlimited.",
+    description: "Brain Dump always unlimited, AI navigator always available, all other rooms 1 use every 11 days after 33 day trial.",
     features: [
-      "33-day full access trial",
-      "Brain Dump — always unlimited",
+      "33-day full trial",
+      "Brain Dump always unlimited",
       "AI navigator always available",
-      "1 use per healing room every 11 days after trial",
-      "Access all 9 healing rooms",
+      "All other rooms 1 use every 11 days after trial",
+      "Access every healing room",
     ],
     icon: Leaf,
     accent: "from-green-500/20 to-emerald-600/20",
     border: "border-green-500/30",
   },
   {
-    name: "Seed",
+    name: "Basic",
     price: 1,
     label: "$1/mo or $11/yr",
-    description: "Plant the seed of your healing journey.",
+    description: "Basic healing support and more sessions.",
     features: [
-      "Everything in Free",
+      "Everything in Free Forever",
       "AI navigator always available",
-      "3 sessions per room per week",
+      "More room sessions",
       "Brain Dump unlimited",
-      "Community access",
+      "Honor system support",
     ],
     icon: Sparkles,
     accent: "from-teal-500/20 to-cyan-600/20",
     border: "border-teal-500/30",
-    priceId: "individual_seed",
+    priceId: "individual_basic",
   },
   {
-    name: "Bloom",
+    name: "More Sessions",
     price: 3,
     label: "$3/mo or $33/yr",
-    description: "Watch your inner garden start to bloom.",
+    description: "More session access across rooms.",
     features: [
-      "Everything in Seed",
+      "Everything in Basic",
       "AI navigator always available",
-      "10 sessions per room per week",
+      "More room sessions",
       "Priority AI responses",
       "Journal history saved",
     ],
@@ -59,32 +59,32 @@ const INDIVIDUAL_TIERS = [
     accent: "from-pink-500/20 to-rose-600/20",
     border: "border-pink-500/30",
     popular: true,
-    priceId: "individual_bloom",
+    priceId: "individual_more_sessions",
   },
   {
-    name: "Radiance",
+    name: "Even More",
     price: 5,
     label: "$5/mo or $55/yr",
-    description: "Step fully into your light.",
+    description: "Even more room time and tools.",
     features: [
-      "Everything in Bloom",
+      "Everything in More Sessions",
       "AI navigator always available",
-      "25 sessions per room per week",
+      "Expanded access to healing rooms",
       "Advanced spiritual tools",
       "Shadow work deep dives",
     ],
     icon: Star,
     accent: "from-amber-500/20 to-yellow-600/20",
     border: "border-amber-500/30",
-    priceId: "individual_radiance",
+    priceId: "individual_even_more",
   },
   {
-    name: "Sanctuary",
+    name: "All Inclusive",
     price: 7,
     label: "$7/mo or $77/yr",
-    description: "Your all-inclusive healing sanctuary.",
+    description: "All inclusive healing access.",
     features: [
-      "Everything in Radiance",
+      "Everything in Even More",
       "AI navigator always available",
       "Unlimited sessions everywhere",
       "1-on-1 practitioner booking",
@@ -93,15 +93,15 @@ const INDIVIDUAL_TIERS = [
     icon: Shield,
     accent: "from-purple-500/20 to-violet-600/20",
     border: "border-purple-500/30",
-    priceId: "individual_sanctuary",
+    priceId: "individual_all_inclusive",
   },
   {
     name: "Ultimate",
     price: 9,
     label: "$9/mo or $99/yr",
-    description: "Everything plus early access to new features.",
+    description: "Ultimate access with beta feature access.",
     features: [
-      "Everything in Sanctuary",
+      "Everything in All Inclusive",
       "AI navigator always available",
       "Beta feature access",
       "Exclusive healing circles",
@@ -116,7 +116,7 @@ const INDIVIDUAL_TIERS = [
 
 const PROFESSIONAL_TIERS = [
   {
-    name: "Roots",
+    name: "Under $33k",
     price: 2,
     label: "$2/mo",
     income: "Under $33k income",
@@ -130,16 +130,16 @@ const PROFESSIONAL_TIERS = [
     icon: Leaf,
     accent: "from-green-500/20 to-emerald-600/20",
     border: "border-green-500/30",
-    priceId: "pro_roots",
+    priceId: "pro_under_33k",
   },
   {
-    name: "Growth",
+    name: "Under $55k",
     price: 4,
     label: "$4/mo",
     income: "Under $55k income",
     clients: "Up to 22 clients",
     features: [
-      "Everything in Roots",
+      "Everything in Under $33k",
       "Up to 22 active clients",
       "Group session tools",
       "Client progress insights",
@@ -147,16 +147,16 @@ const PROFESSIONAL_TIERS = [
     icon: Heart,
     accent: "from-teal-500/20 to-cyan-600/20",
     border: "border-teal-500/30",
-    priceId: "pro_growth",
+    priceId: "pro_under_55k",
   },
   {
-    name: "Flourish",
+    name: "Under $77k",
     price: 6,
     label: "$6/mo",
     income: "Under $77k income",
     clients: "Up to 44 clients",
     features: [
-      "Everything in Growth",
+      "Everything in Under $55k",
       "Up to 44 active clients",
       "Advanced analytics",
       "Custom healing protocols",
@@ -165,16 +165,16 @@ const PROFESSIONAL_TIERS = [
     accent: "from-pink-500/20 to-rose-600/20",
     border: "border-pink-500/30",
     popular: true,
-    priceId: "pro_flourish",
+    priceId: "pro_under_77k",
   },
   {
-    name: "Abundance",
+    name: "Under $99k",
     price: 8,
     label: "$8/mo",
     income: "Under $99k income",
     clients: "Up to 88 clients",
     features: [
-      "Everything in Flourish",
+      "Everything in Under $77k",
       "Up to 88 active clients",
       "Priority support",
       "Workshop hosting tools",
@@ -182,16 +182,16 @@ const PROFESSIONAL_TIERS = [
     icon: Star,
     accent: "from-amber-500/20 to-yellow-600/20",
     border: "border-amber-500/30",
-    priceId: "pro_abundance",
+    priceId: "pro_under_99k",
   },
   {
-    name: "Legacy",
+    name: "Over $99k",
     price: 10,
     label: "$10/mo",
-    income: "$99k+ income",
+    income: "Over $99k income",
     clients: "Unlimited clients",
     features: [
-      "Everything in Abundance",
+      "Everything in Under $99k",
       "Unlimited active clients",
       "Equity share potential",
       "Shape the platform's future",
@@ -199,7 +199,7 @@ const PROFESSIONAL_TIERS = [
     icon: Shield,
     accent: "from-purple-500/20 to-violet-600/20",
     border: "border-purple-500/30",
-    priceId: "pro_legacy",
+    priceId: "pro_over_99k",
   },
 ];
 
@@ -259,7 +259,7 @@ export default function Pricing() {
             <ArrowLeft size={20} />
           </Button>
           <h1 className="text-2xl md:text-3xl font-display font-bold bg-gradient-to-r from-amber-400 via-pink-400 to-purple-500 bg-clip-text text-transparent">
-            Energy Exchange &amp; Pricing
+            Pricing for Individual Users and Professionals + Healers
           </h1>
         </div>
 
@@ -299,16 +299,16 @@ export default function Pricing() {
         {/* Tabs */}
         <Tabs defaultValue="individual" className="space-y-6">
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 bg-muted/50">
-            <TabsTrigger value="individual" className="text-sm">🌱 Individual</TabsTrigger>
-            <TabsTrigger value="professional" className="text-sm">🌿 Professional / Healer</TabsTrigger>
+            <TabsTrigger value="individual" className="text-sm">Individual Users</TabsTrigger>
+            <TabsTrigger value="professional" className="text-sm">Professionals and Healers</TabsTrigger>
           </TabsList>
 
           <TabsContent value="individual" className="space-y-4">
             <p className="text-center text-muted-foreground text-sm">
-              Your personal healing journey. Brain Dump is always free and unlimited. 💜
+              Two tracks: Individual Users and Professionals and Healers. Brain Dump is always free and unlimited.
             </p>
             <p className="text-center text-xs text-muted-foreground">
-              Annual membership options are available for individual tiers at $11, $33, $55, $77, and $99 per year.
+              Yearly options for individual tiers are $11, $33, $55, $77, and $99.
             </p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {INDIVIDUAL_TIERS.map((tier) => (
@@ -357,7 +357,10 @@ export default function Pricing() {
                 Income-based pricing for healers, therapists, and practitioners. 🌿
               </p>
               <p className="text-xs text-muted-foreground">
-                Session cap: $55 per client session. Choose based on your income — we trust you.
+                Practitioner tiers are income based: $2 under $33k up to 7 clients, $4 under $55k up to 22 clients, $6 under $77k up to 44 clients, $8 under $99k up to 88 clients, $10 over $99k unlimited clients.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Session rate cap $55 per hour.
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -442,7 +445,7 @@ export default function Pricing() {
               </span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Every penny funds <strong className="text-foreground">Rise Up Healing</strong>, a nonprofit
+              100% of every payment funds <strong className="text-foreground">Rise Up Healing</strong>, a nonprofit
               dedicated to making spiritual and emotional healing accessible to all — regardless of income,
               ability, or background.
             </p>
