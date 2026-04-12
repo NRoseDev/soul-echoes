@@ -24,6 +24,8 @@ import ShadowWorkRoom from "./pages/ShadowWorkRoom";
 import ShadowWorkDetail from "./pages/ShadowWorkDetail";
 import WisdomRoom from "./pages/WisdomRoom";
 import WisdomDetail from "./pages/WisdomDetail";
+import SpiritualToolsRoom from "./pages/SpiritualToolsRoom";
+import SpiritualToolsDetail from "./pages/SpiritualToolsDetail";
 import DistressSignal from "./components/DistressSignal";
 import AIGuideAnnouncer from "./components/AIGuideAnnouncer";
 import AlwaysOnVoice from "./components/AlwaysOnVoice";
@@ -65,7 +67,8 @@ const App = () => {
               <Route path="/shadow-work/:module" element={<ShadowWorkDetail />} />
               <Route path="/wisdom" element={<WisdomRoom />} />
               <Route path="/wisdom/:section" element={<WisdomDetail />} />
-              <Route path="/spiritual-tools" element={<HealingRoom />} />
+              <Route path="/spiritual-tools" element={<SpiritualToolsRoom />} />
+              <Route path="/spiritual-tools/:section" element={<SpiritualToolsDetail />} />
               <Route path="/community" element={<HealingRoom />} />
               <Route path="/practitioner" element={<HealingRoom />} />
               <Route path="/practitioner/signup" element={<PractitionerSignup />} />
