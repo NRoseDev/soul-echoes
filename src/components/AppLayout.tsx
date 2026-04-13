@@ -73,13 +73,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         Switch anytime — all options are always available. You are never locked into one way.
                       </p>
                     </SheetHeader>
-                    <div className="grid gap-2 mt-4">
+                    <div className="grid gap-2 mt-4" role="radiogroup" aria-label="Communication method">
                       {COMM_MODES.map((mode) => {
                         const active = inputMethod === mode.id;
                         return (
                           <button
                             key={mode.id}
                             onClick={() => switchMode(mode.id)}
+                            role="radio"
+                            aria-checked={active}
+                            aria-label={`${mode.label} — ${mode.desc}${active ? " (currently selected)" : ""}`}
                             className={`flex items-center gap-4 px-4 py-4 rounded-2xl border-2 text-left transition-all ${active ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"}`}
                           >
                             <span className="text-3xl">{mode.emoji}</span>

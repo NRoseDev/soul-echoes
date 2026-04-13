@@ -236,6 +236,20 @@ export default function BrainDump() {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setAnalysis(buildResponseAnalysis(trimmed));
+
+    // When offline, show local guidance and queue for later
+    if (!navigator.onLine) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "You're currently offline. 🌿 Your message has been received and your local guidance is shown below. The AI response will be available once you reconnect.",
+        },
+      ]);
+      return;
+    }
+
     setIsLoading(true);
 
     let assistantSoFar = "";
@@ -580,8 +594,10 @@ export default function BrainDump() {
           <button
             onClick={() => { setAutoRead(!autoRead); if (ttsSpeaking) ttsStop(); }}
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            aria-pressed={autoRead}
+            aria-label={autoRead ? "Auto-read responses aloud — currently on" : "Auto-read responses aloud — currently off"}
           >
-            {autoRead ? <Volume2 className="h-3 w-3" /> : <VolumeX className="h-3 w-3" />}
+            {autoRead ? <Volume2 className="h-3 w-3" aria-hidden="true" /> : <VolumeX className="h-3 w-3" aria-hidden="true" />}
             {autoRead ? "Auto-read on" : "Auto-read off"}
           </button>
         </div>
