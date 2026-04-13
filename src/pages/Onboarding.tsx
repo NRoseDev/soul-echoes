@@ -10,7 +10,7 @@ import {
   COMMUNICATION_METHODS,
   type InputMethod,
 } from "@/lib/preferences";
-import { getVoiceSettings, saveVoiceSettings, type VoiceSettings } from "@/lib/voiceSettings";
+import { getVoiceSettings, saveVoiceSettings, CURATED_VOICES, type CuratedVoice, type VoiceSettings } from "@/lib/voiceSettings";
 import ListeningIndicator from "@/components/ListeningIndicator";
 
 const FLAG_LANGUAGES = [
@@ -243,20 +243,9 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     return () => window.speechSynthesis.removeEventListener("voiceschanged", updateVoices);
   }, []);
 
-  // Keyword sets for inferring gender from browser voice names
-  const FEMININE_VOICE_KEYWORDS = ["female", "woman", "zira", "samantha", "karen", "victoria", "moira", "fiona", "jenny", "aria", "natasha", "hazel", "kate", "allison", "ava", "alice", "sarah", "laura", "emily", "emma", "lisa", "nicky", "susan"];
+  // Keyword sets for finding a gender-matching fallback browser voice during preview
+  const FEMININE_VOICE_KEYWORDS = ["female", "woman", "zira", "samantha", "karen", "victoria", "moira", "fiona", "jenny", "aria", "natasha", "hazel", "kate", "allison", "ava", "emily", "emma", "lisa", "nicky", "susan"];
   const MASCULINE_VOICE_KEYWORDS = ["male", "man", "daniel", "david", "mark", "james", "fred", "ralph", "tom", "bruce", "george", "liam", "charlie", "brian", "eric", "will", "chris", "callum", "bill", "roger"];
-
-  function browserVoiceGender(voice: SpeechSynthesisVoice): "feminine" | "masculine" | "neutral" {
-    const n = voice.name.toLowerCase();
-    if (FEMININE_VOICE_KEYWORDS.some((k) => n.includes(k))) return "feminine";
-    if (MASCULINE_VOICE_KEYWORDS.some((k) => n.includes(k))) return "masculine";
-    return "neutral";
-  }
-
-  const browserVoiceOptions = availableVoices
-    .filter((voice) => voice.lang.startsWith("en") && browserVoiceGender(voice) === voiceSettings.genderPref)
-    .sort((a, b) => a.name.localeCompare(b.name));
 
   const ttsSpeakAsync = useCallback((text: string) => speakAsync(text, voiceSettings.voiceURI), [voiceSettings.voiceURI]);
   const ttsSpeak = useCallback((text: string) => speak(text, voiceSettings.voiceURI), [voiceSettings.voiceURI]);
@@ -544,40 +533,40 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     else setLangSubStep(2);
   };
 
-  const testVoice = useCallback((voiceURI: string) => {
+  const testVoice = useCallback((voice: CuratedVoice) => {
     if (!("speechSynthesis" in window)) return;
     const synth = window.speechSynthesis;
     synth.cancel();
 
     const doSpeak = () => {
-      const voices = synth.getVoices();
+      const allVoices = synth.getVoices();
+      const enVoices = allVoices.filter((v) => v.lang.startsWith("en"));
+      const pool = enVoices.length > 0 ? enVoices : allVoices;
       const u = new SpeechSynthesisUtterance("Hello, I am here with you.");
-      const voice = voices.find((v) => v.voiceURI === voiceURI) ?? voices.find((v) => v.lang.startsWith("en")) ?? null;
-      if (voice) u.voice = voice;
       u.rate = voiceSettings.speed;
       u.volume = voiceSettings.volume;
       u.pitch = 1;
-      setPlayingVoiceURI(voiceURI);
+      // Try to find the named Microsoft voice, then gender fallback, then first English
+      let picked = pool.find((v) => v.name.toLowerCase().includes(voice.speakName.toLowerCase()));
+      if (!picked) {
+        if (voice.gender === "feminine") picked = pool.find((v) => FEMININE_VOICE_KEYWORDS.some((k) => v.name.toLowerCase().includes(k)));
+        else if (voice.gender === "masculine") picked = pool.find((v) => MASCULINE_VOICE_KEYWORDS.some((k) => v.name.toLowerCase().includes(k)));
+      }
+      if (!picked) picked = pool[0];
+      if (picked) u.voice = picked;
+      setPlayingVoiceURI(voice.id);
       const clear = () => setPlayingVoiceURI(null);
       u.onend = clear;
       u.onerror = clear;
-      // Resume in case Chrome paused synthesis, then speak
       synth.resume();
       synth.speak(u);
-      // Safety fallback — clear playing state if events never fire
-      setTimeout(clear, 6000);
+      setTimeout(clear, 8000);
     };
 
     const voices = synth.getVoices();
-    if (voices.length > 0) {
-      doSpeak();
-    } else {
-      synth.onvoiceschanged = () => {
-        synth.onvoiceschanged = null;
-        doSpeak();
-      };
-    }
-  }, [voiceSettings.speed, voiceSettings.volume]);
+    if (voices.length > 0) { doSpeak(); }
+    else { synth.onvoiceschanged = () => { synth.onvoiceschanged = null; doSpeak(); }; }
+  }, [voiceSettings.speed, voiceSettings.volume, FEMININE_VOICE_KEYWORDS, MASCULINE_VOICE_KEYWORDS]);
 
   const INPUT_METHOD_CARDS: { id: InputMethod; label: string; emoji: string; desc: string; detail?: string }[] = [
     { id: "speak", label: "Speak It", emoji: "🗣️", desc: "Use your voice" },
@@ -748,19 +737,6 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">Choose Your AI Voice</h2>
             <p className="text-center text-muted-foreground text-sm">Pick the voice Soul Echoes will use to speak to you.</p>
 
-            <div className="flex gap-3">
-              {(["feminine", "masculine", "neutral"] as const).map((g) => {
-                const gIcons = { feminine: "♀️", masculine: "♂️", neutral: "⚧️" };
-                return (
-                  <button key={g} onClick={() => { setVoiceSettings((s) => ({ ...s, genderPref: g, voiceURI: null })); setPlayingVoiceURI(null); window.speechSynthesis?.cancel(); }}
-                    className={`flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all flex items-center justify-center gap-2 ${voiceSettings.genderPref === g ? "border-primary bg-primary/10 text-foreground" : "border-border bg-card text-muted-foreground hover:border-primary/40"}`}>
-                    <span className="text-lg">{gIcons[g]}</span>
-                    {g.charAt(0).toUpperCase() + g.slice(1)}
-                  </button>
-                );
-              })}
-            </div>
-
             <div className="space-y-2">
               <p className="text-sm font-medium text-foreground">Speed — {voiceSettings.speed <= 0.75 ? "Slow 🐢" : voiceSettings.speed >= 1.25 ? "Fast 🐇" : "Normal"}</p>
               <Slider value={[voiceSettings.speed]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, speed: v }))} min={0.5} max={1.5} step={0.1} />
@@ -771,29 +747,32 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               <Slider value={[voiceSettings.volume]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, volume: v }))} min={0.1} max={1} step={0.05} />
             </div>
 
-            <div className="space-y-1 max-h-48 overflow-y-auto rounded-xl border border-border bg-card p-2">
-              {browserVoiceOptions.length > 0 ? browserVoiceOptions.map((browserVoice) => {
-                const isSelected = voiceSettings.voiceURI === browserVoice.voiceURI;
+            <div className="space-y-1 max-h-[320px] overflow-y-auto rounded-xl border border-border bg-card p-2">
+              {CURATED_VOICES.map((voice) => {
+                const isSelected = voiceSettings.elevenLabsVoiceId === voice.id;
+                const isPlaying = playingVoiceURI === voice.id;
                 return (
-                  <div key={browserVoice.voiceURI} onClick={() => setVoiceSettings((s) => ({ ...s, voiceURI: browserVoice.voiceURI, elevenLabsVoiceId: null, elevenLabsVoiceName: null }))}
+                  <div key={voice.id}
+                    onClick={() => setVoiceSettings((s) => ({ ...s, elevenLabsVoiceId: voice.id, elevenLabsVoiceName: voice.name, voiceURI: null }))}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${isSelected ? "bg-primary/15 border border-primary/30" : "hover:bg-muted"}`}>
-                    <button onClick={(e) => { e.stopPropagation(); testVoice(browserVoice.voiceURI); }} disabled={playingVoiceURI !== null}
-                      aria-label={playingVoiceURI === browserVoice.voiceURI ? `Playing ${browserVoice.name}` : `Preview ${browserVoice.name}`}
-                      className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20 disabled:opacity-50">
-                      {playingVoiceURI === browserVoice.voiceURI
+                    <button
+                      onClick={(e) => { e.stopPropagation(); testVoice(voice); }}
+                      disabled={playingVoiceURI !== null}
+                      aria-label={isPlaying ? `Playing ${voice.name}` : `Preview ${voice.name}`}
+                      className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20 disabled:opacity-50"
+                    >
+                      {isPlaying
                         ? <span className="h-3 w-3 rounded-full border-2 border-primary border-t-transparent animate-spin block" />
                         : <Play className="h-3 w-3 text-foreground" />}
                     </button>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{browserVoice.name}</p>
-                      <p className="text-xs text-muted-foreground">{browserVoice.lang}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{voice.name}</p>
+                      <p className="text-xs text-muted-foreground">{voice.accent}</p>
                     </div>
                     {isSelected && <Check className="h-4 w-4 text-primary shrink-0" />}
                   </div>
                 );
-              }) : (
-                <div className="p-4 text-sm text-muted-foreground">Loading your browser voices. If nothing appears, try refreshing the page or selecting a different input method.</div>
-              )}
+              })}
             </div>
 
             <Button onClick={() => { setStep(4); }} className="w-full rounded-2xl">
