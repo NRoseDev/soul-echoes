@@ -671,37 +671,17 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                   </Button>
                 </div>
                 {wantSecondary && (
-                  <>
-                    {inputMethod === "type" && (
-                      <Input placeholder="Type second language..." value={typedLang} onChange={(e) => setTypedLang(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter" && typedLang.trim()) { const match = matchLanguage(typedLang); if (match) handleSelectSecondaryLang(match.code, match.name); else setRetryMessage(`"${typedLang}" not found.`); }}}
-                        className="text-lg py-6 rounded-2xl" autoFocus />
-                    )}
-                    {inputMethod === "point" && (
-                      <div className="grid grid-cols-3 gap-2 max-h-[300px] overflow-y-auto">
-                        {LANGUAGE_POINT_CARDS.filter((l) => l.code !== primaryLang).map((lang) => (
-                          <button key={lang.code} onClick={() => handleSelectSecondaryLang(lang.code, lang.label)}
-                            className={`flex flex-col items-center gap-1 p-4 rounded-2xl border-2 transition-all ${secondaryLang === lang.code ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"}`}>
-                            <span className="text-3xl">{lang.emoji}</span>
-                            <span className="text-sm font-medium text-foreground">{lang.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {(inputMethod === "speak" || inputMethod === "sign" || inputMethod === "connect") && (
-                      <div className="max-h-[300px] overflow-y-auto rounded-xl p-1">
-                        <div className="grid grid-cols-3 gap-2">
-                          {FLAG_LANGUAGES.filter((l) => l.code !== primaryLang).map((lang) => (
-                            <button key={lang.code} onClick={() => handleSelectSecondaryLang(lang.code, lang.name)}
-                              className={`flex flex-col items-center gap-1 p-3 rounded-2xl border-2 transition-all ${secondaryLang === lang.code ? "border-primary bg-white scale-105 shadow-lg" : "border-white/20 bg-white/90 shadow-sm"}`}>
-                              <img src={`https://flagcdn.com/48x36/${lang.cc}.png`} alt={lang.name} className="w-12 h-9 object-cover rounded-sm" />
-                              <span className="text-xs font-medium text-gray-800">{lang.name}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
+                  <div className="max-h-[300px] overflow-y-auto rounded-xl p-1">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                      {FLAG_LANGUAGES.filter((l) => l.code !== primaryLang).map((lang) => (
+                        <button key={lang.code} onClick={() => handleSelectSecondaryLang(lang.code, lang.name)}
+                          className={`flex flex-col items-center gap-1 p-3 rounded-2xl border-2 transition-all ${secondaryLang === lang.code ? "border-primary bg-white scale-105 shadow-lg" : "border-white/20 bg-white/90 hover:bg-white shadow-sm"}`}>
+                          <img src={`https://flagcdn.com/48x36/${lang.cc}.png`} alt={lang.name} className="w-12 h-9 object-cover rounded-sm" />
+                          <span className="text-xs font-medium text-gray-800">{lang.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             )}
