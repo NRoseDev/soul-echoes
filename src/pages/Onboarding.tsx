@@ -222,7 +222,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
-  const [testingVoice, setTestingVoice] = useState(false);
+  const [playingVoiceURI, setPlayingVoiceURI] = useState<string | null>(null);
   const spokenPromptsRef = useRef<Set<string>>(new Set());
   const handleVoiceRef = useRef<(t: string) => void>(() => {});
 
@@ -243,8 +243,19 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     return () => window.speechSynthesis.removeEventListener("voiceschanged", updateVoices);
   }, []);
 
+  // Keyword sets for inferring gender from browser voice names
+  const FEMININE_VOICE_KEYWORDS = ["female", "woman", "zira", "samantha", "karen", "victoria", "moira", "fiona", "jenny", "aria", "natasha", "hazel", "kate", "allison", "ava", "alice", "sarah", "laura", "emily", "emma", "lisa", "nicky", "susan"];
+  const MASCULINE_VOICE_KEYWORDS = ["male", "man", "daniel", "david", "mark", "james", "fred", "ralph", "tom", "bruce", "george", "liam", "charlie", "brian", "eric", "will", "chris", "callum", "bill", "roger"];
+
+  function browserVoiceGender(voice: SpeechSynthesisVoice): "feminine" | "masculine" | "neutral" {
+    const n = voice.name.toLowerCase();
+    if (FEMININE_VOICE_KEYWORDS.some((k) => n.includes(k))) return "feminine";
+    if (MASCULINE_VOICE_KEYWORDS.some((k) => n.includes(k))) return "masculine";
+    return "neutral";
+  }
+
   const browserVoiceOptions = availableVoices
-    .filter((voice) => voice.lang.startsWith("en"))
+    .filter((voice) => voice.lang.startsWith("en") && browserVoiceGender(voice) === voiceSettings.genderPref)
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const ttsSpeakAsync = useCallback((text: string) => speakAsync(text, voiceSettings.voiceURI), [voiceSettings.voiceURI]);
@@ -533,14 +544,40 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     else setLangSubStep(2);
   };
 
-  const testVoice = async (voiceURI: string | null) => {
-    setTestingVoice(true);
-    try {
-      await speakAsync("Hello, I am here with you.", voiceURI);
-    } finally {
-      setTestingVoice(false);
+  const testVoice = useCallback((voiceURI: string) => {
+    if (!("speechSynthesis" in window)) return;
+    const synth = window.speechSynthesis;
+    synth.cancel();
+
+    const doSpeak = () => {
+      const voices = synth.getVoices();
+      const u = new SpeechSynthesisUtterance("Hello, I am here with you.");
+      const voice = voices.find((v) => v.voiceURI === voiceURI) ?? voices.find((v) => v.lang.startsWith("en")) ?? null;
+      if (voice) u.voice = voice;
+      u.rate = voiceSettings.speed;
+      u.volume = voiceSettings.volume;
+      u.pitch = 1;
+      setPlayingVoiceURI(voiceURI);
+      const clear = () => setPlayingVoiceURI(null);
+      u.onend = clear;
+      u.onerror = clear;
+      // Resume in case Chrome paused synthesis, then speak
+      synth.resume();
+      synth.speak(u);
+      // Safety fallback — clear playing state if events never fire
+      setTimeout(clear, 6000);
+    };
+
+    const voices = synth.getVoices();
+    if (voices.length > 0) {
+      doSpeak();
+    } else {
+      synth.onvoiceschanged = () => {
+        synth.onvoiceschanged = null;
+        doSpeak();
+      };
     }
-  };
+  }, [voiceSettings.speed, voiceSettings.volume]);
 
   const INPUT_METHOD_CARDS: { id: InputMethod; label: string; emoji: string; desc: string; detail?: string }[] = [
     { id: "speak", label: "Speak It", emoji: "🗣️", desc: "Use your voice" },
@@ -715,7 +752,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               {(["feminine", "masculine", "neutral"] as const).map((g) => {
                 const gIcons = { feminine: "♀️", masculine: "♂️", neutral: "⚧️" };
                 return (
-                  <button key={g} onClick={() => setVoiceSettings((s) => ({ ...s, genderPref: g }))}
+                  <button key={g} onClick={() => { setVoiceSettings((s) => ({ ...s, genderPref: g, voiceURI: null })); setPlayingVoiceURI(null); window.speechSynthesis?.cancel(); }}
                     className={`flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all flex items-center justify-center gap-2 ${voiceSettings.genderPref === g ? "border-primary bg-primary/10 text-foreground" : "border-border bg-card text-muted-foreground hover:border-primary/40"}`}>
                     <span className="text-lg">{gIcons[g]}</span>
                     {g.charAt(0).toUpperCase() + g.slice(1)}
@@ -740,9 +777,12 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
                 return (
                   <div key={browserVoice.voiceURI} onClick={() => setVoiceSettings((s) => ({ ...s, voiceURI: browserVoice.voiceURI, elevenLabsVoiceId: null, elevenLabsVoiceName: null }))}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${isSelected ? "bg-primary/15 border border-primary/30" : "hover:bg-muted"}`}>
-                    <button onClick={(e) => { e.stopPropagation(); testVoice(browserVoice.voiceURI); }} disabled={testingVoice}
+                    <button onClick={(e) => { e.stopPropagation(); testVoice(browserVoice.voiceURI); }} disabled={playingVoiceURI !== null}
+                      aria-label={playingVoiceURI === browserVoice.voiceURI ? `Playing ${browserVoice.name}` : `Preview ${browserVoice.name}`}
                       className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20 disabled:opacity-50">
-                      <Play className="h-3 w-3 text-foreground" />
+                      {playingVoiceURI === browserVoice.voiceURI
+                        ? <span className="h-3 w-3 rounded-full border-2 border-primary border-t-transparent animate-spin block" />
+                        : <Play className="h-3 w-3 text-foreground" />}
                     </button>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{browserVoice.name}</p>
