@@ -208,6 +208,20 @@ const LANGUAGE_POINT_CARDS = [
   { code: "it", label: "Italiano", emoji: "🇮🇹" },
 ];
 
+const FEMININE_VOICE_KEYWORDS = ["female", "woman", "zira", "samantha", "karen", "victoria", "moira", "fiona", "jenny", "aria", "natasha", "hazel", "kate", "allison", "ava", "emily", "emma", "lisa", "nicky", "susan"];
+const MASCULINE_VOICE_KEYWORDS = ["male", "man", "daniel", "david", "mark", "james", "fred", "ralph", "tom", "bruce", "george", "liam", "charlie", "brian", "eric", "will", "chris", "callum", "bill", "roger"];
+
+function pickSynthVoice(voice: CuratedVoice, voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+  const enVoices = voices.filter((v) => v.lang.startsWith("en"));
+  const pool = enVoices.length > 0 ? enVoices : voices;
+  let picked = pool.find((v) => v.name.toLowerCase().includes(voice.speakName.toLowerCase()));
+  if (!picked) {
+    if (voice.gender === "feminine") picked = pool.find((v) => FEMININE_VOICE_KEYWORDS.some((k) => v.name.toLowerCase().includes(k)));
+    else if (voice.gender === "masculine") picked = pool.find((v) => MASCULINE_VOICE_KEYWORDS.some((k) => v.name.toLowerCase().includes(k)));
+  }
+  return picked ?? pool[0] ?? null;
+}
+
 export default function Onboarding({ onComplete }: { onComplete: () => void }) { /* v2 */
   const [step, setStep] = useState(0);
   const [inputMethod, setInputMethod] = useState<InputMethod | null>(null);
@@ -223,6 +237,10 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [playingVoiceURI, setPlayingVoiceURI] = useState<string | null>(null);
+  const [autoPlayIdx, setAutoPlayIdx] = useState(0);
+  const [autoPhase, setAutoPhase] = useState<"idle" | "playing" | "listening">("idle");
+  const autoRecRef = useRef<any>(null);
+  const voiceListRef = useRef<HTMLDivElement>(null);
   const spokenPromptsRef = useRef<Set<string>>(new Set());
   const handleVoiceRef = useRef<(t: string) => void>(() => {});
 
@@ -242,10 +260,6 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     window.speechSynthesis.addEventListener("voiceschanged", updateVoices);
     return () => window.speechSynthesis.removeEventListener("voiceschanged", updateVoices);
   }, []);
-
-  // Keyword sets for finding a gender-matching fallback browser voice during preview
-  const FEMININE_VOICE_KEYWORDS = ["female", "woman", "zira", "samantha", "karen", "victoria", "moira", "fiona", "jenny", "aria", "natasha", "hazel", "kate", "allison", "ava", "emily", "emma", "lisa", "nicky", "susan"];
-  const MASCULINE_VOICE_KEYWORDS = ["male", "man", "daniel", "david", "mark", "james", "fred", "ralph", "tom", "bruce", "george", "liam", "charlie", "brian", "eric", "will", "chris", "callum", "bill", "roger"];
 
   const ttsSpeakAsync = useCallback((text: string) => speakAsync(text, voiceSettings.voiceURI), [voiceSettings.voiceURI]);
   const ttsSpeak = useCallback((text: string) => speak(text, voiceSettings.voiceURI), [voiceSettings.voiceURI]);
@@ -374,13 +388,124 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     }
   }, [step, langSubStep, wantSecondary, hasSpoken, markSpoken, ttsSpeakAsync]);
 
+  // Step 3: on enter, kick off auto-play from voice 0
   useEffect(() => {
     if (step !== 3) return;
-    if (!hasSpoken("voice-setup")) {
-      markSpoken("voice-setup");
-      ttsSpeakAsync("Choose your AI guide voice. You can preview each one, then continue.");
+    setAutoPlayIdx(0);
+    setAutoPhase("playing");
+    return () => {
+      window.speechSynthesis?.cancel();
+      try { autoRecRef.current?.abort(); } catch {}
+      autoRecRef.current = null;
+    };
+  }, [step]);
+
+  // Step 3: play the current voice sample
+  useEffect(() => {
+    if (step !== 3 || autoPhase !== "playing") return;
+    const voice = CURATED_VOICES[autoPlayIdx];
+    if (!voice) return;
+
+    // Highlight this voice as current selection
+    setVoiceSettings((s) => ({ ...s, elevenLabsVoiceId: voice.id, elevenLabsVoiceName: voice.name, voiceURI: null }));
+
+    // Scroll voice into view
+    const el = voiceListRef.current?.querySelector(`[data-voice-id="${voice.id}"]`);
+    el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+
+    const synth = window.speechSynthesis;
+    synth.cancel();
+
+    let cleanupCalled = false;
+    const advance = () => {
+      if (cleanupCalled) return;
+      setAutoPhase("listening");
+    };
+
+    const doSpeak = () => {
+      const voices = synth.getVoices();
+      const u = new SpeechSynthesisUtterance(`Hello. My name is ${voice.name}. I am here with you.`);
+      const picked = pickSynthVoice(voice, voices);
+      if (picked) u.voice = picked;
+      u.rate = 1;
+      u.pitch = 1;
+      u.volume = 1;
+      u.onend = advance;
+      u.onerror = advance;
+      synth.resume();
+      synth.speak(u);
+      setTimeout(advance, 10000);
+    };
+
+    if (synth.getVoices().length > 0) {
+      doSpeak();
+    } else {
+      synth.onvoiceschanged = () => { synth.onvoiceschanged = null; doSpeak(); };
     }
-  }, [step, ttsSpeakAsync, hasSpoken, markSpoken]);
+
+    return () => {
+      cleanupCalled = true;
+      synth.cancel();
+    };
+  }, [step, autoPhase, autoPlayIdx]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Step 3: listen for "next", "stop", "pick this one", "I choose this voice"
+  useEffect(() => {
+    if (step !== 3 || autoPhase !== "listening") return;
+    const SR = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    if (!SR) return;
+
+    const rec = new SR();
+    autoRecRef.current = rec;
+    rec.continuous = false;
+    rec.interimResults = false;
+    rec.lang = "en-US";
+    rec.maxAlternatives = 1;
+
+    rec.onresult = (event: any) => {
+      const last = event.results[event.results.length - 1];
+      if (!last?.isFinal) return;
+      const t = last[0]?.transcript?.trim().toLowerCase() ?? "";
+
+      if (["pick this one", "i choose this", "i choose this voice", "select this", "this one", "choose this"].some((w) => t.includes(w))) {
+        try { rec.abort(); } catch {}
+        autoRecRef.current = null;
+        clearSpoken();
+        setStep(4);
+        return;
+      }
+      if (["next", "skip"].some((w) => t.includes(w))) {
+        try { rec.abort(); } catch {}
+        autoRecRef.current = null;
+        const nextIdx = (autoPlayIdx + 1) % CURATED_VOICES.length;
+        setAutoPlayIdx(nextIdx);
+        setAutoPhase("playing");
+        return;
+      }
+      if (["stop", "pause", "enough", "quit"].some((w) => t.includes(w))) {
+        try { rec.abort(); } catch {}
+        autoRecRef.current = null;
+        setAutoPhase("idle");
+        return;
+      }
+      // Unrecognised — restart listening
+      try { rec.start(); } catch {}
+    };
+
+    rec.onend = () => {
+      // If still in listening phase (no command matched), restart
+      if (autoRecRef.current === rec) {
+        try { rec.start(); } catch {}
+      }
+    };
+
+    try { rec.start(); } catch {}
+
+    return () => {
+      try { rec.abort(); } catch {}
+      if (autoRecRef.current === rec) autoRecRef.current = null;
+    };
+  }, [step, autoPhase, autoPlayIdx]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (step !== 4) return;
@@ -540,19 +665,11 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
 
     const doSpeak = () => {
       const allVoices = synth.getVoices();
-      const enVoices = allVoices.filter((v) => v.lang.startsWith("en"));
-      const pool = enVoices.length > 0 ? enVoices : allVoices;
       const u = new SpeechSynthesisUtterance("Hello, I am here with you.");
       u.rate = voiceSettings.speed;
       u.volume = voiceSettings.volume;
       u.pitch = 1;
-      // Try to find the named Microsoft voice, then gender fallback, then first English
-      let picked = pool.find((v) => v.name.toLowerCase().includes(voice.speakName.toLowerCase()));
-      if (!picked) {
-        if (voice.gender === "feminine") picked = pool.find((v) => FEMININE_VOICE_KEYWORDS.some((k) => v.name.toLowerCase().includes(k)));
-        else if (voice.gender === "masculine") picked = pool.find((v) => MASCULINE_VOICE_KEYWORDS.some((k) => v.name.toLowerCase().includes(k)));
-      }
-      if (!picked) picked = pool[0];
+      const picked = pickSynthVoice(voice, allVoices);
       if (picked) u.voice = picked;
       setPlayingVoiceURI(voice.id);
       const clear = () => setPlayingVoiceURI(null);
@@ -566,7 +683,7 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     const voices = synth.getVoices();
     if (voices.length > 0) { doSpeak(); }
     else { synth.onvoiceschanged = () => { synth.onvoiceschanged = null; doSpeak(); }; }
-  }, [voiceSettings.speed, voiceSettings.volume, FEMININE_VOICE_KEYWORDS, MASCULINE_VOICE_KEYWORDS]);
+  }, [voiceSettings.speed, voiceSettings.volume]);
 
   const INPUT_METHOD_CARDS: { id: InputMethod; label: string; emoji: string; desc: string; detail?: string }[] = [
     { id: "speak", label: "Speak It", emoji: "🗣️", desc: "Use your voice" },
@@ -729,57 +846,141 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
           </motion.div>
         )}
 
-        {/* STEP 3: Voice Setup */}
-        {step === 3 && (
-          <motion.div key="voice" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[80vh] overflow-y-auto">
-            {isSpeakMode && <ListeningIndicator visible={isListening} level={inputLevel} />}
-            {retryMessage && <p className="text-sm text-center text-destructive">{retryMessage}</p>}
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">Choose Your AI Voice</h2>
-            <p className="text-center text-muted-foreground text-sm">Pick the voice Soul Echoes will use to speak to you.</p>
+        {/* STEP 3: Voice Setup — auto-play */}
+        {step === 3 && (() => {
+          const currentVoice = CURATED_VOICES[autoPlayIdx];
+          const chooseVoice = () => {
+            window.speechSynthesis?.cancel();
+            try { autoRecRef.current?.abort(); } catch {}
+            autoRecRef.current = null;
+            clearSpoken();
+            setStep(4);
+          };
+          const goTo = (idx: number) => {
+            window.speechSynthesis?.cancel();
+            try { autoRecRef.current?.abort(); } catch {}
+            autoRecRef.current = null;
+            setAutoPlayIdx(idx);
+            setAutoPhase("playing");
+          };
+          return (
+            <motion.div key="voice" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4">
+              {/* Header */}
+              <div className="text-center">
+                <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground">Choose Your AI Voice</h2>
+                <p className="text-muted-foreground text-sm mt-1">
+                  {autoPhase === "idle"
+                    ? "Tap a voice to preview it, then tap Choose."
+                    : autoPhase === "playing"
+                    ? `Playing ${currentVoice?.name ?? ""}…`
+                    : 'Say "next", "pick this one", or "stop"'}
+                </p>
+              </div>
 
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-foreground">Speed — {voiceSettings.speed <= 0.75 ? "Slow 🐢" : voiceSettings.speed >= 1.25 ? "Fast 🐇" : "Normal"}</p>
-              <Slider value={[voiceSettings.speed]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, speed: v }))} min={0.5} max={1.5} step={0.1} />
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-foreground">Volume — {voiceSettings.volume <= 0.35 ? "Soft 🔈" : voiceSettings.volume >= 0.75 ? "Loud 🔊" : "Medium 🔉"}</p>
-              <Slider value={[voiceSettings.volume]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, volume: v }))} min={0.1} max={1} step={0.05} />
-            </div>
-
-            <div className="space-y-1 max-h-[320px] overflow-y-auto rounded-xl border border-border bg-card p-2">
-              {CURATED_VOICES.map((voice) => {
-                const isSelected = voiceSettings.elevenLabsVoiceId === voice.id;
-                const isPlaying = playingVoiceURI === voice.id;
-                return (
-                  <div key={voice.id}
-                    onClick={() => setVoiceSettings((s) => ({ ...s, elevenLabsVoiceId: voice.id, elevenLabsVoiceName: voice.name, voiceURI: null }))}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${isSelected ? "bg-primary/15 border border-primary/30" : "hover:bg-muted"}`}>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); testVoice(voice); }}
-                      disabled={playingVoiceURI !== null}
-                      aria-label={isPlaying ? `Playing ${voice.name}` : `Preview ${voice.name}`}
-                      className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20 disabled:opacity-50"
-                    >
-                      {isPlaying
-                        ? <span className="h-3 w-3 rounded-full border-2 border-primary border-t-transparent animate-spin block" />
-                        : <Play className="h-3 w-3 text-foreground" />}
-                    </button>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{voice.name}</p>
-                      <p className="text-xs text-muted-foreground">{voice.accent}</p>
+              {/* Progress + animation */}
+              {autoPhase !== "idle" && (
+                <div className="flex flex-col items-center gap-3 py-1">
+                  <p className="text-xs text-muted-foreground">{autoPlayIdx + 1} of {CURATED_VOICES.length}</p>
+                  {autoPhase === "playing" ? (
+                    <div className="flex gap-1 items-end h-8" aria-label="Playing audio" role="img">
+                      {[6, 12, 18, 14, 8, 16, 10].map((h, i) => (
+                        <div key={i} className="w-1.5 bg-primary rounded-full animate-pulse"
+                          style={{ height: h, animationDelay: `${i * 0.12}s`, animationDuration: "0.8s" }} />
+                      ))}
                     </div>
-                    {isSelected && <Check className="h-4 w-4 text-primary shrink-0" />}
-                  </div>
-                );
-              })}
-            </div>
+                  ) : (
+                    <ListeningIndicator visible={true} level={0} />
+                  )}
+                </div>
+              )}
 
-            <Button onClick={() => { setStep(4); }} className="w-full rounded-2xl">
-              Continue <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
-          </motion.div>
-        )}
+              {/* Speed */}
+              <div className="space-y-1.5">
+                <p className="text-sm font-medium text-foreground">Speed — {voiceSettings.speed <= 0.75 ? "Slow" : voiceSettings.speed >= 1.25 ? "Fast" : "Normal"}</p>
+                <Slider value={[voiceSettings.speed]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, speed: v }))} min={0.5} max={1.5} step={0.1} aria-label="Speech speed" />
+              </div>
+
+              {/* Volume */}
+              <div className="space-y-1.5">
+                <p className="text-sm font-medium text-foreground">Volume — {voiceSettings.volume <= 0.35 ? "Soft" : voiceSettings.volume >= 0.75 ? "Loud" : "Medium"}</p>
+                <Slider value={[voiceSettings.volume]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, volume: v }))} min={0.1} max={1} step={0.05} aria-label="Speech volume" />
+              </div>
+
+              {/* Manual controls */}
+              <div className="flex flex-wrap gap-2 justify-center">
+                <button
+                  onClick={() => goTo((autoPlayIdx - 1 + CURATED_VOICES.length) % CURATED_VOICES.length)}
+                  className="px-3 py-1.5 rounded-xl border border-border bg-card text-sm hover:border-primary/50 transition-all"
+                  aria-label="Previous voice"
+                >← Prev</button>
+                <button
+                  onClick={() => { window.speechSynthesis?.cancel(); try { autoRecRef.current?.abort(); } catch {} autoRecRef.current = null; setAutoPhase("playing"); }}
+                  className="px-3 py-1.5 rounded-xl border border-border bg-card text-sm hover:border-primary/50 transition-all"
+                  aria-label="Replay current voice"
+                >↺ Replay</button>
+                <button
+                  onClick={() => goTo((autoPlayIdx + 1) % CURATED_VOICES.length)}
+                  className="px-3 py-1.5 rounded-xl border border-border bg-card text-sm hover:border-primary/50 transition-all"
+                  aria-label="Next voice"
+                >Next →</button>
+                <button
+                  onClick={chooseVoice}
+                  className="px-4 py-1.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all"
+                  aria-label="Choose this voice and continue"
+                >✓ Choose This Voice</button>
+                {autoPhase !== "idle" && (
+                  <button
+                    onClick={() => { window.speechSynthesis?.cancel(); try { autoRecRef.current?.abort(); } catch {} autoRecRef.current = null; setAutoPhase("idle"); }}
+                    className="px-3 py-1.5 rounded-xl border border-border bg-card text-sm text-muted-foreground hover:border-primary/50 transition-all"
+                    aria-label="Stop auto-play"
+                  >Stop</button>
+                )}
+              </div>
+
+              {/* Voice list — tap to jump to a voice */}
+              <div ref={voiceListRef} className="space-y-0.5 max-h-[260px] overflow-y-auto rounded-xl border border-border bg-card p-2" role="listbox" aria-label="Voice options">
+                {CURATED_VOICES.map((voice, idx) => {
+                  const isCurrent = idx === autoPlayIdx;
+                  const isPlaying = isCurrent && autoPhase === "playing";
+                  const isManualPlaying = playingVoiceURI === voice.id;
+                  return (
+                    <div
+                      key={voice.id}
+                      data-voice-id={voice.id}
+                      role="option"
+                      aria-selected={isCurrent}
+                      onClick={() => {
+                        setVoiceSettings((s) => ({ ...s, elevenLabsVoiceId: voice.id, elevenLabsVoiceName: voice.name, voiceURI: null }));
+                        goTo(idx);
+                      }}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all ${isCurrent ? "bg-primary/15 border border-primary/30" : "hover:bg-muted"}`}
+                    >
+                      <button
+                        onClick={(e) => { e.stopPropagation(); testVoice(voice); }}
+                        disabled={playingVoiceURI !== null && !isManualPlaying}
+                        aria-label={isPlaying || isManualPlaying ? `Playing ${voice.name}` : `Preview ${voice.name}`}
+                        className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20 disabled:opacity-50 transition-all"
+                      >
+                        {isPlaying || isManualPlaying
+                          ? <span className="h-3 w-3 rounded-full border-2 border-primary border-t-transparent animate-spin block" />
+                          : <Play className="h-3 w-3 text-foreground" />}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{voice.name}</p>
+                        <p className="text-xs text-muted-foreground">{voice.accent}</p>
+                      </div>
+                      {isCurrent && <Check className="h-4 w-4 text-primary shrink-0" />}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <Button onClick={() => { clearSpoken(); setStep(4); }} variant="outline" className="w-full rounded-2xl">
+                Skip <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </motion.div>
+          );
+        })()}
 
         {/* STEP 4: Communication */}
         {step === 4 && (
