@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   getSafetySettings,
+  saveSafetySettings,
   MICHAEL_SITUATIONS,
   FAITH_SITUATIONS,
   type AngelType,
@@ -15,6 +16,7 @@ import angelMichaelImg from "@/assets/angel-michael.png";
 import angelFaithImg from "@/assets/angel-faith.png";
 
 const SIGNAL_QUEUE_KEY = "soul-echoes-signal-queue";
+const INTRO_SEEN_KEY = "soul-echoes-beacon-intro-seen";
 
 interface DistressSignalData {
   angel: AngelType;
@@ -35,7 +37,7 @@ function queueSignal(signal: DistressSignalData) {
 }
 
 export default function DistressSignal() {
-  const [phase, setPhase] = useState<"closed" | "verify" | "angel" | "situation" | "sent" | "confirmed">("closed");
+  const [phase, setPhase] = useState<"closed" | "intro" | "codes" | "first-angel" | "verify" | "angel" | "situation" | "sent" | "confirmed">("closed");
   const [accessInput, setAccessInput] = useState("");
   const [accessError, setAccessError] = useState(false);
   const [selectedAngel, setSelectedAngel] = useState<AngelType | null>(null);
@@ -185,7 +187,10 @@ export default function DistressSignal() {
 
       {/* Safety trigger — always visible */}
       <button
-        onClick={() => setPhase("verify")}
+        onClick={() => {
+          const seen = localStorage.getItem(INTRO_SEEN_KEY);
+          setPhase(seen ? "verify" : "intro");
+        }}
         className="fixed bottom-4 right-4 z-50 h-12 w-12 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-muted/50 backdrop-blur-sm border border-border/30"
         aria-label="Safety — get help"
         style={{ fontSize: "1.25rem" }}
@@ -217,6 +222,134 @@ export default function DistressSignal() {
                   <X className="h-4 w-4" />
                 </button>
               </div>
+
+              {/* INTRO phase — first tap only */}
+              {phase === "intro" && (
+                <div className="space-y-6 text-center">
+                  <motion.div
+                    initial={{ scale: 0.7, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 140, damping: 14 }}
+                    className="text-6xl"
+                    aria-hidden="true"
+                  >
+                    🛡️
+                  </motion.div>
+                  <div className="space-y-3">
+                    <p className="font-display text-xl font-bold text-foreground">
+                      Your Private Safety Beacon
+                    </p>
+                    <p className="text-foreground/80 leading-relaxed text-base">
+                      This is your private silent safety beacon.
+                    </p>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      Only you know what it does.
+                    </p>
+                  </div>
+                  <Button onClick={() => setPhase("codes")} size="lg" className="w-full rounded-2xl text-base py-6">
+                    Show Me How It Works
+                  </Button>
+                </div>
+              )}
+
+              {/* CODES phase — distress codes explained */}
+              {phase === "codes" && (
+                <div className="space-y-5">
+                  <div className="text-center space-y-1">
+                    <p className="font-display text-lg font-bold text-foreground">Your Silent Distress Codes</p>
+                    <p className="text-xs text-muted-foreground">Tap the icon, choose your guide, then tap a code — no words needed.</p>
+                  </div>
+
+                  {/* Michael codes */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                      <span>⚔️</span> Archangel Michael — Physical Safety
+                    </p>
+                    {MICHAEL_SITUATIONS.map((s) => (
+                      <div key={s.code} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-muted/30 border border-border/40">
+                        <span className="shrink-0 text-lg">{s.color}</span>
+                        <span className="shrink-0 text-lg">{s.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-xs font-bold text-primary mr-2">{s.code}</span>
+                          <span className="text-sm text-foreground">{s.label}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Faith codes */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                      <span>🕊️</span> Angel Faith — Inner Crisis
+                    </p>
+                    {FAITH_SITUATIONS.map((s) => (
+                      <div key={s.code} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-muted/30 border border-border/40">
+                        <span className="shrink-0 text-lg">{s.color}</span>
+                        <span className="shrink-0 text-lg">{s.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-xs font-bold text-primary mr-2">{s.code}</span>
+                          <span className="text-sm text-foreground">{s.label}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button onClick={() => setPhase("first-angel")} size="lg" className="w-full rounded-2xl text-base py-6">
+                    Continue
+                  </Button>
+                </div>
+              )}
+
+              {/* FIRST-ANGEL phase — preference question */}
+              {phase === "first-angel" && (
+                <div className="space-y-6 text-center">
+                  <div className="space-y-2">
+                    <p className="font-display text-lg font-bold text-foreground leading-snug">
+                      Who do you feel most comfortable calling on?
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Choose based on personal comfort. You can always use either.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={() => {
+                        saveSafetySettings({ angel: "michael" });
+                        localStorage.setItem(INTRO_SEEN_KEY, "1");
+                        setPhase("closed");
+                      }}
+                      className="flex flex-col items-center gap-3 p-4 rounded-2xl border-2 border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition-all"
+                      aria-label="Archangel Michael"
+                    >
+                      <img src={angelMichaelImg} alt="Archangel Michael" className="w-24 h-24 object-contain" />
+                      <span className="font-display font-bold text-foreground text-sm">Archangel Michael ⚔️</span>
+                      <span className="text-xs text-muted-foreground">Physical Safety</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        saveSafetySettings({ angel: "faith" });
+                        localStorage.setItem(INTRO_SEEN_KEY, "1");
+                        setPhase("closed");
+                      }}
+                      className="flex flex-col items-center gap-3 p-4 rounded-2xl border-2 border-border bg-card hover:border-secondary/50 hover:bg-secondary/5 transition-all"
+                      aria-label="Angel Faith"
+                    >
+                      <img src={angelFaithImg} alt="Angel Faith" className="w-24 h-24 object-contain" />
+                      <span className="font-display font-bold text-foreground text-sm">Angel Faith 🕊️</span>
+                      <span className="text-xs text-muted-foreground">Inner Crisis</span>
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => {
+                      localStorage.setItem(INTRO_SEEN_KEY, "1");
+                      setPhase("closed");
+                    }}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    I'll decide later
+                  </button>
+                </div>
+              )}
 
               {/* VERIFY phase */}
               {phase === "verify" && (
