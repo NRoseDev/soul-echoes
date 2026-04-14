@@ -1,6 +1,6 @@
 import {
   BookOpen, Wind, VolumeX, Eclipse, Sparkles, Compass, Users, Stethoscope,
-  ShieldAlert, Brain, Volume2, Settings, Lock, CreditCard,
+  ShieldAlert, Brain, Volume2, Settings, Lock, CreditCard, ShoppingBag,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -16,6 +16,7 @@ const healingRooms = [
   { title: "Unspoken Chamber", url: "/unspoken", icon: VolumeX, color: "text-healing-unspoken", free: false },
   { title: "Shadow Work", url: "/shadow-work", icon: Eclipse, color: "text-healing-shadow", free: false },
   { title: "Wisdom", url: "/wisdom", icon: Sparkles, color: "text-healing-wisdom", free: false },
+  { title: "Shop", url: "/shop", icon: ShoppingBag, color: "text-rose-400", free: true },
   { title: "Spiritual Tools", url: "/spiritual-tools", icon: Compass, color: "text-healing-tools", free: false },
   { title: "Community", url: "/community", icon: Users, color: "text-healing-community", free: false },
   { title: "Practitioner Connect", url: "/practitioner", icon: Stethoscope, color: "text-healing-practitioner", free: false },
