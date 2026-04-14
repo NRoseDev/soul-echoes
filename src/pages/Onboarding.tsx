@@ -417,12 +417,15 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     synth.cancel();
 
     let cleanupCalled = false;
+    let safetyTimer: ReturnType<typeof setTimeout> | null = null;
+
     const advance = () => {
       if (cleanupCalled) return;
+      if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
       setAutoPhase("listening");
     };
 
-    const doSpeak = () => {
+    const doSpeak = (tries: number) => {
       const voices = synth.getVoices();
       const u = new SpeechSynthesisUtterance(`Hello. My name is ${voice.name}. I am here with you.`);
       const picked = pickSynthVoice(voice, voices);
@@ -431,20 +434,29 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       u.pitch = 1;
       u.volume = 1;
       u.onend = advance;
-      u.onerror = advance;
+      u.onerror = () => {
+        if (cleanupCalled) return;
+        if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
+        if (tries < 3) {
+          setTimeout(() => { if (!cleanupCalled) { synth.cancel(); synth.resume(); doSpeak(tries + 1); } }, 200);
+        } else {
+          advance();
+        }
+      };
       synth.resume();
       synth.speak(u);
-      setTimeout(advance, 10000);
+      safetyTimer = setTimeout(advance, 10000);
     };
 
     if (synth.getVoices().length > 0) {
-      doSpeak();
+      doSpeak(1);
     } else {
-      synth.onvoiceschanged = () => { synth.onvoiceschanged = null; doSpeak(); };
+      synth.onvoiceschanged = () => { synth.onvoiceschanged = null; doSpeak(1); };
     }
 
     return () => {
       cleanupCalled = true;
+      if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
       synth.cancel();
     };
   }, [step, autoPhase, autoPlayIdx]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -663,7 +675,13 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
     const synth = window.speechSynthesis;
     synth.cancel();
 
-    const doSpeak = () => {
+    let safetyTimer: ReturnType<typeof setTimeout> | null = null;
+    const clear = () => {
+      if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
+      setPlayingVoiceURI(null);
+    };
+
+    const attempt = (tries: number) => {
       const allVoices = synth.getVoices();
       const u = new SpeechSynthesisUtterance("Hello, I am here with you.");
       u.rate = voiceSettings.speed;
@@ -671,18 +689,24 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
       u.pitch = 1;
       const picked = pickSynthVoice(voice, allVoices);
       if (picked) u.voice = picked;
-      setPlayingVoiceURI(voice.id);
-      const clear = () => setPlayingVoiceURI(null);
       u.onend = clear;
-      u.onerror = clear;
+      u.onerror = () => {
+        if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
+        if (tries < 3) {
+          setTimeout(() => { synth.cancel(); synth.resume(); attempt(tries + 1); }, 200);
+        } else {
+          setPlayingVoiceURI(null);
+        }
+      };
       synth.resume();
       synth.speak(u);
-      setTimeout(clear, 8000);
+      safetyTimer = setTimeout(clear, 8000);
     };
 
+    setPlayingVoiceURI(voice.id);
     const voices = synth.getVoices();
-    if (voices.length > 0) { doSpeak(); }
-    else { synth.onvoiceschanged = () => { synth.onvoiceschanged = null; doSpeak(); }; }
+    if (voices.length > 0) { attempt(1); }
+    else { synth.onvoiceschanged = () => { synth.onvoiceschanged = null; attempt(1); }; }
   }, [voiceSettings.speed, voiceSettings.volume]);
 
   const INPUT_METHOD_CARDS: {
