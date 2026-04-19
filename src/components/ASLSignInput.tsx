@@ -3,12 +3,11 @@ import { Hand, X, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// ── ASL Alphabet — Wikimedia Commons FilePath redirect (reliable, no CORS) ────
+// ── ASL Alphabet — Handspeak.com (reliable per-letter images) ────────────────
 const ASL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => ({
   id: letter,
   label: letter,
-  img: `https://commons.wikimedia.org/wiki/Special:FilePath/Sign_language_${letter}.svg?width=120`,
-  fallback: `https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Sign_language_${letter}.svg/80px-Sign_language_${letter}.svg.png`,
+  img: `https://www.handspeak.com/spell/index/asl-abc-${letter.toLowerCase()}.jpg`,
 }));
 
 // ── Common Words (22) ─────────────────────────────────────────────────────────
@@ -88,15 +87,10 @@ function AISignsBack({ word }: { word: string }) {
         {letters.map((letter, i) => (
           <div key={i} className="flex flex-col items-center gap-0.5">
             <img
-              src={`https://commons.wikimedia.org/wiki/Special:FilePath/Sign_language_${letter.toUpperCase()}.svg?width=80`}
+              src={`https://www.handspeak.com/spell/index/asl-abc-${letter.toLowerCase()}.jpg`}
               alt={`ASL ${letter}`}
               className="h-12 w-12 object-contain rounded-lg border border-border bg-white"
-              onError={(e) => {
-                const img = e.target as HTMLImageElement;
-                (img as HTMLImageElement & { _tried?: boolean })._tried ||
-                  ((img as HTMLImageElement & { _tried?: boolean })._tried = true,
-                  img.style.display = "none");
-              }}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
             />
             <span className="text-[11px] font-bold text-primary">{letter}</span>
           </div>
@@ -112,7 +106,7 @@ function LearnSign({ letter }: { letter: string }) {
     <div className="rounded-xl border border-border bg-card p-4 flex flex-col items-center gap-2">
       <p className="text-sm font-semibold text-foreground">How to sign "{letter}"</p>
       <img
-        src={`https://commons.wikimedia.org/wiki/Special:FilePath/Sign_language_${letter.toUpperCase()}.svg?width=150`}
+        src={`https://www.handspeak.com/spell/index/asl-abc-${letter.toLowerCase()}.jpg`}
         alt={`ASL ${letter}`}
         className="h-28 w-28 object-contain rounded-xl border border-border bg-white"
         onError={(e) => {
@@ -360,10 +354,7 @@ export default function ASLSignInput({ onSend, disabled }: ASLSignInputProps) {
                   src={card.img}
                   alt={`ASL ${card.label}`}
                   className="h-10 w-10 object-contain rounded bg-white"
-                  onError={(e) => {
-                    const img = e.target as HTMLImageElement;
-                    if (img.src !== card.fallback) img.src = card.fallback;
-                  }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 />
                 <span className="text-[10px] font-bold text-foreground">{card.label}</span>
               </button>
