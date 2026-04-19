@@ -175,6 +175,210 @@ const soundHealingContent = [
   { hz: 741, chakra: "Throat Chakra", effect: "Awakens intuition and self-expression. Cleanses cells of toxins and electromagnetic radiation." },
 ];
 
+/* ── Solfeggio chakra colour palette ── */
+const SOLFEGGIO_META: Record<number, { bg: string; border: string; glow: string; text: string; accent: string }> = {
+  174: { bg: "#120a03", border: "#7c4a1a", glow: "#9b6229", text: "#d4a96a", accent: "#c8843a" },
+  285: { bg: "#150700", border: "#9a3412", glow: "#ea580c", text: "#fb923c", accent: "#f97316" },
+  396: { bg: "#1a0000", border: "#991b1b", glow: "#dc2626", text: "#fca5a5", accent: "#ef4444" },
+  417: { bg: "#1a0d00", border: "#b45309", glow: "#d97706", text: "#fcd34d", accent: "#f59e0b" },
+  528: { bg: "#181200", border: "#a16207", glow: "#ca8a04", text: "#fef08a", accent: "#eab308" },
+  639: { bg: "#001408", border: "#166534", glow: "#22c55e", text: "#86efac", accent: "#4ade80" },
+  741: { bg: "#00091a", border: "#1d4ed8", glow: "#3b82f6", text: "#93c5fd", accent: "#60a5fa" },
+};
+
+/* ── Animated tuning fork SVG ── */
+function TuningFork({ playing, accent, glow }: { playing: boolean; accent: string; glow: string }) {
+  return (
+    <svg
+      viewBox="0 0 40 84"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-16 h-20"
+      aria-hidden="true"
+    >
+      <defs>
+        <style>{`
+          @keyframes sfIdle {
+            0%,100% { transform:translateX(0); }
+            30%      { transform:translateX(-0.7px); }
+            70%      { transform:translateX(0.7px); }
+          }
+          @keyframes sfPlay {
+            0%,100% { transform:translateX(0); }
+            15%     { transform:translateX(-2.8px); }
+            30%     { transform:translateX(2.8px); }
+            45%     { transform:translateX(-2.2px); }
+            60%     { transform:translateX(2.2px); }
+            75%     { transform:translateX(-1.5px); }
+            90%     { transform:translateX(1.5px); }
+          }
+          @keyframes sfGlow {
+            0%,100% { opacity:0.55; }
+            50%     { opacity:1; }
+          }
+        `}</style>
+        <filter id="sfBlur">
+          <feGaussianBlur stdDeviation="0.8" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      {/* Prongs — animated group */}
+      <g
+        style={{
+          animation: playing
+            ? "sfPlay 0.11s ease-in-out infinite"
+            : "sfIdle 3.5s ease-in-out infinite",
+          transformOrigin: "20px 50px",
+        }}
+        filter={playing ? "url(#sfBlur)" : undefined}
+      >
+        {/* Left prong */}
+        <path d="M11,50 L11,24" stroke={accent} strokeWidth="3.5" strokeLinecap="round"/>
+        {/* Right prong */}
+        <path d="M29,50 L29,24" stroke={accent} strokeWidth="3.5" strokeLinecap="round"/>
+        {/* U arch at top */}
+        <path d="M11,24 C11,8 29,8 29,24" stroke={accent} fill="none" strokeWidth="3.5" strokeLinecap="round"/>
+        {/* Glow lines when playing */}
+        {playing && <>
+          <path d="M11,50 L11,24" stroke={glow} strokeWidth="7" strokeLinecap="round" opacity="0.22" style={{ animation: "sfGlow 0.9s ease-in-out infinite" }}/>
+          <path d="M29,50 L29,24" stroke={glow} strokeWidth="7" strokeLinecap="round" opacity="0.22" style={{ animation: "sfGlow 0.9s ease-in-out infinite" }}/>
+          <path d="M11,24 C11,8 29,8 29,24" stroke={glow} fill="none" strokeWidth="7" strokeLinecap="round" opacity="0.22" style={{ animation: "sfGlow 0.9s ease-in-out infinite" }}/>
+        </>}
+      </g>
+
+      {/* Handle — static */}
+      <path d="M20,50 L20,74" stroke={accent} strokeWidth="4.5" strokeLinecap="round"/>
+      {/* Base disc */}
+      <ellipse cx="20" cy="76" rx="7.5" ry="2.8" fill={accent} opacity="0.65"/>
+      {/* Glow halo under base when playing */}
+      {playing && (
+        <ellipse
+          cx="20" cy="76" rx="12" ry="5"
+          fill={glow} opacity="0.18"
+          style={{ animation: "sfGlow 1.1s ease-in-out infinite" }}
+        />
+      )}
+    </svg>
+  );
+}
+
+/* ── Per-frequency card ── */
+function FrequencyCard({ hz, chakra, effect }: { hz: number; chakra: string; effect: string }) {
+  const [playing, setPlaying] = useState(false);
+  const ctxRef   = useRef<AudioContext | null>(null);
+  const oscRef   = useRef<OscillatorNode | null>(null);
+  const gainRef  = useRef<GainNode | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const meta = SOLFEGGIO_META[hz] ?? SOLFEGGIO_META[528];
+
+  const stopTone = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (gainRef.current && ctxRef.current) {
+      gainRef.current.gain.cancelScheduledValues(ctxRef.current.currentTime);
+      gainRef.current.gain.setValueAtTime(gainRef.current.gain.value, ctxRef.current.currentTime);
+      gainRef.current.gain.exponentialRampToValueAtTime(0.0001, ctxRef.current.currentTime + 0.4);
+    }
+    setTimeout(() => {
+      oscRef.current?.stop();
+      ctxRef.current?.close().catch(() => {});
+      ctxRef.current = null;
+      setPlaying(false);
+    }, 420);
+  };
+
+  const toggleTone = () => {
+    if (playing) { stopTone(); return; }
+    const ctx = new AudioContext();
+    ctxRef.current = ctx;
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = hz;
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.28, ctx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.28, ctx.currentTime + 7.5);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 8.2);
+    osc.connect(gain).connect(ctx.destination);
+    oscRef.current = osc;
+    gainRef.current = gain;
+    osc.start();
+    setPlaying(true);
+    timerRef.current = setTimeout(() => { setPlaying(false); ctxRef.current = null; }, 8400);
+  };
+
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    try { oscRef.current?.stop(); } catch {}
+    ctxRef.current?.close().catch(() => {});
+  }, []);
+
+  const ytUrl = `https://www.youtube.com/results?search_query=${hz}+hz+solfeggio+healing+frequency`;
+
+  return (
+    <div
+      className="rounded-2xl border p-5 space-y-4 transition-all duration-500"
+      style={{
+        background: meta.bg,
+        borderColor: playing ? meta.glow : meta.border,
+        boxShadow: playing ? `0 0 36px ${meta.glow}44, 0 0 72px ${meta.glow}18` : "none",
+      }}
+    >
+      {/* Fork + info row */}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={toggleTone}
+          aria-label={playing ? `Stop ${hz} Hz` : `Play ${hz} Hz healing tone`}
+          className="shrink-0 rounded-2xl p-3 transition-all hover:scale-110 active:scale-95 focus:outline-none"
+          style={{ background: `${meta.glow}1a`, boxShadow: playing ? `0 0 22px ${meta.glow}55` : "none" }}
+        >
+          <TuningFork playing={playing} accent={meta.accent} glow={meta.glow} />
+        </button>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="font-display text-3xl font-bold" style={{ color: meta.text }}>{hz}</span>
+            <span className="text-base font-medium opacity-70" style={{ color: meta.text }}>Hz</span>
+            {playing && (
+              <motion.span
+                animate={{ opacity: [1, 0.35, 1] }}
+                transition={{ duration: 1.1, repeat: Infinity }}
+                className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                style={{ background: `${meta.glow}33`, color: meta.accent }}
+              >
+                ♪ playing
+              </motion.span>
+            )}
+          </div>
+          <p className="text-xs mt-1 font-semibold" style={{ color: meta.accent }}>{chakra}</p>
+        </div>
+      </div>
+
+      {/* Effect */}
+      <p className="text-sm leading-relaxed" style={{ color: `${meta.text}cc` }}>{effect}</p>
+
+      {/* Actions */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={toggleTone}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:scale-[1.03] active:scale-95"
+          style={{ background: `${meta.glow}28`, color: meta.text, border: `1px solid ${meta.border}` }}
+        >
+          {playing ? "⏹ Stop" : "▶ Play tone"}
+        </button>
+        <a
+          href={ytUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-red-600/20 border border-red-500/30 text-red-300 hover:bg-red-600/30 transition-all hover:scale-[1.03] active:scale-95"
+        >
+          ▶ Watch on YouTube
+        </a>
+      </div>
+    </div>
+  );
+}
+
 const auraCleansingContent = [
   { name: "Salt Bath Cleanse", steps: ["Fill a warm bath with 1–2 cups of sea salt or Himalayan pink salt.", "Add a few drops of essential oil (lavender, frankincense, or sage).", "Soak for 20–30 minutes. Visualize dark or heavy energy dissolving into the water.", "As you drain the tub, imagine all negativity flowing away.", "Pat dry gently and say: 'My energy is clear, my aura is bright.'"] },
   { name: "Smoke Cleansing (Smudging)", steps: ["Light a bundle of dried sage, palo santo, or cedar.", "Hold it at arm's length and let the smoke billow.", "Starting at your feet, slowly wave the smoke upward around your body.", "Pay extra attention to areas that feel heavy (head, heart, stomach).", "Open a window to let the smoke and released energy flow out."] },
@@ -329,14 +533,13 @@ function SectionContent({ id, reading, readSteps, stopReading }: {
 
     case "sound-healing":
       return (
-        <div className="space-y-4">
-          <p className="text-muted-foreground text-sm mb-2">The 7 Solfeggio Frequencies — ancient tones used for spiritual and physical healing.</p>
+        <div className="space-y-5">
+          <p className="text-muted-foreground text-sm">
+            The 7 Solfeggio Frequencies — ancient tones used for spiritual and physical healing.
+            Tap a tuning fork to play the pure tone through your device. Each tone plays for 8 seconds.
+          </p>
           {soundHealingContent.map((s) => (
-            <div key={s.hz} className="bg-muted/40 rounded-xl p-4 space-y-2">
-              <h3 className="font-display text-lg font-bold text-foreground">{s.hz} Hz</h3>
-              <p className="text-xs text-healing-tools"><strong>Chakra:</strong> {s.chakra}</p>
-              <p className="text-sm text-muted-foreground">{s.effect}</p>
-            </div>
+            <FrequencyCard key={s.hz} hz={s.hz} chakra={s.chakra} effect={s.effect} />
           ))}
         </div>
       );
