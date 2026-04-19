@@ -552,7 +552,7 @@ export default function PortalRoom() {
   return (
     <div
       className="flex-1 flex flex-col overflow-hidden"
-      style={{ background: "radial-gradient(ellipse at top left, hsl(174,60%,8%) 0%, hsl(185,55%,5%) 40%, hsl(200,45%,4%) 100%)" }}
+      style={{ background: "radial-gradient(ellipse at 20% 20%, hsl(0,0%,4%) 0%, hsl(30,20%,12%) 45%, hsl(35,35%,22%) 100%)" }}
     >
       {/* ── Page Header ── */}
       <div className="px-4 pt-5 pb-3 shrink-0">

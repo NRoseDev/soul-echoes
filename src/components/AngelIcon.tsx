@@ -23,8 +23,19 @@ export default function AngelIcon({ className = "h-6 w-6" }: { className?: strin
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       aria-hidden="true"
+      style={{ animation: "sewShimmer 5s linear infinite" }}
     >
       <defs>
+        <style>{`
+          @keyframes sewShimmer {
+            0%   { filter: hue-rotate(0deg)   brightness(1.1) saturate(1.2); }
+            20%  { filter: hue-rotate(60deg)  brightness(1.3) saturate(1.4); }
+            40%  { filter: hue-rotate(140deg) brightness(1.2) saturate(1.3); }
+            60%  { filter: hue-rotate(220deg) brightness(1.25) saturate(1.4); }
+            80%  { filter: hue-rotate(300deg) brightness(1.2) saturate(1.3); }
+            100% { filter: hue-rotate(360deg) brightness(1.1) saturate(1.2); }
+          }
+        `}</style>
         {/* Radial gradient: rich green at wing base → white at wingtips */}
         <radialGradient id={g} cx="40" cy="44" r="56" gradientUnits="userSpaceOnUse">
           <stop offset="0%"   stopColor="#15803d" stopOpacity="1"   />

@@ -36,7 +36,7 @@ export default function SpiritualToolsRoom() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 pb-24 bg-gradient-to-br from-violet-950 via-slate-950 to-indigo-950">
+    <div className="flex-1 overflow-y-auto p-4 pb-24" style={{ background: "radial-gradient(ellipse at 20% 20%, hsl(0,80%,5%) 0%, hsl(0,80%,12%) 45%, hsl(0,50%,25%) 100%)" }}>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <h1 className="font-display text-3xl font-bold text-foreground mb-2 text-center">Spiritual Tools</h1>
         <p className="text-muted-foreground text-center mb-8 max-w-2xl mx-auto">

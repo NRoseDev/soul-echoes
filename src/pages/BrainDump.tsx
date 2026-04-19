@@ -236,20 +236,6 @@ export default function BrainDump() {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setAnalysis(buildResponseAnalysis(trimmed));
-
-    // When offline, show local guidance and queue for later
-    if (!navigator.onLine) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "You're currently offline. 🌿 Your message has been received and your local guidance is shown below. The AI response will be available once you reconnect.",
-        },
-      ]);
-      return;
-    }
-
     setIsLoading(true);
 
     let assistantSoFar = "";
@@ -432,7 +418,7 @@ export default function BrainDump() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" style={{ background: "radial-gradient(ellipse at 30% 20%, hsl(270,80%,5%) 0%, hsl(270,60%,12%) 45%, hsl(270,30%,28%) 100%)" }}>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-4" role="log" aria-label="Conversation" aria-live="polite">
         <AnimatePresence initial={false}>
           {messages.map((msg, i) => (
@@ -594,10 +580,8 @@ export default function BrainDump() {
           <button
             onClick={() => { setAutoRead(!autoRead); if (ttsSpeaking) ttsStop(); }}
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            aria-pressed={autoRead}
-            aria-label={autoRead ? "Auto-read responses aloud — currently on" : "Auto-read responses aloud — currently off"}
           >
-            {autoRead ? <Volume2 className="h-3 w-3" aria-hidden="true" /> : <VolumeX className="h-3 w-3" aria-hidden="true" />}
+            {autoRead ? <Volume2 className="h-3 w-3" /> : <VolumeX className="h-3 w-3" />}
             {autoRead ? "Auto-read on" : "Auto-read off"}
           </button>
         </div>

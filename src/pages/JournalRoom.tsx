@@ -7,7 +7,7 @@ export default function JournalRoom() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-gradient-to-br from-violet-950 via-indigo-950 to-sky-800 text-white">
+    <div className="min-h-[calc(100vh-5rem)] text-white" style={{ background: "radial-gradient(ellipse at 20% 20%, hsl(245,90%,5%) 0%, hsl(245,70%,12%) 45%, hsl(245,30%,28%) 100%)" }}>
       <div className="max-w-6xl mx-auto px-4 py-10">
         <div className="flex flex-col gap-4 mb-8">
           <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-white/90 shadow-lg shadow-black/20">

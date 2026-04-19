@@ -75,9 +75,38 @@ export default function DistressSignal() {
   const [accessError, setAccessError]     = useState(false);
   const [selectedAngel, setSelectedAngel] = useState<AngelType | null>(null);
   const [glitterCount, setGlitterCount]   = useState(0);
+  const [unicornCount, setUnicornCount]   = useState(0);
   const shakeRef = useRef({ last: 0, count: 0 });
+  const unicornFiredRef = useRef(false);
 
   const safety = getSafetySettings();
+
+  /* ── Supabase real-time: fire unicorn when responder acknowledges ── */
+  useEffect(() => {
+    let channel: ReturnType<typeof import("@/integrations/supabase/client").supabase.channel> | null = null;
+    (async () => {
+      try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        channel = (supabase as any)
+          .channel("distress-received")
+          .on(
+            "postgres_changes",
+            { event: "UPDATE", schema: "public", table: "distress_signals", filter: `user_id=eq.${user.id}` },
+            (payload: { new: Record<string, unknown> }) => {
+              const status = payload.new?.status as string | undefined;
+              if ((status === "received" || status === "acknowledged") && !unicornFiredRef.current) {
+                unicornFiredRef.current = true;
+                setUnicornCount((c) => c + 1);
+              }
+            }
+          )
+          .subscribe();
+      } catch { /* supabase not available offline */ }
+    })();
+    return () => { channel?.unsubscribe(); };
+  }, []);
 
   /* ── Shake detection ── */
   useEffect(() => {
@@ -173,6 +202,7 @@ export default function DistressSignal() {
   return (
     <>
       <GlitterBurst trigger={glitterCount} />
+      <GlitterBurst trigger={unicornCount} unicorn />
 
       {/* ── Floating wings button — green glow, left side, above bottom nav ── */}
       <button
