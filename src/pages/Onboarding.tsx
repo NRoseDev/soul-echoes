@@ -1173,7 +1173,35 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               transition={{ type: "spring", stiffness: 140, damping: 14 }}
               className="w-20 h-20 mx-auto rounded-full bg-green-500/20 border-2 border-green-400/50 flex items-center justify-center shadow-[0_0_36px_rgba(74,222,128,0.6),0_0_70px_rgba(74,222,128,0.2)]"
             >
-              <span className="text-4xl" aria-hidden="true">👼</span>
+              <svg viewBox="0 0 80 46" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-9 w-16" aria-hidden="true">
+                <defs>
+                  <radialGradient id="ob5wg" cx="40" cy="44" r="56" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%"   stopColor="#15803d" stopOpacity="1" />
+                    <stop offset="30%"  stopColor="#4ade80" stopOpacity="0.92" />
+                    <stop offset="65%"  stopColor="#86efac" stopOpacity="0.88" />
+                    <stop offset="100%" stopColor="#ffffff" stopOpacity="1" />
+                  </radialGradient>
+                  <filter id="ob5glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="1.6" result="blur" />
+                    <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.13  0 0 0 0 0.77  0 0 0 0 0.36  0 0 0 0.75 0" result="coloredBlur" />
+                    <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                  </filter>
+                </defs>
+                <g filter="url(#ob5glow)">
+                  <path d="M40,44 C35,36 25,26 15,17 C9,11 3,7 3,7 C2,5 3,4 5,5 C9,6 16,12 24,20 C32,28 38,37 40,44Z" fill="url(#ob5wg)" />
+                  <path d="M40,44 C36,37 28,29 20,22 C15,17 11,13 11,13 C12,12 15,14 19,18 C26,25 35,36 40,44Z" fill="url(#ob5wg)" opacity="0.78" />
+                  <path d="M40,44 C37,39 31,33 25,28 C22,24 19,21 20,20 C21,19 23,22 26,25 C31,30 37,39 40,44Z" fill="url(#ob5wg)" opacity="0.55" />
+                  <path d="M40,44 C31,33 18,21 6,10"  fill="none" stroke="white" strokeOpacity="0.5" strokeWidth="0.85" strokeLinecap="round" />
+                  <path d="M40,44 C33,35 22,25 13,16" fill="none" stroke="white" strokeOpacity="0.38" strokeWidth="0.7" strokeLinecap="round" />
+                  <path d="M40,44 C35,37 26,29 18,22" fill="none" stroke="white" strokeOpacity="0.32" strokeWidth="0.65" strokeLinecap="round" />
+                  <path d="M40,44 C45,36 55,26 65,17 C71,11 77,7 77,7 C78,5 77,4 75,5 C71,6 64,12 56,20 C48,28 42,37 40,44Z" fill="url(#ob5wg)" />
+                  <path d="M40,44 C44,37 52,29 60,22 C65,17 69,13 69,13 C68,12 65,14 61,18 C54,25 45,36 40,44Z" fill="url(#ob5wg)" opacity="0.78" />
+                  <path d="M40,44 C43,39 49,33 55,28 C58,24 61,21 60,20 C59,19 57,22 54,25 C49,30 43,39 40,44Z" fill="url(#ob5wg)" opacity="0.55" />
+                  <path d="M40,44 C49,33 62,21 74,10"  fill="none" stroke="white" strokeOpacity="0.5" strokeWidth="0.85" strokeLinecap="round" />
+                  <path d="M40,44 C47,35 58,25 67,16"  fill="none" stroke="white" strokeOpacity="0.38" strokeWidth="0.7" strokeLinecap="round" />
+                  <path d="M40,44 C45,37 54,29 62,22"  fill="none" stroke="white" strokeOpacity="0.32" strokeWidth="0.65" strokeLinecap="round" />
+                </g>
+              </svg>
             </motion.div>
             <div className="space-y-3">
               <h2 className="font-display text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-300 to-emerald-300 bg-clip-text text-transparent">
