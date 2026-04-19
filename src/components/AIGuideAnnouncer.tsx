@@ -2,12 +2,6 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Volume2, X } from "lucide-react";
 
-/**
- * AI Guide Announcer — speaks instructions aloud AND displays them as text on screen.
- * Ensures deaf/HoH users always see what the guide says.
- * Use the global announce() function to trigger announcements from anywhere.
- */
-
 interface Announcement {
   id: number;
   text: string;
@@ -15,20 +9,23 @@ interface Announcement {
 
 let globalAnnounce: (text: string) => void = () => {};
 
-/** Call this from anywhere to make the AI guide speak and display a message */
 export function announceGuide(text: string) {
   globalAnnounce(text);
 }
 
-const PREFERRED_VOICES = ["samantha", "karen", "moira", "google uk english female", "google us english female", "microsoft zira"];
-
 function getSoftVoice(): SpeechSynthesisVoice | null {
   const voices = window.speechSynthesis?.getVoices() || [];
-  for (const pref of PREFERRED_VOICES) {
-    const match = voices.find(v => v.name.toLowerCase().includes(pref));
-    if (match) return match;
-  }
-  return voices.find(v => v.lang.startsWith("en") && /female|zira|samantha|karen/i.test(v.name)) || null;
+  try {
+    const raw = localStorage.getItem("soul-echoes-voice-settings");
+    if (raw) {
+      const settings = JSON.parse(raw);
+      if (settings.voiceURI) {
+        const match = voices.find(v => v.voiceURI === settings.voiceURI);
+        if (match) return match;
+      }
+    }
+  } catch {}
+  return voices.find(v => v.lang.startsWith("en")) || null;
 }
 
 export default function AIGuideAnnouncer() {
@@ -38,11 +35,7 @@ export default function AIGuideAnnouncer() {
 
   const announce = useCallback((text: string) => {
     const id = ++idRef.current;
-
-    // Add to visible announcements
-    setAnnouncements(prev => [...prev.slice(-2), { id, text }]); // keep max 3
-
-    // Speak it aloud
+    setAnnouncements(prev => [...prev.slice(-2), { id, text }]);
     if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
@@ -52,8 +45,6 @@ export default function AIGuideAnnouncer() {
       u.pitch = 1.1;
       window.speechSynthesis.speak(u);
     }
-
-    // Auto-dismiss after duration based on text length
     const duration = Math.max(5000, text.length * 60 + 3000);
     const timer = setTimeout(() => {
       setAnnouncements(prev => prev.filter(a => a.id !== id));
@@ -62,13 +53,11 @@ export default function AIGuideAnnouncer() {
     dismissTimersRef.current.set(id, timer);
   }, []);
 
-  // Register global announce function
   useEffect(() => {
     globalAnnounce = announce;
     return () => { globalAnnounce = () => {}; };
   }, [announce]);
 
-  // Clean up timers
   useEffect(() => {
     return () => {
       dismissTimersRef.current.forEach(t => clearTimeout(t));

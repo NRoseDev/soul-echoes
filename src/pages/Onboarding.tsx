@@ -1171,21 +1171,21 @@ export default function Onboarding({ onComplete }: { onComplete: () => void }) {
               initial={{ scale: 0.7, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 140, damping: 14 }}
-              className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-rose-400 to-pink-600 flex items-center justify-center shadow-[0_0_36px_rgba(251,113,133,0.55)]"
+              className="w-20 h-20 mx-auto rounded-full bg-green-500/20 border-2 border-green-400/50 flex items-center justify-center shadow-[0_0_36px_rgba(74,222,128,0.6),0_0_70px_rgba(74,222,128,0.2)]"
             >
-              <span className="text-4xl" aria-hidden="true">🛡️</span>
+              <span className="text-4xl" aria-hidden="true">👼</span>
             </motion.div>
             <div className="space-y-3">
-              <h2 className="font-display text-xl sm:text-2xl font-bold bg-gradient-to-r from-rose-300 to-pink-300 bg-clip-text text-transparent">
+              <h2 className="font-display text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-300 to-emerald-300 bg-clip-text text-transparent">
                 Your private safety feature
               </h2>
               <p className="text-base text-foreground/80 leading-relaxed max-w-sm mx-auto">
-                This app includes a private safety feature. You can access it anytime from the main menu.
+                The green angel icon is your private silent distress beacon. Tap it anytime to send a code to a dispatcher on call.
               </p>
               <p className="text-sm text-muted-foreground/60">Only you will know what it does.</p>
             </div>
             <button onClick={() => setStep(6)}
-              className="px-10 py-4 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold text-base shadow-[0_0_20px_rgba(251,113,133,0.4)] hover:shadow-[0_0_30px_rgba(251,113,133,0.6)] transition-all duration-300 hover:scale-[1.03]">
+              className="px-10 py-4 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold text-base shadow-[0_0_20px_rgba(74,222,128,0.4)] hover:shadow-[0_0_30px_rgba(74,222,128,0.6)] transition-all duration-300 hover:scale-[1.03]">
               Got it
             </button>
           </motion.div>

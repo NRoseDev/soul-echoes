@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Wind, MessageCircleOff, Moon, Sparkles, ShoppingBag, Flame, Check } from "lucide-react";
+import { Home, BookOpen, Wind, MessageCircleOff, Moon, Sparkles, Flame, Check, Globe2 } from "lucide-react";
 import AIGuideIndicator from "@/AIGuideIndicator";
 import { getPreferences, savePreferences, type InputMethod } from "@/lib/preferences";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { path: "/unspoken", label: "Unspoken", icon: MessageCircleOff },
   { path: "/shadow-work", label: "Shadow", icon: Moon },
   { path: "/wisdom", label: "Wisdom", icon: Sparkles },
-  { path: "/shop", label: "Shop", icon: ShoppingBag },
+  { path: "/shop", label: "Portal", icon: Globe2 },
   { path: "/spiritual-tools", label: "Tools", icon: Flame },
 ];
 

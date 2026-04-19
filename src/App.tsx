@@ -25,6 +25,7 @@ import ShadowWorkDetail from "./pages/ShadowWorkDetail";
 import WisdomRoom from "./pages/WisdomRoom";
 import WisdomDetail from "./pages/WisdomDetail";
 import ShopRoom from "./pages/ShopRoom";
+import PortalRoom from "./pages/PortalRoom";
 import SpiritualToolsRoom from "./pages/SpiritualToolsRoom";
 import SpiritualToolsDetail from "./pages/SpiritualToolsDetail";
 import DistressSignal from "./components/DistressSignal";
@@ -68,7 +69,7 @@ const App = () => {
               <Route path="/shadow-work/:module" element={<ShadowWorkDetail />} />
               <Route path="/wisdom" element={<WisdomRoom />} />
               <Route path="/wisdom/:section" element={<WisdomDetail />} />
-              <Route path="/shop" element={<ShopRoom />} />
+              <Route path="/shop" element={<PortalRoom />} />
               <Route path="/spiritual-tools" element={<SpiritualToolsRoom />} />
               <Route path="/spiritual-tools/:section" element={<SpiritualToolsDetail />} />
               <Route path="/community" element={<HealingRoom />} />

@@ -124,6 +124,7 @@ export default function ASLSignInput({ onSend, disabled }: ASLSignInputProps) {
   const [lastSent, setLastSent]               = useState("");
   const [learnLetter, setLearnLetter]         = useState<string | null>(null);
   const [justSent, setJustSent]               = useState(false);
+  const [pendingCard, setPendingCard]         = useState<{ label: string; emoji?: string } | null>(null);
   const videoRef  = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -152,14 +153,22 @@ export default function ASLSignInput({ onSend, disabled }: ASLSignInputProps) {
     return () => { streamRef.current?.getTracks().forEach((t) => t.stop()); };
   }, []);
 
-  // send a card tap
-  const sendCard = (label: string) => {
+  // confirm a card tap
+  const sendCard = (label: string, emoji?: string) => {
     if (disabled) return;
-    setLastSent(label);
+    setPendingCard({ label, emoji });
+  };
+
+  const confirmCard = () => {
+    if (!pendingCard) return;
+    setLastSent(pendingCard.label);
     setJustSent(true);
-    onSend(`[ASL Sign] ${label}`);
+    onSend(`[ASL Sign] ${pendingCard.label}`);
+    setPendingCard(null);
     setTimeout(() => setJustSent(false), 1500);
   };
+
+  const cancelCard = () => setPendingCard(null);
 
   // send fingerspelled word
   const sendSpelledWord = () => {
@@ -220,6 +229,24 @@ export default function ASLSignInput({ onSend, disabled }: ASLSignInputProps) {
         </div>
       )}
 
+      {/* ── Confirmation card ── */}
+      {pendingCard && (
+        <div className="rounded-2xl border-2 border-primary/40 bg-primary/10 p-4 space-y-3 text-center">
+          <p className="text-sm font-semibold text-foreground">
+            {pendingCard.emoji && <span className="mr-2 text-xl">{pendingCard.emoji}</span>}
+            Send <span className="text-primary">"{pendingCard.label}"</span>?
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Button onClick={confirmCard} size="sm" className="rounded-xl px-6">
+              Yes
+            </Button>
+            <Button onClick={cancelCard} size="sm" variant="outline" className="rounded-xl px-6">
+              No
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* ── AI signs back ── */}
       {lastSent.length > 0 && <AISignsBack word={lastSent} />}
 
@@ -240,7 +267,7 @@ export default function ASLSignInput({ onSend, disabled }: ASLSignInputProps) {
             {ASL_COMMON_WORDS.map((card) => (
               <button
                 key={card.id}
-                onClick={() => sendCard(card.label)}
+                onClick={() => sendCard(card.label, card.emoji)}
                 disabled={disabled}
                 className="flex flex-col items-center gap-0.5 p-2 rounded-xl border border-border bg-card hover:bg-primary/10 active:scale-95 transition-all disabled:opacity-50"
               >
@@ -257,7 +284,7 @@ export default function ASLSignInput({ onSend, disabled }: ASLSignInputProps) {
             {ASL_FEELINGS.map((card) => (
               <button
                 key={card.id}
-                onClick={() => sendCard(card.label)}
+                onClick={() => sendCard(card.label, card.emoji)}
                 disabled={disabled}
                 className="flex flex-col items-center gap-0.5 p-2 rounded-xl border border-border bg-card hover:bg-primary/10 active:scale-95 transition-all disabled:opacity-50"
               >
