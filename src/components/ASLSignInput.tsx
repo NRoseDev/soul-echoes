@@ -3,60 +3,75 @@ import { Hand, X, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// ── ASL Alphabet ──────────────────────────────────────────────────────────────
+// ── ASL Alphabet — Wikimedia Commons FilePath redirect (reliable, no CORS) ────
 const ASL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => ({
   id: letter,
   label: letter,
-  img: `https://www.signingsavvy.com/media/signs/alphabet/${letter.toLowerCase()}.jpg`,
+  img: `https://commons.wikimedia.org/wiki/Special:FilePath/Sign_language_${letter}.svg?width=120`,
   fallback: `https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Sign_language_${letter}.svg/80px-Sign_language_${letter}.svg.png`,
 }));
 
-// ── Common Words ──────────────────────────────────────────────────────────────
+// ── Common Words (22) ─────────────────────────────────────────────────────────
 const ASL_COMMON_WORDS = [
   { id: "hello",           label: "Hello",           emoji: "👋" },
   { id: "thank-you",       label: "Thank You",       emoji: "🙏" },
-  { id: "please",          label: "Please",           emoji: "🤲" },
+  { id: "please",          label: "Please",          emoji: "🤲" },
   { id: "yes",             label: "Yes",             emoji: "👍" },
   { id: "no",              label: "No",              emoji: "👎" },
   { id: "help",            label: "Help",            emoji: "🆘" },
   { id: "sorry",           label: "Sorry",           emoji: "😔" },
   { id: "love",            label: "Love",            emoji: "❤️" },
-  { id: "happy",           label: "Happy",           emoji: "😊" },
-  { id: "sad",             label: "Sad",             emoji: "😢" },
-  { id: "angry",           label: "Angry",           emoji: "😠" },
-  { id: "scared",          label: "Scared",          emoji: "😨" },
-  { id: "tired",           label: "Tired",           emoji: "😴" },
-  { id: "hungry",          label: "Hungry",          emoji: "🍽️" },
-  { id: "water",           label: "Water",           emoji: "💧" },
-  { id: "pain",            label: "Pain",            emoji: "🤕" },
-  { id: "family",          label: "Family",          emoji: "👨‍👩‍👧‍👦" },
-  { id: "friend",          label: "Friend",          emoji: "🤝" },
-  { id: "home",            label: "Home",            emoji: "🏠" },
   { id: "safe",            label: "Safe",            emoji: "🛡️" },
-  { id: "understand",      label: "Understand",      emoji: "💡" },
-  { id: "dont-understand", label: "Don't Understand",emoji: "❓" },
+  { id: "pain",            label: "Pain",            emoji: "🤕" },
+  { id: "water",           label: "Water",           emoji: "💧" },
+  { id: "hungry",          label: "Hungry",          emoji: "🍽️" },
+  { id: "tired",           label: "Tired",           emoji: "😴" },
   { id: "stop",            label: "Stop",            emoji: "✋" },
   { id: "more",            label: "More",            emoji: "➕" },
+  { id: "understand",      label: "Understand",      emoji: "💡" },
+  { id: "dont-understand", label: "Don't Understand",emoji: "❓" },
+  { id: "friend",          label: "Friend",          emoji: "🤝" },
+  { id: "home",            label: "Home",            emoji: "🏠" },
+  { id: "breathe",         label: "Breathe",         emoji: "🌬️" },
+  { id: "wait",            label: "Wait",            emoji: "⏳" },
+  { id: "together",        label: "Together",        emoji: "🫂" },
 ];
 
-// ── Feelings ──────────────────────────────────────────────────────────────────
+// ── Feelings (33) ────────────────────────────────────────────────────────────
 const ASL_FEELINGS = [
-  { id: "peaceful",     label: "Peaceful",     emoji: "🕊️" },
-  { id: "anxious",      label: "Anxious",      emoji: "😰" },
-  { id: "hopeful",      label: "Hopeful",      emoji: "🌅" },
-  { id: "lonely",       label: "Lonely",       emoji: "🥀" },
-  { id: "grateful",     label: "Grateful",     emoji: "✨" },
-  { id: "confused",     label: "Confused",     emoji: "🌀" },
-  { id: "overwhelmed",  label: "Overwhelmed",  emoji: "🌊" },
-  { id: "numb",         label: "Numb",         emoji: "🧊" },
-  { id: "healing",      label: "Healing",      emoji: "🌱" },
-  { id: "grief",        label: "Grief",        emoji: "🖤" },
-  { id: "shame",        label: "Shame",        emoji: "😶" },
-  { id: "rage",         label: "Rage",         emoji: "🔥" },
-  { id: "i-dont-know",  label: "I Don't Know", emoji: "🤷" },
-  { id: "frustrated",   label: "Frustrated",   emoji: "😣" },
-  { id: "ashamed",      label: "Ashamed",      emoji: "😔" },
-  { id: "safe-feeling", label: "Safe",         emoji: "🛡️" },
+  { id: "peaceful",      label: "Peaceful",      emoji: "🕊️" },
+  { id: "anxious",       label: "Anxious",       emoji: "😰" },
+  { id: "hopeful",       label: "Hopeful",       emoji: "🌅" },
+  { id: "lonely",        label: "Lonely",        emoji: "🥀" },
+  { id: "grateful",      label: "Grateful",      emoji: "🙏" },
+  { id: "confused",      label: "Confused",      emoji: "🌀" },
+  { id: "overwhelmed",   label: "Overwhelmed",   emoji: "🌊" },
+  { id: "numb",          label: "Numb",          emoji: "🧊" },
+  { id: "healing",       label: "Healing",       emoji: "🌱" },
+  { id: "grief",         label: "Grief",         emoji: "🖤" },
+  { id: "shame",         label: "Shame",         emoji: "😶" },
+  { id: "rage",          label: "Rage",          emoji: "🔥" },
+  { id: "i-dont-know",   label: "I Don't Know",  emoji: "🤷" },
+  { id: "frustrated",    label: "Frustrated",    emoji: "😣" },
+  { id: "ashamed",       label: "Ashamed",       emoji: "😔" },
+  { id: "safe-feeling",  label: "Safe",          emoji: "🛡️" },
+  { id: "brave",         label: "Brave",         emoji: "💪" },
+  { id: "loved",         label: "Loved",         emoji: "❤️" },
+  { id: "abandoned",     label: "Abandoned",     emoji: "🏚️" },
+  { id: "broken",        label: "Broken",        emoji: "💔" },
+  { id: "nurtured",      label: "Nurtured",      emoji: "🤗" },
+  { id: "betrayed",      label: "Betrayed",      emoji: "😤" },
+  { id: "curious",       label: "Curious",       emoji: "🔍" },
+  { id: "empowered",     label: "Empowered",     emoji: "⚡" },
+  { id: "stuck",         label: "Stuck",         emoji: "🪨" },
+  { id: "tender",        label: "Tender",        emoji: "🌸" },
+  { id: "proud",         label: "Proud",         emoji: "🦁" },
+  { id: "worthy",        label: "Worthy",        emoji: "✨" },
+  { id: "present",       label: "Present",       emoji: "🎯" },
+  { id: "free",          label: "Free",          emoji: "🦋" },
+  { id: "connected",     label: "Connected",     emoji: "🤝" },
+  { id: "disconnected",  label: "Disconnected",  emoji: "🌑" },
+  { id: "at-peace",      label: "At Peace",      emoji: "☮️" },
 ];
 
 // ── AI Signs Back ─────────────────────────────────────────────────────────────
@@ -73,12 +88,14 @@ function AISignsBack({ word }: { word: string }) {
         {letters.map((letter, i) => (
           <div key={i} className="flex flex-col items-center gap-0.5">
             <img
-              src={`https://www.signingsavvy.com/media/signs/alphabet/${letter.toLowerCase()}.jpg`}
+              src={`https://commons.wikimedia.org/wiki/Special:FilePath/Sign_language_${letter.toUpperCase()}.svg?width=80`}
               alt={`ASL ${letter}`}
               className="h-12 w-12 object-contain rounded-lg border border-border bg-white"
               onError={(e) => {
                 const img = e.target as HTMLImageElement;
-                img.src = `https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Sign_language_${letter}.svg/80px-Sign_language_${letter}.svg.png`;
+                (img as HTMLImageElement & { _tried?: boolean })._tried ||
+                  ((img as HTMLImageElement & { _tried?: boolean })._tried = true,
+                  img.style.display = "none");
               }}
             />
             <span className="text-[11px] font-bold text-primary">{letter}</span>
@@ -95,12 +112,11 @@ function LearnSign({ letter }: { letter: string }) {
     <div className="rounded-xl border border-border bg-card p-4 flex flex-col items-center gap-2">
       <p className="text-sm font-semibold text-foreground">How to sign "{letter}"</p>
       <img
-        src={`https://www.signingsavvy.com/media/signs/alphabet/${letter.toLowerCase()}.jpg`}
+        src={`https://commons.wikimedia.org/wiki/Special:FilePath/Sign_language_${letter.toUpperCase()}.svg?width=150`}
         alt={`ASL ${letter}`}
         className="h-28 w-28 object-contain rounded-xl border border-border bg-white"
         onError={(e) => {
-          const img = e.target as HTMLImageElement;
-          img.src = `https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Sign_language_${letter}.svg/80px-Sign_language_${letter}.svg.png`;
+          (e.target as HTMLImageElement).style.display = "none";
         }}
       />
       <p className="text-xs text-muted-foreground text-center">

@@ -136,6 +136,17 @@ export default function DistressSignal() {
     return () => window.removeEventListener("soul-echoes-distress-trigger", handleDistress);
   }, [phase]);
 
+  /* ── External open trigger (from FloatingHub) ── */
+  useEffect(() => {
+    const handleOpen = () => {
+      if (phase !== "closed") return;
+      const seen = localStorage.getItem(INTRO_SEEN_KEY);
+      setPhase(seen ? "verify" : "welcome");
+    };
+    window.addEventListener("soul-echoes-open-sos", handleOpen);
+    return () => window.removeEventListener("soul-echoes-open-sos", handleOpen);
+  }, [phase]);
+
   const verifyAccess = useCallback(() => {
     if (!safety.setupComplete) { setPhase("angel"); return; }
     if (accessInput === safety.accessValue) { setAccessError(false); setPhase("angel"); }
@@ -203,18 +214,6 @@ export default function DistressSignal() {
     <>
       <GlitterBurst trigger={glitterCount} />
       <GlitterBurst trigger={unicornCount} unicorn />
-
-      {/* ── Floating wings button — green glow, left side, above bottom nav ── */}
-      <button
-        onClick={() => {
-          const seen = localStorage.getItem(INTRO_SEEN_KEY);
-          setPhase(seen ? "verify" : "welcome");
-        }}
-        className="fixed bottom-24 left-4 z-50 h-14 w-14 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-green-500/15 backdrop-blur-sm border-2 border-green-400/40 shadow-[0_0_22px_rgba(74,222,128,0.55),0_0_44px_rgba(74,222,128,0.22)]"
-        aria-label="Angel safety beacon"
-      >
-        <AngelIcon className="h-7 w-12" />
-      </button>
 
       <AnimatePresence>
         {phase !== "closed" && (

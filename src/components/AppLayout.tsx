@@ -3,7 +3,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Home, BookOpen, Wind, MessageCircleOff, Moon, Sparkles, Flame, Check, Globe2 } from "lucide-react";
-import AIGuideIndicator from "@/AIGuideIndicator";
+import FloatingHub from "@/components/FloatingHub";
 import { getPreferences, savePreferences, type InputMethod } from "@/lib/preferences";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
@@ -120,7 +120,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </main>
           </div>
         </div>
-        <AIGuideIndicator inputMethod={inputMethod} />
+        <FloatingHub inputMethod={inputMethod} />
         {/* Bottom Navigation Bar */}
         <nav
           className="shrink-0 flex items-center justify-around px-2 py-2 border-t border-white/10"

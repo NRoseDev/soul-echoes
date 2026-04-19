@@ -15,13 +15,13 @@ const INDIVIDUAL_TIERS = [
     name: "Free Forever",
     price: 0,
     label: "$0",
-    description: "Brain Dump always unlimited, AI navigator always available, all other rooms 1 use every 11 days after 33 day trial.",
+    description: "33-day full trial, then Brain Dump unlimited + 1 session every 11 days in all other rooms.",
     features: [
-      "33-day full trial",
+      "33-day full trial — all rooms open",
       "Brain Dump always unlimited",
       "AI navigator always available",
-      "All other rooms 1 use every 11 days after trial",
-      "Access every healing room",
+      "Guardian angel access — free on all plans",
+      "All other rooms: 1 use every 11 days after trial",
     ],
     icon: Leaf,
     accent: "from-green-500/20 to-emerald-600/20",
@@ -31,12 +31,12 @@ const INDIVIDUAL_TIERS = [
     name: "Basic",
     price: 1,
     label: "$1/mo or $11/yr",
-    description: "Basic healing support and more sessions.",
+    description: "1 session per day in every room.",
     features: [
-      "Everything in Free Forever",
-      "AI navigator always available",
-      "More room sessions",
+      "1 session per day in all rooms",
       "Brain Dump unlimited",
+      "AI navigator always available",
+      "Guardian angel access — free on all plans",
       "Honor system support",
     ],
     icon: Sparkles,
@@ -48,12 +48,12 @@ const INDIVIDUAL_TIERS = [
     name: "More Sessions",
     price: 3,
     label: "$3/mo or $33/yr",
-    description: "More session access across rooms.",
+    description: "3 sessions per day in every room.",
     features: [
-      "Everything in Basic",
+      "3 sessions per day in all rooms",
+      "Brain Dump unlimited",
       "AI navigator always available",
-      "More room sessions",
-      "Priority AI responses",
+      "Guardian angel access — free on all plans",
       "Journal history saved",
     ],
     icon: Heart,
@@ -66,13 +66,13 @@ const INDIVIDUAL_TIERS = [
     name: "Even More",
     price: 5,
     label: "$5/mo or $55/yr",
-    description: "Even more room time and tools.",
+    description: "5 sessions per day in every room.",
     features: [
-      "Everything in More Sessions",
+      "5 sessions per day in all rooms",
+      "Brain Dump unlimited",
       "AI navigator always available",
-      "Expanded access to healing rooms",
+      "Guardian angel access — free on all plans",
       "Advanced spiritual tools",
-      "Shadow work deep dives",
     ],
     icon: Star,
     accent: "from-amber-500/20 to-yellow-600/20",
@@ -83,13 +83,13 @@ const INDIVIDUAL_TIERS = [
     name: "All Inclusive",
     price: 7,
     label: "$7/mo or $77/yr",
-    description: "All inclusive healing access.",
+    description: "7 sessions per day in every room.",
     features: [
-      "Everything in Even More",
+      "7 sessions per day in all rooms",
+      "Brain Dump unlimited",
       "AI navigator always available",
-      "Unlimited sessions everywhere",
-      "1-on-1 practitioner booking",
-      "Crisis counselor priority",
+      "Guardian angel access — free on all plans",
+      "Shadow work deep dives",
     ],
     icon: Shield,
     accent: "from-purple-500/20 to-violet-600/20",
@@ -100,13 +100,13 @@ const INDIVIDUAL_TIERS = [
     name: "Ultimate",
     price: 9,
     label: "$9/mo or $99/yr",
-    description: "Ultimate access with beta feature access.",
+    description: "Unlimited sessions in every room, every day.",
     features: [
-      "Everything in All Inclusive",
+      "Unlimited sessions in all rooms",
+      "Brain Dump unlimited",
       "AI navigator always available",
-      "Beta feature access",
-      "Exclusive healing circles",
-      "Direct feedback channel",
+      "Guardian angel access — free on all plans",
+      "Beta feature access + direct feedback channel",
     ],
     icon: Sparkles,
     accent: "from-indigo-500/20 to-blue-600/20",
@@ -214,7 +214,8 @@ export default function Pricing() {
 
   const handleSubscribe = async (tierName: string, priceId?: string) => {
     if (!priceId) {
-      toast.success("Welcome to the Free tier! You're all set. 💚");
+      toast.success("Welcome to Soul Echoes! Let's begin. 💚");
+      navigate("/");
       return;
     }
 
@@ -351,6 +352,12 @@ export default function Pricing() {
             </p>
             <p className="text-center text-xs text-muted-foreground">
               Yearly options for individual tiers are $11, $33, $55, $77, and $99.
+            </p>
+            <p className="text-center text-xs text-muted-foreground/60 italic">
+              🕊️ Guardian angel access is free on every plan — always.
+            </p>
+            <p className="text-center text-xs text-amber-400/80">
+              Klarna, Afterpay, and Affirm financing options coming soon.
             </p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {INDIVIDUAL_TIERS.map((tier) => (

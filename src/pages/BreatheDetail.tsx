@@ -1,7 +1,94 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ShoppingBag, CalendarCheck } from "lucide-react";
+import { ArrowLeft, CalendarCheck, Volume2, VolumeX, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+/* ── Ambient sound generator (Web Audio API brown noise + 528 Hz sine) ── */
+function useAmbientSound() {
+  const ctxRef  = useRef<AudioContext | null>(null);
+  const nodesRef = useRef<AudioNode[]>([]);
+  const [playing, setPlaying] = useState(false);
+
+  const start = useCallback(() => {
+    if (playing) return;
+    const ctx = new AudioContext();
+    ctxRef.current = ctx;
+
+    // Brown noise buffer
+    const bufferSize = ctx.sampleRate * 2;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    let lastOut = 0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      data[i] = (lastOut + 0.02 * white) / 1.02;
+      lastOut = data[i];
+      data[i] *= 3.5;
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    noise.loop = true;
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.value = 0.04;
+
+    // 528 Hz healing tone (very soft)
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = 528;
+    const oscGain = ctx.createGain();
+    oscGain.gain.value = 0.03;
+
+    noise.connect(noiseGain).connect(ctx.destination);
+    osc.connect(oscGain).connect(ctx.destination);
+    noise.start();
+    osc.start();
+
+    nodesRef.current = [noise, osc];
+    setPlaying(true);
+  }, [playing]);
+
+  const stop = useCallback(() => {
+    nodesRef.current.forEach((n) => { try { (n as AudioBufferSourceNode | OscillatorNode).stop(); } catch {} });
+    nodesRef.current = [];
+    ctxRef.current?.close();
+    ctxRef.current = null;
+    setPlaying(false);
+  }, []);
+
+  useEffect(() => () => { stop(); }, []);
+  return { playing, start, stop };
+}
+
+/* ── AI voice step reader ── */
+function useStepReader() {
+  const [reading, setReading] = useState(false);
+  const utterRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  const readSteps = useCallback((title: string, steps: string[]) => {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    setReading(true);
+
+    const script = `${title}. ${steps.join(" ")} Take your time. You are doing beautifully.`;
+    const u = new SpeechSynthesisUtterance(script);
+    u.rate = 0.82;
+    u.pitch = 1.05;
+    u.onend = () => setReading(false);
+    u.onerror = () => setReading(false);
+    utterRef.current = u;
+    window.speechSynthesis.speak(u);
+  }, []);
+
+  const stop = useCallback(() => {
+    window.speechSynthesis.cancel();
+    setReading(false);
+  }, []);
+
+  useEffect(() => () => { window.speechSynthesis.cancel(); }, []);
+  return { reading, readSteps, stop };
+}
 
 /* ───────── CONTENT DATA ───────── */
 
@@ -145,7 +232,29 @@ const sectionTitles: Record<SectionKey, string> = {
 
 /* ───────── DETAIL RENDERER ───────── */
 
-function SectionContent({ id }: { id: SectionKey }) {
+function ReadButton({ title, steps, reading, readSteps, stop }: {
+  title: string; steps: string[];
+  reading: boolean;
+  readSteps: (title: string, steps: string[]) => void;
+  stop: () => void;
+}) {
+  return (
+    <button
+      onClick={() => reading ? stop() : readSteps(title, steps)}
+      className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all ${reading ? "border-blue-400/60 bg-blue-500/15 text-blue-300" : "border-border bg-muted/50 text-muted-foreground hover:text-foreground hover:border-primary/40"}`}
+    >
+      <Volume2 className="h-3 w-3" />
+      {reading ? "Stop reading" : "Read to me"}
+    </button>
+  );
+}
+
+function SectionContent({ id, reading, readSteps, stopReading }: {
+  id: SectionKey;
+  reading: boolean;
+  readSteps: (title: string, steps: string[]) => void;
+  stopReading: () => void;
+}) {
   switch (id) {
     case "meditation":
       return (
@@ -153,7 +262,10 @@ function SectionContent({ id }: { id: SectionKey }) {
           <p className="text-muted-foreground leading-relaxed">{meditationContent.intro}</p>
           {meditationContent.types.map((t) => (
             <div key={t.name} className="bg-muted/40 rounded-xl p-4 space-y-3">
-              <h3 className="font-display text-lg font-bold text-foreground">{t.name}</h3>
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-display text-lg font-bold text-foreground">{t.name}</h3>
+                <ReadButton title={t.name} steps={t.steps} reading={reading} readSteps={readSteps} stop={stopReading} />
+              </div>
               <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
                 {t.steps.map((s, i) => <li key={i}>{s}</li>)}
               </ol>
@@ -189,7 +301,10 @@ function SectionContent({ id }: { id: SectionKey }) {
         <div className="space-y-6">
           {breathworkContent.map((b) => (
             <div key={b.name} className="bg-muted/40 rounded-xl p-4 space-y-3">
-              <h3 className="font-display text-lg font-bold text-foreground">{b.name}</h3>
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-display text-lg font-bold text-foreground">{b.name}</h3>
+                <ReadButton title={b.name} steps={b.steps} reading={reading} readSteps={readSteps} stop={stopReading} />
+              </div>
               <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
                 {b.steps.map((s, i) => <li key={i}>{s}</li>)}
               </ol>
@@ -323,14 +438,16 @@ export default function BreatheDetail() {
   const navigate = useNavigate();
   const id = section as SectionKey;
   const title = sectionTitles[id];
+  const { playing: ambientPlaying, start: startAmbient, stop: stopAmbient } = useAmbientSound();
+  const { reading, readSteps, stop: stopReading } = useStepReader();
 
   if (!title) {
     navigate("/breathe", { replace: true });
     return null;
   }
 
-  const showShop = ["meditation", "chakras", "sound-healing", "aura-cleansing"].includes(id);
-  const showBook = ["breathwork", "vagus-nerve", "cord-cutting"].includes(id);
+  const showPortal = ["meditation", "chakras", "sound-healing", "aura-cleansing"].includes(id);
+  const showBook   = ["breathwork", "vagus-nerve", "cord-cutting"].includes(id);
   const showSafetyDisclaimer = ["breathwork", "chakras", "vagus-nerve", "sound-healing", "aura-cleansing", "cord-cutting", "movement"].includes(id);
 
   return (
@@ -342,11 +459,21 @@ export default function BreatheDetail() {
       className="flex-1 flex flex-col min-h-0 bg-gradient-to-br from-violet-950 via-slate-950 to-sky-950"
     >
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 flex items-center gap-3">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={() => navigate("/breathe")} aria-label="Back">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="font-display text-xl font-bold text-foreground truncate">{title}</h1>
+        <h1 className="font-display text-xl font-bold text-foreground truncate flex-1">{title}</h1>
+        {/* Ambient sound toggle */}
+        <button
+          onClick={() => ambientPlaying ? stopAmbient() : startAmbient()}
+          aria-label={ambientPlaying ? "Stop ambient sounds" : "Play ambient meditation sounds"}
+          title={ambientPlaying ? "Stop ambient sounds" : "Ambient meditation sounds"}
+          className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border transition-all ${ambientPlaying ? "border-teal-400/60 bg-teal-500/15 text-teal-300" : "border-border bg-muted/40 text-muted-foreground hover:text-foreground"}`}
+        >
+          {ambientPlaying ? <VolumeX className="h-3.5 w-3.5" /> : <Music className="h-3.5 w-3.5" />}
+          <span className="hidden sm:inline">{ambientPlaying ? "Mute" : "Ambient"}</span>
+        </button>
       </div>
 
       {/* Content */}
@@ -359,35 +486,32 @@ export default function BreatheDetail() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Button
                 className="w-full bg-white/10 text-foreground border border-border hover:bg-white/20"
-                onClick={() => navigate("/community")}
+                onClick={() => navigate("/shop")}
               >
-                Talk to an Intercessor
+                Connect to an Intercessor
               </Button>
               <Button
                 className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground"
-                onClick={() => navigate("/practitioner")}
+                onClick={() => navigate("/shop")}
               >
                 Connect to a Healer
               </Button>
             </div>
           </div>
         )}
-        <SectionContent id={id} />
+        <SectionContent id={id} reading={reading} readSteps={readSteps} stopReading={stopReading} />
       </div>
 
       {/* Bottom CTA */}
-      {(showShop || showBook) && (
+      {(showPortal || showBook) && (
         <div className="sticky bottom-0 p-4 bg-background/90 backdrop-blur-md border-t border-border">
           <Button
             className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground font-display rounded-xl py-6 text-base"
             size="lg"
-            onClick={() => showBook ? navigate("/practitioner") : undefined}
+            onClick={() => navigate("/shop")}
           >
-            {showBook ? (
-              <><CalendarCheck className="h-5 w-5 mr-2" /> Book a Session</>
-            ) : (
-              <><ShoppingBag className="h-5 w-5 mr-2" /> Shop Healing Tools</>
-            )}
+            <CalendarCheck className="h-5 w-5 mr-2" />
+            {showBook ? "Book a Session" : "Visit the Portal"}
           </Button>
         </div>
       )}

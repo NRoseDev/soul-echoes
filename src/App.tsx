@@ -24,7 +24,6 @@ import ShadowWorkRoom from "./pages/ShadowWorkRoom";
 import ShadowWorkDetail from "./pages/ShadowWorkDetail";
 import WisdomRoom from "./pages/WisdomRoom";
 import WisdomDetail from "./pages/WisdomDetail";
-import ShopRoom from "./pages/ShopRoom";
 import PortalRoom from "./pages/PortalRoom";
 import SpiritualToolsRoom from "./pages/SpiritualToolsRoom";
 import SpiritualToolsDetail from "./pages/SpiritualToolsDetail";
