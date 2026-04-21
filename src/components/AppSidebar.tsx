@@ -1,7 +1,26 @@
 import {
   BookOpen, Wind, VolumeX, Eclipse, Sparkles, Compass,
-  Brain, Volume2, Settings, Lock, CreditCard, Globe2,
+  Brain, Volume2, Settings, Lock, CreditCard,
 } from "lucide-react";
+
+function PortalIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="#2dd4bf" strokeWidth="2" />
+      <circle cx="12" cy="12" r="5.5" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="2 1.5" />
+      <line x1="12" y1="5" x2="12" y2="7.5" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="12" y1="16.5" x2="12" y2="19" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="5" y1="12" x2="7.5" y2="12" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="16.5" y1="12" x2="19" y2="12" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="7.05" y1="7.05" x2="8.82" y2="8.82" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="15.18" y1="15.18" x2="16.95" y2="16.95" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="16.95" y1="7.05" x2="15.18" y2="8.82" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="8.82" y1="15.18" x2="7.05" y2="16.95" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="1.5" fill="#2dd4bf" />
+    </svg>
+  );
+}
+
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -16,8 +35,8 @@ const healingRooms = [
   { title: "Unspoken Chamber", url: "/unspoken", icon: VolumeX, color: "text-healing-unspoken", free: false },
   { title: "Shadow Work", url: "/shadow-work", icon: Eclipse, color: "text-healing-shadow", free: false },
   { title: "Wisdom", url: "/wisdom", icon: Sparkles, color: "text-healing-wisdom", free: false },
-  { title: "Portal", url: "/shop", icon: Globe2, color: "text-teal-400", free: true },
   { title: "Spiritual Tools", url: "/spiritual-tools", icon: Compass, color: "text-healing-tools", free: false },
+  { title: "Portal", url: "/shop", icon: PortalIcon, color: "text-teal-400", free: true },
 ];
 
 export function AppSidebar() {
