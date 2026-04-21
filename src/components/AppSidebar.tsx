@@ -6,17 +6,16 @@ import {
 function PortalIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <circle cx="12" cy="12" r="9" stroke="#2dd4bf" strokeWidth="2" />
-      <circle cx="12" cy="12" r="5.5" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="2 1.5" />
-      <line x1="12" y1="5" x2="12" y2="7.5" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="12" y1="16.5" x2="12" y2="19" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="5" y1="12" x2="7.5" y2="12" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="16.5" y1="12" x2="19" y2="12" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="7.05" y1="7.05" x2="8.82" y2="8.82" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="15.18" y1="15.18" x2="16.95" y2="16.95" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="16.95" y1="7.05" x2="15.18" y2="8.82" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="8.82" y1="15.18" x2="7.05" y2="16.95" stroke="#f59e0b" strokeWidth="1.2" strokeLinecap="round" />
-      <circle cx="12" cy="12" r="1.5" fill="#2dd4bf" />
+      <circle cx="12" cy="12" r="10" fill="#f59e0b" />
+      <line x1="12" y1="4.5" x2="12" y2="8" stroke="#3b82f6" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="12" y1="16" x2="12" y2="19.5" stroke="#3b82f6" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="4.5" y1="12" x2="8" y2="12" stroke="#3b82f6" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="16" y1="12" x2="19.5" y2="12" stroke="#3b82f6" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="6.93" y1="6.93" x2="9.17" y2="9.17" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="14.83" y1="14.83" x2="17.07" y2="17.07" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="17.07" y1="6.93" x2="14.83" y2="9.17" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="9.17" y1="14.83" x2="6.93" y2="17.07" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="2.5" fill="#3b82f6" />
     </svg>
   );
 }
