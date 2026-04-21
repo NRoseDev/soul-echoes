@@ -1,12 +1,33 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, CalendarCheck, Volume2, VolumeX, Music } from "lucide-react";
+import { ArrowLeft, CalendarCheck, VolumeX, Music, Play, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
-/* ── Ambient sound generator (Web Audio API brown noise + 528 Hz sine) ── */
+/* ─── Types ─── */
+
+interface BreathPhase {
+  label: string;
+  type: "inhale" | "hold" | "exhale";
+  duration: number;
+}
+interface BreathworkItem {
+  name: string;
+  phases: BreathPhase[];
+  cycles: number;
+  steps: string[];
+}
+interface BreathState {
+  phaseIndex: number;
+  countdown: number;
+  cycleCount: number;
+  done: boolean;
+}
+
+/* ─── useAmbientSound ─── */
+
 function useAmbientSound() {
-  const ctxRef  = useRef<AudioContext | null>(null);
+  const ctxRef   = useRef<AudioContext | null>(null);
   const nodesRef = useRef<AudioNode[]>([]);
   const [playing, setPlaying] = useState(false);
 
@@ -14,8 +35,6 @@ function useAmbientSound() {
     if (playing) return;
     const ctx = new AudioContext();
     ctxRef.current = ctx;
-
-    // Brown noise buffer
     const bufferSize = ctx.sampleRate * 2;
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
@@ -29,22 +48,17 @@ function useAmbientSound() {
     const noise = ctx.createBufferSource();
     noise.buffer = buffer;
     noise.loop = true;
-
     const noiseGain = ctx.createGain();
     noiseGain.gain.value = 0.04;
-
-    // 528 Hz healing tone (very soft)
     const osc = ctx.createOscillator();
     osc.type = "sine";
     osc.frequency.value = 528;
     const oscGain = ctx.createGain();
     oscGain.gain.value = 0.03;
-
     noise.connect(noiseGain).connect(ctx.destination);
     osc.connect(oscGain).connect(ctx.destination);
     noise.start();
     osc.start();
-
     nodesRef.current = [noise, osc];
     setPlaying(true);
   }, [playing]);
@@ -57,43 +71,37 @@ function useAmbientSound() {
     setPlaying(false);
   }, []);
 
-  useEffect(() => () => { stop(); }, []);
+  useEffect(() => () => { stop(); }, [stop]);
   return { playing, start, stop };
 }
 
-/* ── AI voice step reader ── */
-function useStepReader() {
-  const [reading, setReading] = useState(false);
-  const utterRef = useRef<SpeechSynthesisUtterance | null>(null);
+/* ─── useSpeech ─── */
 
-  const readSteps = useCallback((title: string, steps: string[]) => {
-    if (!("speechSynthesis" in window)) return;
+function useSpeech() {
+  const speakList = useCallback((texts: string[], onDone?: () => void) => {
+    if (!("speechSynthesis" in window)) { onDone?.(); return; }
     window.speechSynthesis.cancel();
-    setReading(true);
-
-    const script = `${title}. ${steps.join(" ")} Take your time. You are doing beautifully.`;
-    const u = new SpeechSynthesisUtterance(script);
-    u.rate = 0.82;
-    u.pitch = 1.05;
-    u.onend = () => setReading(false);
-    u.onerror = () => setReading(false);
-    utterRef.current = u;
-    window.speechSynthesis.speak(u);
+    let i = 0;
+    const next = () => {
+      if (i >= texts.length) { onDone?.(); return; }
+      const u = new SpeechSynthesisUtterance(texts[i++]);
+      u.rate = 0.82; u.pitch = 1.05;
+      u.onend = () => setTimeout(next, 500);
+      u.onerror = next;
+      window.speechSynthesis.speak(u);
+    };
+    next();
   }, []);
-
-  const stop = useCallback(() => {
-    window.speechSynthesis.cancel();
-    setReading(false);
+  const stopSpeech = useCallback(() => {
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
   }, []);
-
-  useEffect(() => () => { window.speechSynthesis.cancel(); }, []);
-  return { reading, readSteps, stop };
+  useEffect(() => () => { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); }, []);
+  return { speakList, stopSpeech };
 }
 
-/* ───────── CONTENT DATA ───────── */
+/* ─── Content data ─── */
 
 const meditationContent = {
-  title: "Meditation",
   intro: "Meditation is the practice of training your attention and awareness to achieve a mentally clear, emotionally calm, and stable state. It's not about stopping your thoughts — it's about observing them without judgment and gently returning to your anchor (breath, mantra, or visualization).",
   types: [
     {
@@ -125,7 +133,7 @@ const meditationContent = {
 };
 
 const chakrasContent = [
-  { num: 0, name: "Earth Star Chakra", location: "6–12 inches below your feet", color: "Deep Brown / Black", blocked: "Feeling ungrounded, disconnected from nature, existential dread", tip: "Walk barefoot on earth or grass for 10 minutes daily.", affirmation: "I am deeply rooted to the Earth and all of creation.", hz: 68.05 },
+  { num: 0, name: "Earth Star Chakra", location: "6–12 inches below your feet", color: "Deep Brown / Black", blocked: "Feeling ungrounded, disconnected from nature, existential dread", tip: "Walk barefoot on earth or grass for 10 minutes daily.", affirmation: "I am deeply rooted to the Earth and all of creation.", hz: 68 },
   { num: 1, name: "Root Chakra (Muladhara)", location: "Base of the spine", color: "Red", blocked: "Anxiety, fear, financial insecurity, lower back pain", tip: "Stomp your feet on the ground and say 'I am safe' three times.", affirmation: "I am safe, secure, and grounded in this moment.", hz: 396 },
   { num: 2, name: "Sacral Chakra (Svadhisthana)", location: "Lower abdomen, below the navel", color: "Orange", blocked: "Guilt, emotional numbness, creative blocks, low libido", tip: "Move your hips — dance freely for 5 minutes.", affirmation: "I honor my emotions and allow pleasure to flow through me.", hz: 417 },
   { num: 3, name: "Solar Plexus Chakra (Manipura)", location: "Upper abdomen, stomach area", color: "Yellow", blocked: "Low self-esteem, indecisiveness, digestive issues, feeling powerless", tip: "Stand in a power pose for 2 minutes and breathe deeply.", affirmation: "I am confident, powerful, and in control of my life.", hz: 528 },
@@ -133,25 +141,119 @@ const chakrasContent = [
   { num: 5, name: "Throat Chakra (Vishuddha)", location: "Throat", color: "Blue", blocked: "Fear of speaking up, sore throat, feeling unheard, dishonesty", tip: "Hum or sing for 5 minutes to vibrate and open this chakra.", affirmation: "I speak my truth with clarity and confidence.", hz: 741 },
   { num: 6, name: "Third Eye Chakra (Ajna)", location: "Between the eyebrows", color: "Indigo", blocked: "Confusion, lack of intuition, headaches, overthinking", tip: "Gaze softly at a candle flame for 3 minutes, then close your eyes.", affirmation: "I trust my intuition and see clearly beyond illusion.", hz: 852 },
   { num: 7, name: "Crown Chakra (Sahasrara)", location: "Top of the head", color: "Violet / White", blocked: "Spiritual disconnection, close-mindedness, depression, isolation", tip: "Sit in silence for 5 minutes and imagine white light pouring in through the top of your head.", affirmation: "I am connected to the divine source of all that is.", hz: 963 },
-  { num: 8, name: "Soul Star Chakra", location: "6 inches above the head", color: "White / Magenta", blocked: "Feeling lost in life purpose, spiritual apathy", tip: "Meditate on the question: 'What is my soul here to do?'", affirmation: "I am aligned with my soul's highest purpose.", hz: 1074 },
-  { num: 9, name: "Spirit Chakra", location: "12 inches above the head", color: "Gold", blocked: "Disconnection from higher self, lack of spiritual growth", tip: "Journal about moments when you felt guided by something greater.", affirmation: "I am a vessel of divine light and wisdom.", hz: 1185 },
-  { num: 10, name: "Universal Chakra", location: "18 inches above the head", color: "Pearlescent", blocked: "Feeling separate from the universe, cosmic loneliness", tip: "Stargaze for 10 minutes and feel your connection to the cosmos.", affirmation: "I am one with the universe and all living things.", hz: 1296 },
-  { num: 11, name: "Galactic Chakra", location: "24 inches above the head", color: "Pink-Orange", blocked: "Inability to access past-life wisdom, feeling stuck in cycles", tip: "Practice a past-life regression meditation.", affirmation: "I carry the wisdom of all my lifetimes within me.", hz: 1407 },
-  { num: 12, name: "Divine Gateway Chakra", location: "36 inches above the head", color: "Diamond White", blocked: "Complete spiritual disconnection, inability to channel or receive", tip: "Pray or set an intention to open yourself to divine guidance.", affirmation: "I am a pure channel for divine love, light, and healing.", hz: 1518 },
+  { num: 8, name: "Soul Star Chakra", location: "6 inches above the head", color: "White / Magenta", blocked: "Feeling lost in life purpose, spiritual apathy", tip: "Meditate on the question: 'What is my soul here to do?'", affirmation: "I am aligned with my soul's highest purpose.", hz: 528 },
+  { num: 9, name: "Spirit Chakra", location: "12 inches above the head", color: "Gold", blocked: "Disconnection from higher self, lack of spiritual growth", tip: "Journal about moments when you felt guided by something greater.", affirmation: "I am a vessel of divine light and wisdom.", hz: 639 },
+  { num: 10, name: "Universal Chakra", location: "18 inches above the head", color: "Pearlescent", blocked: "Feeling separate from the universe, cosmic loneliness", tip: "Stargaze for 10 minutes and feel your connection to the cosmos.", affirmation: "I am one with the universe and all living things.", hz: 741 },
+  { num: 11, name: "Galactic Chakra", location: "24 inches above the head", color: "Pink-Orange", blocked: "Inability to access past-life wisdom, feeling stuck in cycles", tip: "Practice a past-life regression meditation.", affirmation: "I carry the wisdom of all my lifetimes within me.", hz: 852 },
+  { num: 12, name: "Divine Gateway Chakra", location: "36 inches above the head", color: "Diamond White", blocked: "Complete spiritual disconnection, inability to channel or receive", tip: "Pray or set an intention to open yourself to divine guidance.", affirmation: "I am a pure channel for divine love, light, and healing.", hz: 963 },
 ];
 
-const breathworkContent = [
-  { name: "Box Breathing", steps: ["Inhale through your nose for 4 counts.", "Hold your breath for 4 counts.", "Exhale slowly through your mouth for 4 counts.", "Hold again (lungs empty) for 4 counts.", "Repeat for 4–8 cycles."] },
-  { name: "4-7-8 Breathing", steps: ["Inhale quietly through your nose for 4 counts.", "Hold your breath for 7 counts.", "Exhale completely through your mouth (whoosh sound) for 8 counts.", "Repeat for 3–4 cycles.", "Best done before sleep or when anxious."] },
-  { name: "Belly Breathing (Diaphragmatic)", steps: ["Place one hand on your chest, one on your belly.", "Breathe in slowly through your nose — your belly should rise, not your chest.", "Exhale slowly through pursed lips.", "Focus on making the exhale longer than the inhale.", "Continue for 5 minutes."] },
-  { name: "Alternate Nostril Breathing (Nadi Shodhana)", steps: ["Sit comfortably. Use your right thumb to close your right nostril.", "Inhale through your left nostril for 4 counts.", "Close your left nostril with your ring finger, release your thumb.", "Exhale through your right nostril for 4 counts.", "Inhale through the right, close it, exhale through the left. Repeat for 5–10 cycles."] },
-  { name: "Humming Breath (Bhramari)", steps: ["Sit comfortably and close your eyes.", "Place your index fingers gently on the cartilage of your ears (tragus).", "Inhale deeply through your nose.", "As you exhale, make a steady humming sound like a bee.", "Feel the vibration in your head and chest. Repeat 5–7 times."] },
-  { name: "Ocean Breath (Ujjayi)", steps: ["Sit tall and relax your shoulders.", "Inhale through your nose while slightly constricting the back of your throat.", "Exhale through your nose with the same gentle constriction, making a soft ocean sound.", "Keep the breath smooth and even.", "Continue for 5–10 cycles, staying aware of the sound and rhythm."] },
-  { name: "Triangle Breathing", steps: ["Inhale through your nose for 4 counts.", "Hold your breath for 4 counts.", "Exhale through your nose for 4 counts.", "Hold again for 4 counts.", "Imagine tracing a triangle with each phase. Repeat for 3–5 minutes."] },
-  { name: "Cooling Breath (Sheetali)", steps: ["Sit comfortably with your spine straight.", "Curl the sides of your tongue upward into a tube or keep lips slightly parted if needed.", "Inhale slowly through the tongue or mouth with a cooling sensation.", "Close your mouth and exhale through your nose.", "Repeat for 8–10 breaths until you feel calm and cool."] },
-  { name: "Power Breathing", steps: ["Stand or sit tall with shoulders relaxed.", "Inhale deeply through your nose, filling belly and chest.", "Exhale quickly and forcefully through your mouth.", "Continue with strong, active breaths for 30 seconds to 1 minute.", "Slow down and rest with normal breath after each round."] },
-  { name: "Heart Coherence", steps: ["Place one hand on your heart and one on your belly.", "Inhale slowly for 5 counts, feeling your heart expand.", "Exhale gently for 5 counts, releasing tension from your chest.", "Imagine your breath flowing in and out through your heart center.", "Continue for 3–5 minutes while thinking of a positive feeling (gratitude, love, safety)."] },
-  { name: "Grounding Breath", steps: ["Sit with both feet on the floor and hands resting on your thighs.", "Inhale deeply through your nose, drawing energy up from the earth through your feet.", "Exhale slowly through your nose, releasing tension down through your legs into the ground.", "With each breath, imagine roots extending from your feet into the earth.", "Repeat for 5–10 breaths until you feel stable and centered."] },
+const breathworkContent: BreathworkItem[] = [
+  {
+    name: "Box Breathing",
+    phases: [
+      { label: "Inhale", type: "inhale", duration: 4 },
+      { label: "Hold", type: "hold", duration: 4 },
+      { label: "Exhale", type: "exhale", duration: 4 },
+      { label: "Hold", type: "hold", duration: 4 },
+    ],
+    cycles: 6,
+    steps: ["Inhale through your nose for 4 counts.", "Hold your breath for 4 counts.", "Exhale slowly through your mouth for 4 counts.", "Hold again (lungs empty) for 4 counts.", "Repeat for 4–8 cycles."],
+  },
+  {
+    name: "4-7-8 Breathing",
+    phases: [
+      { label: "Inhale", type: "inhale", duration: 4 },
+      { label: "Hold", type: "hold", duration: 7 },
+      { label: "Exhale", type: "exhale", duration: 8 },
+    ],
+    cycles: 4,
+    steps: ["Inhale quietly through your nose for 4 counts.", "Hold your breath for 7 counts.", "Exhale completely through your mouth (whoosh sound) for 8 counts.", "Repeat for 3–4 cycles.", "Best done before sleep or when anxious."],
+  },
+  {
+    name: "Belly Breathing (Diaphragmatic)",
+    phases: [
+      { label: "Inhale", type: "inhale", duration: 4 },
+      { label: "Exhale", type: "exhale", duration: 7 },
+    ],
+    cycles: 8,
+    steps: ["Place one hand on your chest, one on your belly.", "Breathe in slowly through your nose — your belly should rise, not your chest.", "Exhale slowly through pursed lips.", "Focus on making the exhale longer than the inhale.", "Continue for 5 minutes."],
+  },
+  {
+    name: "Alternate Nostril Breathing (Nadi Shodhana)",
+    phases: [
+      { label: "Inhale left", type: "inhale", duration: 4 },
+      { label: "Exhale right", type: "exhale", duration: 4 },
+      { label: "Inhale right", type: "inhale", duration: 4 },
+      { label: "Exhale left", type: "exhale", duration: 4 },
+    ],
+    cycles: 6,
+    steps: ["Sit comfortably. Use your right thumb to close your right nostril.", "Inhale through your left nostril for 4 counts.", "Close your left nostril with your ring finger, release your thumb.", "Exhale through your right nostril for 4 counts.", "Inhale through the right, close it, exhale through the left. Repeat for 5–10 cycles."],
+  },
+  {
+    name: "Humming Breath (Bhramari)",
+    phases: [
+      { label: "Inhale", type: "inhale", duration: 4 },
+      { label: "Hum", type: "exhale", duration: 6 },
+    ],
+    cycles: 7,
+    steps: ["Sit comfortably and close your eyes.", "Place your index fingers gently on the cartilage of your ears (tragus).", "Inhale deeply through your nose.", "As you exhale, make a steady humming sound like a bee.", "Feel the vibration in your head and chest. Repeat 5–7 times."],
+  },
+  {
+    name: "Ocean Breath (Ujjayi)",
+    phases: [
+      { label: "Inhale", type: "inhale", duration: 5 },
+      { label: "Exhale", type: "exhale", duration: 5 },
+    ],
+    cycles: 8,
+    steps: ["Sit tall and relax your shoulders.", "Inhale through your nose while slightly constricting the back of your throat.", "Exhale through your nose with the same gentle constriction, making a soft ocean sound.", "Keep the breath smooth and even.", "Continue for 5–10 cycles, staying aware of the sound and rhythm."],
+  },
+  {
+    name: "Triangle Breathing",
+    phases: [
+      { label: "Inhale", type: "inhale", duration: 4 },
+      { label: "Hold", type: "hold", duration: 4 },
+      { label: "Exhale", type: "exhale", duration: 4 },
+    ],
+    cycles: 6,
+    steps: ["Inhale through your nose for 4 counts.", "Hold your breath for 4 counts.", "Exhale through your nose for 4 counts.", "Hold again for 4 counts.", "Imagine tracing a triangle with each phase. Repeat for 3–5 minutes."],
+  },
+  {
+    name: "Cooling Breath (Sheetali)",
+    phases: [
+      { label: "Inhale", type: "inhale", duration: 6 },
+      { label: "Exhale", type: "exhale", duration: 6 },
+    ],
+    cycles: 8,
+    steps: ["Sit comfortably with your spine straight.", "Curl the sides of your tongue upward into a tube or keep lips slightly parted if needed.", "Inhale slowly through the tongue or mouth with a cooling sensation.", "Close your mouth and exhale through your nose.", "Repeat for 8–10 breaths until you feel calm and cool."],
+  },
+  {
+    name: "Power Breathing",
+    phases: [
+      { label: "Inhale", type: "inhale", duration: 2 },
+      { label: "Exhale", type: "exhale", duration: 2 },
+    ],
+    cycles: 15,
+    steps: ["Stand or sit tall with shoulders relaxed.", "Inhale deeply through your nose, filling belly and chest.", "Exhale quickly and forcefully through your mouth.", "Continue with strong, active breaths for 30 seconds to 1 minute.", "Slow down and rest with normal breath after each round."],
+  },
+  {
+    name: "Heart Coherence",
+    phases: [
+      { label: "Inhale", type: "inhale", duration: 5 },
+      { label: "Exhale", type: "exhale", duration: 5 },
+    ],
+    cycles: 6,
+    steps: ["Place one hand on your heart and one on your belly.", "Inhale slowly for 5 counts, feeling your heart expand.", "Exhale gently for 5 counts, releasing tension from your chest.", "Imagine your breath flowing in and out through your heart center.", "Continue for 3–5 minutes while thinking of a positive feeling (gratitude, love, safety)."],
+  },
+  {
+    name: "Grounding Breath",
+    phases: [
+      { label: "Inhale", type: "inhale", duration: 5 },
+      { label: "Exhale", type: "exhale", duration: 5 },
+    ],
+    cycles: 7,
+    steps: ["Sit with both feet on the floor and hands resting on your thighs.", "Inhale deeply through your nose, drawing energy up from the earth through your feet.", "Exhale slowly through your nose, releasing tension down through your legs into the ground.", "With each breath, imagine roots extending from your feet into the earth.", "Repeat for 5–10 breaths until you feel stable and centered."],
+  },
 ];
 
 const vagusNerveContent = {
@@ -175,7 +277,6 @@ const soundHealingContent = [
   { hz: 741, chakra: "Throat Chakra", effect: "Awakens intuition and self-expression. Cleanses cells of toxins and electromagnetic radiation." },
 ];
 
-/* ── Solfeggio chakra colour palette ── */
 const SOLFEGGIO_META: Record<number, { bg: string; border: string; glow: string; text: string; accent: string }> = {
   174: { bg: "#120a03", border: "#7c4a1a", glow: "#9b6229", text: "#d4a96a", accent: "#c8843a" },
   285: { bg: "#150700", border: "#9a3412", glow: "#ea580c", text: "#fb923c", accent: "#f97316" },
@@ -185,199 +286,6 @@ const SOLFEGGIO_META: Record<number, { bg: string; border: string; glow: string;
   639: { bg: "#001408", border: "#166534", glow: "#22c55e", text: "#86efac", accent: "#4ade80" },
   741: { bg: "#00091a", border: "#1d4ed8", glow: "#3b82f6", text: "#93c5fd", accent: "#60a5fa" },
 };
-
-/* ── Animated tuning fork SVG ── */
-function TuningFork({ playing, accent, glow }: { playing: boolean; accent: string; glow: string }) {
-  return (
-    <svg
-      viewBox="0 0 40 84"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-16 h-20"
-      aria-hidden="true"
-    >
-      <defs>
-        <style>{`
-          @keyframes sfIdle {
-            0%,100% { transform:translateX(0); }
-            30%      { transform:translateX(-0.7px); }
-            70%      { transform:translateX(0.7px); }
-          }
-          @keyframes sfPlay {
-            0%,100% { transform:translateX(0); }
-            15%     { transform:translateX(-2.8px); }
-            30%     { transform:translateX(2.8px); }
-            45%     { transform:translateX(-2.2px); }
-            60%     { transform:translateX(2.2px); }
-            75%     { transform:translateX(-1.5px); }
-            90%     { transform:translateX(1.5px); }
-          }
-          @keyframes sfGlow {
-            0%,100% { opacity:0.55; }
-            50%     { opacity:1; }
-          }
-        `}</style>
-        <filter id="sfBlur">
-          <feGaussianBlur stdDeviation="0.8" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-
-      {/* Prongs — animated group */}
-      <g
-        style={{
-          animation: playing
-            ? "sfPlay 0.11s ease-in-out infinite"
-            : "sfIdle 3.5s ease-in-out infinite",
-          transformOrigin: "20px 50px",
-        }}
-        filter={playing ? "url(#sfBlur)" : undefined}
-      >
-        {/* Left prong */}
-        <path d="M11,50 L11,24" stroke={accent} strokeWidth="3.5" strokeLinecap="round"/>
-        {/* Right prong */}
-        <path d="M29,50 L29,24" stroke={accent} strokeWidth="3.5" strokeLinecap="round"/>
-        {/* U arch at top */}
-        <path d="M11,24 C11,8 29,8 29,24" stroke={accent} fill="none" strokeWidth="3.5" strokeLinecap="round"/>
-        {/* Glow lines when playing */}
-        {playing && <>
-          <path d="M11,50 L11,24" stroke={glow} strokeWidth="7" strokeLinecap="round" opacity="0.22" style={{ animation: "sfGlow 0.9s ease-in-out infinite" }}/>
-          <path d="M29,50 L29,24" stroke={glow} strokeWidth="7" strokeLinecap="round" opacity="0.22" style={{ animation: "sfGlow 0.9s ease-in-out infinite" }}/>
-          <path d="M11,24 C11,8 29,8 29,24" stroke={glow} fill="none" strokeWidth="7" strokeLinecap="round" opacity="0.22" style={{ animation: "sfGlow 0.9s ease-in-out infinite" }}/>
-        </>}
-      </g>
-
-      {/* Handle — static */}
-      <path d="M20,50 L20,74" stroke={accent} strokeWidth="4.5" strokeLinecap="round"/>
-      {/* Base disc */}
-      <ellipse cx="20" cy="76" rx="7.5" ry="2.8" fill={accent} opacity="0.65"/>
-      {/* Glow halo under base when playing */}
-      {playing && (
-        <ellipse
-          cx="20" cy="76" rx="12" ry="5"
-          fill={glow} opacity="0.18"
-          style={{ animation: "sfGlow 1.1s ease-in-out infinite" }}
-        />
-      )}
-    </svg>
-  );
-}
-
-/* ── Per-frequency card ── */
-function FrequencyCard({ hz, chakra, effect }: { hz: number; chakra: string; effect: string }) {
-  const [playing, setPlaying] = useState(false);
-  const ctxRef   = useRef<AudioContext | null>(null);
-  const oscRef   = useRef<OscillatorNode | null>(null);
-  const gainRef  = useRef<GainNode | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const meta = SOLFEGGIO_META[hz] ?? SOLFEGGIO_META[528];
-
-  const stopTone = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (gainRef.current && ctxRef.current) {
-      gainRef.current.gain.cancelScheduledValues(ctxRef.current.currentTime);
-      gainRef.current.gain.setValueAtTime(gainRef.current.gain.value, ctxRef.current.currentTime);
-      gainRef.current.gain.exponentialRampToValueAtTime(0.0001, ctxRef.current.currentTime + 0.4);
-    }
-    setTimeout(() => {
-      oscRef.current?.stop();
-      ctxRef.current?.close().catch(() => {});
-      ctxRef.current = null;
-      setPlaying(false);
-    }, 420);
-  };
-
-  const toggleTone = () => {
-    if (playing) { stopTone(); return; }
-    const ctx = new AudioContext();
-    ctxRef.current = ctx;
-    const osc  = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.value = hz;
-    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.28, ctx.currentTime + 0.15);
-    gain.gain.setValueAtTime(0.28, ctx.currentTime + 7.5);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 8.2);
-    osc.connect(gain).connect(ctx.destination);
-    oscRef.current = osc;
-    gainRef.current = gain;
-    osc.start();
-    setPlaying(true);
-    timerRef.current = setTimeout(() => { setPlaying(false); ctxRef.current = null; }, 8400);
-  };
-
-  useEffect(() => () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    try { oscRef.current?.stop(); } catch {}
-    ctxRef.current?.close().catch(() => {});
-  }, []);
-
-  const ytUrl = `https://www.youtube.com/results?search_query=${hz}+hz+solfeggio+healing+frequency`;
-
-  return (
-    <div
-      className="rounded-2xl border p-5 space-y-4 transition-all duration-500"
-      style={{
-        background: meta.bg,
-        borderColor: playing ? meta.glow : meta.border,
-        boxShadow: playing ? `0 0 36px ${meta.glow}44, 0 0 72px ${meta.glow}18` : "none",
-      }}
-    >
-      {/* Fork + info row */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={toggleTone}
-          aria-label={playing ? `Stop ${hz} Hz` : `Play ${hz} Hz healing tone`}
-          className="shrink-0 rounded-2xl p-3 transition-all hover:scale-110 active:scale-95 focus:outline-none"
-          style={{ background: `${meta.glow}1a`, boxShadow: playing ? `0 0 22px ${meta.glow}55` : "none" }}
-        >
-          <TuningFork playing={playing} accent={meta.accent} glow={meta.glow} />
-        </button>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline gap-2 flex-wrap">
-            <span className="font-display text-3xl font-bold" style={{ color: meta.text }}>{hz}</span>
-            <span className="text-base font-medium opacity-70" style={{ color: meta.text }}>Hz</span>
-            {playing && (
-              <motion.span
-                animate={{ opacity: [1, 0.35, 1] }}
-                transition={{ duration: 1.1, repeat: Infinity }}
-                className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                style={{ background: `${meta.glow}33`, color: meta.accent }}
-              >
-                ♪ playing
-              </motion.span>
-            )}
-          </div>
-          <p className="text-xs mt-1 font-semibold" style={{ color: meta.accent }}>{chakra}</p>
-        </div>
-      </div>
-
-      {/* Effect */}
-      <p className="text-sm leading-relaxed" style={{ color: `${meta.text}cc` }}>{effect}</p>
-
-      {/* Actions */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={toggleTone}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:scale-[1.03] active:scale-95"
-          style={{ background: `${meta.glow}28`, color: meta.text, border: `1px solid ${meta.border}` }}
-        >
-          {playing ? "⏹ Stop" : "▶ Play tone"}
-        </button>
-        <a
-          href={ytUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-red-600/20 border border-red-500/30 text-red-300 hover:bg-red-600/30 transition-all hover:scale-[1.03] active:scale-95"
-        >
-          ▶ Watch on YouTube
-        </a>
-      </div>
-    </div>
-  );
-}
 
 const auraCleansingContent = [
   { name: "Salt Bath Cleanse", steps: ["Fill a warm bath with 1–2 cups of sea salt or Himalayan pink salt.", "Add a few drops of essential oil (lavender, frankincense, or sage).", "Soak for 20–30 minutes. Visualize dark or heavy energy dissolving into the water.", "As you drain the tub, imagine all negativity flowing away.", "Pat dry gently and say: 'My energy is clear, my aura is bright.'"] },
@@ -418,7 +326,384 @@ const movementContent = [
   { emoji: "👐", name: "EFT Tapping", what: "Emotional Freedom Technique — tapping on specific acupressure points (meridian endpoints) on your face and body while speaking about emotional issues, combining ancient Chinese medicine with modern psychology.", why: "Tapping sends calming signals to the amygdala (your brain's fear center), reducing the emotional charge of traumatic memories and negative beliefs. It literally rewires your stress response.", beginner: ["Identify your issue and rate its intensity 0–10.", "Tap the side of your hand (karate chop point) while saying: 'Even though I feel [emotion], I deeply and completely accept myself.' Repeat 3 times.", "Tap 5–7 times on each point: top of head, eyebrow, side of eye, under eye, under nose, chin, collarbone, under arm.", "While tapping, describe what you feel: 'This tightness in my chest, this sadness.'", "After 2–3 rounds, re-rate your intensity. Repeat until it drops."] },
 ];
 
-/* ───────── SECTION MAP ───────── */
+/* ─── TuningFork ─── */
+
+function TuningFork({ playing, accent, glow }: { playing: boolean; accent: string; glow: string }) {
+  return (
+    <svg viewBox="0 0 40 84" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-16 h-20" aria-hidden="true">
+      <defs>
+        <style>{`
+          @keyframes sfIdle { 0%,100%{transform:translateX(0)} 30%{transform:translateX(-0.7px)} 70%{transform:translateX(0.7px)} }
+          @keyframes sfPlay { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-2.8px)} 30%{transform:translateX(2.8px)} 45%{transform:translateX(-2.2px)} 60%{transform:translateX(2.2px)} 75%{transform:translateX(-1.5px)} 90%{transform:translateX(1.5px)} }
+          @keyframes sfGlow { 0%,100%{opacity:0.55} 50%{opacity:1} }
+        `}</style>
+        <filter id="sfBlur"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <g style={{ animation: playing ? "sfPlay 0.11s ease-in-out infinite" : "sfIdle 3.5s ease-in-out infinite", transformOrigin: "20px 50px" }} filter={playing ? "url(#sfBlur)" : undefined}>
+        <path d="M11,50 L11,24" stroke={accent} strokeWidth="3.5" strokeLinecap="round"/>
+        <path d="M29,50 L29,24" stroke={accent} strokeWidth="3.5" strokeLinecap="round"/>
+        <path d="M11,24 C11,8 29,8 29,24" stroke={accent} fill="none" strokeWidth="3.5" strokeLinecap="round"/>
+        {playing && <>
+          <path d="M11,50 L11,24" stroke={glow} strokeWidth="7" strokeLinecap="round" opacity="0.22" style={{ animation: "sfGlow 0.9s ease-in-out infinite" }}/>
+          <path d="M29,50 L29,24" stroke={glow} strokeWidth="7" strokeLinecap="round" opacity="0.22" style={{ animation: "sfGlow 0.9s ease-in-out infinite" }}/>
+          <path d="M11,24 C11,8 29,8 29,24" stroke={glow} fill="none" strokeWidth="7" strokeLinecap="round" opacity="0.22" style={{ animation: "sfGlow 0.9s ease-in-out infinite" }}/>
+        </>}
+      </g>
+      <path d="M20,50 L20,74" stroke={accent} strokeWidth="4.5" strokeLinecap="round"/>
+      <ellipse cx="20" cy="76" rx="7.5" ry="2.8" fill={accent} opacity="0.65"/>
+      {playing && <ellipse cx="20" cy="76" rx="12" ry="5" fill={glow} opacity="0.18" style={{ animation: "sfGlow 1.1s ease-in-out infinite" }}/>}
+    </svg>
+  );
+}
+
+/* ─── FrequencyCard ─── */
+
+function FrequencyCard({ hz, chakra, effect }: { hz: number; chakra: string; effect: string }) {
+  const [playing, setPlaying] = useState(false);
+  const ctxRef  = useRef<AudioContext | null>(null);
+  const oscRef  = useRef<OscillatorNode | null>(null);
+  const gainRef = useRef<GainNode | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const meta = SOLFEGGIO_META[hz] ?? SOLFEGGIO_META[528];
+
+  const stopTone = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (gainRef.current && ctxRef.current) {
+      gainRef.current.gain.cancelScheduledValues(ctxRef.current.currentTime);
+      gainRef.current.gain.setValueAtTime(gainRef.current.gain.value, ctxRef.current.currentTime);
+      gainRef.current.gain.exponentialRampToValueAtTime(0.0001, ctxRef.current.currentTime + 0.4);
+    }
+    setTimeout(() => { oscRef.current?.stop(); ctxRef.current?.close().catch(() => {}); ctxRef.current = null; setPlaying(false); }, 420);
+  };
+
+  const toggleTone = () => {
+    if (playing) { stopTone(); return; }
+    const ctx = new AudioContext();
+    ctxRef.current = ctx;
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine"; osc.frequency.value = hz;
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.28, ctx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.28, ctx.currentTime + 7.5);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 8.2);
+    osc.connect(gain).connect(ctx.destination);
+    oscRef.current = osc; gainRef.current = gain;
+    osc.start(); setPlaying(true);
+    timerRef.current = setTimeout(() => { setPlaying(false); ctxRef.current = null; }, 8400);
+  };
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); try { oscRef.current?.stop(); } catch {} ctxRef.current?.close().catch(() => {}); }, []);
+
+  const ytUrl = `https://www.youtube.com/results?search_query=${hz}+hz+solfeggio+healing+frequency`;
+  return (
+    <div className="rounded-2xl border p-5 space-y-4 transition-all duration-500" style={{ background: meta.bg, borderColor: playing ? meta.glow : meta.border, boxShadow: playing ? `0 0 36px ${meta.glow}44, 0 0 72px ${meta.glow}18` : "none" }}>
+      <div className="flex items-center gap-4">
+        <button onClick={toggleTone} aria-label={playing ? `Stop ${hz} Hz` : `Play ${hz} Hz healing tone`} className="shrink-0 rounded-2xl p-3 transition-all hover:scale-110 active:scale-95 focus:outline-none" style={{ background: `${meta.glow}1a`, boxShadow: playing ? `0 0 22px ${meta.glow}55` : "none" }}>
+          <TuningFork playing={playing} accent={meta.accent} glow={meta.glow} />
+        </button>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="font-display text-3xl font-bold" style={{ color: meta.text }}>{hz}</span>
+            <span className="text-base font-medium opacity-70" style={{ color: meta.text }}>Hz</span>
+            {playing && (
+              <motion.span animate={{ opacity: [1, 0.35, 1] }} transition={{ duration: 1.1, repeat: Infinity }} className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: `${meta.glow}33`, color: meta.accent }}>
+                ♪ playing
+              </motion.span>
+            )}
+          </div>
+          <p className="text-xs mt-1 font-semibold" style={{ color: meta.accent }}>{chakra}</p>
+        </div>
+      </div>
+      <p className="text-sm leading-relaxed" style={{ color: `${meta.text}cc` }}>{effect}</p>
+      <div className="flex flex-wrap gap-2">
+        <button onClick={toggleTone} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:scale-[1.03] active:scale-95" style={{ background: `${meta.glow}28`, color: meta.text, border: `1px solid ${meta.border}` }}>
+          {playing ? "⏹ Stop" : "▶ Play tone"}
+        </button>
+        <a href={ytUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-red-600/20 border border-red-500/30 text-red-300 hover:bg-red-600/30 transition-all hover:scale-[1.03] active:scale-95">
+          ▶ Watch on YouTube
+        </a>
+      </div>
+    </div>
+  );
+}
+
+/* ─── GuideButton — reads steps aloud ─── */
+
+function GuideButton({ label, texts }: { label: string; texts: string[] }) {
+  const [active, setActive] = useState(false);
+  const start = () => {
+    if (!("speechSynthesis" in window)) return;
+    setActive(true);
+    window.speechSynthesis.cancel();
+    let i = 0;
+    const next = () => {
+      if (i >= texts.length) { setActive(false); return; }
+      const u = new SpeechSynthesisUtterance(texts[i++]);
+      u.rate = 0.82; u.pitch = 1.05;
+      u.onend = () => setTimeout(next, 500);
+      u.onerror = next;
+      window.speechSynthesis.speak(u);
+    };
+    next();
+  };
+  const stop = () => { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); setActive(false); };
+  useEffect(() => () => { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); }, []);
+  return (
+    <button onClick={active ? stop : start} className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all shrink-0 ${active ? "border-blue-400/60 bg-blue-500/15 text-blue-300" : "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"}`}>
+      {active ? <><Square className="h-3 w-3" /> Stop</> : <><Play className="h-3 w-3" /> {label}</>}
+    </button>
+  );
+}
+
+/* ─── MeditationCard — voiced reading + ambient ─── */
+
+function MeditationCard({ name, steps, tip }: { name: string; steps: string[]; tip: string }) {
+  const [reading, setReading] = useState(false);
+  const [activeStep, setActiveStep] = useState(-1);
+  const { start: startAmbient, stop: stopAmbient } = useAmbientSound();
+
+  const begin = () => {
+    if (!("speechSynthesis" in window)) return;
+    setReading(true); setActiveStep(-1);
+    startAmbient();
+    window.speechSynthesis.cancel();
+    const allTexts = [name, ...steps, "Take your time. You are doing beautifully."];
+    let i = 0;
+    const next = () => {
+      if (i >= allTexts.length) { setReading(false); setActiveStep(-1); stopAmbient(); return; }
+      setActiveStep(i - 1);
+      const u = new SpeechSynthesisUtterance(allTexts[i++]);
+      u.rate = 0.78; u.pitch = 1.05;
+      u.onend = () => setTimeout(next, 700);
+      u.onerror = next;
+      window.speechSynthesis.speak(u);
+    };
+    next();
+  };
+
+  const stop = () => {
+    window.speechSynthesis.cancel(); stopAmbient();
+    setReading(false); setActiveStep(-1);
+  };
+
+  useEffect(() => () => { window.speechSynthesis.cancel(); stopAmbient(); }, [stopAmbient]);
+
+  return (
+    <div className={`rounded-xl p-4 space-y-3 border transition-all duration-300 ${reading ? "bg-primary/8 border-primary/30" : "bg-muted/40 border-transparent"}`}>
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="font-display text-lg font-bold text-foreground">{name}</h3>
+        <button onClick={reading ? stop : begin} className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all shrink-0 ${reading ? "border-blue-400/60 bg-blue-500/15 text-blue-300" : "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"}`}>
+          {reading ? <><Square className="h-3 w-3" /> Stop</> : <><Play className="h-3 w-3" /> Begin</>}
+        </button>
+      </div>
+      <ol className="list-decimal list-inside space-y-1 text-sm">
+        {steps.map((s, i) => (
+          <li key={i} className={`transition-colors duration-300 ${reading && activeStep === i ? "text-primary font-medium" : "text-muted-foreground"}`}>{s}</li>
+        ))}
+      </ol>
+      <p className="text-xs text-healing-breathe italic">💡 Tip: {tip}</p>
+    </div>
+  );
+}
+
+/* ─── ChakraActivateButton ─── */
+
+function ChakraActivateButton({ name, affirmation, hz }: { name: string; affirmation: string; hz: number }) {
+  const [active, setActive] = useState(false);
+  const ctxRef = useRef<AudioContext | null>(null);
+
+  const activate = () => {
+    if (active) { doStop(); return; }
+    setActive(true);
+    const ctx = new AudioContext();
+    ctxRef.current = ctx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = Math.min(hz, 963);
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.14, ctx.currentTime + 0.3);
+    gain.gain.setValueAtTime(0.14, ctx.currentTime + 7.5);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 8);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 8);
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(`${name}. ${affirmation}`);
+      u.rate = 0.78; u.pitch = 1.1;
+      u.onend = () => setActive(false);
+      u.onerror = () => setActive(false);
+      window.speechSynthesis.speak(u);
+    } else {
+      setTimeout(() => setActive(false), 8200);
+    }
+  };
+
+  const doStop = () => {
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    ctxRef.current?.close(); ctxRef.current = null;
+    setActive(false);
+  };
+
+  useEffect(() => () => { doStop(); }, []);
+
+  return (
+    <button onClick={activate} className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all ${active ? "border-violet-400/60 bg-violet-500/15 text-violet-300" : "border-primary/20 bg-primary/8 text-primary hover:bg-primary/15"}`}>
+      {active ? <><Square className="h-3 w-3" /> Stop</> : <><Play className="h-3 w-3" /> Activate</>}
+    </button>
+  );
+}
+
+/* ─── BreathingCircle overlay ─── */
+
+const PHASE_COLORS = {
+  inhale: { ring: "#2dd4bf", glow: "#0d9488", bg: "#042f2e" },
+  hold:   { ring: "#f59e0b", glow: "#d97706", bg: "#1c1408" },
+  exhale: { ring: "#818cf8", glow: "#6366f1", bg: "#0f0f2e" },
+};
+
+function BreathingCircle({ technique, onStop }: { technique: BreathworkItem; onStop: () => void }) {
+  const makeReducer = (t: BreathworkItem) => (s: BreathState): BreathState => {
+    if (s.done) return s;
+    if (s.countdown > 1) return { ...s, countdown: s.countdown - 1 };
+    const next = (s.phaseIndex + 1) % t.phases.length;
+    const isNewCycle = next === 0;
+    const nextCycle = isNewCycle ? s.cycleCount + 1 : s.cycleCount;
+    if (isNewCycle && nextCycle >= t.cycles) return { ...s, done: true, countdown: 0 };
+    return { phaseIndex: next, countdown: t.phases[next].duration, cycleCount: nextCycle, done: false };
+  };
+
+  const [bState, tick] = useReducer(makeReducer(technique), {
+    phaseIndex: 0,
+    countdown: technique.phases[0].duration,
+    cycleCount: 0,
+    done: false,
+  });
+
+  const [targetScale, setTargetScale] = useState(0.45);
+  const [scaleDuration, setScaleDuration] = useState(technique.phases[0].duration);
+  const { start: startAmbient, stop: stopAmbient } = useAmbientSound();
+
+  useEffect(() => {
+    startAmbient();
+    return () => { stopAmbient(); if ("speechSynthesis" in window) window.speechSynthesis.cancel(); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const p = technique.phases[bState.phaseIndex];
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(p.label);
+      u.rate = 0.72; u.volume = 1;
+      window.speechSynthesis.speak(u);
+    }
+    if (p.type === "inhale") { setTargetScale(1); setScaleDuration(p.duration); }
+    else if (p.type === "exhale") { setTargetScale(0.45); setScaleDuration(p.duration); }
+  }, [bState.phaseIndex, technique]);
+
+  useEffect(() => {
+    if (bState.done) return;
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [bState.done, tick]);
+
+  const phase = technique.phases[bState.phaseIndex];
+  const col = PHASE_COLORS[phase.type];
+
+  if (bState.done) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-md">
+        <motion.div initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center space-y-4 px-8">
+          <div className="text-6xl">✨</div>
+          <h2 className="text-3xl font-display font-bold text-white">Well done</h2>
+          <p className="text-white/50 text-sm">{technique.cycles} cycles complete</p>
+          <button onClick={onStop} className="mt-4 px-10 py-3 rounded-2xl bg-teal-500 hover:bg-teal-400 text-white font-semibold transition-all">
+            Close
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-md">
+      <p className="text-white/40 text-sm font-display tracking-widest uppercase mb-10">{technique.name}</p>
+
+      <div className="relative flex items-center justify-center" style={{ width: 280, height: 280 }}>
+        {/* Outer glow pulse */}
+        <motion.div
+          className="absolute rounded-full pointer-events-none"
+          animate={{ scale: targetScale, opacity: targetScale > 0.6 ? 0.35 : 0.12 }}
+          transition={{ duration: scaleDuration, ease: phase.type === "inhale" ? "easeIn" : phase.type === "exhale" ? "easeOut" : [1, 1, 1, 1] }}
+          style={{ width: 280, height: 280, background: `radial-gradient(circle, ${col.ring}55, transparent 70%)`, boxShadow: `0 0 80px ${col.glow}44` }}
+        />
+        {/* Main breathing circle */}
+        <motion.div
+          className="absolute rounded-full flex items-center justify-center"
+          initial={{ scale: 0.45 }}
+          animate={{ scale: targetScale }}
+          transition={{ duration: scaleDuration, ease: phase.type === "inhale" ? "easeIn" : phase.type === "exhale" ? "easeOut" : [1, 1, 1, 1] }}
+          style={{
+            width: 230, height: 230,
+            border: `3px solid ${col.ring}`,
+            background: `radial-gradient(circle, ${col.bg}, #000)`,
+            boxShadow: `0 0 50px ${col.glow}66, inset 0 0 30px ${col.ring}11`,
+          }}
+        >
+          <div className="text-center select-none">
+            <p className="text-base font-bold tracking-[0.2em] uppercase" style={{ color: col.ring }}>{phase.label}</p>
+            <p className="text-7xl font-mono font-bold text-white mt-1 leading-none">{bState.countdown}</p>
+          </div>
+        </motion.div>
+      </div>
+
+      <p className="mt-10 text-white/35 text-xs tracking-[0.25em] uppercase">
+        Cycle {bState.cycleCount + 1} / {technique.cycles}
+      </p>
+
+      <button
+        onClick={onStop}
+        className="mt-8 flex items-center gap-2 px-8 py-3 rounded-2xl bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all text-sm font-semibold"
+      >
+        <Square className="h-3.5 w-3.5" /> Stop
+      </button>
+    </div>
+  );
+}
+
+/* ─── BreathworkCard ─── */
+
+function BreathworkCard({ item }: { item: BreathworkItem }) {
+  const [active, setActive] = useState(false);
+  return (
+    <div className="bg-muted/40 rounded-xl p-4 space-y-3">
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="font-display text-lg font-bold text-foreground">{item.name}</h3>
+        <button
+          onClick={() => setActive(true)}
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-teal-400/40 bg-teal-500/10 text-teal-300 hover:bg-teal-500/20 transition-all shrink-0"
+        >
+          <Play className="h-3 w-3" /> Start
+        </button>
+      </div>
+      <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
+        {item.steps.map((s, i) => <li key={i}>{s}</li>)}
+      </ol>
+      <div className="flex gap-1.5 flex-wrap">
+        {item.phases.map((p, i) => (
+          <span key={i} className={`text-xs px-2 py-0.5 rounded-full border font-medium ${p.type === "inhale" ? "border-teal-500/30 text-teal-400 bg-teal-500/10" : p.type === "exhale" ? "border-indigo-400/30 text-indigo-300 bg-indigo-500/10" : "border-amber-400/30 text-amber-300 bg-amber-500/10"}`}>
+            {p.label} {p.duration}s
+          </span>
+        ))}
+        <span className="text-xs px-2 py-0.5 rounded-full border border-border text-muted-foreground">{item.cycles} cycles</span>
+      </div>
+      {active && <BreathingCircle technique={item} onStop={() => setActive(false)} />}
+    </div>
+  );
+}
+
+/* ─── Section map ─── */
 
 type SectionKey = "meditation" | "chakras" | "breathwork" | "vagus-nerve" | "sound-healing" | "aura-cleansing" | "cord-cutting" | "movement" | "connect-healer";
 
@@ -434,47 +719,18 @@ const sectionTitles: Record<SectionKey, string> = {
   "connect-healer": "Connect to a Healer",
 };
 
-/* ───────── DETAIL RENDERER ───────── */
+/* ─── SectionContent ─── */
 
-function ReadButton({ title, steps, reading, readSteps, stop }: {
-  title: string; steps: string[];
-  reading: boolean;
-  readSteps: (title: string, steps: string[]) => void;
-  stop: () => void;
-}) {
-  return (
-    <button
-      onClick={() => reading ? stop() : readSteps(title, steps)}
-      className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all ${reading ? "border-blue-400/60 bg-blue-500/15 text-blue-300" : "border-border bg-muted/50 text-muted-foreground hover:text-foreground hover:border-primary/40"}`}
-    >
-      <Volume2 className="h-3 w-3" />
-      {reading ? "Stop reading" : "Read to me"}
-    </button>
-  );
-}
+function SectionContent({ id }: { id: SectionKey }) {
+  const navigate = useNavigate();
 
-function SectionContent({ id, reading, readSteps, stopReading }: {
-  id: SectionKey;
-  reading: boolean;
-  readSteps: (title: string, steps: string[]) => void;
-  stopReading: () => void;
-}) {
   switch (id) {
     case "meditation":
       return (
         <div className="space-y-6">
           <p className="text-muted-foreground leading-relaxed">{meditationContent.intro}</p>
           {meditationContent.types.map((t) => (
-            <div key={t.name} className="bg-muted/40 rounded-xl p-4 space-y-3">
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-display text-lg font-bold text-foreground">{t.name}</h3>
-                <ReadButton title={t.name} steps={t.steps} reading={reading} readSteps={readSteps} stop={stopReading} />
-              </div>
-              <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
-                {t.steps.map((s, i) => <li key={i}>{s}</li>)}
-              </ol>
-              <p className="text-xs text-healing-breathe italic">💡 Tip: {t.tip}</p>
-            </div>
+            <MeditationCard key={t.name} name={t.name} steps={t.steps} tip={t.tip} />
           ))}
         </div>
       );
@@ -482,12 +738,15 @@ function SectionContent({ id, reading, readSteps, stopReading }: {
     case "chakras":
       return (
         <div className="space-y-4">
-          <p className="text-muted-foreground text-sm mb-2">From Earth Star (below your feet) up to the Divine Gateway (above your head).</p>
+          <p className="text-muted-foreground text-sm mb-2">From Earth Star (below your feet) up to the Divine Gateway (above your head). Tap Activate to hear the affirmation and play the chakra tone.</p>
           {chakrasContent.map((c) => (
             <div key={c.num} className="bg-muted/40 rounded-xl p-4 space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold bg-primary/20 text-primary rounded-full px-2 py-0.5">#{c.num}</span>
-                <h3 className="font-display text-base font-bold text-foreground">{c.name}</h3>
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold bg-primary/20 text-primary rounded-full px-2 py-0.5">#{c.num}</span>
+                  <h3 className="font-display text-base font-bold text-foreground">{c.name}</h3>
+                </div>
+                <ChakraActivateButton name={c.name} affirmation={c.affirmation} hz={c.hz} />
               </div>
               <p className="text-xs text-muted-foreground"><strong>Location:</strong> {c.location}</p>
               <p className="text-xs text-muted-foreground"><strong>Color:</strong> {c.color}</p>
@@ -503,16 +762,9 @@ function SectionContent({ id, reading, readSteps, stopReading }: {
     case "breathwork":
       return (
         <div className="space-y-6">
+          <p className="text-muted-foreground text-sm">Tap Start to launch the guided breathing circle. The circle expands on inhale and contracts on exhale. Your device will speak each phase aloud.</p>
           {breathworkContent.map((b) => (
-            <div key={b.name} className="bg-muted/40 rounded-xl p-4 space-y-3">
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-display text-lg font-bold text-foreground">{b.name}</h3>
-                <ReadButton title={b.name} steps={b.steps} reading={reading} readSteps={readSteps} stop={stopReading} />
-              </div>
-              <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
-                {b.steps.map((s, i) => <li key={i}>{s}</li>)}
-              </ol>
-            </div>
+            <BreathworkCard key={b.name} item={b} />
           ))}
         </div>
       );
@@ -523,8 +775,11 @@ function SectionContent({ id, reading, readSteps, stopReading }: {
           <p className="text-muted-foreground leading-relaxed">{vagusNerveContent.explanation}</p>
           <h3 className="font-display text-lg font-bold text-foreground">5 Quick Activation Techniques</h3>
           {vagusNerveContent.techniques.map((t) => (
-            <div key={t.name} className="bg-muted/40 rounded-xl p-4 space-y-2">
-              <h4 className="font-display font-bold text-foreground">{t.name}</h4>
+            <div key={t.name} className="bg-muted/40 rounded-xl p-4 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <h4 className="font-display font-bold text-foreground">{t.name}</h4>
+                <GuideButton label="Guide me" texts={[t.name, t.how, "Take a moment to notice how you feel."]} />
+              </div>
               <p className="text-sm text-muted-foreground">{t.how}</p>
             </div>
           ))}
@@ -534,10 +789,7 @@ function SectionContent({ id, reading, readSteps, stopReading }: {
     case "sound-healing":
       return (
         <div className="space-y-5">
-          <p className="text-muted-foreground text-sm">
-            The 7 Solfeggio Frequencies — ancient tones used for spiritual and physical healing.
-            Tap a tuning fork to play the pure tone through your device. Each tone plays for 8 seconds.
-          </p>
+          <p className="text-muted-foreground text-sm">The 7 Solfeggio Frequencies — ancient tones used for spiritual and physical healing. Tap a tuning fork to play the pure tone through your device. Each tone plays for 8 seconds.</p>
           {soundHealingContent.map((s) => (
             <FrequencyCard key={s.hz} hz={s.hz} chakra={s.chakra} effect={s.effect} />
           ))}
@@ -547,10 +799,13 @@ function SectionContent({ id, reading, readSteps, stopReading }: {
     case "aura-cleansing":
       return (
         <div className="space-y-6">
-          <p className="text-muted-foreground text-sm">3 simple techniques anyone can do at home to cleanse and protect their aura.</p>
+          <p className="text-muted-foreground text-sm">3 simple techniques anyone can do at home to cleanse and protect their aura. Tap Begin to be guided through each one.</p>
           {auraCleansingContent.map((a) => (
             <div key={a.name} className="bg-muted/40 rounded-xl p-4 space-y-3">
-              <h3 className="font-display text-lg font-bold text-foreground">{a.name}</h3>
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-display text-lg font-bold text-foreground">{a.name}</h3>
+                <GuideButton label="Begin" texts={[a.name, ...a.steps, "Take a breath. Your aura is clear and bright."]} />
+              </div>
               <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
                 {a.steps.map((s, i) => <li key={i}>{s}</li>)}
               </ol>
@@ -564,12 +819,26 @@ function SectionContent({ id, reading, readSteps, stopReading }: {
         <div className="space-y-6">
           <p className="text-muted-foreground leading-relaxed">{cordCuttingContent.explanation}</p>
           <div className="bg-muted/40 rounded-xl p-4 space-y-2">
-            <h3 className="font-display text-lg font-bold text-foreground">5 Signs You Need Cord Cutting</h3>
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-display text-lg font-bold text-foreground">5 Signs You Need Cord Cutting</h3>
+              <GuideButton label="Read to me" texts={["Five signs you may need cord cutting.", ...cordCuttingContent.signs]} />
+            </div>
             <ul className="list-disc list-inside space-y-1 text-muted-foreground text-sm">
               {cordCuttingContent.signs.map((s, i) => <li key={i}>{s}</li>)}
             </ul>
           </div>
-          <h3 className="font-display text-lg font-bold text-foreground">The 5-Step Cord Cutting Ritual</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-lg font-bold text-foreground">The 5-Step Cord Cutting Ritual</h3>
+            <GuideButton
+              label="Begin Ritual"
+              texts={[
+                "The five step cord cutting ritual. Find a quiet space, close your eyes, and breathe deeply.",
+                ...cordCuttingContent.ritual.map((r, i) => `Step ${i + 1}. ${r.step}. ${r.detail}`),
+                cordCuttingContent.affirmation,
+                "The ritual is complete. You are free, whole, and sovereign in your energy.",
+              ]}
+            />
+          </div>
           {cordCuttingContent.ritual.map((r, i) => (
             <div key={i} className="bg-muted/40 rounded-xl p-4 space-y-2">
               <h4 className="font-display font-bold text-foreground">Step {i + 1}: {r.step}</h4>
@@ -585,30 +854,38 @@ function SectionContent({ id, reading, readSteps, stopReading }: {
     case "movement":
       return (
         <div className="space-y-6">
-          <p className="text-muted-foreground leading-relaxed">Movement is one of the most ancient and effective ways to release emotions trapped in the body. When we experience stress, trauma, or grief, the energy often gets stuck in our muscles, fascia, and nervous system. These 11 practices help you move that energy out — no gym required, no experience needed.</p>
+          <p className="text-muted-foreground leading-relaxed">Movement is one of the most ancient and effective ways to release emotions trapped in the body. These practices help you move that energy out — no gym required, no experience needed.</p>
           {movementContent.map((m) => (
             <div key={m.name} className="bg-muted/40 rounded-xl p-4 space-y-3">
-              <h3 className="font-display text-lg font-bold text-foreground">{m.emoji} {m.name}</h3>
-              <div className="space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-display text-lg font-bold text-foreground">{m.emoji} {m.name}</h3>
+                <GuideButton
+                  label="Start Practice"
+                  texts={[
+                    `${m.name}. ${m.what}`,
+                    `Why this helps: ${m.why}`,
+                    "Here is how to begin.",
+                    ...m.beginner,
+                    "Take your time. Move with intention.",
+                  ]}
+                />
+              </div>
+              <div className="space-y-1">
                 <h4 className="text-sm font-semibold text-foreground">What it is</h4>
                 <p className="text-sm text-muted-foreground">{m.what}</p>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <h4 className="text-sm font-semibold text-foreground">Why it moves stuck emotions</h4>
                 <p className="text-sm text-muted-foreground">{m.why}</p>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <h4 className="text-sm font-semibold text-foreground">How to start as a beginner</h4>
                 <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-sm">
                   {m.beginner.map((s, i) => <li key={i}>{s}</li>)}
                 </ol>
               </div>
-              <Button
-                className="w-full mt-2 bg-gradient-to-r from-primary to-secondary text-primary-foreground font-display rounded-xl"
-                onClick={() => {}}
-              >
-                <CalendarCheck className="h-4 w-4 mr-2" />
-                Connect with a Healer or Teacher
+              <Button className="w-full mt-1 bg-gradient-to-r from-primary to-secondary text-primary-foreground font-display rounded-xl" onClick={() => navigate("/shop")}>
+                <CalendarCheck className="h-4 w-4 mr-2" /> Connect with a Healer or Teacher
               </Button>
             </div>
           ))}
@@ -621,20 +898,15 @@ function SectionContent({ id, reading, readSteps, stopReading }: {
           <p className="text-muted-foreground text-lg leading-relaxed max-w-sm">
             Ready to go deeper? Connect with a verified spiritual practitioner, energy healer, or holistic therapist for personalized guidance.
           </p>
-          <Button
-            size="lg"
-            className="bg-gradient-to-r from-primary to-secondary text-primary-foreground font-display text-lg px-8 py-6 rounded-2xl shadow-lg"
-            onClick={() => {}}
-          >
-            <CalendarCheck className="h-5 w-5 mr-2" />
-            Book a One-on-One Session
+          <Button size="lg" className="bg-gradient-to-r from-primary to-secondary text-primary-foreground font-display text-lg px-8 py-6 rounded-2xl shadow-lg" onClick={() => navigate("/shop")}>
+            <CalendarCheck className="h-5 w-5 mr-2" /> Book a One-on-One Session
           </Button>
         </div>
       );
   }
 }
 
-/* ───────── MAIN COMPONENT ───────── */
+/* ─── Main ─── */
 
 export default function BreatheDetail() {
   const { section } = useParams<{ section: string }>();
@@ -642,12 +914,8 @@ export default function BreatheDetail() {
   const id = section as SectionKey;
   const title = sectionTitles[id];
   const { playing: ambientPlaying, start: startAmbient, stop: stopAmbient } = useAmbientSound();
-  const { reading, readSteps, stop: stopReading } = useStepReader();
 
-  if (!title) {
-    navigate("/breathe", { replace: true });
-    return null;
-  }
+  if (!title) { navigate("/breathe", { replace: true }); return null; }
 
   const showPortal = ["meditation", "chakras", "sound-healing", "aura-cleansing"].includes(id);
   const showBook   = ["breathwork", "vagus-nerve", "cord-cutting"].includes(id);
@@ -661,17 +929,14 @@ export default function BreatheDetail() {
       transition={{ duration: 0.3 }}
       className="flex-1 flex flex-col min-h-0 bg-gradient-to-br from-violet-950 via-slate-950 to-sky-950"
     >
-      {/* Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={() => navigate("/breathe")} aria-label="Back">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="font-display text-xl font-bold text-foreground truncate flex-1">{title}</h1>
-        {/* Ambient sound toggle */}
         <button
           onClick={() => ambientPlaying ? stopAmbient() : startAmbient()}
           aria-label={ambientPlaying ? "Stop ambient sounds" : "Play ambient meditation sounds"}
-          title={ambientPlaying ? "Stop ambient sounds" : "Ambient meditation sounds"}
           className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border transition-all ${ambientPlaying ? "border-teal-400/60 bg-teal-500/15 text-teal-300" : "border-border bg-muted/40 text-muted-foreground hover:text-foreground"}`}
         >
           {ambientPlaying ? <VolumeX className="h-3.5 w-3.5" /> : <Music className="h-3.5 w-3.5" />}
@@ -679,7 +944,6 @@ export default function BreatheDetail() {
         </button>
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto p-4 pb-32">
         {showSafetyDisclaimer && (
           <div className="space-y-4 bg-muted/70 border border-border/80 rounded-3xl p-4 mb-6">
@@ -687,32 +951,21 @@ export default function BreatheDetail() {
               Some breathwork and energy practices can surface deep emotions or trauma. You are never alone here. Intercessors and healers are always on standby to support you. If you feel overwhelmed stop and reach out.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Button
-                className="w-full bg-white/10 text-foreground border border-border hover:bg-white/20"
-                onClick={() => navigate("/shop")}
-              >
+              <Button className="w-full bg-white/10 text-foreground border border-border hover:bg-white/20" onClick={() => navigate("/shop")}>
                 Connect to an Intercessor
               </Button>
-              <Button
-                className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground"
-                onClick={() => navigate("/shop")}
-              >
+              <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground" onClick={() => navigate("/shop")}>
                 Connect to a Healer
               </Button>
             </div>
           </div>
         )}
-        <SectionContent id={id} reading={reading} readSteps={readSteps} stopReading={stopReading} />
+        <SectionContent id={id} />
       </div>
 
-      {/* Bottom CTA */}
       {(showPortal || showBook) && (
         <div className="sticky bottom-0 p-4 bg-background/90 backdrop-blur-md border-t border-border">
-          <Button
-            className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground font-display rounded-xl py-6 text-base"
-            size="lg"
-            onClick={() => navigate("/shop")}
-          >
+          <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground font-display rounded-xl py-6 text-base" size="lg" onClick={() => navigate("/shop")}>
             <CalendarCheck className="h-5 w-5 mr-2" />
             {showBook ? "Book a Session" : "Visit the Portal"}
           </Button>
