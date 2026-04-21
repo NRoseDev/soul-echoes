@@ -6,32 +6,25 @@ import {
 function PortalIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <defs>
-        <radialGradient id="portalGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-          <stop offset="40%" stopColor="#fbbf24" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="ringGrad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#fde68a" />
-          <stop offset="100%" stopColor="#d97706" />
-        </radialGradient>
-      </defs>
       {/* teal outer glow ring */}
-      <circle cx="12" cy="12" r="10.5" stroke="#0ea5e9" strokeWidth="1.5" strokeOpacity="0.5" />
+      <circle cx="12" cy="12" r="10" stroke="#2dd4bf" strokeWidth="1.2" strokeOpacity="0.6" />
       {/* gold ring */}
-      <circle cx="12" cy="12" r="9" stroke="url(#ringGrad)" strokeWidth="2.5" />
-      {/* dark interior */}
-      <circle cx="12" cy="12" r="7.5" fill="#0c1a2e" />
-      {/* 4-point star burst arms — long cardinal */}
-      <line x1="12" y1="4.5" x2="12" y2="19.5" stroke="#fbbf24" strokeWidth="1" strokeLinecap="round" strokeOpacity="0.7" />
-      <line x1="4.5" y1="12" x2="19.5" y2="12" stroke="#fbbf24" strokeWidth="1" strokeLinecap="round" strokeOpacity="0.7" />
-      {/* diagonal arms — shorter */}
-      <line x1="7.2" y1="7.2" x2="16.8" y2="16.8" stroke="#fbbf24" strokeWidth="0.6" strokeLinecap="round" strokeOpacity="0.45" />
-      <line x1="16.8" y1="7.2" x2="7.2" y2="16.8" stroke="#fbbf24" strokeWidth="0.6" strokeLinecap="round" strokeOpacity="0.45" />
-      {/* glowing center */}
-      <circle cx="12" cy="12" r="3" fill="url(#portalGlow)" />
-      <circle cx="12" cy="12" r="1.2" fill="#ffffff" />
+      <circle cx="12" cy="12" r="8.5" stroke="#f59e0b" strokeWidth="2.2" />
+      {/* teal inner ring */}
+      <circle cx="12" cy="12" r="6.5" stroke="#2dd4bf" strokeWidth="0.8" strokeOpacity="0.7" />
+      {/* 4-point star burst — long cardinal rays */}
+      <line x1="12" y1="6.8" x2="12" y2="9.2" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="12" y1="14.8" x2="12" y2="17.2" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="6.8" y1="12" x2="9.2" y2="12" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="14.8" y1="12" x2="17.2" y2="12" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" />
+      {/* diagonal rays */}
+      <line x1="8.5" y1="8.5" x2="9.9" y2="9.9" stroke="#2dd4bf" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="14.1" y1="14.1" x2="15.5" y2="15.5" stroke="#2dd4bf" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="15.5" y1="8.5" x2="14.1" y2="9.9" stroke="#2dd4bf" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="9.9" y1="14.1" x2="8.5" y2="15.5" stroke="#2dd4bf" strokeWidth="1.2" strokeLinecap="round" />
+      {/* bright center */}
+      <circle cx="12" cy="12" r="1.8" fill="#fde68a" />
+      <circle cx="12" cy="12" r="0.9" fill="#ffffff" />
     </svg>
   );
 }
