@@ -1,40 +1,80 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Send, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, X, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// 33 feelings (angel number) — each with a name, color, and short description
+// Color is decorative/supportive only; the WORD is the primary signal so this
+// works for color-blind, low-vision, and screen-reader users.
+const FEELINGS = [
+  { name: "Sad", color: "#1E3A5F", desc: "heavy, low, tearful" },
+  { name: "Angry", color: "#E63946", desc: "mad, furious, heated" },
+  { name: "Anxious", color: "#9B7EBD", desc: "worried, on edge" },
+  { name: "Scared", color: "#4A4E69", desc: "afraid, fearful" },
+  { name: "Lonely", color: "#577590", desc: "alone, disconnected" },
+  { name: "Hopeless", color: "#2B2D42", desc: "no way out, dark" },
+  { name: "Numb", color: "#6C757D", desc: "empty, nothing, blank" },
+  { name: "Tired", color: "#5C6B73", desc: "exhausted, drained" },
+  { name: "Overwhelmed", color: "#7251B5", desc: "too much, drowning" },
+  { name: "Confused", color: "#8338EC", desc: "lost, foggy, unclear" },
+  { name: "Ashamed", color: "#6A0572", desc: "small, hiding, guilty" },
+  { name: "Guilty", color: "#5B2A86", desc: "did wrong, regret" },
+  { name: "Hurt", color: "#C1666B", desc: "wounded, aching" },
+  { name: "Betrayed", color: "#8B2635", desc: "lied to, broken trust" },
+  { name: "Rejected", color: "#A4133C", desc: "pushed away, unwanted" },
+  { name: "Jealous", color: "#386641", desc: "envy, longing" },
+  { name: "Frustrated", color: "#BC4749", desc: "stuck, blocked" },
+  { name: "Disgusted", color: "#606C38", desc: "repulsed, turned off" },
+  { name: "Restless", color: "#DDA15E", desc: "can't sit still" },
+  { name: "Embarrassed", color: "#E07A5F", desc: "exposed, awkward" },
+  { name: "Calm", color: "#A8DADC", desc: "settled, at ease" },
+  { name: "Peaceful", color: "#CAD2C5", desc: "quiet, still" },
+  { name: "Safe", color: "#8B5E3C", desc: "protected, grounded" },
+  { name: "Hopeful", color: "#F4A261", desc: "light ahead, expectant" },
+  { name: "Grateful", color: "#E9C46A", desc: "thankful, blessed" },
+  { name: "Loved", color: "#FF8FA3", desc: "held, cherished" },
+  { name: "Happy", color: "#FFD166", desc: "light, glad" },
+  { name: "Joyful", color: "#FFB627", desc: "bursting, alive" },
+  { name: "Excited", color: "#FB5607", desc: "energized, eager" },
+  { name: "Proud", color: "#FFB400", desc: "accomplished, strong" },
+  { name: "Curious", color: "#06AED5", desc: "wondering, open" },
+  { name: "Inspired", color: "#7B2CBF", desc: "moved, lit up" },
+  { name: "Healing", color: "#2A9D8F", desc: "growing, mending" },
+  { name: "I don't know", color: "#6C757D", desc: "help me find it" },
+];
+
 const COLORS = [
-  { hex: "#1E3A5F", name: "dark blue", meaning: "sadness, depth, melancholy" },
-  { hex: "#E63946", name: "red", meaning: "anger, passion, intensity" },
-  { hex: "#F4A261", name: "warm orange", meaning: "comfort, warmth, hope" },
-  { hex: "#2A9D8F", name: "teal", meaning: "calm, healing, balance" },
-  { hex: "#264653", name: "deep teal", meaning: "solitude, reflection, weight" },
-  { hex: "#E9C46A", name: "golden yellow", meaning: "joy, energy, optimism" },
-  { hex: "#6A0572", name: "deep purple", meaning: "grief, spirituality, mystery" },
-  { hex: "#1D1D1D", name: "black", meaning: "emptiness, darkness, the unknown" },
-  { hex: "#F1FAEE", name: "soft white", meaning: "peace, purity, new beginning" },
-  { hex: "#A8DADC", name: "light blue", meaning: "gentleness, vulnerability, openness" },
-  { hex: "#8B5E3C", name: "earth brown", meaning: "grounding, stability, safety" },
-  { hex: "#C1666B", name: "dusty rose", meaning: "tenderness, longing, bittersweet" },
+  { hex: "#1E3A5F", name: "dark blue", meaning: "sadness, depth" },
+  { hex: "#E63946", name: "red", meaning: "anger, intensity" },
+  { hex: "#F4A261", name: "warm orange", meaning: "comfort, hope" },
+  { hex: "#2A9D8F", name: "teal", meaning: "calm, healing" },
+  { hex: "#264653", name: "deep teal", meaning: "solitude, weight" },
+  { hex: "#E9C46A", name: "golden yellow", meaning: "joy, energy" },
+  { hex: "#6A0572", name: "deep purple", meaning: "grief, mystery" },
+  { hex: "#1D1D1D", name: "black", meaning: "emptiness, unknown" },
+  { hex: "#F1FAEE", name: "soft white", meaning: "peace, new start" },
+  { hex: "#A8DADC", name: "light blue", meaning: "gentleness, openness" },
+  { hex: "#8B5E3C", name: "earth brown", meaning: "grounding, safety" },
+  { hex: "#C1666B", name: "dusty rose", meaning: "tenderness, longing" },
 ];
 
 const SYMBOLS = [
-  { emoji: "💔", name: "broken heart", meaning: "heartbreak, loss, betrayal" },
-  { emoji: "🌊", name: "wave", meaning: "overwhelm, emotions crashing, flow" },
-  { emoji: "🔥", name: "fire", meaning: "anger, transformation, burning feeling" },
-  { emoji: "🌑", name: "dark moon", meaning: "darkness, hidden feelings, shadow" },
-  { emoji: "🌅", name: "sunrise", meaning: "hope, new beginning, light ahead" },
-  { emoji: "⛓️", name: "chains", meaning: "feeling trapped, stuck, bound" },
-  { emoji: "🕊️", name: "dove", meaning: "peace, release, freedom" },
-  { emoji: "🌱", name: "sprout", meaning: "growth, healing, something new" },
-  { emoji: "💧", name: "tear", meaning: "crying, release, sadness" },
-  { emoji: "⚡", name: "lightning", meaning: "shock, sudden change, energy" },
-  { emoji: "🫂", name: "hug", meaning: "need comfort, connection, warmth" },
-  { emoji: "🌀", name: "spiral", meaning: "confusion, spinning, anxiety" },
-  { emoji: "🛡️", name: "shield", meaning: "protection, guarding, defense" },
-  { emoji: "🦋", name: "butterfly", meaning: "transformation, beauty, fragility" },
-  { emoji: "💤", name: "sleep", meaning: "exhaustion, need rest, numbness" },
-  { emoji: "🌿", name: "herb", meaning: "healing, nature, grounding" },
+  { emoji: "💔", name: "broken heart", meaning: "heartbreak, loss" },
+  { emoji: "🌊", name: "wave", meaning: "overwhelm, flow" },
+  { emoji: "🔥", name: "fire", meaning: "anger, transformation" },
+  { emoji: "🌑", name: "dark moon", meaning: "hidden, shadow" },
+  { emoji: "🌅", name: "sunrise", meaning: "hope, new beginning" },
+  { emoji: "⛓️", name: "chains", meaning: "trapped, stuck" },
+  { emoji: "🕊️", name: "dove", meaning: "peace, release" },
+  { emoji: "🌱", name: "sprout", meaning: "growth, healing" },
+  { emoji: "💧", name: "tear", meaning: "crying, release" },
+  { emoji: "⚡", name: "lightning", meaning: "shock, sudden change" },
+  { emoji: "🫂", name: "hug", meaning: "need comfort" },
+  { emoji: "🌀", name: "spiral", meaning: "confusion, anxiety" },
+  { emoji: "🛡️", name: "shield", meaning: "protection, defense" },
+  { emoji: "🦋", name: "butterfly", meaning: "transformation" },
+  { emoji: "🌿", name: "herb", meaning: "healing, grounding" },
+  { emoji: "⭐", name: "star", meaning: "guidance, wish" },
 ];
 
 interface Props {
@@ -43,8 +83,18 @@ interface Props {
 }
 
 export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
+  const [selectedFeelings, setSelectedFeelings] = useState<typeof FEELINGS[number][]>([]);
   const [selectedColors, setSelectedColors] = useState<typeof COLORS[number][]>([]);
   const [selectedSymbols, setSelectedSymbols] = useState<typeof SYMBOLS[number][]>([]);
+  const [showExtras, setShowExtras] = useState(false);
+
+  const toggleFeeling = (f: typeof FEELINGS[number]) => {
+    setSelectedFeelings((prev) =>
+      prev.find((x) => x.name === f.name)
+        ? prev.filter((x) => x.name !== f.name)
+        : [...prev, f]
+    );
+  };
 
   const toggleColor = (color: typeof COLORS[number]) => {
     setSelectedColors((prev) =>
@@ -62,110 +112,219 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
     );
   };
 
+  const hasSelection =
+    selectedFeelings.length > 0 || selectedColors.length > 0 || selectedSymbols.length > 0;
+
   const handleSend = () => {
-    if (selectedColors.length === 0 && selectedSymbols.length === 0) return;
+    if (!hasSelection) return;
 
-    // Build a descriptive message the AI can interpret
-    const colorDesc = selectedColors.map((c) => `${c.name} (${c.meaning})`).join(", ");
-    const symbolDesc = selectedSymbols.map((s) => `${s.emoji} ${s.name} (${s.meaning})`).join(", ");
-
-    let message = "[Expressed through colors and symbols]\n";
-    if (selectedColors.length > 0) message += `Colors chosen: ${colorDesc}\n`;
-    if (selectedSymbols.length > 0) message += `Symbols chosen: ${symbolDesc}`;
+    let message = "[Expressed without typing]\n";
+    if (selectedFeelings.length > 0) {
+      const names = selectedFeelings.map((f) => f.name.toLowerCase());
+      message += `Feelings: ${names.join(", ")}\n`;
+      if (names.includes("i don't know")) {
+        message += `(They can't name it yet — gently guide them to uncover the true emotion underneath and explore the root.)\n`;
+      }
+    }
+    if (selectedColors.length > 0) {
+      message += `Colors chosen: ${selectedColors
+        .map((c) => `${c.name} (${c.meaning})`)
+        .join(", ")}\n`;
+    }
+    if (selectedSymbols.length > 0) {
+      message += `Symbols chosen: ${selectedSymbols
+        .map((s) => `${s.emoji} ${s.name} (${s.meaning})`)
+        .join(", ")}`;
+    }
 
     onSend(message.trim());
+    setSelectedFeelings([]);
     setSelectedColors([]);
     setSelectedSymbols([]);
   };
 
-  const hasSelection = selectedColors.length > 0 || selectedSymbols.length > 0;
-
   return (
     <div className="space-y-4 p-4">
-      {/* Selected items preview */}
+      {/* Selected preview */}
       {hasSelection && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
           className="flex flex-wrap gap-2 p-3 bg-card rounded-xl border border-border"
+          aria-live="polite"
         >
+          {selectedFeelings.map((f) => (
+            <button
+              key={f.name}
+              onClick={() => toggleFeeling(f)}
+              className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border-2 border-foreground/20"
+              style={{ backgroundColor: f.color, color: "#fff", textShadow: "0 1px 2px rgba(0,0,0,0.4)" }}
+              aria-label={`Remove feeling ${f.name}`}
+            >
+              {f.name}
+              <X className="h-3 w-3" />
+            </button>
+          ))}
           {selectedColors.map((c) => (
             <button
               key={c.hex}
               onClick={() => toggleColor(c)}
-              className="w-8 h-8 rounded-full border-2 border-foreground/20 flex items-center justify-center"
-              style={{ backgroundColor: c.hex }}
-              aria-label={`Remove ${c.name}`}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-foreground/20 text-xs font-medium"
+              style={{ backgroundColor: c.hex, color: "#fff", textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
+              aria-label={`Remove color ${c.name}`}
             >
-              <X className="h-3 w-3 text-white drop-shadow" />
+              {c.name}
+              <X className="h-3 w-3" />
             </button>
           ))}
           {selectedSymbols.map((s) => (
             <button
               key={s.emoji}
               onClick={() => toggleSymbol(s)}
-              className="text-xl px-1 rounded hover:bg-muted"
-              aria-label={`Remove ${s.name}`}
+              className="inline-flex items-center gap-1 text-sm px-2 py-1 rounded-full bg-muted hover:bg-muted/70"
+              aria-label={`Remove symbol ${s.name}`}
             >
-              {s.emoji}
+              <span aria-hidden="true">{s.emoji}</span>
+              <span>{s.name}</span>
+              <X className="h-3 w-3" />
             </button>
           ))}
         </motion.div>
       )}
 
-      {/* Colors */}
+      {/* Feelings grid — primary input */}
       <div>
         <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-          Choose colors that match how you feel
+          Tap any feelings that match how you feel — pick as many as you want
         </p>
-        <div className="grid grid-cols-6 gap-2">
-          {COLORS.map((color) => {
-            const selected = selectedColors.some((c) => c.hex === color.hex);
+        <div
+          role="group"
+          aria-label="Feelings to choose from"
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2"
+        >
+          {FEELINGS.map((f) => {
+            const selected = selectedFeelings.some((x) => x.name === f.name);
             return (
               <button
-                key={color.hex}
-                onClick={() => toggleColor(color)}
+                key={f.name}
+                onClick={() => toggleFeeling(f)}
                 disabled={disabled}
-                className={`w-full aspect-square rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-ring ${
-                  selected ? "ring-2 ring-primary scale-110 shadow-lg" : "hover:scale-105"
+                className={`relative px-3 py-3 rounded-xl text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-ring text-left ${
+                  selected ? "ring-2 ring-primary scale-[1.02] shadow-md" : "hover:scale-[1.02]"
                 }`}
-                style={{ backgroundColor: color.hex }}
-                aria-label={`${color.name} — ${color.meaning}`}
+                style={{
+                  backgroundColor: f.color,
+                  color: "#fff",
+                  textShadow: "0 1px 2px rgba(0,0,0,0.45)",
+                }}
+                aria-label={`${f.name} — ${f.desc}`}
                 aria-pressed={selected}
-                title={color.name}
-              />
+                title={`${f.name} — ${f.desc}`}
+              >
+                <span className="block leading-tight">{f.name}</span>
+                <span className="block text-[10px] font-normal opacity-90 mt-0.5 leading-tight">
+                  {f.desc}
+                </span>
+              </button>
             );
           })}
         </div>
       </div>
 
-      {/* Symbols */}
-      <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-          Choose symbols that express your feelings
-        </p>
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-          {SYMBOLS.map((symbol) => {
-            const selected = selectedSymbols.some((s) => s.emoji === symbol.emoji);
-            return (
-              <button
-                key={symbol.emoji}
-                onClick={() => toggleSymbol(symbol)}
-                disabled={disabled}
-                className={`text-2xl p-2 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-ring ${
-                  selected
-                    ? "bg-primary/15 ring-2 ring-primary scale-110 shadow-md"
-                    : "bg-card hover:bg-muted hover:scale-105"
-                }`}
-                aria-label={`${symbol.name} — ${symbol.meaning}`}
-                aria-pressed={selected}
-                title={symbol.name}
-              >
-                {symbol.emoji}
-              </button>
-            );
-          })}
-        </div>
+      {/* Optional: colors + symbols layer */}
+      <div className="border-t border-border pt-3">
+        <button
+          type="button"
+          onClick={() => setShowExtras((v) => !v)}
+          className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring rounded px-2 py-1"
+          aria-expanded={showExtras}
+          aria-controls="extras-panel"
+        >
+          {showExtras ? <Minus className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
+          {showExtras ? "Hide colors & symbols" : "Add colors & symbols (optional)"}
+        </button>
+
+        <AnimatePresence initial={false}>
+          {showExtras && (
+            <motion.div
+              id="extras-panel"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="space-y-4 pt-4">
+                {/* Colors */}
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
+                    Colors (each is labeled — hover or tap)
+                  </p>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                    {COLORS.map((color) => {
+                      const selected = selectedColors.some((c) => c.hex === color.hex);
+                      return (
+                        <button
+                          key={color.hex}
+                          onClick={() => toggleColor(color)}
+                          disabled={disabled}
+                          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-ring bg-card hover:bg-muted ${
+                            selected ? "ring-2 ring-primary scale-105" : ""
+                          }`}
+                          aria-label={`${color.name} — ${color.meaning}`}
+                          aria-pressed={selected}
+                          title={`${color.name} — ${color.meaning}`}
+                        >
+                          <span
+                            className="w-8 h-8 rounded-full border border-foreground/20"
+                            style={{ backgroundColor: color.hex }}
+                            aria-hidden="true"
+                          />
+                          <span className="text-[10px] font-medium text-foreground leading-tight text-center">
+                            {color.name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Symbols */}
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
+                    Symbols (each is labeled)
+                  </p>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                    {SYMBOLS.map((symbol) => {
+                      const selected = selectedSymbols.some((s) => s.emoji === symbol.emoji);
+                      return (
+                        <button
+                          key={symbol.emoji}
+                          onClick={() => toggleSymbol(symbol)}
+                          disabled={disabled}
+                          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-ring bg-card hover:bg-muted ${
+                            selected
+                              ? "bg-primary/15 ring-2 ring-primary scale-105"
+                              : ""
+                          }`}
+                          aria-label={`${symbol.name} — ${symbol.meaning}`}
+                          aria-pressed={selected}
+                          title={`${symbol.name} — ${symbol.meaning}`}
+                        >
+                          <span className="text-2xl" aria-hidden="true">
+                            {symbol.emoji}
+                          </span>
+                          <span className="text-[10px] font-medium text-foreground leading-tight text-center">
+                            {symbol.name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Send */}

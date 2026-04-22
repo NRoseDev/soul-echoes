@@ -1,14 +1,14 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen, Gem, Droplet, Volume2, Headphones, Users, Star, Bookmark,
   BookmarkCheck, Bell, BellOff, ChevronDown, ChevronUp, Heart, Check,
   CreditCard, Sliders, Gift, Globe2, ArrowRight, ShieldCheck, Zap,
-  Wind, Sun, Flame, Music2, Video, Mic, Camera, Image as ImageIcon,
-  Play, Square, Upload, Lock,
+  Wind, Sun, Flame, Music2, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import HealingJourneys from "@/components/HealingJourneys";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 interface Product {
@@ -278,10 +278,10 @@ const PAYMENT_METHODS = [
 
 const SECTION_TABS = [
   { id: "products",       label: "Healing Products",     icon: Gem        },
+  { id: "journeys",       label: "Healing Journeys",     icon: Sparkles   },
   { id: "practitioners",  label: "Find a Practitioner",  icon: Users      },
   { id: "book",           label: "Book a Session",       icon: Star       },
   { id: "saved",          label: "Wait & Save",          icon: Bookmark   },
-  { id: "journeys",       label: "Healing Journeys",     icon: Video      },
 ] as const;
 type SectionId = typeof SECTION_TABS[number]["id"];
 
@@ -512,479 +512,6 @@ function PractitionerCard({
   );
 }
 
-/* ─── Healing Journeys ───────────────────────────────────────────────────── */
-interface JourneyEntry {
-  id: string;
-  title: string;
-  tags: string[];
-  privacyMode: "face" | "voice" | "background";
-  duration: string;
-  daysAgo: number;
-  accent: string;
-  isNew?: boolean;
-}
-
-const MOCK_JOURNEYS: JourneyEntry[] = [
-  { id: "j1", title: "Finding light after grief", tags: ["Grief", "Hope"], privacyMode: "voice", duration: "3:42", daysAgo: 2, accent: "from-violet-900 to-purple-900" },
-  { id: "j2", title: "My breathwork breakthrough", tags: ["Breathwork", "Anxiety"], privacyMode: "face", duration: "5:18", daysAgo: 7, accent: "from-sky-900 to-teal-900" },
-  { id: "j3", title: "Six months of shadow work", tags: ["Shadow Work", "Growth"], privacyMode: "background", duration: "8:05", daysAgo: 14, accent: "from-slate-800 to-indigo-900" },
-  { id: "j4", title: "Learning to feel safe again", tags: ["Trauma", "Safety"], privacyMode: "voice", duration: "4:30", daysAgo: 21, accent: "from-emerald-900 to-teal-900" },
-  { id: "j5", title: "When prayer was all I had", tags: ["Faith", "Crisis"], privacyMode: "background", duration: "6:45", daysAgo: 30, accent: "from-amber-900 to-orange-900" },
-];
-
-const PRIVACY_MODES = [
-  { id: "face",       label: "Show Face",       icon: "📹", desc: "Full camera and audio" },
-  { id: "voice",      label: "Voice Only",      icon: "🎤", desc: "Audio only, no video" },
-  { id: "background", label: "Voice + Image",   icon: "🖼️", desc: "Your voice over a background image" },
-] as const;
-
-function HealingJourneys() {
-  const [view, setView]               = useState<"home" | "record" | "browse">("home");
-  const [privacyMode, setPrivacyMode] = useState<"face" | "voice" | "background">("voice");
-  const [recording, setRecording]     = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
-  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
-  const [bgImage, setBgImage]         = useState<string | null>(null);
-  const [journeys, setJourneys]       = useState<JourneyEntry[]>(MOCK_JOURNEYS);
-  const [playingId, setPlayingId]     = useState<string | null>(null);
-  const [permError, setPermError]     = useState<string | null>(null);
-
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef        = useRef<Blob[]>([]);
-  const streamRef        = useRef<MediaStream | null>(null);
-  const timerRef         = useRef<ReturnType<typeof setInterval> | null>(null);
-  const videoRef         = useRef<HTMLVideoElement>(null);
-  const fileInputRef     = useRef<HTMLInputElement>(null);
-  const bgFileRef        = useRef<HTMLInputElement>(null);
-
-  useEffect(() => () => {
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    if (timerRef.current) clearInterval(timerRef.current);
-  }, []);
-
-  const fmt = (s: number) =>
-    `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
-
-  const startRecording = async () => {
-    setPermError(null);
-    chunksRef.current = [];
-    try {
-      const constraints: MediaStreamConstraints = {
-        audio: true,
-        video: privacyMode === "face" ? { facingMode: "user" } : false,
-      };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      streamRef.current = stream;
-      if (privacyMode === "face" && videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play().catch(() => {});
-      }
-      const mimeType = MediaRecorder.isTypeSupported("video/webm") ? "video/webm" : "";
-      const mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
-      mediaRecorderRef.current = mr;
-      mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-      mr.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "video/webm" });
-        setRecordedUrl(URL.createObjectURL(blob));
-        if (videoRef.current) videoRef.current.srcObject = null;
-      };
-      mr.start(250);
-      setRecording(true);
-      setRecordingTime(0);
-      timerRef.current = setInterval(() => setRecordingTime((t) => t + 1), 1000);
-    } catch {
-      setPermError(
-        `Could not access your ${privacyMode === "face" ? "camera and microphone" : "microphone"}. Please check your browser permissions and try again.`
-      );
-    }
-  };
-
-  const stopRecording = () => {
-    mediaRecorderRef.current?.stop();
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    if (timerRef.current) clearInterval(timerRef.current);
-    setRecording(false);
-  };
-
-  const discardRecording = () => {
-    if (recordedUrl) URL.revokeObjectURL(recordedUrl);
-    setRecordedUrl(null);
-    setRecordingTime(0);
-  };
-
-  const handleShare = () => {
-    const entry: JourneyEntry = {
-      id: `j-${Date.now()}`,
-      title: "My Healing Journey",
-      tags: [],
-      privacyMode,
-      duration: fmt(recordingTime),
-      daysAgo: 0,
-      accent: "from-teal-900 to-emerald-900",
-      isNew: true,
-    };
-    setJourneys((prev) => [entry, ...prev]);
-    discardRecording();
-    setView("browse");
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setRecordedUrl(URL.createObjectURL(file));
-    setView("record");
-  };
-
-  const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setBgImage(URL.createObjectURL(file));
-  };
-
-  /* ── Home ── */
-  if (view === "home") return (
-    <div className="p-4 space-y-5">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <Video className="h-5 w-5 text-teal-400" />
-          <h2 className="font-display text-lg font-bold text-foreground">Healing Journeys</h2>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Lock className="h-3 w-3 text-teal-400/70" />
-          <p className="text-xs text-teal-400/70">Visible only to logged-in Soul Echoes members</p>
-        </div>
-      </div>
-
-      <div className="rounded-2xl bg-gradient-to-br from-teal-500/10 to-violet-500/10 border border-teal-400/20 p-4 space-y-1.5">
-        <p className="text-sm text-foreground/90 leading-relaxed">
-          Share your healing story in your own words, at your own pace, in the way that feels safe.
-          Your testimony may be the thing that helps someone else take their first step.
-        </p>
-        <p className="text-xs text-muted-foreground">All journeys are reviewed before publishing. You choose how much to share.</p>
-      </div>
-
-      {/* Privacy level selector */}
-      <div className="space-y-2">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Choose your privacy level</p>
-        <div className="grid grid-cols-3 gap-2">
-          {PRIVACY_MODES.map((m) => (
-            <button
-              key={m.id}
-              onClick={() => setPrivacyMode(m.id as typeof privacyMode)}
-              className={`rounded-2xl border p-3 text-center space-y-1.5 transition-all ${
-                privacyMode === m.id
-                  ? "border-teal-400/50 bg-teal-500/10"
-                  : "border-white/10 bg-white/[0.03] hover:border-teal-400/20"
-              }`}
-            >
-              <span className="text-2xl">{m.icon}</span>
-              <p className="text-xs font-semibold text-foreground">{m.label}</p>
-              <p className="text-[10px] text-muted-foreground leading-tight">{m.desc}</p>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Action buttons */}
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          onClick={() => setView("record")}
-          className="flex flex-col items-center gap-2.5 p-5 rounded-2xl border-2 border-teal-400/40 bg-teal-500/10 hover:bg-teal-500/20 transition-all"
-        >
-          <div className="w-14 h-14 rounded-full bg-teal-500/20 border-2 border-teal-400/40 flex items-center justify-center shadow-[0_0_20px_rgba(45,212,191,0.3)]">
-            <Mic className="h-7 w-7 text-teal-300" />
-          </div>
-          <div className="text-center">
-            <p className="text-sm font-bold text-teal-300">Record Your Journey</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Share your healing story</p>
-          </div>
-        </button>
-
-        <button
-          onClick={() => setView("browse")}
-          className="flex flex-col items-center gap-2.5 p-5 rounded-2xl border-2 border-violet-400/40 bg-violet-500/10 hover:bg-violet-500/20 transition-all"
-        >
-          <div className="w-14 h-14 rounded-full bg-violet-500/20 border-2 border-violet-400/40 flex items-center justify-center shadow-[0_0_20px_rgba(167,139,250,0.3)]">
-            <Play className="h-7 w-7 text-violet-300 fill-violet-300" />
-          </div>
-          <div className="text-center">
-            <p className="text-sm font-bold text-violet-300">Browse Journeys</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Watch others' stories</p>
-          </div>
-        </button>
-      </div>
-
-      {/* Upload existing recording */}
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 flex items-center justify-between">
-        <div>
-          <p className="text-xs font-semibold text-foreground/80">Already have a recording?</p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">Upload a video or audio file</p>
-        </div>
-        <input ref={fileInputRef} type="file" accept="video/*,audio/*" className="hidden" onChange={handleFileUpload} />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-teal-400/30 bg-teal-500/10 text-xs font-medium text-teal-300 hover:bg-teal-500/20 transition-all"
-        >
-          <Upload className="h-3.5 w-3.5" /> Upload
-        </button>
-      </div>
-    </div>
-  );
-
-  /* ── Record ── */
-  if (view === "record") return (
-    <div className="p-4 space-y-5">
-      <button
-        onClick={() => { stopRecording(); discardRecording(); setView("home"); }}
-        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-      >
-        ← Back
-      </button>
-
-      <div>
-        <h2 className="font-display text-lg font-bold text-foreground">Record Your Journey</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">Your recording is private until you choose to share it.</p>
-      </div>
-
-      {/* Privacy mode tabs */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-        {PRIVACY_MODES.map((m) => (
-          <button
-            key={m.id}
-            disabled={recording}
-            onClick={() => { discardRecording(); setPrivacyMode(m.id as typeof privacyMode); }}
-            className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs transition-all disabled:opacity-50 ${
-              privacyMode === m.id
-                ? "bg-teal-500/20 border-teal-400/50 text-teal-300"
-                : "bg-white/[0.03] border-white/10 text-muted-foreground hover:border-teal-400/20"
-            }`}
-          >
-            {m.icon} {m.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Background image picker */}
-      {privacyMode === "background" && !recording && (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
-          <p className="text-xs text-muted-foreground">Choose a background image shown while you speak</p>
-          <input ref={bgFileRef} type="file" accept="image/*" className="hidden" onChange={handleBgUpload} />
-          {bgImage ? (
-            <div className="relative">
-              <img src={bgImage} alt="Background" className="w-full h-28 object-cover rounded-xl" />
-              <button
-                onClick={() => setBgImage(null)}
-                className="absolute top-1.5 right-1.5 bg-black/60 rounded-full w-6 h-6 flex items-center justify-center text-white text-xs"
-              >✕</button>
-            </div>
-          ) : (
-            <button
-              onClick={() => bgFileRef.current?.click()}
-              className="flex items-center gap-1.5 text-sm text-teal-300 hover:text-teal-200 transition-colors"
-            >
-              <ImageIcon className="h-4 w-4" /> Upload background image
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Preview area */}
-      {privacyMode === "face" ? (
-        <div className="rounded-2xl overflow-hidden bg-black/50 border border-white/10 aspect-video flex items-center justify-center">
-          {recording ? (
-            <video ref={videoRef} muted playsInline className="w-full h-full object-cover" />
-          ) : recordedUrl ? (
-            <video src={recordedUrl} controls className="w-full h-full object-cover" />
-          ) : (
-            <div className="flex flex-col items-center gap-2 text-muted-foreground">
-              <Camera className="h-10 w-10 opacity-40" />
-              <p className="text-xs opacity-60">Camera activates when you start</p>
-            </div>
-          )}
-        </div>
-      ) : privacyMode === "voice" && !recordedUrl ? (
-        <div className="rounded-2xl bg-gradient-to-br from-teal-900/50 to-violet-900/50 border border-white/10 aspect-video flex items-center justify-center">
-          {recording ? (
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-20 h-20 rounded-full bg-teal-500/20 border-2 border-teal-400/60 flex items-center justify-center animate-pulse">
-                <Mic className="h-10 w-10 text-teal-300" />
-              </div>
-              <p className="text-sm text-teal-300 font-medium tracking-wide">Recording…</p>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-2 text-muted-foreground">
-              <Mic className="h-10 w-10 opacity-40" />
-              <p className="text-xs opacity-60">Audio only — no video will be recorded</p>
-            </div>
-          )}
-        </div>
-      ) : privacyMode === "background" && !recordedUrl ? (
-        <div
-          className="rounded-2xl overflow-hidden border border-white/10 aspect-video flex items-center justify-center relative"
-          style={bgImage ? { backgroundImage: `url(${bgImage})`, backgroundSize: "cover", backgroundPosition: "center" } : {}}
-        >
-          {!bgImage && <div className="absolute inset-0 bg-gradient-to-br from-violet-900/60 to-teal-900/60 rounded-2xl" />}
-          <div className="relative z-10 flex flex-col items-center gap-3">
-            {recording ? (
-              <div className="w-16 h-16 rounded-full bg-black/50 border-2 border-teal-400/60 flex items-center justify-center animate-pulse">
-                <Mic className="h-8 w-8 text-teal-300" />
-              </div>
-            ) : (
-              <>
-                <div className="w-14 h-14 rounded-full bg-black/40 flex items-center justify-center border border-white/20">
-                  <Mic className="h-7 w-7 text-white/60" />
-                </div>
-                <p className="text-xs text-white/60 bg-black/30 px-3 py-1 rounded-full">Your voice over your chosen image</p>
-              </>
-            )}
-          </div>
-        </div>
-      ) : null}
-
-      {/* Audio playback for non-face modes */}
-      {recordedUrl && privacyMode !== "face" && (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 space-y-1.5">
-          <p className="text-xs text-muted-foreground">Review your recording</p>
-          <audio src={recordedUrl} controls className="w-full" />
-        </div>
-      )}
-
-      {/* Permission error */}
-      {permError && (
-        <div className="rounded-xl border border-red-400/30 bg-red-500/10 p-3 text-xs text-red-300 leading-relaxed">
-          {permError}
-        </div>
-      )}
-
-      {/* Record / Stop / Share controls */}
-      {!recordedUrl ? (
-        <div className="flex flex-col items-center gap-4 pt-2">
-          {recording && (
-            <div className="flex items-center gap-2 font-mono text-xl font-bold text-red-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse" />
-              {fmt(recordingTime)}
-            </div>
-          )}
-          <button
-            onClick={recording ? stopRecording : startRecording}
-            className={`w-24 h-24 rounded-full border-4 flex items-center justify-center transition-all ${
-              recording
-                ? "border-red-400 bg-red-500/20 hover:bg-red-500/30 shadow-[0_0_24px_rgba(239,68,68,0.35)]"
-                : "border-teal-400 bg-teal-500/20 hover:bg-teal-500/30 shadow-[0_0_24px_rgba(45,212,191,0.35)]"
-            }`}
-            aria-label={recording ? "Stop recording" : "Start recording"}
-          >
-            {recording
-              ? <Square className="h-9 w-9 text-red-400 fill-red-400" />
-              : <Mic className="h-9 w-9 text-teal-300" />}
-          </button>
-          <p className="text-xs text-muted-foreground">{recording ? "Tap to stop" : "Tap to start recording"}</p>
-        </div>
-      ) : (
-        <div className="space-y-2.5">
-          <Button
-            size="lg"
-            className="w-full rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0 font-semibold shadow-[0_0_20px_rgba(45,212,191,0.3)]"
-            onClick={handleShare}
-          >
-            Share Your Journey
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="w-full rounded-xl border-white/20 text-muted-foreground"
-            onClick={discardRecording}
-          >
-            Record Again
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-
-  /* ── Browse ── */
-  return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="font-display text-lg font-bold text-foreground">Community Journeys</h2>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <Lock className="h-3 w-3 text-teal-400/70" />
-            <p className="text-xs text-teal-400/70">Visible only to Soul Echoes members</p>
-          </div>
-        </div>
-        <button
-          onClick={() => setView("record")}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-teal-400/40 bg-teal-500/10 text-xs font-medium text-teal-300 hover:bg-teal-500/20 transition-all"
-        >
-          <Mic className="h-3 w-3" /> Record
-        </button>
-      </div>
-
-      <button onClick={() => setView("home")} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-        ← Back
-      </button>
-
-      <div className="space-y-3">
-        {journeys.map((j) => (
-          <motion.div key={j.id} layout className="rounded-2xl overflow-hidden border border-white/10">
-            <div className={`bg-gradient-to-br ${j.accent} px-4 py-4 flex items-center gap-3`}>
-              <div className="w-10 h-10 rounded-full bg-black/30 border border-white/20 flex items-center justify-center shrink-0">
-                {j.privacyMode === "face"
-                  ? <Camera className="h-5 w-5 text-white/70" />
-                  : j.privacyMode === "voice"
-                  ? <Mic className="h-5 w-5 text-white/70" />
-                  : <ImageIcon className="h-5 w-5 text-white/70" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">{j.title}</p>
-                <p className="text-[11px] text-white/50">
-                  {j.daysAgo === 0 ? "Just shared" : `${j.daysAgo}d ago`} · {j.duration}
-                  {j.isNew && <span className="ml-1.5 text-teal-300 font-medium">· New</span>}
-                </p>
-              </div>
-              <button
-                onClick={() => setPlayingId(playingId === j.id ? null : j.id)}
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-all shrink-0"
-                aria-label={playingId === j.id ? "Stop" : "Play"}
-              >
-                {playingId === j.id
-                  ? <Square className="h-4 w-4 text-white fill-white" />
-                  : <Play className="h-4 w-4 text-white fill-white" />}
-              </button>
-            </div>
-
-            {j.tags.length > 0 && (
-              <div className="px-4 py-2 flex flex-wrap gap-1.5 bg-white/[0.02]">
-                {j.tags.map((tag) => (
-                  <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-foreground/60">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {playingId === j.id && (
-              <div className="px-4 py-2.5 bg-black/20 border-t border-white/[0.05] flex items-center gap-2.5">
-                <div className="flex gap-0.5 items-end h-4">
-                  {[40, 70, 50, 90, 60, 45, 80].map((h, i) => (
-                    <div
-                      key={i}
-                      className="w-0.5 bg-teal-400 rounded-full animate-pulse"
-                      style={{ height: `${h}%`, animationDelay: `${i * 0.08}s` }}
-                    />
-                  ))}
-                </div>
-                <p className="text-xs text-teal-300 italic">Playing journey…</p>
-              </div>
-            )}
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* ─── Main Page ──────────────────────────────────────────────────────────── */
 export default function PortalRoom() {
   const [activeSection, setActiveSection] = useState<SectionId>("products");
@@ -1151,6 +678,13 @@ export default function PortalRoom() {
             </motion.div>
           )}
 
+          {/* ════ HEALING JOURNEYS ════ */}
+          {activeSection === "journeys" && (
+            <motion.div key="journeys" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
+              <HealingJourneys onBack={() => setActiveSection("practitioners")} />
+            </motion.div>
+          )}
+
           {/* ════ BOOK A SESSION ════ */}
           {activeSection === "book" && (
             <motion.div key="book" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-5">
@@ -1274,13 +808,6 @@ export default function PortalRoom() {
                   ))}
                 </div>
               )}
-            </motion.div>
-          )}
-
-          {/* ════ HEALING JOURNEYS ════ */}
-          {activeSection === "journeys" && (
-            <motion.div key="journeys" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <HealingJourneys />
             </motion.div>
           )}
 
