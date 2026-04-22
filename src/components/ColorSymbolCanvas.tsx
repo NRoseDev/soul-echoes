@@ -40,6 +40,7 @@ const FEELINGS = [
   { name: "Curious", color: "#06AED5", desc: "wondering, open" },
   { name: "Inspired", color: "#7B2CBF", desc: "moved, lit up" },
   { name: "Healing", color: "#2A9D8F", desc: "growing, mending" },
+  { name: "I don't know", color: "#6C757D", desc: "help me find it" },
 ];
 
 const COLORS = [
