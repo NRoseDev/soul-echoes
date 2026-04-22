@@ -82,6 +82,11 @@ const EXERCISE_SUGGESTION: Record<string, { text: string; path: string; buttonLa
     path: "/breathe/meditation",
     buttonLabel: "Start Body Scan",
   },
+  loneliness: {
+    text: "Heart Coherence Breathing in the Breathe room can soften the ache of loneliness and remind your body that connection lives within you too.",
+    path: "/breathe/breathwork",
+    buttonLabel: "Start Heart Coherence",
+  },
   anger: {
     text: "Box Breathing for 4 minutes in the Breathe room can interrupt the tension anger builds in your body and give your nervous system relief.",
     path: "/breathe/breathwork",
