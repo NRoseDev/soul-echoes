@@ -312,6 +312,27 @@ const WISDOM_QUOTES: Record<string, string[]> = {
   ],
 };
 
+/* ─── Clarifying follow-up questions per emotion ─── */
+
+const CLARIFYING_QUESTIONS: Record<string, { prompt: string; options: string[] }> = {
+  fear: {
+    prompt: "Before we go deeper — is your fear about something happening right now, something that might happen, or something from the past?",
+    options: [
+      "Something happening right now",
+      "Something that might happen",
+      "Something from the past",
+    ],
+  },
+  loneliness: {
+    prompt: "Before we go deeper — is your loneliness about missing someone specific, feeling unseen by those around you, or feeling disconnected from something greater?",
+    options: [
+      "Missing someone specific",
+      "Feeling unseen",
+      "Disconnected from something greater",
+    ],
+  },
+};
+
 type ResponseAnalysis = {
   reflection: string;
   emotion: string;
@@ -319,6 +340,7 @@ type ResponseAnalysis = {
   pathways: Pathway[];
   verses: string[];
   quotes: string[];
+  clarifying?: { prompt: string; options: string[] };
   distress?: boolean;
 };
 
@@ -347,6 +369,7 @@ function buildResponseAnalysis(text: string): ResponseAnalysis {
     pathways: HEALING_PATHWAYS[emotion] ?? HEALING_PATHWAYS.default,
     verses: BIBLE_VERSES[emotion] ?? BIBLE_VERSES.default,
     quotes: WISDOM_QUOTES[emotion] ?? WISDOM_QUOTES.default,
+    clarifying: CLARIFYING_QUESTIONS[emotion],
     distress: detectDistress(trimmed),
   };
 }
