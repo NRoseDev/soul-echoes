@@ -221,9 +221,14 @@ const BIBLE_VERSES: Record<string, string[]> = {
     "Ephesians 4:26 — In your anger do not sin. Do not let the sun go down while you are still angry.",
   ],
   fear: [
-    "Isaiah 41:10 — Do not fear, for I am with you; do not be dismayed, for I am your God.",
-    "Psalm 23:4 — Even though I walk through the darkest valley, I will fear no evil, for you are with me.",
+    "Isaiah 41:10 — Do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you.",
     "2 Timothy 1:7 — God gave us a spirit not of fear but of power, love, and self-control.",
+    "Psalm 23:4 — Even though I walk through the darkest valley, I will fear no evil, for you are with me.",
+  ],
+  loneliness: [
+    "Psalm 68:6 — God sets the lonely in families, he leads out the prisoners with singing.",
+    "Hebrews 13:5 — Never will I leave you; never will I forsake you.",
+    "Isaiah 43:2 — When you pass through the waters, I will be with you; and when you pass through the rivers, they will not sweep over you.",
   ],
   confusion: [
     "Proverbs 3:5-6 — Trust in the Lord with all your heart and lean not on your own understanding.",
