@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Loader2, Mic, MicOff, Volume2, VolumeX, ArrowRight } from "lucide-react";
+import { Send, Loader2, Mic, MicOff, Volume2, VolumeX, ArrowRight, ArrowLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -369,13 +369,30 @@ function stripMarkdown(text: string): string {
     .replace(/_{2}(.+?)_{2}/gs, "$1")
     .replace(/_(.+?)_/gs, "$1")
     .replace(/#{1,6}\s+/g, "")
+    .replace(/^>\s*/gm, "")
+    .replace(/^-{3,}$/gm, "")
     .replace(/\[(.+?)\]\(.+?\)/g, "$1")
     .replace(/`{3}[\s\S]*?`{3}/g, "")
     .replace(/`(.+?)`/g, "$1")
     .replace(/^\s*[-*+]\s+/gm, "")
     .replace(/^\s*\d+\.\s+/gm, "")
+    .replace(/\*/g, "")
+    .replace(/_/g, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+}
+
+function parseCardMessage(msg: string): { emoji: string; label: string; category: string } | null {
+  const header = msg.match(/\[Pointed to: (.+?)\]/);
+  const category = msg.match(/Category: (.+)/);
+  if (!header || !category) return null;
+  const spaceIdx = header[1].indexOf(" ");
+  if (spaceIdx === -1) return null;
+  return {
+    emoji: header[1].slice(0, spaceIdx),
+    label: header[1].slice(spaceIdx + 1),
+    category: category[1].trim(),
+  };
 }
 
 function buildResponseAnalysis(text: string): ResponseAnalysis {
@@ -412,6 +429,8 @@ export default function BrainDump() {
   const activeMethods = COMMUNICATION_METHODS.map((m) => m.id);
   const [activeTab, setActiveTab] = useState(activeMethods[0]);
   const [analysis, setAnalysis] = useState<ResponseAnalysis | null>(null);
+  const [showCardScreen, setShowCardScreen] = useState(false);
+  const [cardInfo, setCardInfo] = useState<{ emoji: string; label: string; category: string } | null>(null);
 
   const send = useCallback(async (text: string) => {
     const trimmed = text.trim();
@@ -420,7 +439,13 @@ export default function BrainDump() {
     const userMsg: ChatMessage = { role: "user", content: trimmed };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
-    setAnalysis(buildResponseAnalysis(trimmed));
+    const newAnalysis = buildResponseAnalysis(trimmed);
+    setAnalysis(newAnalysis);
+    const parsed = parseCardMessage(trimmed);
+    if (parsed) {
+      setCardInfo(parsed);
+      setShowCardScreen(true);
+    }
     setIsLoading(true);
 
     let assistantSoFar = "";
@@ -573,7 +598,7 @@ export default function BrainDump() {
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ background: "radial-gradient(ellipse at 30% 20%, hsl(270,80%,5%) 0%, hsl(270,60%,12%) 45%, hsl(270,30%,28%) 100%)" }}>
+    <div className="relative flex flex-col h-full" style={{ background: "radial-gradient(ellipse at 30% 20%, hsl(270,80%,5%) 0%, hsl(270,60%,12%) 45%, hsl(270,30%,28%) 100%)" }}>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-4" role="log" aria-label="Conversation" aria-live="polite">
         <AnimatePresence initial={false}>
           {messages.map((msg, i) => (
@@ -596,7 +621,7 @@ export default function BrainDump() {
           ))}
         </AnimatePresence>
 
-        {analysis && (
+        {analysis && !showCardScreen && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="rounded-3xl border border-white/10 bg-gradient-to-br from-purple-900 via-violet-800 to-sky-900 p-5 text-white shadow-xl space-y-5">
 
             {/* Reflection + emotion */}
@@ -772,6 +797,129 @@ export default function BrainDump() {
           renderInputMethod(activeMethods[0])
         )}
       </div>
+
+      {/* ── Full-screen card response overlay ── */}
+      <AnimatePresence>
+        {showCardScreen && analysis && (
+          <motion.div
+            key="card-screen"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 280 }}
+            className="absolute inset-0 z-40 flex flex-col overflow-hidden"
+            style={{ background: "radial-gradient(ellipse at 25% 15%, hsl(270,80%,6%) 0%, hsl(270,65%,13%) 50%, hsl(270,35%,22%) 100%)" }}
+          >
+            {/* Header */}
+            <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10 shrink-0">
+              <button
+                onClick={() => { setShowCardScreen(false); ttsStop(); }}
+                className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
+                aria-label="Back to Brain Dump"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Brain Dump
+              </button>
+            </div>
+
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+
+              {/* Feeling heading */}
+              {cardInfo && (
+                <div className="text-center pt-2 pb-4">
+                  <span className="text-6xl">{cardInfo.emoji}</span>
+                  <h2 className="text-2xl font-bold text-white mt-3">{cardInfo.label}</h2>
+                  <p className="text-xs text-purple-300/60 mt-1 uppercase tracking-widest">{cardInfo.category}</p>
+                </div>
+              )}
+
+              {/* AI response */}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-4 space-y-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-purple-300 font-semibold">Soul Echo</p>
+                {isLoading && messages[messages.length - 1]?.role !== "assistant" ? (
+                  <div className="flex items-center gap-2 text-white/50">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">Listening to your heart…</span>
+                  </div>
+                ) : (() => {
+                  const lastAi = [...messages].reverse().find((m) => m.role === "assistant" && m !== WELCOME_MESSAGE);
+                  return lastAi ? (
+                    <>
+                      <div className="prose prose-sm prose-invert max-w-none prose-p:my-1">
+                        <ReactMarkdown>{lastAi.content}</ReactMarkdown>
+                      </div>
+                      <button
+                        onClick={() => replayMessage(lastAi.content)}
+                        className="flex items-center gap-1 text-xs text-white/40 hover:text-white/70 transition-colors"
+                        aria-label="Replay this message"
+                      >
+                        <Volume2 className="h-3 w-3" /> Replay
+                      </button>
+                    </>
+                  ) : null;
+                })()}
+              </div>
+
+              {/* Bible verses */}
+              <div className="space-y-2.5">
+                <p className="text-xs uppercase tracking-[0.18em] text-purple-300 font-semibold">Scripture</p>
+                {analysis.verses.map((verse) => (
+                  <div key={verse} className="rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3.5 text-sm text-white/90 leading-relaxed">
+                    {verse}
+                  </div>
+                ))}
+              </div>
+
+              {/* Wisdom quotes */}
+              <div className="space-y-2.5">
+                <p className="text-xs uppercase tracking-[0.18em] text-purple-300 font-semibold">Wisdom</p>
+                {analysis.quotes.map((quote) => (
+                  <div key={quote} className="rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3.5 text-sm text-white/75 leading-relaxed italic">
+                    {quote}
+                  </div>
+                ))}
+              </div>
+
+              {/* Healing pathways */}
+              <div className="space-y-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-purple-300 font-semibold">Your Healing Paths</p>
+                <p className="text-sm text-white/50 -mt-1">Choose the path that calls to you.</p>
+                <div className="space-y-2.5">
+                  {analysis.pathways.map((p) => (
+                    <div key={p.room} className="rounded-2xl border border-white/15 bg-white/[0.05] overflow-hidden">
+                      <div className="flex items-start gap-3 px-4 pt-3.5 pb-2.5">
+                        <span className="text-2xl shrink-0 mt-0.5">{p.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-white">{p.room}</p>
+                          <p className="text-xs text-purple-300 font-medium mt-0.5">{p.exercise}</p>
+                          <p className="text-xs text-white/55 mt-1 leading-relaxed">{p.why}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => { setShowCardScreen(false); navigate(p.path); }}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white/[0.07] hover:bg-white/[0.15] border-t border-white/10 text-sm font-semibold text-white transition-all"
+                      >
+                        Open {p.room} <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Distress warning */}
+              {analysis.distress && (
+                <div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-100">
+                  <p className="font-semibold mb-1">If you are in crisis</p>
+                  <p>Please reach out for immediate support. If you are feeling unsafe, call your local emergency number or your nearest crisis hotline right now.</p>
+                </div>
+              )}
+
+              <div className="h-6" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
