@@ -4,10 +4,11 @@ import {
   BookOpen, Gem, Droplet, Volume2, Headphones, Users, Star, Bookmark,
   BookmarkCheck, Bell, BellOff, ChevronDown, ChevronUp, Heart, Check,
   CreditCard, Sliders, Gift, Globe2, ArrowRight, ShieldCheck, Zap,
-  Wind, Sun, Flame, Music2,
+  Wind, Sun, Flame, Music2, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import HealingJourneys from "@/components/HealingJourneys";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 interface Product {
@@ -278,6 +279,7 @@ const PAYMENT_METHODS = [
 const SECTION_TABS = [
   { id: "products",       label: "Healing Products",     icon: Gem        },
   { id: "practitioners",  label: "Find a Practitioner",  icon: Users      },
+  { id: "journeys",       label: "Healing Journeys",     icon: Sparkles   },
   { id: "book",           label: "Book a Session",       icon: Star       },
   { id: "saved",          label: "Wait & Save",          icon: Bookmark   },
 ] as const;
