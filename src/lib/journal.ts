@@ -245,7 +245,7 @@ export async function saveJournalEntry(sectionId: JournalSectionKey, data: Journ
     return localEntry;
   }
 
-  const { data: savedEntry, error } = await supabase
+  const { data: savedEntry, error } = await (supabase as any)
     .from("journal_entries")
     .upsert(
       {
@@ -255,7 +255,7 @@ export async function saveJournalEntry(sectionId: JournalSectionKey, data: Journ
         created_at: localEntry.created_at,
         updated_at: now,
       },
-      { onConflict: ["user_id", "section"] }
+      { onConflict: "user_id,section" }
     )
     .select("id,section,data,created_at,updated_at")
     .single();
