@@ -317,6 +317,22 @@ function detectDistress(text: string) {
   return DISTRESS_TERMS.some((term) => lower.includes(term));
 }
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/gs, "$1")
+    .replace(/\*(.+?)\*/gs, "$1")
+    .replace(/_{2}(.+?)_{2}/gs, "$1")
+    .replace(/_(.+?)_/gs, "$1")
+    .replace(/#{1,6}\s+/g, "")
+    .replace(/\[(.+?)\]\(.+?\)/g, "$1")
+    .replace(/`{3}[\s\S]*?`{3}/g, "")
+    .replace(/`(.+?)`/g, "$1")
+    .replace(/^\s*[-*+]\s+/gm, "")
+    .replace(/^\s*\d+\.\s+/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function buildResponseAnalysis(text: string): ResponseAnalysis {
   const trimmed = text.trim();
   const short = trimmed.length > 180 ? `${trimmed.slice(0, 180)}…` : trimmed;
@@ -339,7 +355,6 @@ export default function BrainDump() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [userMessageCount, setUserMessageCount] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const listenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -351,7 +366,6 @@ export default function BrainDump() {
   const activeMethods = COMMUNICATION_METHODS.map((m) => m.id);
   const [activeTab, setActiveTab] = useState(activeMethods[0]);
   const [analysis, setAnalysis] = useState<ResponseAnalysis | null>(null);
-  const [showPathways, setShowPathways] = useState(false);
 
   const send = useCallback(async (text: string) => {
     const trimmed = text.trim();
@@ -361,11 +375,6 @@ export default function BrainDump() {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setAnalysis(buildResponseAnalysis(trimmed));
-    setUserMessageCount((prev) => {
-      const next = prev + 1;
-      if (next >= 2) setShowPathways(true);
-      return next;
-    });
     setIsLoading(true);
 
     let assistantSoFar = "";
@@ -386,7 +395,7 @@ export default function BrainDump() {
       onDelta: upsertAssistant,
       onDone: () => {
         setIsLoading(false);
-        if (autoRead) ttsSpeak(assistantSoFar);
+        if (autoRead) ttsSpeak(stripMarkdown(assistantSoFar));
       },
       onError: (err) => {
         setIsLoading(false);
@@ -434,7 +443,7 @@ export default function BrainDump() {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); }
   };
 
-  const replayMessage = (text: string) => { ttsStop(); ttsSpeak(text); };
+  const replayMessage = (text: string) => { ttsStop(); ttsSpeak(stripMarkdown(text)); };
 
   function renderInputMethod(method: string) {
     switch (method) {
@@ -602,36 +611,32 @@ export default function BrainDump() {
               ))}
             </div>
 
-            {/* Healing pathways — shown after follow-up response */}
-            <AnimatePresence>
-              {showPathways && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="space-y-3">
-                  <div className="border-t border-white/15 pt-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-purple-300 font-semibold mb-1">Choose your healing path</p>
-                    <p className="text-sm text-white/60 mb-3">Each path below connects to what you are carrying. Choose what calls to you.</p>
+            {/* Healing pathways — always visible */}
+            <div className="space-y-3">
+              <div className="border-t border-white/15 pt-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-purple-300 font-semibold mb-1">Choose your healing path</p>
+                <p className="text-sm text-white/60 mb-3">Each path connects to what you are carrying. Choose what calls to you.</p>
+              </div>
+              <div className="space-y-2.5">
+                {analysis.pathways.map((p) => (
+                  <div key={p.room} className="rounded-2xl border border-white/15 bg-white/[0.06] overflow-hidden">
+                    <div className="flex items-start gap-3 px-4 pt-3.5 pb-2.5">
+                      <span className="text-2xl shrink-0 mt-0.5">{p.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-white">{p.room} <span className="text-purple-300 font-medium text-xs">— {p.exercise}</span></p>
+                        <p className="text-xs text-white/60 mt-1 leading-relaxed">{p.why}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => navigate(p.path)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white/[0.08] hover:bg-white/[0.16] border-t border-white/10 text-sm font-semibold text-white transition-all"
+                    >
+                      Open {p.room} <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
                   </div>
-                  <div className="space-y-2">
-                    {analysis.pathways.map((p) => (
-                      <button
-                        key={p.room}
-                        onClick={() => navigate(p.path)}
-                        className="w-full flex items-start gap-3 rounded-2xl border border-white/15 bg-white/8 hover:bg-white/15 px-4 py-3.5 text-left transition-all group"
-                      >
-                        <span className="text-2xl shrink-0 mt-0.5">{p.emoji}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-bold text-white">{p.room}</p>
-                            <span className="text-xs text-purple-300 font-medium">— {p.exercise}</span>
-                          </div>
-                          <p className="text-xs text-white/60 mt-0.5 leading-relaxed">{p.why}</p>
-                        </div>
-                        <ArrowRight className="h-4 w-4 text-white/30 group-hover:text-white/70 transition-colors shrink-0 mt-1" />
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                ))}
+              </div>
+            </div>
 
             {/* Distress warning */}
             {analysis.distress && (
