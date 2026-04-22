@@ -40,6 +40,7 @@ const FEELINGS = [
   { name: "Curious", color: "#06AED5", desc: "wondering, open" },
   { name: "Inspired", color: "#7B2CBF", desc: "moved, lit up" },
   { name: "Healing", color: "#2A9D8F", desc: "growing, mending" },
+  { name: "I don't know", color: "#6C757D", desc: "help me find it" },
 ];
 
 const COLORS = [
@@ -119,7 +120,11 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
 
     let message = "[Expressed without typing]\n";
     if (selectedFeelings.length > 0) {
-      message += `Feelings: ${selectedFeelings.map((f) => f.name.toLowerCase()).join(", ")}\n`;
+      const names = selectedFeelings.map((f) => f.name.toLowerCase());
+      message += `Feelings: ${names.join(", ")}\n`;
+      if (names.includes("i don't know")) {
+        message += `(They can't name it yet — gently guide them to uncover the true emotion underneath and explore the root.)\n`;
+      }
     }
     if (selectedColors.length > 0) {
       message += `Colors chosen: ${selectedColors
