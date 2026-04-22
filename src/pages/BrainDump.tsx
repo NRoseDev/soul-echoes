@@ -599,6 +599,25 @@ export default function BrainDump() {
               </p>
             </div>
 
+            {/* Clarifying follow-up question (fear, loneliness) */}
+            {analysis.clarifying && (
+              <div className="rounded-2xl bg-white/10 border border-white/15 p-4 space-y-3">
+                <p className="text-sm text-purple-100 leading-relaxed">{analysis.clarifying.prompt}</p>
+                <div className="flex flex-wrap gap-2">
+                  {analysis.clarifying.options.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => send(opt)}
+                      className="px-4 py-2 rounded-xl bg-purple-500/25 border border-purple-400/40 text-purple-100 hover:bg-purple-500/40 transition-all text-sm font-medium"
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Specific exercise suggestion */}
             <div className="rounded-2xl bg-white/10 border border-white/15 p-4 space-y-3">
               <p className="text-sm text-purple-100 leading-relaxed">{analysis.exerciseSuggestion.text}</p>
