@@ -120,7 +120,11 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
 
     let message = "[Expressed without typing]\n";
     if (selectedFeelings.length > 0) {
-      message += `Feelings: ${selectedFeelings.map((f) => f.name.toLowerCase()).join(", ")}\n`;
+      const names = selectedFeelings.map((f) => f.name.toLowerCase());
+      message += `Feelings: ${names.join(", ")}\n`;
+      if (names.includes("i don't know")) {
+        message += `(They can't name it yet — gently guide them to uncover the true emotion underneath and explore the root.)\n`;
+      }
     }
     if (selectedColors.length > 0) {
       message += `Colors chosen: ${selectedColors
