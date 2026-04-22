@@ -60,9 +60,10 @@ const DISTRESS_TERMS = [
 const EMOTION_KEYWORDS: [string[], string][] = [
   [["pain", "hurting", "hurt", "aching", "suffering", "agony", "sore", "in pain", "physical pain", "emotional pain", "body pain"], "pain"],
   [["overwhelmed", "overwhelm", "stuck", "lost", "confused"], "confusion"],
-  [["sad", "sadness", "lonely", "alone", "grief", "grieving", "heartbroken"], "sadness"],
+  [["lonely", "loneliness", "alone", "isolated", "no one", "nobody", "abandoned", "left out", "unseen", "invisible"], "loneliness"],
+  [["sad", "sadness", "grief", "grieving", "heartbroken"], "sadness"],
   [["angry", "anger", "rage", "frustrated", "annoyed", "resent", "betrayed", "jealous"], "anger"],
-  [["afraid", "fear", "scared", "panic", "terrified", "anxious", "anxiety"], "fear"],
+  [["afraid", "fear", "scared", "panic", "terrified", "anxious", "anxiety", "fearful", "frightened"], "fear"],
   [["guilty", "guilt", "shame", "ashamed"], "shame"],
   [["relieved", "relief", "calmer", "peaceful", "lighter"], "peace"],
   [["happy", "joy", "grateful", "hopeful", "content"], "joy"],
@@ -80,6 +81,11 @@ const EXERCISE_SUGGESTION: Record<string, { text: string; path: string; buttonLa
     text: "Body Scan Meditation in the Breathe room can locate where sadness sits in your body and give it permission to move.",
     path: "/breathe/meditation",
     buttonLabel: "Start Body Scan",
+  },
+  loneliness: {
+    text: "Heart Coherence Breathing in the Breathe room can soften the ache of loneliness and remind your body that connection lives within you too.",
+    path: "/breathe/breathwork",
+    buttonLabel: "Start Heart Coherence",
   },
   anger: {
     text: "Box Breathing for 4 minutes in the Breathe room can interrupt the tension anger builds in your body and give your nervous system relief.",
@@ -151,11 +157,18 @@ const HEALING_PATHWAYS: Record<string, Pathway[]> = {
     { room: "Unspoken", emoji: "🤫", path: "/unspoken", exercise: "Healing Conversation", why: "Sometimes anger just needs to be witnessed without judgment. The Unspoken chamber holds that space." },
   ],
   fear: [
-    { room: "Breathe", emoji: "🌬️", path: "/breathe/breathwork", exercise: "4-7-8 Breathing", why: "4-7-8 breathing activates your parasympathetic system and tells your body it is safe." },
-    { room: "Wisdom", emoji: "📖", path: "/wisdom", exercise: "Grounding Reflection", why: "Fear expands in silence. Grounding wisdom reminds you of what is true and still standing." },
-    { room: "Shadow Work", emoji: "🌑", path: "/shadow-work", exercise: "Fear Root Exploration", why: "Most fear has a root. Shadow work can help you trace it back and release its grip." },
-    { room: "Journal", emoji: "📓", path: "/journal", exercise: "Fear Write", why: "Writing your fears out of your head and onto the page shrinks them to something you can face." },
-    { room: "Portal", emoji: "🌀", path: "/shop", exercise: "Connect to a Healer", why: "If fear is persistent or overwhelming, a healer can walk through it with you safely." },
+    { room: "Breathe", emoji: "🌬️", path: "/breathe/breathwork", exercise: "Vagus Nerve Activation", why: "Vagus nerve activation through breath signals safety to your body and calms the fight-or-flight response." },
+    { room: "Shadow Work", emoji: "🌑", path: "/shadow-work", exercise: "Explore the Root", why: "Most fear has a root. Shadow work can help you trace it back and release its grip." },
+    { room: "Unspoken", emoji: "🤫", path: "/unspoken", exercise: "Give Fear a Voice", why: "Fear loses power when it is named and witnessed. Speak what scares you in a safe space." },
+    { room: "Spiritual Tools", emoji: "✨", path: "/spiritual-tools", exercise: "Protection Prayer", why: "A protection prayer wraps you in spiritual safety and reminds you that you are not alone." },
+    { room: "Portal", emoji: "🌀", path: "/shop", exercise: "Trauma-Informed Healer", why: "If fear is persistent or rooted in trauma, a trauma-informed healer can walk through it with you safely." },
+  ],
+  loneliness: [
+    { room: "Brain Dump", emoji: "💭", path: "/brain-dump", exercise: "Speak What Feels Unseen", why: "Sometimes the first step out of loneliness is letting the unseen parts of you be heard." },
+    { room: "Unspoken", emoji: "🤫", path: "/unspoken", exercise: "Healing Conversation", why: "A healing conversation can fill the silence with understanding and reconnect you to feeling known." },
+    { room: "Journal", emoji: "📓", path: "/journal", exercise: "Write with Self-Love", why: "Writing to yourself with the tenderness of a dear friend reminds you that you are never truly alone with you." },
+    { room: "Spiritual Tools", emoji: "✨", path: "/spiritual-tools", exercise: "Prayer & Angels", why: "Prayer and connection to angels open you to the unseen presence that has always surrounded you." },
+    { room: "Portal", emoji: "🌀", path: "/shop", exercise: "Intercessor Connection", why: "An intercessor can hold space and pray with you, offering the human and spiritual connection your soul is seeking." },
   ],
   confusion: [
     { room: "Wisdom", emoji: "📖", path: "/wisdom", exercise: "Guided Reflection", why: "Wisdom offers clarity when your mind cannot find the thread on its own." },
@@ -213,9 +226,14 @@ const BIBLE_VERSES: Record<string, string[]> = {
     "Ephesians 4:26 — In your anger do not sin. Do not let the sun go down while you are still angry.",
   ],
   fear: [
-    "Isaiah 41:10 — Do not fear, for I am with you; do not be dismayed, for I am your God.",
-    "Psalm 23:4 — Even though I walk through the darkest valley, I will fear no evil, for you are with me.",
+    "Isaiah 41:10 — Do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you.",
     "2 Timothy 1:7 — God gave us a spirit not of fear but of power, love, and self-control.",
+    "Psalm 23:4 — Even though I walk through the darkest valley, I will fear no evil, for you are with me.",
+  ],
+  loneliness: [
+    "Psalm 68:6 — God sets the lonely in families, he leads out the prisoners with singing.",
+    "Hebrews 13:5 — Never will I leave you; never will I forsake you.",
+    "Isaiah 43:2 — When you pass through the waters, I will be with you; and when you pass through the rivers, they will not sweep over you.",
   ],
   confusion: [
     "Proverbs 3:5-6 — Trust in the Lord with all your heart and lean not on your own understanding.",
@@ -257,6 +275,11 @@ const WISDOM_QUOTES: Record<string, string[]> = {
     "Sorrow is a teacher; listen to it deeply. — Anonymous",
     "Emotions are not problems to be solved. They are signals to be heard. — Aisha Tyler",
   ],
+  loneliness: [
+    "Loneliness is the human condition. No one is ever going to fill that space. The best you can do is know somebody who understands it. — Janet Fitch",
+    "What a lovely surprise to finally discover how unlonely being alone can be. — Ellen Burstyn",
+    "We are most alive when we are in love, and most awake when we are seen. — Anonymous",
+  ],
   anger: [
     "Anger is a wind which blows out the lamp of the mind. — Robert Green Ingersoll",
     "Speak when you are angry and you will make the best speech you will ever regret. — Ambrose Bierce",
@@ -294,6 +317,27 @@ const WISDOM_QUOTES: Record<string, string[]> = {
   ],
 };
 
+/* ─── Clarifying follow-up questions per emotion ─── */
+
+const CLARIFYING_QUESTIONS: Record<string, { prompt: string; options: string[] }> = {
+  fear: {
+    prompt: "Before we go deeper — is your fear about something happening right now, something that might happen, or something from the past?",
+    options: [
+      "Something happening right now",
+      "Something that might happen",
+      "Something from the past",
+    ],
+  },
+  loneliness: {
+    prompt: "Before we go deeper — is your loneliness about missing someone specific, feeling unseen by those around you, or feeling disconnected from something greater?",
+    options: [
+      "Missing someone specific",
+      "Feeling unseen",
+      "Disconnected from something greater",
+    ],
+  },
+};
+
 type ResponseAnalysis = {
   reflection: string;
   emotion: string;
@@ -301,6 +345,7 @@ type ResponseAnalysis = {
   pathways: Pathway[];
   verses: string[];
   quotes: string[];
+  clarifying?: { prompt: string; options: string[] };
   distress?: boolean;
 };
 
@@ -329,6 +374,7 @@ function buildResponseAnalysis(text: string): ResponseAnalysis {
     pathways: HEALING_PATHWAYS[emotion] ?? HEALING_PATHWAYS.default,
     verses: BIBLE_VERSES[emotion] ?? BIBLE_VERSES.default,
     quotes: WISDOM_QUOTES[emotion] ?? WISDOM_QUOTES.default,
+    clarifying: CLARIFYING_QUESTIONS[emotion],
     distress: detectDistress(trimmed),
   };
 }
@@ -552,6 +598,25 @@ export default function BrainDump() {
                 <span className="font-semibold">Core feeling detected:</span> {analysis.emotion}
               </p>
             </div>
+
+            {/* Clarifying follow-up question (fear, loneliness) */}
+            {analysis.clarifying && (
+              <div className="rounded-2xl bg-white/10 border border-white/15 p-4 space-y-3">
+                <p className="text-sm text-purple-100 leading-relaxed">{analysis.clarifying.prompt}</p>
+                <div className="flex flex-wrap gap-2">
+                  {analysis.clarifying.options.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => send(opt)}
+                      className="px-4 py-2 rounded-xl bg-purple-500/25 border border-purple-400/40 text-purple-100 hover:bg-purple-500/40 transition-all text-sm font-medium"
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Specific exercise suggestion */}
             <div className="rounded-2xl bg-white/10 border border-white/15 p-4 space-y-3">
