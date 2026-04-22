@@ -160,6 +160,7 @@ type SectionKey =
   | "connect-healer";
 
 function SectionContent({ id }: { id: SectionKey }) {
+  const navigate = useNavigate();
   switch (id) {
     case "healing-conversations":
       return (
