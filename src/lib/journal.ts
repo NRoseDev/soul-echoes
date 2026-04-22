@@ -206,7 +206,7 @@ export async function loadJournalEntry(sectionId: JournalSectionKey): Promise<Jo
     return localEntry ?? createEmptyJournalEntry(sectionId);
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("journal_entries")
     .select("id,section,data,created_at,updated_at")
     .eq("user_id", user.id)
