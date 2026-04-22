@@ -60,9 +60,10 @@ const DISTRESS_TERMS = [
 const EMOTION_KEYWORDS: [string[], string][] = [
   [["pain", "hurting", "hurt", "aching", "suffering", "agony", "sore", "in pain", "physical pain", "emotional pain", "body pain"], "pain"],
   [["overwhelmed", "overwhelm", "stuck", "lost", "confused"], "confusion"],
-  [["sad", "sadness", "lonely", "alone", "grief", "grieving", "heartbroken"], "sadness"],
+  [["lonely", "loneliness", "alone", "isolated", "no one", "nobody", "abandoned", "left out", "unseen", "invisible"], "loneliness"],
+  [["sad", "sadness", "grief", "grieving", "heartbroken"], "sadness"],
   [["angry", "anger", "rage", "frustrated", "annoyed", "resent", "betrayed", "jealous"], "anger"],
-  [["afraid", "fear", "scared", "panic", "terrified", "anxious", "anxiety"], "fear"],
+  [["afraid", "fear", "scared", "panic", "terrified", "anxious", "anxiety", "fearful", "frightened"], "fear"],
   [["guilty", "guilt", "shame", "ashamed"], "shame"],
   [["relieved", "relief", "calmer", "peaceful", "lighter"], "peace"],
   [["happy", "joy", "grateful", "hopeful", "content"], "joy"],
