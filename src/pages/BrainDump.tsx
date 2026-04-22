@@ -270,6 +270,11 @@ const WISDOM_QUOTES: Record<string, string[]> = {
     "Sorrow is a teacher; listen to it deeply. — Anonymous",
     "Emotions are not problems to be solved. They are signals to be heard. — Aisha Tyler",
   ],
+  loneliness: [
+    "Loneliness is the human condition. No one is ever going to fill that space. The best you can do is know somebody who understands it. — Janet Fitch",
+    "What a lovely surprise to finally discover how unlonely being alone can be. — Ellen Burstyn",
+    "We are most alive when we are in love, and most awake when we are seen. — Anonymous",
+  ],
   anger: [
     "Anger is a wind which blows out the lamp of the mind. — Robert Green Ingersoll",
     "Speak when you are angry and you will make the best speech you will ever regret. — Ambrose Bierce",
