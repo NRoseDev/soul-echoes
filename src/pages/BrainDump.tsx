@@ -152,11 +152,18 @@ const HEALING_PATHWAYS: Record<string, Pathway[]> = {
     { room: "Unspoken", emoji: "🤫", path: "/unspoken", exercise: "Healing Conversation", why: "Sometimes anger just needs to be witnessed without judgment. The Unspoken chamber holds that space." },
   ],
   fear: [
-    { room: "Breathe", emoji: "🌬️", path: "/breathe/breathwork", exercise: "4-7-8 Breathing", why: "4-7-8 breathing activates your parasympathetic system and tells your body it is safe." },
-    { room: "Wisdom", emoji: "📖", path: "/wisdom", exercise: "Grounding Reflection", why: "Fear expands in silence. Grounding wisdom reminds you of what is true and still standing." },
-    { room: "Shadow Work", emoji: "🌑", path: "/shadow-work", exercise: "Fear Root Exploration", why: "Most fear has a root. Shadow work can help you trace it back and release its grip." },
-    { room: "Journal", emoji: "📓", path: "/journal", exercise: "Fear Write", why: "Writing your fears out of your head and onto the page shrinks them to something you can face." },
-    { room: "Portal", emoji: "🌀", path: "/shop", exercise: "Connect to a Healer", why: "If fear is persistent or overwhelming, a healer can walk through it with you safely." },
+    { room: "Breathe", emoji: "🌬️", path: "/breathe/breathwork", exercise: "Vagus Nerve Activation", why: "Vagus nerve activation through breath signals safety to your body and calms the fight-or-flight response." },
+    { room: "Shadow Work", emoji: "🌑", path: "/shadow-work", exercise: "Explore the Root", why: "Most fear has a root. Shadow work can help you trace it back and release its grip." },
+    { room: "Unspoken", emoji: "🤫", path: "/unspoken", exercise: "Give Fear a Voice", why: "Fear loses power when it is named and witnessed. Speak what scares you in a safe space." },
+    { room: "Spiritual Tools", emoji: "✨", path: "/spiritual-tools", exercise: "Protection Prayer", why: "A protection prayer wraps you in spiritual safety and reminds you that you are not alone." },
+    { room: "Portal", emoji: "🌀", path: "/shop", exercise: "Trauma-Informed Healer", why: "If fear is persistent or rooted in trauma, a trauma-informed healer can walk through it with you safely." },
+  ],
+  loneliness: [
+    { room: "Brain Dump", emoji: "💭", path: "/brain-dump", exercise: "Speak What Feels Unseen", why: "Sometimes the first step out of loneliness is letting the unseen parts of you be heard." },
+    { room: "Unspoken", emoji: "🤫", path: "/unspoken", exercise: "Healing Conversation", why: "A healing conversation can fill the silence with understanding and reconnect you to feeling known." },
+    { room: "Journal", emoji: "📓", path: "/journal", exercise: "Write with Self-Love", why: "Writing to yourself with the tenderness of a dear friend reminds you that you are never truly alone with you." },
+    { room: "Spiritual Tools", emoji: "✨", path: "/spiritual-tools", exercise: "Prayer & Angels", why: "Prayer and connection to angels open you to the unseen presence that has always surrounded you." },
+    { room: "Portal", emoji: "🌀", path: "/shop", exercise: "Intercessor Connection", why: "An intercessor can hold space and pray with you, offering the human and spiritual connection your soul is seeking." },
   ],
   confusion: [
     { room: "Wisdom", emoji: "📖", path: "/wisdom", exercise: "Guided Reflection", why: "Wisdom offers clarity when your mind cannot find the thread on its own." },
