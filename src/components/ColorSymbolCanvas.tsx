@@ -58,23 +58,42 @@ const COLORS = [
   { hex: "#C1666B", name: "dusty rose", meaning: "tenderness, longing" },
 ];
 
+// 33 symbols (angel number) — visual metaphors for what's hard to put into words
 const SYMBOLS = [
   { emoji: "💔", name: "broken heart", meaning: "heartbreak, loss" },
-  { emoji: "🌊", name: "wave", meaning: "overwhelm, flow" },
-  { emoji: "🔥", name: "fire", meaning: "anger, transformation" },
-  { emoji: "🌑", name: "dark moon", meaning: "hidden, shadow" },
-  { emoji: "🌅", name: "sunrise", meaning: "hope, new beginning" },
-  { emoji: "⛓️", name: "chains", meaning: "trapped, stuck" },
-  { emoji: "🕊️", name: "dove", meaning: "peace, release" },
-  { emoji: "🌱", name: "sprout", meaning: "growth, healing" },
+  { emoji: "❤️‍🩹", name: "mending heart", meaning: "healing from pain" },
+  { emoji: "🫀", name: "raw heart", meaning: "tender, exposed" },
+  { emoji: "🌊", name: "wave", meaning: "overwhelm, flooding" },
   { emoji: "💧", name: "tear", meaning: "crying, release" },
-  { emoji: "⚡", name: "lightning", meaning: "shock, sudden change" },
-  { emoji: "🫂", name: "hug", meaning: "need comfort" },
-  { emoji: "🌀", name: "spiral", meaning: "confusion, anxiety" },
-  { emoji: "🛡️", name: "shield", meaning: "protection, defense" },
-  { emoji: "🦋", name: "butterfly", meaning: "transformation" },
-  { emoji: "🌿", name: "herb", meaning: "healing, grounding" },
-  { emoji: "⭐", name: "star", meaning: "guidance, wish" },
+  { emoji: "🌧️", name: "rain", meaning: "sadness, grieving" },
+  { emoji: "⛈️", name: "storm", meaning: "chaos inside" },
+  { emoji: "🔥", name: "fire", meaning: "anger, rage, burning" },
+  { emoji: "🌋", name: "volcano", meaning: "about to erupt" },
+  { emoji: "⚡", name: "lightning", meaning: "shock, sudden hit" },
+  { emoji: "🌑", name: "dark moon", meaning: "hidden, shadow self" },
+  { emoji: "🕳️", name: "hole", meaning: "empty, falling in" },
+  { emoji: "🧱", name: "wall", meaning: "shut down, blocked" },
+  { emoji: "⛓️", name: "chains", meaning: "trapped, bound" },
+  { emoji: "🪨", name: "heavy stone", meaning: "weight on chest" },
+  { emoji: "🌫️", name: "fog", meaning: "lost, can't see clearly" },
+  { emoji: "🌀", name: "spiral", meaning: "spinning thoughts, anxiety" },
+  { emoji: "🪞", name: "mirror", meaning: "facing myself" },
+  { emoji: "🎭", name: "mask", meaning: "hiding how I really feel" },
+  { emoji: "🧩", name: "puzzle piece", meaning: "missing something" },
+  { emoji: "🪤", name: "trap", meaning: "stuck, can't escape" },
+  { emoji: "🩸", name: "blood drop", meaning: "deep wound, pain" },
+  { emoji: "🫂", name: "hug", meaning: "need to be held" },
+  { emoji: "🛡️", name: "shield", meaning: "protecting myself" },
+  { emoji: "🪽", name: "wing", meaning: "watched over, angels" },
+  { emoji: "🕊️", name: "dove", meaning: "peace, letting go" },
+  { emoji: "🌱", name: "sprout", meaning: "new growth, beginning" },
+  { emoji: "🌿", name: "leaves", meaning: "grounding, calm" },
+  { emoji: "🦋", name: "butterfly", meaning: "transformation, becoming" },
+  { emoji: "🌅", name: "sunrise", meaning: "hope, new day" },
+  { emoji: "🌈", name: "rainbow", meaning: "after the storm" },
+  { emoji: "⭐", name: "star", meaning: "guidance, hope" },
+  { emoji: "✨", name: "sparkles", meaning: "magic, alive again" },
+  { emoji: "🕯️", name: "candle", meaning: "small light in dark" },
 ];
 
 interface Props {
@@ -257,9 +276,9 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
                 {/* Colors */}
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                    Colors (each is labeled — hover or tap)
+                    Colors — tap any that match the feeling
                   </p>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                  <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-12 gap-2">
                     {COLORS.map((color) => {
                       const selected = selectedColors.some((c) => c.hex === color.hex);
                       return (
@@ -267,22 +286,14 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
                           key={color.hex}
                           onClick={() => toggleColor(color)}
                           disabled={disabled}
-                          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-ring bg-card hover:bg-muted ${
-                            selected ? "ring-2 ring-primary scale-105" : ""
+                          className={`aspect-square rounded-full border border-foreground/20 transition-all focus:outline-none focus:ring-2 focus:ring-ring ${
+                            selected ? "ring-2 ring-primary scale-110 shadow-md" : "hover:scale-110"
                           }`}
+                          style={{ backgroundColor: color.hex }}
                           aria-label={`${color.name} — ${color.meaning}`}
                           aria-pressed={selected}
                           title={`${color.name} — ${color.meaning}`}
-                        >
-                          <span
-                            className="w-8 h-8 rounded-full border border-foreground/20"
-                            style={{ backgroundColor: color.hex }}
-                            aria-hidden="true"
-                          />
-                          <span className="text-[10px] font-medium text-foreground leading-tight text-center">
-                            {color.name}
-                          </span>
-                        </button>
+                        />
                       );
                     })}
                   </div>
