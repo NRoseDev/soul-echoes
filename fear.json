@@ -1,4 +1,14 @@
 {
   "emotion": "Fear",
-  "status": "draft"
+  "icon": "😨",
+  "what_this_is": "",
+  "ai_prompt": "",
+  "perspectives": {
+    "therapeutic": "",
+    "spiritual": "",
+    "biblical": "",
+    "wisdom": ""
+  },
+  "healing_pathways": [],
+  "ai_guidance_logic": {}
 }
