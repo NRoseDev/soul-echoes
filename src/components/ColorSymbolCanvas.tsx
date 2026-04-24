@@ -276,9 +276,9 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
                 {/* Colors */}
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
-                    Colors (each is labeled — hover or tap)
+                    Colors — tap any that match the feeling
                   </p>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                  <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-12 gap-2">
                     {COLORS.map((color) => {
                       const selected = selectedColors.some((c) => c.hex === color.hex);
                       return (
@@ -286,22 +286,14 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
                           key={color.hex}
                           onClick={() => toggleColor(color)}
                           disabled={disabled}
-                          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-ring bg-card hover:bg-muted ${
-                            selected ? "ring-2 ring-primary scale-105" : ""
+                          className={`aspect-square rounded-full border border-foreground/20 transition-all focus:outline-none focus:ring-2 focus:ring-ring ${
+                            selected ? "ring-2 ring-primary scale-110 shadow-md" : "hover:scale-110"
                           }`}
+                          style={{ backgroundColor: color.hex }}
                           aria-label={`${color.name} — ${color.meaning}`}
                           aria-pressed={selected}
                           title={`${color.name} — ${color.meaning}`}
-                        >
-                          <span
-                            className="w-8 h-8 rounded-full border border-foreground/20"
-                            style={{ backgroundColor: color.hex }}
-                            aria-hidden="true"
-                          />
-                          <span className="text-[10px] font-medium text-foreground leading-tight text-center">
-                            {color.name}
-                          </span>
-                        </button>
+                        />
                       );
                     })}
                   </div>
