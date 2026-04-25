@@ -1,0 +1,65 @@
+{
+  "routing_rules": {
+    "general_principles": {
+      "max_suggestions": 2,
+      "always_include_option": "Brain Dump",
+      "tone": "calm, grounding, non-overwhelming",
+      "rule": "User is never forced into a room. AI only gently suggests."
+    },
+
+    "emotion_to_room": {
+      "fear": {
+        "primary": "Breathe",
+        "secondary": "Brain Dump"
+      },
+
+      "overwhelm": {
+        "primary": "Breathe",
+        "secondary": "Brain Dump"
+      },
+
+      "heartbreak": {
+        "primary": "Unspoken",
+        "secondary": "Journal"
+      },
+
+      "guilt": {
+        "primary": "Journal",
+        "secondary": "Shadow Work"
+      },
+
+      "numbness": {
+        "primary": "Breathe",
+        "secondary": "Brain Dump"
+      },
+
+      "betrayal": {
+        "primary": "Unspoken",
+        "secondary": "Shadow Work"
+      },
+
+      "abandonment": {
+        "primary": "Unspoken",
+        "secondary": "Breathe"
+      },
+
+      "hopelessness": {
+        "primary": "Spiritual Tools",
+        "secondary": "Breathe"
+      }
+    },
+
+    "ai_behavior_rules": {
+      "step_1": "Reflect user emotion in 1–2 sentences max",
+      "step_2": "Suggest 1–2 rooms based on routing map",
+      "step_3": "Always include option to stay in Brain Dump",
+      "step_4": "Never overwhelm or list all rooms",
+      "step_5": "Prioritize emotional stabilization over explanation"
+    },
+
+    "angel_number_alignment": {
+      "3_rule": "Offer max 2 suggestions + 1 stay option = total 3 choices available to user",
+      "meaning": "User always has choice, guidance, and safety without overload"
+    }
+  }
+}
