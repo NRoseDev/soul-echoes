@@ -1,0 +1,56 @@
+{
+  "universal_input_model": {
+    "supported_input_types": [
+      "text",
+      "voice",
+      "gesture",
+      "signed_language",
+      "card_selection",
+      "pendulum_input",
+      "eye_movement",
+      "braille_device",
+      "external_device_signal"
+    ],
+
+    "normalization_process": {
+      "step_1": "capture_raw_input",
+      "step_2": "convert_input_to_meaning_units",
+      "step_3": "extract_emotion_signal",
+      "step_4": "extract_intent",
+      "step_5": "assess_intensity",
+      "step_6": "assess_clarity_level"
+    },
+
+    "standard_output_format": {
+      "emotion": "string",
+      "intent": "string",
+      "intensity": "low | medium | high",
+      "clarity": "clear | partial | fragmented"
+    },
+
+    "emotion_extraction_rules": {
+      "priority": "emotional_state_over_words",
+      "fallback": "if unclear, mark as overwhelmed or fragmented",
+      "never_force_precision": true
+    },
+
+    "intent_detection": {
+      "types": [
+        "express_emotion",
+        "seek_help",
+        "seek_grounding",
+        "communication_support",
+        "reflection",
+        "crisis_signal"
+      ]
+    },
+
+    "safety_fallbacks": {
+      "if_unclear_input": "gently reflect confusion and suggest Brain Dump",
+      "if_fragmented_input": "prioritize grounding over interpretation",
+      "if_high_intensity": "route immediately to Breathe or Brain Dump"
+    },
+
+    "core_principle": "All forms of human expression are valid input. The system never rejects communication style."
+  }
+}
