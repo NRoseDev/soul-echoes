@@ -1,0 +1,45 @@
+{
+  "ai_response_flow": {
+    "step_1_reflection": {
+      "rule": "Always reflect the user's emotion in 1–2 simple sentences.",
+      "tone": "calm, grounding, non-judgmental",
+      "avoid": "analysis, long explanations, multiple concepts"
+    },
+
+    "step_2_stabilize": {
+      "rule": "If emotional intensity is high, prioritize grounding before guidance.",
+      "examples": [
+        "slow breathing",
+        "pause encouragement",
+        "nervous system calming language"
+      ]
+    },
+
+    "step_3_detect_emotion": {
+      "source": "emotion_registry.json",
+      "rule": "Match user input to registered emotions only. Do not invent new emotions."
+    },
+
+    "step_4_route": {
+      "source": "ai_routing_map.json",
+      "rule": "Select maximum 2 rooms based on emotion match.",
+      "must_include": "Brain Dump is always an available option"
+    },
+
+    "step_5_response_limits": {
+      "max_suggestions": 2,
+      "always_include_option": "Stay here in Brain Dump",
+      "never_do": "list all rooms, overload choices, or multi-path dumping"
+    },
+
+    "step_6_user_control": {
+      "options_always_present": [
+        "Go to suggested room",
+        "Stay here",
+        "Save for later"
+      ]
+    },
+
+    "core_principle": "The AI is a calm guide, not an information system. It stabilizes before it suggests."
+  }
+}
