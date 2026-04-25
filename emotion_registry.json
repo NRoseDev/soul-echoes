@@ -1,0 +1,44 @@
+{
+  "emotions": [
+    {
+      "id": "fear",
+      "name": "Fear",
+      "active": true
+    },
+    {
+      "id": "overwhelm",
+      "name": "Overwhelm",
+      "active": true
+    },
+    {
+      "id": "heartbreak",
+      "name": "Heartbreak",
+      "active": true
+    },
+    {
+      "id": "guilt",
+      "name": "Guilt",
+      "active": true
+    },
+    {
+      "id": "numbness",
+      "name": "Numbness",
+      "active": true
+    },
+    {
+      "id": "betrayal",
+      "name": "Betrayal",
+      "active": true
+    },
+    {
+      "id": "abandonment",
+      "name": "Abandonment",
+      "active": true
+    },
+    {
+      "id": "hopelessness",
+      "name": "Hopelessness",
+      "active": true
+    }
+  ]
+}
