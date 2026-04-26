@@ -272,8 +272,17 @@ export default function ASLSignInput({ onSend, disabled }: ASLSignInputProps) {
         </TabsList>
 
         {/* ── Common words ── */}
-        <TabsContent value="words" className="mt-2">
-          <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 max-h-52 overflow-y-auto p-1">
+        <TabsContent value="words" className="mt-2 space-y-2">
+          {/* ASL chart reference */}
+          <div className="rounded-xl overflow-hidden border border-border">
+            <p className="text-[10px] text-center text-muted-foreground py-1 bg-muted">ASL Hand Signs — tap a card below to send</p>
+            <img
+              src="/asl/asl-chart-1.jpg"
+              alt="ASL common signs chart"
+              className="w-full object-contain max-h-48"
+            />
+          </div>
+          <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 max-h-36 overflow-y-auto p-1">
             {ASL_COMMON_WORDS.map((card) => (
               <button
                 key={card.id}
