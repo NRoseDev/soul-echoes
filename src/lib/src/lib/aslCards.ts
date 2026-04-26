@@ -1,9 +1,16 @@
+export const ASL_CATEGORIES = [
+  "basic",
+  "emotion",
+  "needs",
+  "communication",
+] as const;
+
 export type ASLCard = {
   id: string;
   label: string;
   meaning: string;
   image: string;
-  category: "basic" | "emotion" | "needs" | "communication";
+  category: (typeof ASL_CATEGORIES)[number];
 };
 
 export const aslCards: ASLCard[] = [
