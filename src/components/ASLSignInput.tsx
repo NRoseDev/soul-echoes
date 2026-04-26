@@ -10,30 +10,39 @@ const ASL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => ({
   img: `https://www.handspeak.com/spell/index/asl-abc-${letter.toLowerCase()}.jpg`,
 }));
 
-// ── Common Words (22) ─────────────────────────────────────────────────────────
-const ASL_COMMON_WORDS = [
-  { id: "hello",           label: "Hello",           emoji: "👋" },
-  { id: "thank-you",       label: "Thank You",       emoji: "🙏" },
-  { id: "please",          label: "Please",          emoji: "🤲" },
-  { id: "yes",             label: "Yes",             emoji: "👍" },
-  { id: "no",              label: "No",              emoji: "👎" },
-  { id: "help",            label: "Help",            emoji: "🆘" },
-  { id: "sorry",           label: "Sorry",           emoji: "😔" },
-  { id: "love",            label: "Love",            emoji: "❤️" },
-  { id: "safe",            label: "Safe",            emoji: "🛡️" },
-  { id: "pain",            label: "Pain",            emoji: "🤕" },
-  { id: "water",           label: "Water",           emoji: "💧" },
-  { id: "hungry",          label: "Hungry",          emoji: "🍽️" },
-  { id: "tired",           label: "Tired",           emoji: "😴" },
-  { id: "stop",            label: "Stop",            emoji: "✋" },
-  { id: "more",            label: "More",            emoji: "➕" },
-  { id: "understand",      label: "Understand",      emoji: "💡" },
-  { id: "dont-understand", label: "Don't Understand",emoji: "❓" },
-  { id: "friend",          label: "Friend",          emoji: "🤝" },
-  { id: "home",            label: "Home",            emoji: "🏠" },
-  { id: "breathe",         label: "Breathe",         emoji: "🌬️" },
-  { id: "wait",            label: "Wait",            emoji: "⏳" },
-  { id: "together",        label: "Together",        emoji: "🫂" },
+// ── Chart sprite: each word maps to its position in asl-chart-1.jpg
+// Chart has 5 rows: row1=3cols, rows2-5=4cols. bsx=cols*100, bsy=500
+const CHART = "/asl/asl-chart-1.jpg";
+type Sprite = { x: number; y: number; bsx: number } | null;
+
+// ── Common Words ──────────────────────────────────────────────────────────────
+const ASL_COMMON_WORDS: { id: string; label: string; emoji: string; sprite: Sprite }[] = [
+  { id: "hello",           label: "Hello",           emoji: "👋",  sprite: { x: 0,   y: 0,   bsx: 300 } },
+  { id: "thank-you",       label: "Thank You",       emoji: "🙏",  sprite: { x: 100, y: 0,   bsx: 300 } },
+  { id: "yes",             label: "Yes",             emoji: "👍",  sprite: { x: 0,   y: 25,  bsx: 400 } },
+  { id: "no",              label: "No",              emoji: "👎",  sprite: { x: 33,  y: 25,  bsx: 400 } },
+  { id: "help",            label: "Help",            emoji: "🆘",  sprite: { x: 67,  y: 25,  bsx: 400 } },
+  { id: "please",          label: "Please",          emoji: "🤲",  sprite: { x: 0,   y: 50,  bsx: 400 } },
+  { id: "sorry",           label: "Sorry",           emoji: "😔",  sprite: { x: 33,  y: 50,  bsx: 400 } },
+  { id: "stop",            label: "Stop",            emoji: "✋",  sprite: { x: 67,  y: 50,  bsx: 400 } },
+  { id: "pain",            label: "Pain",            emoji: "🤕",  sprite: { x: 100, y: 50,  bsx: 400 } },
+  { id: "eat",             label: "Eat",             emoji: "🍽️", sprite: { x: 0,   y: 75,  bsx: 400 } },
+  { id: "drink",           label: "Drink",           emoji: "💧",  sprite: { x: 33,  y: 75,  bsx: 400 } },
+  { id: "more",            label: "More",            emoji: "➕",  sprite: { x: 67,  y: 75,  bsx: 400 } },
+  { id: "bathroom",        label: "Bathroom",        emoji: "🚽",  sprite: { x: 100, y: 75,  bsx: 400 } },
+  { id: "how",             label: "How",             emoji: "🤷",  sprite: { x: 0,   y: 100, bsx: 400 } },
+  { id: "what",            label: "What",            emoji: "❓",  sprite: { x: 33,  y: 100, bsx: 400 } },
+  { id: "where",           label: "Where",           emoji: "📍",  sprite: { x: 67,  y: 100, bsx: 400 } },
+  { id: "when",            label: "When",            emoji: "⏰",  sprite: { x: 100, y: 100, bsx: 400 } },
+  { id: "love",            label: "Love",            emoji: "❤️",  sprite: null },
+  { id: "safe",            label: "Safe",            emoji: "🛡️", sprite: null },
+  { id: "water",           label: "Water",           emoji: "💧",  sprite: null },
+  { id: "tired",           label: "Tired",           emoji: "😴",  sprite: null },
+  { id: "understand",      label: "Understand",      emoji: "💡",  sprite: null },
+  { id: "dont-understand", label: "Don't Understand",emoji: "❓",  sprite: null },
+  { id: "friend",          label: "Friend",          emoji: "🤝",  sprite: null },
+  { id: "breathe",         label: "Breathe",         emoji: "🌬️", sprite: null },
+  { id: "together",        label: "Together",        emoji: "🫂",  sprite: null },
 ];
 
 // ── Feelings (33) ────────────────────────────────────────────────────────────
@@ -272,26 +281,29 @@ export default function ASLSignInput({ onSend, disabled }: ASLSignInputProps) {
         </TabsList>
 
         {/* ── Common words ── */}
-        <TabsContent value="words" className="mt-2 space-y-2">
-          {/* ASL chart reference */}
-          <div className="rounded-xl overflow-hidden border border-border">
-            <p className="text-[10px] text-center text-muted-foreground py-1 bg-muted">ASL Hand Signs — tap a card below to send</p>
-            <img
-              src="/asl/asl-chart-1.jpg"
-              alt="ASL common signs chart"
-              className="w-full object-contain max-h-48"
-            />
-          </div>
-          <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5 max-h-36 overflow-y-auto p-1">
+        <TabsContent value="words" className="mt-2">
+          <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 max-h-64 overflow-y-auto p-1">
             {ASL_COMMON_WORDS.map((card) => (
               <button
                 key={card.id}
                 onClick={() => sendCard(card.label, card.emoji)}
                 disabled={disabled}
-                className="flex flex-col items-center gap-0.5 p-2 rounded-xl border border-border bg-card hover:bg-primary/10 active:scale-95 transition-all disabled:opacity-50"
+                className="flex flex-col items-center gap-0.5 p-1.5 rounded-xl border border-border bg-card hover:bg-primary/10 active:scale-95 transition-all disabled:opacity-50"
               >
-                <span className="text-2xl">{card.emoji}</span>
-                <span className="text-[10px] text-foreground leading-tight text-center">{card.label}</span>
+                {card.sprite ? (
+                  <div
+                    className="h-12 w-12 rounded-lg flex-shrink-0"
+                    style={{
+                      backgroundImage: `url(${CHART})`,
+                      backgroundSize: `${card.sprite.bsx}% 500%`,
+                      backgroundPosition: `${card.sprite.x}% ${card.sprite.y}%`,
+                      backgroundRepeat: "no-repeat",
+                    }}
+                  />
+                ) : (
+                  <span className="text-2xl leading-none h-12 w-12 flex items-center justify-center">{card.emoji}</span>
+                )}
+                <span className="text-[9px] text-foreground leading-tight text-center w-full truncate">{card.label}</span>
               </button>
             ))}
           </div>
