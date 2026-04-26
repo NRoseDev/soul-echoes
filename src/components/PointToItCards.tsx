@@ -1,27 +1,34 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 
-const CATEGORIES = [
+// Local paths we have downloaded; undefined = emoji fallback
+const S = "/asl/signs";
+const A = "/asl/alpha";
+
+type Card = { emoji: string; label: string; asl?: string };
+
+const CATEGORIES: { title: string; cards: Card[] }[] = [
   {
     title: "Feelings",
     cards: [
-      { emoji: "😢", label: "Sad" },
-      { emoji: "😤", label: "Angry" },
-      { emoji: "😰", label: "Anxious" },
+      { emoji: "😢", label: "Sad",           asl: `${S}/sad.gif` },
+      { emoji: "😤", label: "Angry",          asl: `${S}/angry.gif` },
+      { emoji: "😰", label: "Anxious",        asl: `${S}/anxious.gif` },
       { emoji: "😔", label: "Depressed" },
       { emoji: "😶", label: "Numb" },
       { emoji: "💔", label: "Heartbroken" },
       { emoji: "🤯", label: "Overwhelmed" },
-      { emoji: "😴", label: "Exhausted" },
-      { emoji: "😟", label: "Scared" },
-      { emoji: "😠", label: "Frustrated" },
+      { emoji: "😴", label: "Exhausted",      asl: `${S}/tired.gif` },
+      { emoji: "😟", label: "Scared",         asl: `${S}/scared.gif` },
+      { emoji: "😠", label: "Frustrated",     asl: `${S}/frustrated.gif` },
       { emoji: "😕", label: "Confused" },
-      { emoji: "🥺", label: "Lonely" },
-      { emoji: "😣", label: "In Pain" },
+      { emoji: "🥺", label: "Lonely",         asl: `${S}/lonely.gif` },
+      { emoji: "😣", label: "In Pain",        asl: `${S}/pain.gif` },
       { emoji: "😑", label: "Shutdown" },
       { emoji: "🫠", label: "Melting Down" },
       { emoji: "😞", label: "Hopeless" },
       { emoji: "🫣", label: "Ashamed" },
-      { emoji: "😒", label: "Jealous" },
+      { emoji: "😒", label: "Jealous",        asl: `${S}/jealous.gif` },
       { emoji: "💢", label: "Betrayed" },
       { emoji: "🖤", label: "Grieving" },
       { emoji: "😬", label: "Restless" },
@@ -31,11 +38,11 @@ const CATEGORIES = [
   {
     title: "Body Needs",
     cards: [
-      { emoji: "🤒", label: "Sick" },
+      { emoji: "🤒", label: "Sick",           asl: `${S}/sick.gif` },
       { emoji: "🍽️", label: "Hungry" },
-      { emoji: "💧", label: "Thirsty" },
-      { emoji: "😴", label: "Tired" },
-      { emoji: "🤕", label: "Hurting" },
+      { emoji: "💧", label: "Thirsty",        asl: `${S}/water.gif` },
+      { emoji: "😴", label: "Tired",          asl: `${S}/tired.gif` },
+      { emoji: "🤕", label: "Hurting",        asl: `${S}/pain.gif` },
       { emoji: "🥶", label: "Cold" },
       { emoji: "🥵", label: "Hot" },
       { emoji: "💪", label: "Tense" },
@@ -59,7 +66,7 @@ const CATEGORIES = [
     title: "I Need",
     cards: [
       { emoji: "🤗", label: "A Hug" },
-      { emoji: "🙏", label: "Help" },
+      { emoji: "🙏", label: "Help",           asl: `${S}/help.gif` },
       { emoji: "💊", label: "Resources" },
       { emoji: "🗣️", label: "To Talk" },
       { emoji: "🤫", label: "Quiet" },
@@ -88,12 +95,12 @@ const CATEGORIES = [
       { emoji: "🤷", label: "I Don't Know" },
       { emoji: "🌀", label: "Everything Feels Wrong" },
       { emoji: "😶", label: "I Can't Explain It" },
-      { emoji: "😞", label: "I'm Just Tired" },
+      { emoji: "😞", label: "I'm Just Tired",   asl: `${S}/tired.gif` },
       { emoji: "🫙", label: "I Feel Empty" },
       { emoji: "🔇", label: "Something Is Off" },
       { emoji: "🪨", label: "I Feel Heavy" },
       { emoji: "🧭", label: "I Feel Lost" },
-      { emoji: "🙋", label: "I Need Help" },
+      { emoji: "🙋", label: "I Need Help",       asl: `${S}/help.gif` },
       { emoji: "🔌", label: "I'm Shutting Down" },
       { emoji: "💫", label: "I'm Spiraling" },
       { emoji: "📡", label: "I Feel Disconnected" },
@@ -110,6 +117,26 @@ const CATEGORIES = [
     ],
   },
 ];
+
+function ASLCardImage({ asl, emoji }: { asl?: string; emoji: string }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!asl || failed) {
+    return <span className="text-3xl leading-none">{emoji}</span>;
+  }
+
+  return (
+    <div className="relative w-full flex flex-col items-center">
+      <img
+        src={asl}
+        alt="ASL sign"
+        className="h-14 w-14 object-contain rounded-lg bg-white"
+        onError={() => setFailed(true)}
+      />
+      <span className="text-base leading-none mt-0.5">{emoji}</span>
+    </div>
+  );
+}
 
 interface Props {
   onSend: (message: string) => void;
@@ -136,11 +163,11 @@ export default function PointToItCards({ onSend, disabled }: Props) {
                 whileTap={{ scale: 0.93 }}
                 onClick={() => handleTap(card.emoji, card.label, cat.title)}
                 disabled={disabled}
-                className="flex flex-col items-center gap-1 p-3 rounded-xl border-2 border-border bg-card hover:border-primary/40 hover:bg-primary/5 transition-all focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+                className="flex flex-col items-center gap-1 p-2 rounded-xl border-2 border-border bg-card hover:border-primary/40 hover:bg-primary/5 transition-all focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
                 aria-label={card.label}
               >
-                <span className="text-2xl">{card.emoji}</span>
-                <span className="text-xs font-medium text-foreground leading-tight text-center">{card.label}</span>
+                <ASLCardImage asl={card.asl} emoji={card.emoji} />
+                <span className="text-[10px] font-medium text-foreground leading-tight text-center w-full">{card.label}</span>
               </motion.button>
             ))}
           </div>
