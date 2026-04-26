@@ -3,11 +3,11 @@ import { Hand, X, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// ── ASL Alphabet — Handspeak.com (reliable per-letter images) ────────────────
+// ── ASL Alphabet — lifeprint.com free educational ASL images ─────────────────
 const ASL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => ({
   id: letter,
   label: letter,
-  img: `https://www.handspeak.com/spell/index/asl-abc-${letter.toLowerCase()}.jpg`,
+  img: `https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/${letter.toLowerCase()}.gif`,
 }));
 
 // lifeprint.com hosts free ASL sign GIFs by word name
@@ -105,7 +105,7 @@ function AISignsBack({ word }: { word: string }) {
         {letters.map((letter, i) => (
           <div key={i} className="flex flex-col items-center gap-0.5">
             <img
-              src={`https://www.handspeak.com/spell/index/asl-abc-${letter.toLowerCase()}.jpg`}
+              src={`https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/${letter.toLowerCase()}.gif`}
               alt={`ASL ${letter}`}
               className="h-12 w-12 object-contain rounded-lg border border-border bg-white"
               onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
@@ -124,7 +124,7 @@ function LearnSign({ letter }: { letter: string }) {
     <div className="rounded-xl border border-border bg-card p-4 flex flex-col items-center gap-2">
       <p className="text-sm font-semibold text-foreground">How to sign "{letter}"</p>
       <img
-        src={`https://www.handspeak.com/spell/index/asl-abc-${letter.toLowerCase()}.jpg`}
+        src={`https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/${letter.toLowerCase()}.gif`}
         alt={`ASL ${letter}`}
         className="h-28 w-28 object-contain rounded-xl border border-border bg-white"
         onError={(e) => {
@@ -356,7 +356,7 @@ export default function ASLSignInput({ onSend, disabled }: ASLSignInputProps) {
             </div>
           )}
 
-          {/* alphabet grid with real ASL images */}
+          {/* alphabet grid with real ASL hand sign images */}
           <div className="grid grid-cols-6 sm:grid-cols-9 gap-1.5 max-h-64 overflow-y-auto p-1">
             {ASL_ALPHABET.map((card) => (
               <button
@@ -368,12 +368,7 @@ export default function ASLSignInput({ onSend, disabled }: ASLSignInputProps) {
                 disabled={disabled}
                 className="flex flex-col items-center justify-center gap-0.5 p-1 rounded-lg border border-border bg-card hover:bg-primary/10 active:scale-95 transition-all disabled:opacity-50"
               >
-                <img
-                  src={card.img}
-                  alt={`ASL ${card.label}`}
-                  className="h-10 w-10 object-contain rounded bg-white"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                />
+                <ASLSignCard img={card.img} emoji={card.label} label={card.label} />
                 <span className="text-[10px] font-bold text-foreground">{card.label}</span>
               </button>
             ))}

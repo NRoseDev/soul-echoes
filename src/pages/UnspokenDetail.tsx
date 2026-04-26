@@ -260,7 +260,7 @@ function SectionContent({ id }: { id: SectionKey }) {
                     {letters.map((letter, i) => (
                       <img
                         key={i}
-                        src={`https://www.handspeak.com/spell/index/asl-abc-${letter.toLowerCase()}.jpg`}
+                        src={`https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/${letter.toLowerCase()}.gif`}
                         alt={`ASL ${letter}`}
                         className="h-8 w-8 object-contain bg-white rounded"
                         onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
