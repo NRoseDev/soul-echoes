@@ -3,77 +3,78 @@ import { Hand, X, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// ── ASL Alphabet — lifeprint.com free educational ASL images ─────────────────
+// ── ASL Alphabet — local images (works offline) ───────────────────────────────
 const ASL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => ({
   id: letter,
   label: letter,
-  img: `https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/${letter.toLowerCase()}.gif`,
+  img: `/asl/alpha/${letter.toLowerCase()}.gif`,
 }));
 
-// lifeprint.com hosts free ASL sign GIFs by word name
-const LP = "https://www.lifeprint.com/asl101/gifs";
+// Local sign images (works offline). Falls back to lifeprint.com, then emoji.
+const LOCAL = "/asl/signs";
+const LP    = "https://www.lifeprint.com/asl101/gifs";
 
 // ── Common Words ──────────────────────────────────────────────────────────────
 const ASL_COMMON_WORDS = [
-  { id: "hello",           label: "Hello",           emoji: "👋",  img: `${LP}/h/hello.gif` },
-  { id: "thank-you",       label: "Thank You",       emoji: "🙏",  img: `${LP}/t/thank-you.gif` },
-  { id: "please",          label: "Please",          emoji: "🤲",  img: `${LP}/p/please.gif` },
-  { id: "yes",             label: "Yes",             emoji: "👍",  img: `${LP}/y/yes.gif` },
-  { id: "no",              label: "No",              emoji: "👎",  img: `${LP}/n/no.gif` },
-  { id: "help",            label: "Help",            emoji: "🆘",  img: `${LP}/h/help.gif` },
-  { id: "sorry",           label: "Sorry",           emoji: "😔",  img: `${LP}/s/sorry.gif` },
-  { id: "love",            label: "Love",            emoji: "❤️",  img: `${LP}/l/love.gif` },
-  { id: "safe",            label: "Safe",            emoji: "🛡️", img: `${LP}/s/safe.gif` },
-  { id: "pain",            label: "Pain",            emoji: "🤕",  img: `${LP}/p/pain.gif` },
-  { id: "water",           label: "Water",           emoji: "💧",  img: `${LP}/w/water.gif` },
-  { id: "hungry",          label: "Hungry",          emoji: "🍽️", img: `${LP}/h/hungry.gif` },
-  { id: "tired",           label: "Tired",           emoji: "😴",  img: `${LP}/t/tired.gif` },
-  { id: "stop",            label: "Stop",            emoji: "✋",  img: `${LP}/s/stop.gif` },
-  { id: "more",            label: "More",            emoji: "➕",  img: `${LP}/m/more.gif` },
-  { id: "understand",      label: "Understand",      emoji: "💡",  img: `${LP}/u/understand.gif` },
-  { id: "friend",          label: "Friend",          emoji: "🤝",  img: `${LP}/f/friend.gif` },
-  { id: "home",            label: "Home",            emoji: "🏠",  img: `${LP}/h/home.gif` },
-  { id: "breathe",         label: "Breathe",         emoji: "🌬️", img: `${LP}/b/breathe.gif` },
-  { id: "wait",            label: "Wait",            emoji: "⏳",  img: `${LP}/w/wait.gif` },
-  { id: "together",        label: "Together",        emoji: "🫂",  img: `${LP}/t/together.gif` },
-  { id: "bathroom",        label: "Bathroom",        emoji: "🚽",  img: `${LP}/b/bathroom.gif` },
+  { id: "hello",      label: "Hello",      emoji: "👋",  img: `${LP}/h/hello.gif` },
+  { id: "thank-you",  label: "Thank You",  emoji: "🙏",  img: `${LOCAL}/thank-you.gif` },
+  { id: "please",     label: "Please",     emoji: "🤲",  img: `${LP}/p/please.gif` },
+  { id: "yes",        label: "Yes",        emoji: "👍",  img: `${LOCAL}/yes.gif` },
+  { id: "no",         label: "No",         emoji: "👎",  img: `${LP}/n/no.gif` },
+  { id: "help",       label: "Help",       emoji: "🆘",  img: `${LOCAL}/help.gif` },
+  { id: "sorry",      label: "Sorry",      emoji: "😔",  img: `${LP}/s/sorry.gif` },
+  { id: "love",       label: "Love",       emoji: "❤️",  img: `${LOCAL}/love.gif` },
+  { id: "safe",       label: "Safe",       emoji: "🛡️", img: `${LP}/s/safe.gif` },
+  { id: "pain",       label: "Pain",       emoji: "🤕",  img: `${LOCAL}/pain.gif` },
+  { id: "water",      label: "Water",      emoji: "💧",  img: `${LOCAL}/water.gif` },
+  { id: "hungry",     label: "Hungry",     emoji: "🍽️", img: `${LP}/h/hungry.gif` },
+  { id: "tired",      label: "Tired",      emoji: "😴",  img: `${LOCAL}/tired.gif` },
+  { id: "stop",       label: "Stop",       emoji: "✋",  img: `${LOCAL}/stop.gif` },
+  { id: "more",       label: "More",       emoji: "➕",  img: `${LOCAL}/more.gif` },
+  { id: "understand", label: "Understand", emoji: "💡",  img: `${LOCAL}/understand.gif` },
+  { id: "friend",     label: "Friend",     emoji: "🤝",  img: `${LOCAL}/friend.gif` },
+  { id: "home",       label: "Home",       emoji: "🏠",  img: `${LOCAL}/home.gif` },
+  { id: "breathe",    label: "Breathe",    emoji: "🌬️", img: `${LP}/b/breathe.gif` },
+  { id: "wait",       label: "Wait",       emoji: "⏳",  img: `${LOCAL}/wait.gif` },
+  { id: "together",   label: "Together",   emoji: "🫂",  img: `${LP}/t/together.gif` },
+  { id: "bathroom",   label: "Bathroom",   emoji: "🚽",  img: `${LOCAL}/bathroom.gif` },
 ];
 
 // ── Feelings ──────────────────────────────────────────────────────────────────
 const ASL_FEELINGS = [
-  { id: "peaceful",      label: "Peaceful",      emoji: "🕊️", img: `${LP}/p/peaceful.gif` },
-  { id: "anxious",       label: "Anxious",       emoji: "😰",  img: `${LP}/a/anxious.gif` },
-  { id: "hopeful",       label: "Hopeful",       emoji: "🌅",  img: `${LP}/h/hopeful.gif` },
-  { id: "lonely",        label: "Lonely",        emoji: "🥀",  img: `${LP}/l/lonely.gif` },
-  { id: "grateful",      label: "Grateful",      emoji: "🙏",  img: `${LP}/g/grateful.gif` },
-  { id: "confused",      label: "Confused",      emoji: "🌀",  img: `${LP}/c/confused.gif` },
-  { id: "overwhelmed",   label: "Overwhelmed",   emoji: "🌊",  img: `${LP}/o/overwhelmed.gif` },
-  { id: "numb",          label: "Numb",          emoji: "🧊",  img: `${LP}/n/numb.gif` },
-  { id: "healing",       label: "Healing",       emoji: "🌱",  img: `${LP}/h/healing.gif` },
-  { id: "grief",         label: "Grief",         emoji: "🖤",  img: `${LP}/g/grief.gif` },
-  { id: "shame",         label: "Shame",         emoji: "😶",  img: `${LP}/s/shame.gif` },
-  { id: "rage",          label: "Rage",          emoji: "🔥",  img: `${LP}/r/rage.gif` },
-  { id: "frustrated",    label: "Frustrated",    emoji: "😣",  img: `${LP}/f/frustrated.gif` },
-  { id: "ashamed",       label: "Ashamed",       emoji: "😔",  img: `${LP}/a/ashamed.gif` },
-  { id: "brave",         label: "Brave",         emoji: "💪",  img: `${LP}/b/brave.gif` },
-  { id: "loved",         label: "Loved",         emoji: "❤️",  img: `${LP}/l/loved.gif` },
-  { id: "broken",        label: "Broken",        emoji: "💔",  img: `${LP}/b/broken.gif` },
-  { id: "curious",       label: "Curious",       emoji: "🔍",  img: `${LP}/c/curious.gif` },
-  { id: "proud",         label: "Proud",         emoji: "🦁",  img: `${LP}/p/proud.gif` },
-  { id: "free",          label: "Free",          emoji: "🦋",  img: `${LP}/f/free.gif` },
-  { id: "happy",         label: "Happy",         emoji: "😊",  img: `${LP}/h/happy.gif` },
-  { id: "sad",           label: "Sad",           emoji: "😢",  img: `${LP}/s/sad.gif` },
-  { id: "angry",         label: "Angry",         emoji: "😠",  img: `${LP}/a/angry.gif` },
-  { id: "scared",        label: "Scared",        emoji: "😨",  img: `${LP}/s/scared.gif` },
-  { id: "calm",          label: "Calm",          emoji: "😌",  img: `${LP}/c/calm.gif` },
-  { id: "i-dont-know",   label: "I Don't Know",  emoji: "🤷",  img: `${LP}/i/i-dont-know.gif` },
-  { id: "safe-feeling",  label: "Safe",          emoji: "🛡️", img: `${LP}/s/safe.gif` },
-  { id: "abandoned",     label: "Abandoned",     emoji: "🏚️", img: `${LP}/a/abandoned.gif` },
-  { id: "nurtured",      label: "Nurtured",      emoji: "🤗",  img: `${LP}/n/nurtured.gif` },
-  { id: "empowered",     label: "Empowered",     emoji: "⚡",  img: `${LP}/e/empowered.gif` },
-  { id: "stuck",         label: "Stuck",         emoji: "🪨",  img: `${LP}/s/stuck.gif` },
-  { id: "connected",     label: "Connected",     emoji: "🤝",  img: `${LP}/c/connected.gif` },
-  { id: "at-peace",      label: "At Peace",      emoji: "☮️",  img: `${LP}/a/at-peace.gif` },
+  { id: "happy",        label: "Happy",        emoji: "😊",  img: `${LOCAL}/happy.gif` },
+  { id: "sad",          label: "Sad",          emoji: "😢",  img: `${LOCAL}/sad.gif` },
+  { id: "angry",        label: "Angry",        emoji: "😠",  img: `${LOCAL}/angry.gif` },
+  { id: "scared",       label: "Scared",       emoji: "😨",  img: `${LOCAL}/scared.gif` },
+  { id: "anxious",      label: "Anxious",      emoji: "😰",  img: `${LOCAL}/anxious.gif` },
+  { id: "frustrated",   label: "Frustrated",   emoji: "😣",  img: `${LOCAL}/frustrated.gif` },
+  { id: "lonely",       label: "Lonely",       emoji: "🥀",  img: `${LOCAL}/lonely.gif` },
+  { id: "proud",        label: "Proud",        emoji: "🦁",  img: `${LOCAL}/proud.gif` },
+  { id: "brave",        label: "Brave",        emoji: "💪",  img: `${LOCAL}/brave.gif` },
+  { id: "stuck",        label: "Stuck",        emoji: "🪨",  img: `${LOCAL}/stuck.gif` },
+  { id: "calm",         label: "Calm",         emoji: "😌",  img: `${LP}/c/calm.gif` },
+  { id: "peaceful",     label: "Peaceful",     emoji: "🕊️", img: `${LP}/p/peaceful.gif` },
+  { id: "hopeful",      label: "Hopeful",      emoji: "🌅",  img: `${LP}/h/hopeful.gif` },
+  { id: "grateful",     label: "Grateful",     emoji: "🙏",  img: `${LP}/g/grateful.gif` },
+  { id: "confused",     label: "Confused",     emoji: "🌀",  img: `${LP}/c/confused.gif` },
+  { id: "overwhelmed",  label: "Overwhelmed",  emoji: "🌊",  img: `${LP}/o/overwhelmed.gif` },
+  { id: "numb",         label: "Numb",         emoji: "🧊",  img: `${LP}/n/numb.gif` },
+  { id: "healing",      label: "Healing",      emoji: "🌱",  img: `${LP}/h/healing.gif` },
+  { id: "grief",        label: "Grief",        emoji: "🖤",  img: `${LP}/g/grief.gif` },
+  { id: "shame",        label: "Shame",        emoji: "😶",  img: `${LP}/s/shame.gif` },
+  { id: "rage",         label: "Rage",         emoji: "🔥",  img: `${LP}/r/rage.gif` },
+  { id: "ashamed",      label: "Ashamed",      emoji: "😔",  img: `${LP}/a/ashamed.gif` },
+  { id: "loved",        label: "Loved",        emoji: "❤️",  img: `${LP}/l/loved.gif` },
+  { id: "broken",       label: "Broken",       emoji: "💔",  img: `${LP}/b/broken.gif` },
+  { id: "curious",      label: "Curious",      emoji: "🔍",  img: `${LP}/c/curious.gif` },
+  { id: "free",         label: "Free",         emoji: "🦋",  img: `${LP}/f/free.gif` },
+  { id: "i-dont-know",  label: "I Don't Know", emoji: "🤷",  img: `${LP}/i/i-dont-know.gif` },
+  { id: "safe-feeling", label: "Safe",         emoji: "🛡️", img: `${LP}/s/safe.gif` },
+  { id: "abandoned",    label: "Abandoned",    emoji: "🏚️", img: `${LP}/a/abandoned.gif` },
+  { id: "nurtured",     label: "Nurtured",     emoji: "🤗",  img: `${LP}/n/nurtured.gif` },
+  { id: "empowered",    label: "Empowered",    emoji: "⚡",  img: `${LP}/e/empowered.gif` },
+  { id: "connected",    label: "Connected",    emoji: "🤝",  img: `${LP}/c/connected.gif` },
+  { id: "at-peace",     label: "At Peace",     emoji: "☮️",  img: `${LP}/a/at-peace.gif` },
 ];
 
 // ── Sign Card: shows real ASL image, falls back to emoji if image fails ───────
@@ -105,7 +106,7 @@ function AISignsBack({ word }: { word: string }) {
         {letters.map((letter, i) => (
           <div key={i} className="flex flex-col items-center gap-0.5">
             <img
-              src={`https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/${letter.toLowerCase()}.gif`}
+              src={`/asl/alpha/${letter.toLowerCase()}.gif`}
               alt={`ASL ${letter}`}
               className="h-12 w-12 object-contain rounded-lg border border-border bg-white"
               onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
@@ -124,7 +125,7 @@ function LearnSign({ letter }: { letter: string }) {
     <div className="rounded-xl border border-border bg-card p-4 flex flex-col items-center gap-2">
       <p className="text-sm font-semibold text-foreground">How to sign "{letter}"</p>
       <img
-        src={`https://www.lifeprint.com/asl101/fingerspelling/abc-gifs/${letter.toLowerCase()}.gif`}
+        src={`/asl/alpha/${letter.toLowerCase()}.gif`}
         alt={`ASL ${letter}`}
         className="h-28 w-28 object-contain rounded-xl border border-border bg-white"
         onError={(e) => {

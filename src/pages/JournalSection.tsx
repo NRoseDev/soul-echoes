@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, CircleCheck } from "lucide-react";
+import ASLSignInput from "@/components/ASLSignInput";
 import {
   JOURNAL_SECTIONS,
   JOURNAL_SECTION_MAP,
@@ -39,6 +40,7 @@ export default function JournalSection() {
   const [status, setStatus] = useState<string>("Loading your journal...");
   const [isSaving, setIsSaving] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
   const saveTimerRef = useRef<number | null>(null);
   const mountedRef = useRef(true);
 
@@ -146,6 +148,7 @@ export default function JournalSection() {
                 <Textarea
                   value={entry?.[field.name] ?? ""}
                   onChange={(e) => updateField(field.name, e.target.value)}
+                  onFocus={() => setFocusedField(field.name)}
                   placeholder={field.placeholder}
                   rows={field.rows ?? 6}
                   className="min-h-[140px] resize-none bg-slate-950/80 border-white/10 text-white placeholder:text-slate-500"
@@ -154,6 +157,7 @@ export default function JournalSection() {
                 <Input
                   value={entry?.[field.name] ?? ""}
                   onChange={(e) => updateField(field.name, e.target.value)}
+                  onFocus={() => setFocusedField(field.name)}
                   placeholder={field.placeholder}
                   className="bg-slate-950/80 border-white/10 text-white placeholder:text-slate-500"
                 />
@@ -182,6 +186,20 @@ export default function JournalSection() {
               )}
             </div>
           ))}
+        </div>
+
+        {/* ── ASL Sign Input ── */}
+        <div className="rounded-3xl border border-white/10 bg-white/5 overflow-hidden">
+          <p className="text-xs text-slate-400 px-5 pt-4 pb-1">
+            Sign your thoughts — tap a field above first, then use ASL cards below to add to it
+          </p>
+          <ASLSignInput
+            onSend={(text) => {
+              const target = focusedField ?? section?.fields?.[0]?.name;
+              if (!target) return;
+              updateField(target, `${entry?.[target] ?? ""} ${text}`.trimStart());
+            }}
+          />
         </div>
 
         <div className="rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-slate-200">

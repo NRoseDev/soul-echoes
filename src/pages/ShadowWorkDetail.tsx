@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, HeartHandshake, Users, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import ASLSignInput from "@/components/ASLSignInput";
 
 type ModuleKey =
   | "inner-child-healing"
@@ -237,6 +238,7 @@ const moduleData: Record<ModuleKey, ModuleData> = {
 
 function PromptCard({ number, prompt }: { number: number; prompt: string }) {
   const [text, setText] = useState("");
+  const [showASL, setShowASL] = useState(false);
 
   return (
     <div className="bg-muted/60 rounded-2xl p-4 space-y-3 border border-border/60">
@@ -252,6 +254,19 @@ function PromptCard({ number, prompt }: { number: number; prompt: string }) {
         placeholder="Write your reflection here…"
         className="min-h-[96px] bg-background/60 border-border/60 text-sm resize-none"
       />
+      <button
+        onClick={() => setShowASL((v) => !v)}
+        className="text-xs text-primary underline underline-offset-2"
+      >
+        {showASL ? "Hide ASL" : "Sign your response in ASL"}
+      </button>
+      {showASL && (
+        <div className="rounded-xl border border-border bg-background/50 overflow-hidden">
+          <ASLSignInput
+            onSend={(asl) => setText((prev) => `${prev} ${asl}`.trimStart())}
+          />
+        </div>
+      )}
     </div>
   );
 }
