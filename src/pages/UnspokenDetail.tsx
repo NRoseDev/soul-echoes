@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, Mic2, Feather, Keyboard, ImageIcon, Volume2, HeartHandshake, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import ASLSignInput from "@/components/ASLSignInput";
 
 const relationshipCards = [
   "Mother", "Father", "Partner", "Sibling", "Child", "Grandparent", "Best Friend", "Mentor", "Teacher", "Therapist",
@@ -239,6 +240,10 @@ function SectionContent({ id }: { id: SectionKey }) {
               <li>"What feels true for me in this moment is..."</li>
             </ol>
           </div>
+          <div className="bg-muted/70 rounded-3xl border border-border overflow-hidden">
+            <p className="text-sm font-semibold text-foreground px-4 pt-4 pb-2">Sign Your Truth</p>
+            <ASLSignInput onSend={(text) => { console.log("Speak Your Truth:", text); }} />
+          </div>
         </div>
       );
 
@@ -247,15 +252,28 @@ function SectionContent({ id }: { id: SectionKey }) {
         <div className="space-y-6">
           <p className="text-muted-foreground leading-relaxed">Explore 111 ASL signs grouped by emotion, daily needs, healing, therapy vocabulary, communication tools, and accessibility support.</p>
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-            {aslSigns.map((sign) => (
-              <div key={`${sign.category}-${sign.name}`} className="bg-muted/70 rounded-3xl p-4 space-y-2 border border-border">
-                <div className="h-24 rounded-2xl bg-slate-900/60 flex items-center justify-center text-xs text-muted-foreground">Image</div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{sign.name}</p>
-                  <p className="text-xs text-muted-foreground">{sign.category}</p>
+            {aslSigns.map((sign) => {
+              const letters = sign.name.toUpperCase().replace(/[^A-Z]/g, "").split("");
+              return (
+                <div key={`${sign.category}-${sign.name}`} className="bg-muted/70 rounded-3xl p-4 space-y-2 border border-border">
+                  <div className="rounded-2xl bg-slate-900/60 p-2 flex flex-wrap gap-0.5 justify-center min-h-16 items-center">
+                    {letters.map((letter, i) => (
+                      <img
+                        key={i}
+                        src={`https://www.handspeak.com/spell/index/asl-abc-${letter.toLowerCase()}.jpg`}
+                        alt={`ASL ${letter}`}
+                        className="h-8 w-8 object-contain bg-white rounded"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
+                    ))}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{sign.name}</p>
+                    <p className="text-xs text-muted-foreground">{sign.category}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <p className="text-xs text-muted-foreground italic">111 signs for emotions, needs, healing, therapy, and accessible connection.</p>
         </div>
