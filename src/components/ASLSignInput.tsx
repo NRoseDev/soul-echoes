@@ -14,67 +14,56 @@ const ASL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => ({
 const LOCAL = "/asl/signs";
 const LP    = "https://www.lifeprint.com/asl101/gifs";
 
-// ── Common Words ──────────────────────────────────────────────────────────────
+// ── Common Words — exactly 22 including I Don't Know ─────────────────────────
 const ASL_COMMON_WORDS = [
-  { id: "hello",      label: "Hello",      emoji: "👋",  img: `${LOCAL}/hello.jpg` },
-  { id: "thank-you",  label: "Thank You",  emoji: "🙏",  img: `${LOCAL}/thank-you.gif` },
-  { id: "please",     label: "Please",     emoji: "🤲",  img: `${LOCAL}/please.jpg` },
-  { id: "yes",        label: "Yes",        emoji: "👍",  img: `${LOCAL}/yes.gif` },
-  { id: "no",         label: "No",         emoji: "👎",  img: `${LOCAL}/no.gif` },
-  { id: "help",       label: "Help",       emoji: "🆘",  img: `${LOCAL}/help.gif` },
-  { id: "sorry",      label: "Sorry",      emoji: "😔",  img: `${LOCAL}/sorry.jpg` },
-  { id: "love",       label: "Love",       emoji: "❤️",  img: `${LOCAL}/love.gif` },
-  { id: "safe",       label: "Safe",       emoji: "🛡️", img: `${LP}/s/safe.gif` },
-  { id: "pain",       label: "Pain",       emoji: "🤕",  img: `${LOCAL}/pain.gif` },
-  { id: "water",      label: "Water",      emoji: "💧",  img: `${LOCAL}/water.gif` },
-  { id: "hungry",     label: "Hungry",     emoji: "🍽️", img: `${LOCAL}/hungry.jpg` },
-  { id: "tired",      label: "Tired",      emoji: "😴",  img: `${LOCAL}/tired.gif` },
-  { id: "stop",       label: "Stop",       emoji: "✋",  img: `${LOCAL}/stop.gif` },
-  { id: "more",       label: "More",       emoji: "➕",  img: `${LOCAL}/more.gif` },
-  { id: "understand", label: "Understand", emoji: "💡",  img: `${LOCAL}/understand.gif` },
-  { id: "friend",     label: "Friend",     emoji: "🤝",  img: `${LOCAL}/friend.gif` },
-  { id: "home",       label: "Home",       emoji: "🏠",  img: `${LOCAL}/home.gif` },
-  { id: "breathe",    label: "Breathe",    emoji: "🌬️", img: `${LOCAL}/breathe.jpg` },
-  { id: "wait",       label: "Wait",       emoji: "⏳",  img: `${LOCAL}/wait.gif` },
-  { id: "together",   label: "Together",   emoji: "🫂",  img: `${LOCAL}/together.jpg` },
-  { id: "bathroom",   label: "Bathroom",   emoji: "🚽",  img: `${LOCAL}/bathroom.gif` },
+  { id: "hello",        label: "Hello",        emoji: "👋",  img: `${LOCAL}/hello.jpg` },
+  { id: "thank-you",    label: "Thank You",    emoji: "🙏",  img: `${LOCAL}/thank-you.gif` },
+  { id: "please",       label: "Please",       emoji: "🤲",  img: `${LOCAL}/please.jpg` },
+  { id: "yes",          label: "Yes",          emoji: "👍",  img: `${LOCAL}/yes.gif` },
+  { id: "no",           label: "No",           emoji: "👎",  img: `${LOCAL}/no.gif` },
+  { id: "help",         label: "Help",         emoji: "🆘",  img: `${LOCAL}/help.gif` },
+  { id: "sorry",        label: "Sorry",        emoji: "😔",  img: `${LOCAL}/sorry.jpg` },
+  { id: "love",         label: "Love",         emoji: "❤️",  img: `${LOCAL}/love.gif` },
+  { id: "safe",         label: "Safe",         emoji: "🛡️", img: `${LP}/s/safe.gif` },
+  { id: "pain",         label: "Pain",         emoji: "🤕",  img: `${LOCAL}/pain.gif` },
+  { id: "water",        label: "Water",        emoji: "💧",  img: `${LOCAL}/water.gif` },
+  { id: "hungry",       label: "Hungry",       emoji: "🍽️", img: `${LOCAL}/hungry.jpg` },
+  { id: "tired",        label: "Tired",        emoji: "😴",  img: `${LOCAL}/tired.gif` },
+  { id: "stop",         label: "Stop",         emoji: "✋",  img: `${LOCAL}/stop.gif` },
+  { id: "more",         label: "More",         emoji: "➕",  img: `${LOCAL}/more.gif` },
+  { id: "understand",   label: "Understand",   emoji: "💡",  img: `${LOCAL}/understand.gif` },
+  { id: "friend",       label: "Friend",       emoji: "🤝",  img: `${LOCAL}/friend.gif` },
+  { id: "home",         label: "Home",         emoji: "🏠",  img: `${LOCAL}/home.gif` },
+  { id: "breathe",      label: "Breathe",      emoji: "🌬️", img: `${LOCAL}/breathe.jpg` },
+  { id: "wait",         label: "Wait",         emoji: "⏳",  img: `${LOCAL}/wait.gif` },
+  { id: "bathroom",     label: "Bathroom",     emoji: "🚽",  img: `${LOCAL}/bathroom.gif` },
+  { id: "i-dont-know",  label: "I Don't Know", emoji: "🤷",  img: `${LOCAL}/i-dont-know.gif` },
 ];
 
-// ── Feelings ──────────────────────────────────────────────────────────────────
+// ── Feelings — exactly 22 including I Don't Know ─────────────────────────────
 const ASL_FEELINGS = [
-  { id: "happy",        label: "Happy",        emoji: "😊",  img: `${LOCAL}/happy.gif` },
-  { id: "sad",          label: "Sad",          emoji: "😢",  img: `${LOCAL}/sad.gif` },
-  { id: "angry",        label: "Angry",        emoji: "😠",  img: `${LOCAL}/angry.gif` },
-  { id: "scared",       label: "Scared",       emoji: "😨",  img: `${LOCAL}/scared.gif` },
-  { id: "anxious",      label: "Anxious",      emoji: "😰",  img: `${LOCAL}/anxious.gif` },
-  { id: "frustrated",   label: "Frustrated",   emoji: "😣",  img: `${LOCAL}/frustrated.gif` },
-  { id: "lonely",       label: "Lonely",       emoji: "🥀",  img: `${LOCAL}/lonely.gif` },
-  { id: "proud",        label: "Proud",        emoji: "🦁",  img: `${LOCAL}/proud.gif` },
-  { id: "brave",        label: "Brave",        emoji: "💪",  img: `${LOCAL}/brave.gif` },
-  { id: "stuck",        label: "Stuck",        emoji: "🪨",  img: `${LOCAL}/stuck.gif` },
-  { id: "calm",         label: "Calm",         emoji: "😌",  img: `${LOCAL}/calm.jpg` },
-  { id: "peaceful",     label: "Peaceful",     emoji: "🕊️", img: `${LP}/p/peaceful.gif` },
-  { id: "hopeful",      label: "Hopeful",      emoji: "🌅",  img: `${LP}/h/hopeful.gif` },
-  { id: "grateful",     label: "Grateful",     emoji: "🙏",  img: `${LP}/g/grateful.gif` },
-  { id: "confused",     label: "Confused",     emoji: "🌀",  img: `${LP}/c/confused.gif` },
-  { id: "overwhelmed",  label: "Overwhelmed",  emoji: "🌊",  img: `${LP}/o/overwhelmed.gif` },
-  { id: "numb",         label: "Numb",         emoji: "🧊",  img: `${LP}/n/numb.gif` },
-  { id: "healing",      label: "Healing",      emoji: "🌱",  img: `${LP}/h/healing.gif` },
-  { id: "grief",        label: "Grief",        emoji: "🖤",  img: `${LP}/g/grief.gif` },
-  { id: "shame",        label: "Shame",        emoji: "😶",  img: `${LP}/s/shame.gif` },
-  { id: "rage",         label: "Rage",         emoji: "🔥",  img: `${LP}/r/rage.gif` },
-  { id: "ashamed",      label: "Ashamed",      emoji: "😔",  img: `${LP}/a/ashamed.gif` },
-  { id: "loved",        label: "Loved",        emoji: "❤️",  img: `${LOCAL}/loved.gif` },
-  { id: "broken",       label: "Broken",       emoji: "💔",  img: `${LP}/b/broken.gif` },
-  { id: "curious",      label: "Curious",      emoji: "🔍",  img: `${LP}/c/curious.gif` },
-  { id: "free",         label: "Free",         emoji: "🦋",  img: `${LP}/f/free.gif` },
-  { id: "i-dont-know",  label: "I Don't Know", emoji: "🤷",  img: `${LP}/i/i-dont-know.gif` },
-  { id: "safe-feeling", label: "Safe",         emoji: "🛡️", img: `${LP}/s/safe.gif` },
-  { id: "abandoned",    label: "Abandoned",    emoji: "🏚️", img: `${LP}/a/abandoned.gif` },
-  { id: "nurtured",     label: "Nurtured",     emoji: "🤗",  img: `${LP}/n/nurtured.gif` },
-  { id: "empowered",    label: "Empowered",    emoji: "⚡",  img: `${LP}/e/empowered.gif` },
-  { id: "connected",    label: "Connected",    emoji: "🤝",  img: `${LP}/c/connected.gif` },
-  { id: "at-peace",     label: "At Peace",     emoji: "☮️",  img: `${LP}/a/at-peace.gif` },
+  { id: "happy",       label: "Happy",        emoji: "😊",  img: `${LOCAL}/happy.gif` },
+  { id: "sad",         label: "Sad",          emoji: "😢",  img: `${LOCAL}/sad.gif` },
+  { id: "angry",       label: "Angry",        emoji: "😠",  img: `${LOCAL}/angry.gif` },
+  { id: "scared",      label: "Scared",       emoji: "😨",  img: `${LOCAL}/scared.gif` },
+  { id: "anxious",     label: "Anxious",      emoji: "😰",  img: `${LOCAL}/anxious.gif` },
+  { id: "frustrated",  label: "Frustrated",   emoji: "😣",  img: `${LOCAL}/frustrated.gif` },
+  { id: "lonely",      label: "Lonely",       emoji: "🥀",  img: `${LOCAL}/lonely.gif` },
+  { id: "overwhelmed", label: "Overwhelmed",  emoji: "🌊",  img: `${LP}/o/overwhelmed.gif` },
+  { id: "calm",        label: "Calm",         emoji: "😌",  img: `${LOCAL}/calm.jpg` },
+  { id: "hopeful",     label: "Hopeful",      emoji: "🌅",  img: `${LP}/h/hopeful.gif` },
+  { id: "grateful",    label: "Grateful",     emoji: "🙏",  img: `${LP}/g/grateful.gif` },
+  { id: "loved",       label: "Loved",        emoji: "❤️",  img: `${LOCAL}/loved.gif` },
+  { id: "proud",       label: "Proud",        emoji: "🦁",  img: `${LOCAL}/proud.gif` },
+  { id: "brave",       label: "Brave",        emoji: "💪",  img: `${LOCAL}/brave.gif` },
+  { id: "numb",        label: "Numb",         emoji: "🧊",  img: `${LP}/n/numb.gif` },
+  { id: "grief",       label: "Grief",        emoji: "🖤",  img: `${LP}/g/grief.gif` },
+  { id: "shame",       label: "Shame",        emoji: "😶",  img: `${LP}/s/shame.gif` },
+  { id: "healing",     label: "Healing",      emoji: "🌱",  img: `${LP}/h/healing.gif` },
+  { id: "confused",    label: "Confused",     emoji: "🌀",  img: `${LP}/c/confused.gif` },
+  { id: "peaceful",    label: "Peaceful",     emoji: "🕊️", img: `${LP}/p/peaceful.gif` },
+  { id: "stuck",       label: "Stuck",        emoji: "🪨",  img: `${LOCAL}/stuck.gif` },
+  { id: "i-dont-know", label: "I Don't Know", emoji: "🤷",  img: `${LOCAL}/i-dont-know.gif` },
 ];
 
 // ── Sign Card: shows real ASL image, falls back to emoji if image fails ───────
@@ -326,8 +315,17 @@ export default function ASLSignInput({ onSend, disabled }: ASLSignInputProps) {
 
         {/* ── Alphabet / Fingerspell ── */}
         <TabsContent value="alphabet" className="mt-2 space-y-2">
+          {/* Always-visible I Don't Know button */}
+          <button
+            onClick={() => sendCard("I Don't Know", "🤷")}
+            disabled={disabled}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-primary/40 bg-primary/10 hover:bg-primary/20 active:scale-95 transition-all disabled:opacity-50"
+          >
+            <span className="text-xl">🤷</span>
+            <span className="text-sm font-semibold text-foreground">I Don't Know</span>
+          </button>
           <p className="text-[11px] text-muted-foreground text-center">
-            Tap a letter to fingerspell • Long press to learn the sign
+            Tap a letter to fingerspell • Tap above if you can't find the word
           </p>
 
           {/* word builder */}
