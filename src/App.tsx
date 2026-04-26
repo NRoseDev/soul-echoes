@@ -32,6 +32,7 @@ import DistressSignal from "./components/DistressSignal";
 import AIGuideAnnouncer from "./components/AIGuideAnnouncer";
 import AlwaysOnVoice from "./components/AlwaysOnVoice";
 import { getPreferences } from "./lib/preferences";
+import ASLImages from "./pages/ASLImages"; // <-- Added import
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ const App = () => {
               <Route path="/voice-settings" element={<VoiceSettings />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/pricing" element={<Pricing />} />
+              <Route path="/asl-images" element={<ASLImages />} /> {/* <-- Added route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>
