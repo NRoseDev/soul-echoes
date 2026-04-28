@@ -4,6 +4,7 @@ interface UseSpeechRecognitionOptions {
   onResult?: (transcript: string) => void;
   onNoMatch?: () => void;
   lang?: string;
+  continuous?: boolean;
 }
 
 export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) {
@@ -11,6 +12,8 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
   const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef<any>(null);
   const optionsRef = useRef(options);
+  const activeRef = useRef(false);
+  const mountedRef = useRef(true);
   optionsRef.current = options;
 
   const isSupported =
@@ -20,62 +23,92 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
   const start = useCallback(
     (lang?: string) => {
       if (!isSupported) return;
-      // Stop any existing session
       recognitionRef.current?.abort();
 
       const SpeechRecognitionAPI =
         (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognitionAPI();
-      recognition.continuous = false;
+
+      const isContinuous = optionsRef.current.continuous !== false;
+      recognition.continuous = isContinuous;
       recognition.interimResults = false;
       recognition.lang = lang || optionsRef.current.lang || "en-US";
       recognition.maxAlternatives = 3;
 
       recognition.onstart = () => {
+        if (!mountedRef.current) return;
+        activeRef.current = true;
         setListening(true);
         setTranscript("");
       };
 
-      recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const result = event.results[0][0].transcript;
-        setTranscript(result);
-        setListening(false);
-        optionsRef.current.onResult?.(result);
+      recognition.onresult = (event: any) => {
+        const last = event.results[event.results.length - 1];
+        if (last.isFinal) {
+          const result = last[0].transcript;
+          if (mountedRef.current) setTranscript(result);
+          optionsRef.current.onResult?.(result);
+        }
       };
 
       recognition.onnomatch = () => {
-        setListening(false);
         optionsRef.current.onNoMatch?.();
       };
 
-      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        // "no-speech" and "aborted" are not real errors
+      recognition.onerror = (event: any) => {
+        activeRef.current = false;
+        if (event.error === "not-allowed") {
+          if (mountedRef.current) setListening(false);
+          return;
+        }
         if (event.error !== "no-speech" && event.error !== "aborted") {
           console.warn("Speech recognition error:", event.error);
         }
-        setListening(false);
         if (event.error === "no-speech") {
           optionsRef.current.onNoMatch?.();
+        }
+        // Auto-restart on non-fatal errors if continuous
+        if (isContinuous && mountedRef.current && activeRef.current) {
+          setTimeout(() => start(lang), 300);
+        } else {
+          if (mountedRef.current) setListening(false);
         }
       };
 
       recognition.onend = () => {
-        setListening(false);
+        activeRef.current = false;
+        // Auto-restart if continuous mode
+        if (isContinuous && mountedRef.current) {
+          setTimeout(() => start(lang), 300);
+        } else {
+          if (mountedRef.current) setListening(false);
+        }
       };
 
       recognitionRef.current = recognition;
-      recognition.start();
+      try {
+        recognition.start();
+      } catch {
+        activeRef.current = false;
+        if (isContinuous && mountedRef.current) {
+          setTimeout(() => start(lang), 1000);
+        }
+      }
     },
     [isSupported]
   );
 
   const stop = useCallback(() => {
+    activeRef.current = false;
     recognitionRef.current?.abort();
-    setListening(false);
+    recognitionRef.current = null;
+    if (mountedRef.current) setListening(false);
   }, []);
 
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
+      mountedRef.current = false;
       recognitionRef.current?.abort();
     };
   }, []);

@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Heart, Sparkles, Users, Star, Shield, Leaf, HandHeart, ArrowLeft } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Heart, Sparkles, Users, Star, Shield, Leaf, HandHeart, ArrowLeft, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -14,92 +15,98 @@ const INDIVIDUAL_TIERS = [
     name: "Free Forever",
     price: 0,
     label: "$0",
-    description: "33-day full trial, then 1 use per space every 11 days. Brain Dump always unlimited.",
+    description: "33-day full trial, then Brain Dump unlimited + 1 session every 11 days in all other rooms.",
     features: [
-      "33-day full access trial",
-      "Brain Dump — always unlimited",
-      "1 use per healing room every 11 days after trial",
-      "Access all 9 healing rooms",
+      "33-day full trial — all rooms open",
+      "Brain Dump always unlimited",
+      "AI navigator always available",
+      "Guardian angel access — free on all plans",
+      "All other rooms: 1 use every 11 days after trial",
     ],
     icon: Leaf,
     accent: "from-green-500/20 to-emerald-600/20",
     border: "border-green-500/30",
   },
   {
-    name: "Seed",
+    name: "Basic",
     price: 1,
-    label: "$1/mo",
-    description: "Plant the seed of your healing journey.",
+    label: "$1/mo or $11/yr",
+    description: "1 session per day in every room.",
     features: [
-      "Everything in Free",
-      "3 sessions per room per week",
+      "1 session per day in all rooms",
       "Brain Dump unlimited",
-      "Community access",
+      "AI navigator always available",
+      "Guardian angel access — free on all plans",
+      "Honor system support",
     ],
     icon: Sparkles,
     accent: "from-teal-500/20 to-cyan-600/20",
     border: "border-teal-500/30",
-    priceId: "individual_seed",
+    priceId: "individual_basic",
   },
   {
-    name: "Bloom",
+    name: "More Sessions",
     price: 3,
-    label: "$3/mo",
-    description: "Watch your inner garden start to bloom.",
+    label: "$3/mo or $33/yr",
+    description: "3 sessions per day in every room.",
     features: [
-      "Everything in Seed",
-      "10 sessions per room per week",
-      "Priority AI responses",
+      "3 sessions per day in all rooms",
+      "Brain Dump unlimited",
+      "AI navigator always available",
+      "Guardian angel access — free on all plans",
       "Journal history saved",
     ],
     icon: Heart,
     accent: "from-pink-500/20 to-rose-600/20",
     border: "border-pink-500/30",
     popular: true,
-    priceId: "individual_bloom",
+    priceId: "individual_more_sessions",
   },
   {
-    name: "Radiance",
+    name: "Even More",
     price: 5,
-    label: "$5/mo",
-    description: "Step fully into your light.",
+    label: "$5/mo or $55/yr",
+    description: "5 sessions per day in every room.",
     features: [
-      "Everything in Bloom",
-      "25 sessions per room per week",
+      "5 sessions per day in all rooms",
+      "Brain Dump unlimited",
+      "AI navigator always available",
+      "Guardian angel access — free on all plans",
       "Advanced spiritual tools",
-      "Shadow work deep dives",
     ],
     icon: Star,
     accent: "from-amber-500/20 to-yellow-600/20",
     border: "border-amber-500/30",
-    priceId: "individual_radiance",
+    priceId: "individual_even_more",
   },
   {
-    name: "Sanctuary",
+    name: "All Inclusive",
     price: 7,
-    label: "$7/mo",
-    description: "Your all-inclusive healing sanctuary.",
+    label: "$7/mo or $77/yr",
+    description: "7 sessions per day in every room.",
     features: [
-      "Everything in Radiance",
-      "Unlimited sessions everywhere",
-      "1-on-1 practitioner booking",
-      "Crisis counselor priority",
+      "7 sessions per day in all rooms",
+      "Brain Dump unlimited",
+      "AI navigator always available",
+      "Guardian angel access — free on all plans",
+      "Shadow work deep dives",
     ],
     icon: Shield,
     accent: "from-purple-500/20 to-violet-600/20",
     border: "border-purple-500/30",
-    priceId: "individual_sanctuary",
+    priceId: "individual_all_inclusive",
   },
   {
     name: "Ultimate",
     price: 9,
-    label: "$9/mo",
-    description: "Everything plus early access to new features.",
+    label: "$9/mo or $99/yr",
+    description: "Unlimited sessions in every room, every day.",
     features: [
-      "Everything in Sanctuary",
-      "Beta feature access",
-      "Exclusive healing circles",
-      "Direct feedback channel",
+      "Unlimited sessions in all rooms",
+      "Brain Dump unlimited",
+      "AI navigator always available",
+      "Guardian angel access — free on all plans",
+      "Beta feature access + direct feedback channel",
     ],
     icon: Sparkles,
     accent: "from-indigo-500/20 to-blue-600/20",
@@ -110,7 +117,7 @@ const INDIVIDUAL_TIERS = [
 
 const PROFESSIONAL_TIERS = [
   {
-    name: "Roots",
+    name: "Under $33k",
     price: 2,
     label: "$2/mo",
     income: "Under $33k income",
@@ -124,16 +131,16 @@ const PROFESSIONAL_TIERS = [
     icon: Leaf,
     accent: "from-green-500/20 to-emerald-600/20",
     border: "border-green-500/30",
-    priceId: "pro_roots",
+    priceId: "pro_under_33k",
   },
   {
-    name: "Growth",
+    name: "Under $55k",
     price: 4,
     label: "$4/mo",
     income: "Under $55k income",
     clients: "Up to 22 clients",
     features: [
-      "Everything in Roots",
+      "Everything in Under $33k",
       "Up to 22 active clients",
       "Group session tools",
       "Client progress insights",
@@ -141,16 +148,16 @@ const PROFESSIONAL_TIERS = [
     icon: Heart,
     accent: "from-teal-500/20 to-cyan-600/20",
     border: "border-teal-500/30",
-    priceId: "pro_growth",
+    priceId: "pro_under_55k",
   },
   {
-    name: "Flourish",
+    name: "Under $77k",
     price: 6,
     label: "$6/mo",
     income: "Under $77k income",
     clients: "Up to 44 clients",
     features: [
-      "Everything in Growth",
+      "Everything in Under $55k",
       "Up to 44 active clients",
       "Advanced analytics",
       "Custom healing protocols",
@@ -159,16 +166,16 @@ const PROFESSIONAL_TIERS = [
     accent: "from-pink-500/20 to-rose-600/20",
     border: "border-pink-500/30",
     popular: true,
-    priceId: "pro_flourish",
+    priceId: "pro_under_77k",
   },
   {
-    name: "Abundance",
+    name: "Under $99k",
     price: 8,
     label: "$8/mo",
     income: "Under $99k income",
     clients: "Up to 88 clients",
     features: [
-      "Everything in Flourish",
+      "Everything in Under $77k",
       "Up to 88 active clients",
       "Priority support",
       "Workshop hosting tools",
@@ -176,16 +183,16 @@ const PROFESSIONAL_TIERS = [
     icon: Star,
     accent: "from-amber-500/20 to-yellow-600/20",
     border: "border-amber-500/30",
-    priceId: "pro_abundance",
+    priceId: "pro_under_99k",
   },
   {
-    name: "Legacy",
+    name: "Over $99k",
     price: 10,
     label: "$10/mo",
-    income: "$99k+ income",
+    income: "Over $99k income",
     clients: "Unlimited clients",
     features: [
-      "Everything in Abundance",
+      "Everything in Under $99k",
       "Unlimited active clients",
       "Equity share potential",
       "Shape the platform's future",
@@ -193,19 +200,22 @@ const PROFESSIONAL_TIERS = [
     icon: Shield,
     accent: "from-purple-500/20 to-violet-600/20",
     border: "border-purple-500/30",
-    priceId: "pro_legacy",
+    priceId: "pro_over_99k",
   },
 ];
 
 export default function Pricing() {
   const navigate = useNavigate();
   const [energyExchange, setEnergyExchange] = useState(false);
+  const [energyExchangeTerms, setEnergyExchangeTerms] = useState(false);
+  const [payItForwardTerms, setPayItForwardTerms] = useState(false);
   const [donationAmount, setDonationAmount] = useState(0);
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
 
   const handleSubscribe = async (tierName: string, priceId?: string) => {
     if (!priceId) {
-      toast.success("Welcome to the Free tier! You're all set. 💚");
+      toast.success("Welcome to Soul Echoes! Let's begin. 💚");
+      navigate("/");
       return;
     }
 
@@ -253,7 +263,7 @@ export default function Pricing() {
             <ArrowLeft size={20} />
           </Button>
           <h1 className="text-2xl md:text-3xl font-display font-bold bg-gradient-to-r from-amber-400 via-pink-400 to-purple-500 bg-clip-text text-transparent">
-            Energy Exchange &amp; Pricing
+            Pricing for Individual Users and Professionals + Healers
           </h1>
         </div>
 
@@ -274,32 +284,80 @@ export default function Pricing() {
 
         {/* Energy Exchange Agreement */}
         <Card className="border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-indigo-500/10">
-          <CardContent className="p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Sparkles className="text-purple-400" size={22} />
-                <span className="font-semibold text-foreground">Energy Exchange Agreement</span>
-              </div>
-              <Switch checked={energyExchange} onCheckedChange={setEnergyExchange} />
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-center gap-3">
+              <Sparkles className="text-purple-400 shrink-0" size={22} />
+              <span className="font-semibold text-foreground text-lg">Energy Exchange</span>
             </div>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Instead of — or in addition to — monetary payment, I agree to give back through acts of
-              kindness, volunteering, or sharing healing energy with others. This is a sacred agreement
-              between you and the universe. ✨
-            </p>
+
+            <div className="space-y-2">
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Energy exchange is a <strong className="text-foreground">private agreement between you and your healer</strong> — facilitated through Soul Echoes as a platform. It means you offer something of genuine value in return for the healing work you receive: time, skill, creative labor, care, or a reciprocal act of service. Soul Echoes does not set the terms, hold funds, or verify the exchange. We simply provide the space for it to be honoured.
+              </p>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                This option exists because we believe healing should never be withheld because of financial limitation — and that every exchange, whatever form it takes, carries its own integrity.
+              </p>
+            </div>
+
+            {/* Terms checkbox — required before enabling */}
+            <div className="flex items-start gap-3 bg-background/40 rounded-xl p-3 border border-purple-500/20">
+              <Checkbox
+                id="energy-exchange-terms"
+                checked={energyExchangeTerms}
+                onCheckedChange={(v) => {
+                  setEnergyExchangeTerms(!!v);
+                  if (!v) setEnergyExchange(false);
+                }}
+                className="mt-0.5"
+              />
+              <label htmlFor="energy-exchange-terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+                I understand that energy exchange is a private agreement between myself and my healer. Soul Echoes is a platform that facilitates connection — it is not a financial intermediary and does not manage, guarantee, or enforce exchange terms. I enter this agreement freely and in good faith.
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-foreground font-medium">
+                {energyExchange ? "Energy exchange active" : "Enable energy exchange for this session"}
+              </span>
+              <Switch
+                checked={energyExchange}
+                onCheckedChange={(v) => {
+                  if (v && !energyExchangeTerms) {
+                    toast.error("Please read and agree to the energy exchange terms first.");
+                    return;
+                  }
+                  setEnergyExchange(v);
+                }}
+              />
+            </div>
+
+            {energyExchange && (
+              <p className="text-xs text-purple-300 italic">
+                Energy exchange is noted. Your healer will receive this indication when you connect.
+              </p>
+            )}
           </CardContent>
         </Card>
 
         {/* Tabs */}
         <Tabs defaultValue="individual" className="space-y-6">
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 bg-muted/50">
-            <TabsTrigger value="individual" className="text-sm">🌱 Individual</TabsTrigger>
-            <TabsTrigger value="professional" className="text-sm">🌿 Professional / Healer</TabsTrigger>
+            <TabsTrigger value="individual" className="text-sm">Individual Users</TabsTrigger>
+            <TabsTrigger value="professional" className="text-sm">Professionals and Healers</TabsTrigger>
           </TabsList>
 
           <TabsContent value="individual" className="space-y-4">
             <p className="text-center text-muted-foreground text-sm">
-              Your personal healing journey. Brain Dump is always free and unlimited. 💜
+              Two tracks: Individual Users and Professionals and Healers. Brain Dump is always free and unlimited.
+            </p>
+            <p className="text-center text-xs text-muted-foreground">
+              Yearly options for individual tiers are $11, $33, $55, $77, and $99.
+            </p>
+            <p className="text-center text-xs text-muted-foreground/60 italic">
+              🕊️ Guardian angel access is free on every plan — always.
+            </p>
+            <p className="text-center text-xs text-amber-400/80">
+              Klarna, Afterpay, and Affirm financing options coming soon.
             </p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {INDIVIDUAL_TIERS.map((tier) => (
@@ -348,7 +406,10 @@ export default function Pricing() {
                 Income-based pricing for healers, therapists, and practitioners. 🌿
               </p>
               <p className="text-xs text-muted-foreground">
-                Session cap: $55 per client session. Choose based on your income — we trust you.
+                Practitioner tiers are income based: $2 under $33k up to 7 clients, $4 under $55k up to 22 clients, $6 under $77k up to 44 clients, $8 under $99k up to 88 clients, $10 over $99k unlimited clients.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Session rate cap $55 per hour.
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -398,28 +459,60 @@ export default function Pricing() {
 
         {/* Pay It Forward */}
         <Card className="border-green-500/30 bg-gradient-to-r from-green-500/10 to-teal-500/10">
-          <CardContent className="p-5 space-y-3">
+          <CardContent className="p-5 space-y-4">
             <div className="flex items-center gap-3">
-              <Heart className="text-green-400" size={22} />
-              <span className="font-semibold text-foreground">Pay It Forward 💚</span>
+              <Heart className="text-green-400 shrink-0" size={22} />
+              <span className="font-semibold text-foreground text-lg">Pay It Forward — Honor System</span>
             </div>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Add a donation at checkout to fund someone else's healing journey. Every dollar
-              goes directly to keeping Soul Echoes accessible for those who can't afford it.
-            </p>
-            <div className="flex gap-2 flex-wrap">
-              {[0, 1, 3, 5, 11].map((amt) => (
-                <Button
-                  key={amt}
-                  size="sm"
-                  variant={donationAmount === amt ? "default" : "outline"}
-                  onClick={() => setDonationAmount(amt)}
-                  className="text-xs"
-                >
-                  {amt === 0 ? "None" : `+$${amt}`}
-                </Button>
-              ))}
+
+            <div className="space-y-2">
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                This is an <strong className="text-foreground">honor system</strong>. If Soul Echoes has helped you and you are in a season where you can give, consider adding a contribution to cover someone else's healing access. There is no obligation, no tracking, and no judgment for giving nothing.
+              </p>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Contributions go directly to the <strong className="text-foreground">Rise Up Healing</strong> nonprofit fund — keeping the platform free and accessible for those who need it most. Give when you can. Receive freely when you cannot. Both are welcome here.
+              </p>
             </div>
+
+            {/* Terms checkbox */}
+            <div className="flex items-start gap-3 bg-background/40 rounded-xl p-3 border border-green-500/20">
+              <Checkbox
+                id="pay-it-forward-terms"
+                checked={payItForwardTerms}
+                onCheckedChange={(v) => {
+                  setPayItForwardTerms(!!v);
+                  if (!v) setDonationAmount(0);
+                }}
+                className="mt-0.5"
+              />
+              <label htmlFor="pay-it-forward-terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+                I understand that Pay It Forward contributions are voluntary donations to the Rise Up Healing nonprofit. They are not refundable and are not exchanged for services. Soul Echoes is a platform, not a financial intermediary.
+              </label>
+            </div>
+
+            {payItForwardTerms && (
+              <div className="space-y-2">
+                <p className="text-xs text-foreground font-medium">Choose a contribution amount:</p>
+                <div className="flex gap-2 flex-wrap">
+                  {[0, 1, 3, 5, 11].map((amt) => (
+                    <Button
+                      key={amt}
+                      size="sm"
+                      variant={donationAmount === amt ? "default" : "outline"}
+                      onClick={() => setDonationAmount(amt)}
+                      className="text-xs"
+                    >
+                      {amt === 0 ? "None" : `+$${amt}`}
+                    </Button>
+                  ))}
+                </div>
+                {donationAmount > 0 && (
+                  <p className="text-xs text-green-400 italic">
+                    Thank you. Your +${donationAmount} contribution will be added at checkout.
+                  </p>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -433,7 +526,7 @@ export default function Pricing() {
               </span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Every penny funds <strong className="text-foreground">Rise Up Healing</strong>, a nonprofit
+              100% of every payment funds <strong className="text-foreground">Rise Up Healing</strong>, a nonprofit
               dedicated to making spiritual and emotional healing accessible to all — regardless of income,
               ability, or background.
             </p>
@@ -444,6 +537,8 @@ export default function Pricing() {
                 { icon: "🌱", title: "Community Programs", desc: "Free healing circles and workshops" },
                 { icon: "♿", title: "Accessibility", desc: "ASL, AAC, screen reader, and more" },
                 { icon: "🆘", title: "Crisis Services", desc: "24/7 crisis counselor availability" },
+                { icon: "💎", title: "Practitioner Store Share", desc: "Practitioners keep 97% of store sales and 3% supports Rise Up Healing." },
+                { icon: "🛍️", title: "Store Discount", desc: "Users receive 33% off all store products." },
                 { icon: "🌍", title: "Global Reach", desc: "Multilingual support and outreach" },
               ].map((item) => (
                 <div key={item.title} className="flex gap-3 items-start p-3 rounded-lg bg-card/50">
@@ -459,6 +554,30 @@ export default function Pricing() {
               Soul Echoes is a project of Rise Up Healing — a 501(c)(3) nonprofit organization.
               All proceeds go toward our mission of universal healing access. 🙏
             </p>
+            <p className="text-xs text-center text-muted-foreground italic">
+              Honor system pricing means you are trusted to choose the tier that best matches your means and your healing work.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Platform Disclaimer */}
+        <Card className="border-muted bg-muted/30">
+          <CardContent className="p-5 space-y-3">
+            <div className="flex items-start gap-3">
+              <Info className="text-muted-foreground shrink-0 mt-0.5" size={18} />
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-foreground">Platform Disclaimer</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Soul Echoes is a digital platform that connects individuals with healing resources and practitioners. Soul Echoes is <strong className="text-foreground">not a financial intermediary, payment processor, or escrow service</strong>. Any energy exchange, monetary transaction, or contribution facilitated through or alongside this platform is a direct private agreement between the parties involved.
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Soul Echoes does not verify, guarantee, mediate, or take responsibility for the terms or outcomes of private energy exchange arrangements. Pay It Forward contributions are voluntary donations to the Rise Up Healing nonprofit and are processed through secure third-party payment infrastructure. Soul Echoes does not hold, transfer, or control user funds.
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  By engaging with any exchange feature on this platform, you confirm that you are doing so freely, with full understanding of these terms, and without expectation of financial guarantee or intervention from Soul Echoes.
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 

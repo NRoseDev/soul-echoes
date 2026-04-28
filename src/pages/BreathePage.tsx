@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 const sections = [
   { id: "meditation", title: "Meditation", description: "Discover the art of stillness and inner peace through 5 powerful meditation techniques.", icon: Brain, colorClass: "text-healing-breathe" },
   { id: "chakras", title: "The 13 Chakras", description: "Explore all 12 chakras plus Earth Star — from root to divine gateway.", icon: Circle, colorClass: "text-healing-wisdom" },
-  { id: "breathwork", title: "Breathwork", description: "Master box breathing, 4-7-8, belly breathing, alternate nostril, and humming breath.", icon: Wind, colorClass: "text-healing-breathe" },
+  { id: "breathwork", title: "Breathwork", description: "Master box breathing, 4-7-8, belly breathing, alternate nostril, humming breath, ocean breath, triangle breathing, cooling breath, power breathing, heart coherence, grounding breath.", icon: Wind, colorClass: "text-healing-breathe" },
   { id: "vagus-nerve", title: "Vagus Nerve & Nervous System", description: "Learn 5 quick techniques to activate your vagus nerve and calm your body.", icon: Zap, colorClass: "text-healing-journal" },
   { id: "sound-healing", title: "Sound Healing", description: "All 7 Solfeggio frequencies — which chakra each heals and what it does.", icon: Music, colorClass: "text-healing-tools" },
   { id: "aura-cleansing", title: "Aura Cleansing", description: "3 simple techniques anyone can do at home to cleanse and protect your energy.", icon: Sparkles, colorClass: "text-healing-unspoken" },
@@ -19,10 +19,10 @@ export default function BreathePage() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 pb-24">
+    <div className="flex-1 overflow-y-auto p-4 pb-24" style={{ background: "radial-gradient(ellipse at 20% 20%, hsl(210,90%,5%) 0%, hsl(210,80%,12%) 45%, hsl(210,40%,28%) 100%)" }}>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <h1 className="font-display text-3xl font-bold text-foreground mb-2 text-center">Breathe</h1>
-        <p className="text-muted-foreground text-center mb-6">Guided breathing, meditation, and energy healing tools.</p>
+        <p className="text-muted-foreground text-center mb-6">Guided breathing, meditation, and energy healing tools in nine focused sections.</p>
       </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">

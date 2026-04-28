@@ -1,0 +1,67 @@
+{
+  "rooms": {
+    "brain_dump": {
+      "name": "Brain Dump",
+      "purpose": "A safe space to release thoughts, emotions, and mental overload without structure or judgment.",
+      "when_to_use": "Racing thoughts, overwhelm, emotional flooding, confusion, or needing to unload.",
+      "ai_role": "Do not analyze. Only contain, reflect briefly, and stabilize. Help user express freely without pressure.",
+      "outcome_goal": "User feels lighter, clearer, and less mentally crowded."
+    },
+
+    "breathe": {
+      "name": "Breathe",
+      "purpose": "Nervous system regulation and grounding.",
+      "when_to_use": "Anxiety, panic, stress spikes, physical tension, or emotional dysregulation.",
+      "ai_role": "Guide slow grounding and calming. Reduce intensity before thinking or decision-making.",
+      "outcome_goal": "User feels physically calmer and emotionally steadier."
+    },
+
+    "journal": {
+      "name": "Journal",
+      "purpose": "Reflection, meaning-making, and organizing thoughts.",
+      "when_to_use": "After emotional release or when clarity is needed.",
+      "ai_role": "Help organize thoughts gently. No pressure to be perfect or structured.",
+      "outcome_goal": "User gains clarity and understanding of their experience."
+    },
+
+    "unspoken": {
+      "name": "Unspoken",
+      "purpose": "Expressing things not said in relationships or inner dialogue.",
+      "when_to_use": "Relationship tension, unresolved conversations, emotional withholding.",
+      "ai_role": "Support expression without judgment. Help articulate what was not said.",
+      "outcome_goal": "User feels heard and emotionally expressed."
+    },
+
+    "shadow_work": {
+      "name": "Shadow Work",
+      "purpose": "Exploring deeper emotional patterns, triggers, and internal conflicts.",
+      "when_to_use": "Repeating patterns, emotional triggers, self-sabotage, deep discomfort.",
+      "ai_role": "Gently guide insight without overwhelming or pushing too deep too fast.",
+      "outcome_goal": "User gains awareness of deeper emotional roots."
+    },
+
+    "wisdom": {
+      "name": "Wisdom",
+      "purpose": "Insight, reframing, and perspective shift.",
+      "when_to_use": "When user is ready to reframe experience or seek understanding.",
+      "ai_role": "Offer simple grounded insights, not lectures.",
+      "outcome_goal": "User sees situation from a calmer, clearer perspective."
+    },
+
+    "spiritual_tools": {
+      "name": "Spiritual Tools",
+      "purpose": "Grounding through faith, prayer, meditation, or spiritual practices.",
+      "when_to_use": "When user seeks comfort, grounding, or connection beyond self.",
+      "ai_role": "Provide gentle spiritual grounding without pressure or dogma.",
+      "outcome_goal": "User feels spiritually supported and centered."
+    },
+
+    "portal": {
+      "name": "Portal",
+      "purpose": "Deeper support, guidance, and connection pathways.",
+      "when_to_use": "When user needs additional help, interconnection, or external support.",
+      "ai_role": "Help connect user to deeper resources or support pathways gently.",
+      "outcome_goal": "User feels supported beyond the app itself."
+    }
+  }
+}

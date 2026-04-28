@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.tsx$\")",
+      "Bash(npm run:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git commit -m ' *)",
+      "Bash(awk '{print $NF}')",
+      "Bash(xargs ls *)",
+      "Bash(git rm *)"
+    ]
+  }
+}

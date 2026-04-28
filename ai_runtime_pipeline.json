@@ -1,0 +1,48 @@
+{
+  "ai_runtime_pipeline": {
+    "entry_point": "universal_input_model",
+
+    "execution_steps": [
+      {
+        "step": 1,
+        "name": "Normalize Input",
+        "uses": "universal_input_model.json",
+        "output": "standardized emotional + intent signal"
+      },
+      {
+        "step": 2,
+        "name": "Detect Emotion",
+        "uses": "emotion_registry.json",
+        "output": "matched emotion label"
+      },
+      {
+        "step": 3,
+        "name": "Apply Advocate Rules",
+        "uses": "ai_system_prompt.json",
+        "output": "tone + response constraints applied"
+      },
+      {
+        "step": 4,
+        "name": "Generate Response Flow",
+        "uses": "ai_response_flow.json",
+        "output": "structured response format"
+      },
+      {
+        "step": 5,
+        "name": "Route to Rooms",
+        "uses": "ai_routing_map.json",
+        "output": "max 2 room suggestions"
+      }
+    ],
+
+    "final_output_rules": {
+      "max_suggestions": 2,
+      "always_include": "Brain Dump",
+      "response_style": "calm, short, grounding",
+      "no_overload": true,
+      "user_control_required": true
+    },
+
+    "core_principle": "All inputs become one calm guided response that prioritizes emotional safety over complexity."
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "session_state_model": {
+    "core_purpose": "Maintain continuous emotional and navigational memory across Brain Dump and all rooms.",
+
+    "session_tracking": {
+      "current_room": "Brain Dump",
+      "last_room_visited": null,
+      "active_emotion": null,
+      "emotion_intensity": null,
+      "intent": null,
+      "timestamp_last_update": null
+    },
+
+    "thread_tracking": {
+      "active_thread": null,
+      "unresolved_threads": [],
+      "completed_threads": []
+    },
+
+    "brain_dump_role": {
+      "is_home_base": true,
+      "stores_session_context": true,
+      "restores_last_state_on_entry": true,
+      "function": "Always show user where they left off emotionally and logically."
+    },
+
+    "room_memory_rules": {
+      "on_enter_room": "Save current session state before transition",
+      "on_exit_room": "Return user to Brain Dump automatically",
+      "on_return": "Summarize last activity in one calm sentence"
+    },
+
+    "continuity_rules": {
+      "never_reset_session_unless_user_requests": true,
+      "preserve_emotional_progress": true,
+      "preserve_last_topic": true,
+      "avoid_overwriting_memory": true
+    },
+
+    "healer_side_tracking_ready": {
+      "track_patterns": true,
+      "track_repeated_emotions": true,
+      "track_room_frequency": true,
+      "note_emotional_cycles": true,
+      "purpose": "future practitioner dashboard integration"
+    },
+
+    "core_principle": "The user is always returning to an ongoing emotional story, never starting over."
+  }
+}

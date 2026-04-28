@@ -59,6 +59,48 @@ export type Database = {
         }
         Relationships: []
       }
+      healing_journeys: {
+        Row: {
+          background_image_path: string | null
+          created_at: string
+          description: string | null
+          duration_seconds: number
+          id: string
+          is_practitioner: boolean
+          share_mode: string
+          title: string
+          updated_at: string
+          user_id: string
+          video_path: string
+        }
+        Insert: {
+          background_image_path?: string | null
+          created_at?: string
+          description?: string | null
+          duration_seconds: number
+          id?: string
+          is_practitioner?: boolean
+          share_mode: string
+          title: string
+          updated_at?: string
+          user_id: string
+          video_path: string
+        }
+        Update: {
+          background_image_path?: string | null
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number
+          id?: string
+          is_practitioner?: boolean
+          share_mode?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          video_path?: string
+        }
+        Relationships: []
+      }
       practitioner_applications: {
         Row: {
           answers: Json

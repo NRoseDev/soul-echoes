@@ -1,0 +1,14 @@
+{
+  "emotion": "Fear",
+  "icon": "😨",
+"what_this_is": "Fear is your body’s natural response to something that feels unsafe, uncertain, or out of your control. It’s meant to protect you, but sometimes it reacts to perceived threats instead of real danger. It can show up as anxiety, racing thoughts, tension, or avoidance."
+"ai_prompt": "What does this fear feel connected to right now—something happening, something that might happen, or something from the past?"
+  "perspectives": {
+    "therapeutic": "",
+    "spiritual": "",
+    "biblical": "",
+    "wisdom": ""
+  },
+  "healing_pathways": [],
+  "ai_guidance_logic": {}
+}

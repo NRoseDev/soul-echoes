@@ -7,7 +7,7 @@ export interface UserPreferences {
   primaryLanguage: string;
   secondaryLanguage: string | null;
   signLanguageEnabled: boolean;
-  communicationMethods: string[]; // up to 3
+  communicationMethods: string[];
   autoReadEnabled: boolean;
   inputMethod: InputMethod;
 }
@@ -17,7 +17,7 @@ const defaults: UserPreferences = {
   primaryLanguage: "en",
   secondaryLanguage: null,
   signLanguageEnabled: false,
-  communicationMethods: ["type"],
+  communicationMethods: ["speak", "type", "sign", "pictures", "colors", "braille", "aac", "eyetrack"],
   autoReadEnabled: true,
   inputMethod: "type",
 };

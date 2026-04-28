@@ -6,20 +6,76 @@ import { Slider } from "@/components/ui/slider";
 import {
   getVoiceSettings,
   saveVoiceSettings,
-  ELEVENLABS_VOICES,
+  CURATED_VOICES,
   type VoiceSettings,
-  type ElevenLabsVoice,
+  type CuratedVoice,
 } from "@/lib/voiceSettings";
 import { useToast } from "@/hooks/use-toast";
 
 
 const PREVIEW_TEXT = "Hello, I am here with you. Let me be your voice on this healing journey.";
 
-const GENDER_OPTIONS: { id: VoiceSettings["genderPref"]; label: string }[] = [
-  { id: "feminine", label: "Feminine" },
-  { id: "masculine", label: "Masculine" },
-  { id: "neutral", label: "Neutral" },
-];
+// Keyword lists to find a gender-matching browser voice as fallback
+const FEMININE_KEYWORDS = ["female", "woman", "girl", "zira", "samantha", "victoria", "karen", "moira", "tessa", "fiona", "jenny", "aria", "natasha", "hazel", "susan", "kate", "allison", "ava", "emily", "emma", "sarah", "laura", "lisa", "nicky"];
+const MASCULINE_KEYWORDS = ["male", "man", "daniel", "david", "mark", "james", "fred", "alex", "ralph", "tom", "bruce", "george", "liam", "charlie", "brian", "eric", "will", "chris", "callum", "bill", "roger"];
+
+function speakVoice(
+  voice: CuratedVoice,
+  speed: number,
+  volume: number,
+  onStart: () => void,
+  onDone: () => void
+) {
+  if (!("speechSynthesis" in window)) { onDone(); return; }
+  const synth = window.speechSynthesis;
+  synth.cancel();
+
+  const doSpeak = () => {
+    const allVoices = synth.getVoices();
+    const enVoices = allVoices.filter((v) => v.lang.startsWith("en"));
+    const pool = enVoices.length > 0 ? enVoices : allVoices;
+
+    const u = new SpeechSynthesisUtterance(PREVIEW_TEXT);
+    u.rate = speed;
+    u.volume = volume;
+    u.pitch = 1;
+
+    // 1. Try to find the exact Microsoft voice by name
+    let picked = pool.find((v) => v.name.toLowerCase().includes(voice.speakName.toLowerCase()));
+
+    // 2. Fall back to a gender-matching browser voice
+    if (!picked) {
+      const nameLower = (v: SpeechSynthesisVoice) => v.name.toLowerCase();
+      if (voice.gender === "feminine") {
+        picked = pool.find((v) => FEMININE_KEYWORDS.some((k) => nameLower(v).includes(k)));
+      } else if (voice.gender === "masculine") {
+        picked = pool.find((v) => MASCULINE_KEYWORDS.some((k) => nameLower(v).includes(k)));
+      }
+    }
+
+    // 3. Fall back to first available English voice
+    if (!picked) picked = pool[0];
+    if (picked) u.voice = picked;
+
+    onStart();
+    const clear = () => onDone();
+    u.onend = clear;
+    u.onerror = clear;
+    synth.resume();
+    synth.speak(u);
+    // Safety: re-enable if events never fire
+    setTimeout(clear, 8000);
+  };
+
+  if (synth.getVoices().length > 0) {
+    doSpeak();
+  } else {
+    synth.onvoiceschanged = () => {
+      synth.onvoiceschanged = null;
+      doSpeak();
+    };
+  }
+}
 
 export default function VoiceSettingsPage() {
   const [settings, setSettings] = useState<VoiceSettings>(getVoiceSettings);
@@ -92,13 +148,29 @@ export default function VoiceSettingsPage() {
       }
     }
   }, [settings.volume, toast]);
+  const playVoice = useCallback(
+    (voice: CuratedVoice) => {
+      // Stop any browser speech in progress
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+      setPlayingId(voice.id);
+      speakVoice(
+        voice,
+        settings.speed,
+        settings.volume,
+        () => {}, // onStart — state already set above
+        () => setPlayingId(null)
+      );
+    },
+    [settings.speed, settings.volume]
+  );
 
   const testVoice = useCallback(() => {
-    const selectedVoice = settings.elevenLabsVoiceId
-      ? ELEVENLABS_VOICES.find((v) => v.id === settings.elevenLabsVoiceId)
-      : ELEVENLABS_VOICES[0]; // default to Sarah
-    if (selectedVoice) playElevenLabs(selectedVoice);
-  }, [settings.elevenLabsVoiceId, playElevenLabs]);
+    const selected =
+      (settings.elevenLabsVoiceId
+        ? CURATED_VOICES.find((v) => v.id === settings.elevenLabsVoiceId)
+        : null) ?? CURATED_VOICES[0];
+    playVoice(selected);
+  }, [settings.elevenLabsVoiceId, playVoice]);
 
   const handleSave = () => {
     saveVoiceSettings(settings);
@@ -116,88 +188,56 @@ export default function VoiceSettingsPage() {
         <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-3">
           <Volume2 className="h-7 w-7 text-primary" /> Voice Settings
         </h1>
-        <p className="text-muted-foreground mt-1">
-          Choose how Soul Echoes speaks to you. These settings apply to every room.
-        </p>
+        <p className="text-muted-foreground mt-1">Choose how Soul Echoes speaks to you.</p>
       </motion.div>
 
-      {/* Gender Preference */}
-      <section className="space-y-3">
-        <h2 className="font-display text-lg font-semibold text-foreground">Voice Gender Preference</h2>
-        <div className="flex gap-3">
-          {GENDER_OPTIONS.map((g) => (
-            <button
-              key={g.id}
-              onClick={() => setSettings((s) => ({ ...s, genderPref: g.id }))}
-              className={`flex-1 py-3 rounded-xl border-2 text-base font-medium transition-all focus:outline-none focus:ring-2 focus:ring-ring ${
-                settings.genderPref === g.id
-                  ? "border-primary bg-primary/10 text-foreground"
-                  : "border-border bg-card text-muted-foreground hover:border-primary/40"
-              }`}
-            >
-              {g.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Speed */}
-      <section className="space-y-3">
-        <h2 className="font-display text-lg font-semibold text-foreground">
+      <section className="space-y-3" aria-labelledby="speed-heading">
+        <h2 id="speed-heading" className="font-display text-lg font-semibold text-foreground">
           Speech Speed — <span className="text-primary">{speedLabel}</span>
         </h2>
         <Slider
           value={[settings.speed]}
           onValueChange={([v]) => setSettings((s) => ({ ...s, speed: v }))}
-          min={0.5}
-          max={1.5}
-          step={0.1}
-          className="py-2"
+          min={0.5} max={1.5} step={0.1}
           aria-label="Speech speed"
         />
-        <div className="flex justify-between text-xs text-muted-foreground">
+        <div className="flex justify-between text-xs text-muted-foreground" aria-hidden="true">
           <span>Slow</span><span>Normal</span><span>Fast</span>
         </div>
       </section>
 
-      {/* Volume */}
-      <section className="space-y-3">
-        <h2 className="font-display text-lg font-semibold text-foreground">
+      <section className="space-y-3" aria-labelledby="volume-heading">
+        <h2 id="volume-heading" className="font-display text-lg font-semibold text-foreground">
           Speech Volume — <span className="text-primary">{volumeLabel}</span>
         </h2>
         <Slider
           value={[settings.volume]}
           onValueChange={([v]) => setSettings((s) => ({ ...s, volume: v }))}
-          min={0.1}
-          max={1}
-          step={0.05}
-          className="py-2"
+          min={0.1} max={1} step={0.05}
           aria-label="Speech volume"
         />
-        <div className="flex justify-between text-xs text-muted-foreground">
+        <div className="flex justify-between text-xs text-muted-foreground" aria-hidden="true">
           <span>Soft</span><span>Medium</span><span>Loud</span>
         </div>
       </section>
 
-      {/* ElevenLabs Voice Picker */}
-      <section className="space-y-3">
-        <h2 className="font-display text-lg font-semibold text-foreground">
+      <section className="space-y-3" aria-labelledby="voices-heading">
+        <h2 id="voices-heading" className="font-display text-lg font-semibold text-foreground">
           Available Voices
         </h2>
-        <p className="text-sm text-muted-foreground">
-          Tap the play button to preview, then select a voice. Powered by ElevenLabs — works on every device.
-        </p>
-        <div className="space-y-1 max-h-[360px] overflow-y-auto pr-1">
-          {filteredVoices.map((voice) => {
+        <p className="text-sm text-muted-foreground">Tap play to preview, then tap a voice to select it.</p>
+
+        <div className="space-y-1 max-h-[400px] overflow-y-auto pr-1" role="listbox" aria-label="Voice options">
+          {CURATED_VOICES.map((voice) => {
             const isSelected = settings.elevenLabsVoiceId === voice.id;
             const isPlaying = playingId === voice.id;
             return (
               <div
                 key={voice.id}
+                role="option"
+                aria-selected={isSelected}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all cursor-pointer ${
-                  isSelected
-                    ? "border-primary bg-primary/10"
-                    : "border-border bg-card hover:border-primary/40"
+                  isSelected ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"
                 }`}
                 onClick={() =>
                   setSettings((s) => ({
@@ -206,49 +246,28 @@ export default function VoiceSettingsPage() {
                     elevenLabsVoiceName: voice.name,
                   }))
                 }
-                role="radio"
-                aria-checked={isSelected}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setSettings((s) => ({
-                      ...s,
-                      elevenLabsVoiceId: voice.id,
-                      elevenLabsVoiceName: voice.name,
-                    }));
-                  }
-                }}
               >
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    playElevenLabs(voice);
-                  }}
-                  disabled={isPlaying}
-                  className="shrink-0 h-8 w-8 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20 transition-colors disabled:opacity-50"
-                  aria-label={`Preview ${voice.name}`}
+                  onClick={(e) => { e.stopPropagation(); playVoice(voice); }}
+                  disabled={playingId !== null}
+                  aria-label={isPlaying ? `Playing ${voice.name}` : `Preview ${voice.name}`}
+                  className="shrink-0 h-8 w-8 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20 disabled:opacity-50"
                 >
-                  {isPlaying ? (
-                    <Loader2 className="h-3.5 w-3.5 text-foreground animate-spin" />
-                  ) : (
-                    <Play className="h-3.5 w-3.5 text-foreground" />
-                  )}
+                  {isPlaying
+                    ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                    : <Play className="h-3.5 w-3.5" aria-hidden="true" />}
                 </button>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{voice.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {voice.accent} · {voice.description}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{voice.accent}</p>
                 </div>
-                {isSelected && <Check className="h-5 w-5 text-primary shrink-0" />}
+                {isSelected && <Check className="h-5 w-5 text-primary shrink-0" aria-label="Selected" />}
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* Action buttons */}
       <div className="flex flex-col sm:flex-row gap-3 pb-8">
         <Button
           onClick={testVoice}
@@ -256,20 +275,17 @@ export default function VoiceSettingsPage() {
           size="lg"
           className="flex-1 rounded-2xl text-base"
           disabled={playingId !== null}
+          aria-label={playingId ? "Playing voice preview" : "Test selected voice"}
         >
-          {playingId ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Play className="h-4 w-4 mr-2" />
-          )}
+          {playingId
+            ? <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
+            : <Play className="h-4 w-4 mr-2" aria-hidden="true" />}
           Test Voice
         </Button>
-        <Button
-          onClick={handleSave}
-          size="lg"
-          className="flex-1 rounded-2xl text-base"
-        >
-          {saved ? <Check className="h-4 w-4 mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+        <Button onClick={handleSave} size="lg" className="flex-1 rounded-2xl text-base">
+          {saved
+            ? <Check className="h-4 w-4 mr-2" aria-hidden="true" />
+            : <Save className="h-4 w-4 mr-2" aria-hidden="true" />}
           {saved ? "Saved!" : "Save Settings"}
         </Button>
       </div>

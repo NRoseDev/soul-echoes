@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, ChevronRight, Volume2, Play } from "lucide-react";
+import { Check, ChevronRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -10,10 +10,9 @@ import {
   COMMUNICATION_METHODS,
   type InputMethod,
 } from "@/lib/preferences";
-import { getVoiceSettings, saveVoiceSettings, ELEVENLABS_VOICES, type VoiceSettings } from "@/lib/voiceSettings";
-import { supabase } from "@/integrations/supabase/client";
+import { getVoiceSettings, saveVoiceSettings, CURATED_VOICES, type CuratedVoice, type VoiceSettings } from "@/lib/voiceSettings";
 import ListeningIndicator from "@/components/ListeningIndicator";
-import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
+
 const FLAG_LANGUAGES = [
   { code: "en", name: "English", cc: "us" },
   { code: "es", name: "Spanish", cc: "es" },
@@ -39,46 +38,86 @@ const FLAG_LANGUAGES = [
   { code: "sw", name: "Swahili", cc: "za" },
 ];
 
-/* ─── TTS helpers ─── */
-const PREFERRED_VOICES = ["samantha", "karen", "moira", "google uk english female", "google us english female", "microsoft zira"];
+const PREFERRED_VOICES = [
+  "samantha", "karen", "moira", "fiona",
+  "microsoft jenny", "microsoft aria", "microsoft zira", "microsoft natasha",
+  "google uk english female", "google us english female",
+];
 
-function getSoftFemaleVoice(): SpeechSynthesisVoice | null {
-  const voices = window.speechSynthesis.getVoices();
+function pickBrowserVoice(
+  voices: SpeechSynthesisVoice[],
+  preferredVoiceURI: string | null = null
+): SpeechSynthesisVoice | null {
+  if (preferredVoiceURI) {
+    const selected = voices.find((v) => v.voiceURI === preferredVoiceURI);
+    if (selected) return selected;
+  }
+
   for (const pref of PREFERRED_VOICES) {
     const match = voices.find((v) => v.name.toLowerCase().includes(pref));
     if (match) return match;
   }
-  return voices.find((v) => v.lang.startsWith("en") && /female|zira|samantha|karen/i.test(v.name)) || null;
+
+  return (
+    voices.find((v) => v.lang.startsWith("en") && /female|zira|samantha|karen|aria|jenny|natasha|moira|fiona/i.test(v.name)) ||
+    voices.find((v) => v.lang.startsWith("en")) ||
+    voices[0] ||
+    null
+  );
 }
 
-function speakAsync(text: string): Promise<void> {
+/**
+ * Returns a Promise that resolves with the loaded voice list.
+ * Handles the async nature of speechSynthesis.getVoices() across browsers.
+ */
+function getVoicesReady(): Promise<SpeechSynthesisVoice[]> {
   return new Promise((resolve) => {
-    if (!("speechSynthesis" in window)) { resolve(); return; }
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    const voice = getSoftFemaleVoice();
-    if (voice) u.voice = voice;
-    u.rate = 0.9;
-    u.pitch = 1.1;
-    u.onend = () => resolve();
-    u.onerror = () => resolve();
-    window.speechSynthesis.speak(u);
-    setTimeout(resolve, text.length * 80 + 2000);
+    if (!("speechSynthesis" in window)) { resolve([]); return; }
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) { resolve(voices); return; }
+    const handler = () => {
+      resolve(window.speechSynthesis.getVoices());
+      window.speechSynthesis.removeEventListener("voiceschanged", handler);
+    };
+    window.speechSynthesis.addEventListener("voiceschanged", handler);
+    setTimeout(() => {
+      window.speechSynthesis.removeEventListener("voiceschanged", handler);
+      resolve(window.speechSynthesis.getVoices());
+    }, 2000);
   });
 }
 
-function speak(text: string) {
+async function speakAsync(text: string, preferredVoiceURI: string | null = null): Promise<void> {
   if (!("speechSynthesis" in window)) return;
+  const voices = await getVoicesReady();
+  window.speechSynthesis.cancel();
+  return new Promise((resolve) => {
+    const u = new SpeechSynthesisUtterance(text);
+    const voice = pickBrowserVoice(voices, preferredVoiceURI);
+    if (voice) u.voice = voice;
+    u.rate = 0.9;
+    u.pitch = 1.1;
+    u.volume = 1;
+    u.onend = () => resolve();
+    u.onerror = () => resolve();
+    window.speechSynthesis.speak(u);
+    setTimeout(resolve, text.length * 80 + 3000);
+  });
+}
+
+async function speak(text: string, preferredVoiceURI: string | null = null): Promise<void> {
+  if (!("speechSynthesis" in window)) return;
+  const voices = await getVoicesReady();
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  const voice = getSoftFemaleVoice();
+  const voice = pickBrowserVoice(voices, preferredVoiceURI);
   if (voice) u.voice = voice;
   u.rate = 0.9;
   u.pitch = 1.1;
+  u.volume = 1;
   window.speechSynthesis.speak(u);
 }
 
-/* ─── Animations ─── */
 const fadeSlide = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0 },
@@ -86,7 +125,6 @@ const fadeSlide = {
   transition: { duration: 0.5 },
 };
 
-/* ─── Matchers ─── */
 function matchLanguage(transcript: string) {
   const lower = transcript.toLowerCase().trim();
   return (
@@ -111,10 +149,11 @@ function matchCommMethod(transcript: string): string | null {
     [["type", "typing", "keyboard", "text"], "type"],
     [["sign", "asl", "signing"], "sign"],
     [["color", "colour", "symbol", "paint", "art"], "colors"],
-    [["picture", "card", "point", "pointing", "image"], "pictures"],
-    [["braille", "assistive", "device"], "braille"],
-    [["computer", "aac", "device speaks", "augmentative"], "aac"],
-    [["eye", "tracking", "switch", "gaze"], "eyetrack"],
+    [["picture", "card", "point", "pointing", "image"], "point"],
+    [["braille", "assistive"], "braille"],
+    [["computer", "aac", "augmentative"], "aac"],
+    [["eye", "tracking", "gaze"], "eyetrack"],
+    [["connect", "device", "bluetooth"], "connect"],
   ];
   for (const [keywords, id] of mapping) {
     if (keywords.some((k) => lower.includes(k))) return id;
@@ -122,16 +161,6 @@ function matchCommMethod(transcript: string): string | null {
   return null;
 }
 
-function guessGender(name: string): VoiceSettings["genderPref"] {
-  const lower = name.toLowerCase();
-  const fem = ["samantha", "karen", "moira", "tessa", "fiona", "victoria", "alice", "anna", "sara", "female"];
-  const masc = ["daniel", "alex", "fred", "jorge", "thomas", "male", "david", "mark"];
-  if (fem.some((n) => lower.includes(n))) return "feminine";
-  if (masc.some((n) => lower.includes(n))) return "masculine";
-  return "neutral";
-}
-
-/* ─── ASL Camera Panel ─── */
 function ASLCameraPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -156,208 +185,363 @@ function ASLCameraPanel({ open, onClose }: { open: boolean; onClose: () => void 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       <div className="relative">
-        <video ref={videoRef} autoPlay playsInline muted className="w-full aspect-video object-cover" aria-label="Camera feed for signing" />
-        <div className="absolute bottom-1 left-1 bg-background/80 text-[10px] px-2 py-0.5 rounded text-foreground">
-          Sign your answer here
-        </div>
-        <button onClick={onClose} className="absolute top-1 right-1 bg-background/80 rounded-full h-6 w-6 flex items-center justify-center text-xs" aria-label="Close camera">✕</button>
+        <video ref={videoRef} autoPlay playsInline muted className="w-full aspect-video object-cover" />
+        <div className="absolute bottom-1 left-1 bg-background/80 text-[10px] px-2 py-0.5 rounded text-foreground">Sign your answer here</div>
+        <button onClick={onClose} className="absolute top-1 right-1 bg-background/80 rounded-full h-6 w-6 flex items-center justify-center text-xs">✕</button>
       </div>
     </div>
   );
 }
 
-/* ─── Point-It language cards ─── */
 const LANGUAGE_POINT_CARDS = [
-  { code: "en", label: "English", emoji: "🇺🇸" },
-  { code: "es", label: "Español", emoji: "🇪🇸" },
-  { code: "fr", label: "Français", emoji: "🇫🇷" },
-  { code: "pt", label: "Português", emoji: "🇧🇷" },
-  { code: "zh", label: "中文", emoji: "🇨🇳" },
-  { code: "ar", label: "العربية", emoji: "🇸🇦" },
-  { code: "hi", label: "हिन्दी", emoji: "🇮🇳" },
-  { code: "ru", label: "Русский", emoji: "🇷🇺" },
-  { code: "de", label: "Deutsch", emoji: "🇩🇪" },
-  { code: "ja", label: "日本語", emoji: "🇯🇵" },
-  { code: "ko", label: "한국어", emoji: "🇰🇷" },
-  { code: "it", label: "Italiano", emoji: "🇮🇹" },
+  { code: "en", label: "English",   cc: "us" },
+  { code: "es", label: "Español",   cc: "es" },
+  { code: "fr", label: "Français",  cc: "fr" },
+  { code: "pt", label: "Português", cc: "br" },
+  { code: "zh", label: "中文",      cc: "cn" },
+  { code: "ar", label: "العربية",  cc: "sa" },
+  { code: "hi", label: "हिन्दी",   cc: "in" },
+  { code: "ru", label: "Русский",   cc: "ru" },
+  { code: "de", label: "Deutsch",   cc: "de" },
+  { code: "ja", label: "日本語",    cc: "jp" },
+  { code: "ko", label: "한국어",    cc: "kr" },
+  { code: "it", label: "Italiano",  cc: "it" },
 ];
 
-/* ═══════════════════════════ COMPONENT ═══════════════════════════ */
+const FEMININE_VOICE_KEYWORDS = ["female", "woman", "zira", "samantha", "karen", "victoria", "moira", "fiona", "jenny", "aria", "natasha", "hazel", "kate", "allison", "ava", "emily", "emma", "lisa", "nicky", "susan"];
+const MASCULINE_VOICE_KEYWORDS = ["male", "man", "daniel", "david", "mark", "james", "fred", "ralph", "tom", "bruce", "george", "liam", "charlie", "brian", "eric", "will", "chris", "callum", "bill", "roger"];
 
-export default function Onboarding({ onComplete }: { onComplete: () => void }) {
-  // Step 0: input method, 1: welcome, 2: language, 3: voice, 4: communication, 5: safety, 6: done
+function pickSynthVoice(voice: CuratedVoice, voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+  const enVoices = voices.filter((v) => v.lang.startsWith("en"));
+  const pool = enVoices.length > 0 ? enVoices : voices;
+  let picked = pool.find((v) => v.name.toLowerCase().includes(voice.speakName.toLowerCase()));
+  if (!picked) {
+    if (voice.gender === "feminine") picked = pool.find((v) => FEMININE_VOICE_KEYWORDS.some((k) => v.name.toLowerCase().includes(k)));
+    else if (voice.gender === "masculine") picked = pool.find((v) => MASCULINE_VOICE_KEYWORDS.some((k) => v.name.toLowerCase().includes(k)));
+  }
+  return picked ?? pool[0] ?? null;
+}
+
+export default function Onboarding({ onComplete }: { onComplete: () => void }) { /* v2 */
   const [step, setStep] = useState(0);
   const [inputMethod, setInputMethod] = useState<InputMethod | null>(null);
   const [welcomeDone, setWelcomeDone] = useState(false);
-
-  // Language
   const [primaryLang, setPrimaryLang] = useState("en");
   const [secondaryLang, setSecondaryLang] = useState<string | null>(null);
   const [wantSecondary, setWantSecondary] = useState<boolean | null>(null);
   const [signLanguage, setSignLanguage] = useState<boolean | null>(null);
   const [langSubStep, setLangSubStep] = useState(0);
   const [typedLang, setTypedLang] = useState("");
-
-  // Communication
-  const [commMethods, setCommMethods] = useState<string[]>([]);
-
-  // Voice
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(getVoiceSettings);
-
-  // Shared
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [testingVoice, setTestingVoice] = useState(false);
-  const hasSpokenRef = useRef<string>("");
-
-  /* ─── Continuous Speech Recognition (only for "speak" method) ─── */
-  const contRecRef = useRef<any>(null);
-  const contRecActiveRef = useRef(false);
+  const [playingVoiceURI, setPlayingVoiceURI] = useState<string | null>(null);
+  const [autoPlayIdx, setAutoPlayIdx] = useState(0);
+  const [autoPhase, setAutoPhase] = useState<"idle" | "playing" | "listening">("idle");
+  const autoRecRef = useRef<any>(null);
+  const voiceListRef = useRef<HTMLDivElement>(null);
+  const spokenPromptsRef = useRef<Set<string>>(new Set());
   const handleVoiceRef = useRef<(t: string) => void>(() => {});
 
+  const hasSpoken = useCallback((key: string) => spokenPromptsRef.current.has(key), []);
+  const markSpoken = useCallback((key: string) => { spokenPromptsRef.current.add(key); }, []);
+  const clearSpoken = useCallback(() => { spokenPromptsRef.current.clear(); }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const updateVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        setAvailableVoices(voices);
+      }
+    };
+    updateVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", updateVoices);
+    return () => window.speechSynthesis.removeEventListener("voiceschanged", updateVoices);
+  }, []);
+
+  const ttsSpeakAsync = useCallback((text: string) => speakAsync(text, voiceSettings.voiceURI), [voiceSettings.voiceURI]);
+  const ttsSpeak = useCallback((text: string) => speak(text, voiceSettings.voiceURI), [voiceSettings.voiceURI]);
+
   const isSpeakMode = inputMethod === "speak";
-useAlwaysOnListening({
-  onTranscript: (t) => handleVoiceRef.current(t),
-  enabled: true,
-});
-  const startContinuousRec = useCallback(() => {
-    if (!isSpeakMode) return;
-    if (contRecActiveRef.current) return;
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+  const [isListening, setIsListening] = useState(false);
+  const inputLevel = 0;
+  const recognitionRef = useRef<any>(null);
+  const mountedRef = useRef(true);
+
+  const stopListening = useCallback(() => {
+    try { recognitionRef.current?.abort(); } catch {}
+    recognitionRef.current = null;
+    setIsListening(false);
+  }, []);
+
+  const startRecognition = useCallback(() => {
+    if (recognitionRef.current) return;
+    const SR = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
     if (!SR) return;
-    contRecRef.current?.abort();
+
     const rec = new SR();
     rec.continuous = true;
     rec.interimResults = false;
     rec.lang = "en-US";
-    rec.maxAlternatives = 3;
-    rec.onresult = (e: any) => {
-      const last = e.results[e.results.length - 1];
-      if (last.isFinal) handleVoiceRef.current(last[0].transcript);
+    rec.maxAlternatives = 1;
+
+    rec.onstart = () => {
+      if (!mountedRef.current) return;
+      setIsListening(true);
     };
-    rec.onend = () => {
-      contRecActiveRef.current = false;
-      // Only hide indicator if we're NOT about to restart
-      if (contRecRef.current === rec) {
-        // Keep isListening true — we're restarting momentarily
-        setTimeout(() => startContinuousRec(), 300);
-      } else {
+
+    rec.onresult = (event: any) => {
+      const last = event.results[event.results.length - 1];
+      if (!last || !last.isFinal) return;
+      const transcript = last[0]?.transcript?.trim();
+      if (!transcript) return;
+      if (mountedRef.current) {
+        setRetryMessage(null);
+      }
+      handleVoiceRef.current(transcript);
+    };
+
+    rec.onerror = (event: any) => {
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
         setIsListening(false);
       }
     };
-    rec.onerror = (e: any) => {
-      contRecActiveRef.current = false;
-      if (e.error === "not-allowed" || e.error === "network") {
-        contRecRef.current = null;
-        return;
+
+    rec.onend = () => {
+      recognitionRef.current = null;
+      if (!mountedRef.current) return;
+      setIsListening(false);
+      if (inputMethod === "speak") {
+        window.setTimeout(() => startRecognition(), 250);
       }
     };
-    contRecRef.current = rec;
-    contRecActiveRef.current = true;
-    setIsListening(true);
-    rec.start();
-  }, [isSpeakMode]);
 
-  const stopContinuousRec = useCallback(() => {
-    contRecRef.current?.abort();
-    contRecRef.current = null;
-    contRecActiveRef.current = false;
-    setIsListening(false);
-  }, []);
+    recognitionRef.current = rec;
+    try {
+      rec.start();
+    } catch {
+      window.setTimeout(() => startRecognition(), 500);
+    }
+  }, [inputMethod]);
 
-  // Load voices
   useEffect(() => {
-    const load = () => {
-      const v = window.speechSynthesis?.getVoices() || [];
-      if (v.length > 0) setVoices(v);
+    mountedRef.current = true;
+
+    const introText =
+      "If you use a communication device, AAC board, eye gaze tracker, or any assistive technology — you can connect it via Bluetooth or your phone's port and use it here. " +
+      "Soul Echoes works on iPhone, Android, and all computers worldwide. " +
+      "All options are always available. How would you like to communicate today?";
+
+    const initialize = async () => {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch {
+        // microphone permission request was attempted
+      }
+
+      await speakAsync(introText, null);
+      if (mountedRef.current) {
+        startRecognition();
+      }
     };
-    load();
-    window.speechSynthesis?.addEventListener("voiceschanged", load);
-    return () => window.speechSynthesis?.removeEventListener("voiceschanged", load);
-  }, []);
 
-  /* ─── Auto-request mic and start listening when speak is chosen ─── */
-  useEffect(() => {
-    if (inputMethod !== "speak") return;
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then((stream) => {
-        stream.getTracks().forEach((t) => t.stop());
-        // Start listening immediately after permission granted
-        startContinuousRec();
-      })
-      .catch(() => {});
-    return () => stopContinuousRec();
-  }, [inputMethod, startContinuousRec, stopContinuousRec]);
+    initialize();
 
-  /* ─── Step effects ─── */
+    return () => {
+      mountedRef.current = false;
+      stopListening();
+    };
+  }, [startRecognition, stopListening]);
 
-  // STEP 1: Welcome
   useEffect(() => {
     if (step !== 1) return;
-    if (isSpeakMode) {
-      speak("Soul Echoes — Your daily healing advocate. A sacred space to release, heal, and find closure.");
-    }
-    const timer = setTimeout(() => setWelcomeDone(true), 4000);
-    const autoAdvance = setTimeout(() => setStep(2), 8000);
-    return () => { clearTimeout(timer); clearTimeout(autoAdvance); };
-  }, [step, isSpeakMode]);
+    if (hasSpoken("welcome")) return;
+    markSpoken("welcome");
+    markSpoken("lang-primary");
+    ttsSpeakAsync("Soul Echoes. Your daily healing advocate. A sacred space to release, heal, and find closure. What is your primary language?")
+      .then(() => {
+        setWelcomeDone(true);
+        setStep(2);
+      });
+  }, [step, ttsSpeakAsync, hasSpoken, markSpoken]);
 
-  // STEP 2: Language — auto-listen for speak mode
   useEffect(() => {
     if (step !== 2) return;
-    if (!isSpeakMode) return;
+    if (langSubStep === 0 && !hasSpoken("lang-primary")) {
+      markSpoken("lang-primary");
+      ttsSpeakAsync("What is your primary language?");
+    }
+    if (langSubStep === 1 && wantSecondary === null && !hasSpoken("lang-secondary-q")) {
+      markSpoken("lang-secondary-q");
+      ttsSpeakAsync("Would you like to add a second language?");
+    }
+    if (langSubStep === 1 && wantSecondary === true && !hasSpoken("lang-secondary-pick")) {
+      markSpoken("lang-secondary-pick");
+      ttsSpeakAsync("Which second language?");
+    }
+    if (langSubStep === 2 && !hasSpoken("lang-sign")) {
+      markSpoken("lang-sign");
+      ttsSpeakAsync("Would you like to enable sign language?");
+    }
+  }, [step, langSubStep, wantSecondary, hasSpoken, markSpoken, ttsSpeakAsync]);
 
-    if (langSubStep === 0 && hasSpokenRef.current !== "lang-primary") {
-      hasSpokenRef.current = "lang-primary";
-      speakAsync("What is your primary language?").then(() => startContinuousRec());
-    }
-    if (langSubStep === 1 && wantSecondary === null && hasSpokenRef.current !== "lang-secondary-q") {
-      hasSpokenRef.current = "lang-secondary-q";
-      speakAsync("Would you like to add a second language?").then(() => startContinuousRec());
-    }
-    if (langSubStep === 1 && wantSecondary === true && hasSpokenRef.current !== "lang-secondary-pick") {
-      hasSpokenRef.current = "lang-secondary-pick";
-      speakAsync("Which second language?").then(() => startContinuousRec());
-    }
-    if (langSubStep === 2 && hasSpokenRef.current !== "lang-sign") {
-      hasSpokenRef.current = "lang-sign";
-      speakAsync("Would you like to enable Sign Language?").then(() => startContinuousRec());
-    }
-  }, [step, langSubStep, wantSecondary, isSpeakMode, startContinuousRec]);
-
-  // STEP 3: Voice Setup — auto-listen for speak mode
+  // Step 3: on enter, kick off auto-play from voice 0
   useEffect(() => {
     if (step !== 3) return;
-    if (!isSpeakMode) return;
-    if (hasSpokenRef.current !== "voice-setup") {
-      hasSpokenRef.current = "voice-setup";
-      speakAsync("Choose your AI voice. Say a voice name, or say continue to skip.").then(() => startContinuousRec());
-    }
-  }, [step, isSpeakMode, startContinuousRec]);
+    setAutoPlayIdx(0);
+    setAutoPhase("playing");
+    return () => {
+      window.speechSynthesis?.cancel();
+      try { autoRecRef.current?.abort(); } catch {}
+      autoRecRef.current = null;
+    };
+  }, [step]);
 
-  // STEP 4: Communication — auto-listen
+  // Step 3: play the current voice sample
   useEffect(() => {
-    if (step !== 4 || !isSpeakMode) return;
-    if (hasSpokenRef.current !== "comm-method") {
-      hasSpokenRef.current = "comm-method";
-      speakAsync("How do you like to communicate? Choose up to 3.").then(() => startContinuousRec());
-    }
-  }, [step, isSpeakMode, startContinuousRec]);
+    if (step !== 3 || autoPhase !== "playing") return;
+    const voice = CURATED_VOICES[autoPlayIdx];
+    if (!voice) return;
 
-  // STEP 6: Confirmation
+    // Highlight this voice as current selection
+    setVoiceSettings((s) => ({ ...s, elevenLabsVoiceId: voice.id, elevenLabsVoiceName: voice.name, voiceURI: null }));
+
+    // Scroll voice into view
+    const el = voiceListRef.current?.querySelector(`[data-voice-id="${voice.id}"]`);
+    el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+
+    const synth = window.speechSynthesis;
+    synth.cancel();
+
+    let cleanupCalled = false;
+    let safetyTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const advance = () => {
+      if (cleanupCalled) return;
+      if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
+      setAutoPhase("listening");
+    };
+
+    const doSpeak = (tries: number) => {
+      const voices = synth.getVoices();
+      const u = new SpeechSynthesisUtterance(`Hello. My name is ${voice.name}. I am here with you.`);
+      const picked = pickSynthVoice(voice, voices);
+      if (picked) u.voice = picked;
+      u.rate = 1;
+      u.pitch = 1;
+      u.volume = 1;
+      u.onend = advance;
+      u.onerror = () => {
+        if (cleanupCalled) return;
+        if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
+        if (tries < 3) {
+          setTimeout(() => { if (!cleanupCalled) { synth.cancel(); synth.resume(); doSpeak(tries + 1); } }, 200);
+        } else {
+          advance();
+        }
+      };
+      synth.resume();
+      synth.speak(u);
+      safetyTimer = setTimeout(advance, 10000);
+    };
+
+    if (synth.getVoices().length > 0) {
+      doSpeak(1);
+    } else {
+      synth.onvoiceschanged = () => { synth.onvoiceschanged = null; doSpeak(1); };
+    }
+
+    return () => {
+      cleanupCalled = true;
+      if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
+      synth.cancel();
+    };
+  }, [step, autoPhase, autoPlayIdx]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Step 3: listen for "next", "stop", "pick this one", "I choose this voice"
+  useEffect(() => {
+    if (step !== 3 || autoPhase !== "listening") return;
+    const SR = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    if (!SR) return;
+
+    const rec = new SR();
+    autoRecRef.current = rec;
+    rec.continuous = false;
+    rec.interimResults = false;
+    rec.lang = "en-US";
+    rec.maxAlternatives = 1;
+
+    rec.onresult = (event: any) => {
+      const last = event.results[event.results.length - 1];
+      if (!last?.isFinal) return;
+      const t = last[0]?.transcript?.trim().toLowerCase() ?? "";
+
+      if (["pick this one", "i choose this", "i choose this voice", "select this", "this one", "choose this"].some((w) => t.includes(w))) {
+        try { rec.abort(); } catch {}
+        autoRecRef.current = null;
+        clearSpoken();
+        setStep(4);
+        return;
+      }
+      if (["next", "skip"].some((w) => t.includes(w))) {
+        try { rec.abort(); } catch {}
+        autoRecRef.current = null;
+        const nextIdx = (autoPlayIdx + 1) % CURATED_VOICES.length;
+        setAutoPlayIdx(nextIdx);
+        setAutoPhase("playing");
+        return;
+      }
+      if (["stop", "pause", "enough", "quit"].some((w) => t.includes(w))) {
+        try { rec.abort(); } catch {}
+        autoRecRef.current = null;
+        setAutoPhase("idle");
+        return;
+      }
+      // Unrecognised — restart listening
+      try { rec.start(); } catch {}
+    };
+
+    rec.onend = () => {
+      // If still in listening phase (no command matched), restart
+      if (autoRecRef.current === rec) {
+        try { rec.start(); } catch {}
+      }
+    };
+
+    try { rec.start(); } catch {}
+
+    return () => {
+      try { rec.abort(); } catch {}
+      if (autoRecRef.current === rec) autoRecRef.current = null;
+    };
+  }, [step, autoPhase, autoPlayIdx]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (step !== 4) return;
+    if (!hasSpoken("comm-method")) {
+      markSpoken("comm-method");
+      ttsSpeakAsync("Every communication method is always available to you. Switch anytime, from any room.");
+    }
+  }, [step, ttsSpeakAsync, hasSpoken, markSpoken]);
+
+  useEffect(() => {
+    if (step !== 5) return;
+    ttsSpeakAsync("This app includes a private safety feature. Only you will know what it does. You can access it anytime from the main menu.");
+  }, [step, ttsSpeakAsync]);
+
   useEffect(() => {
     if (step !== 6) return;
-    stopContinuousRec();
-    if (isSpeakMode) speak("You are all set. Welcome to Soul Echoes.");
+    ttsSpeak("You are all set. Welcome to Soul Echoes.");
     const timer = setTimeout(() => {
       savePreferences({
         onboardingComplete: true,
         primaryLanguage: primaryLang,
         secondaryLanguage: secondaryLang,
         signLanguageEnabled: signLanguage === true,
-        communicationMethods: commMethods.length > 0 ? commMethods : [inputMethod || "type"],
+        communicationMethods: COMMUNICATION_METHODS.map((m) => m.id),
         autoReadEnabled: true,
         inputMethod: inputMethod || "type",
       });
@@ -365,23 +549,32 @@ useAlwaysOnListening({
       onComplete();
     }, 4500);
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
-  /* ─── Voice handler (all steps, routed by step) ─── */
   const handleVoiceInput = useCallback((t: string) => {
     const lower = t.toLowerCase().trim();
-
+    if (step === 0) {
+      const matched = matchCommMethod(t) as InputMethod | null;
+      if (matched && ["speak", "type", "sign", "point", "connect"].includes(matched)) {
+        setInputMethod(matched);
+        setRetryMessage(null);
+        clearSpoken();
+        if (matched === "sign") setCameraOpen(true);
+        setStep(1);
+        return;
+      }
+      setRetryMessage(`I heard "${t}" — say speak, type, sign, point, or connect.`);
+      return;
+    }
     if (step === 2) {
       if (langSubStep === 0) {
         const match = matchLanguage(t);
         if (match) {
-          stopContinuousRec();
           setPrimaryLang(match.code);
           setRetryMessage(null);
-          hasSpokenRef.current = "";
+          clearSpoken();
           savePreferences({ primaryLanguage: match.code });
-          speakAsync(`Got it — ${match.name} selected.`).then(() => setLangSubStep(1));
+          ttsSpeakAsync(`Got it — ${match.name} selected.`).then(() => setLangSubStep(1));
         } else {
           setRetryMessage(`I heard "${t}" — try again.`);
         }
@@ -389,29 +582,27 @@ useAlwaysOnListening({
         if (wantSecondary === true) {
           const match = matchLanguage(t);
           if (match) {
-            stopContinuousRec();
             setSecondaryLang(match.code);
             setRetryMessage(null);
-            hasSpokenRef.current = "";
+            clearSpoken();
             savePreferences({ secondaryLanguage: match.code });
-            speakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
+            ttsSpeakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
           } else {
             setRetryMessage(`I heard "${t}" — say a language name.`);
           }
         } else {
           const yn = matchYesNo(t);
-          if (yn === true) { setWantSecondary(true); setRetryMessage(null); hasSpokenRef.current = ""; }
-          else if (yn === false) { stopContinuousRec(); setWantSecondary(false); setRetryMessage(null); hasSpokenRef.current = ""; setLangSubStep(2); }
+          if (yn === true) { setWantSecondary(true); setRetryMessage(null); clearSpoken(); }
+          else if (yn === false) { setWantSecondary(false); setRetryMessage(null); clearSpoken(); setLangSubStep(2); }
           else {
             const match = matchLanguage(t);
             if (match) {
-              stopContinuousRec();
               setWantSecondary(true);
               setSecondaryLang(match.code);
               setRetryMessage(null);
-              hasSpokenRef.current = "";
+              clearSpoken();
               savePreferences({ secondaryLanguage: match.code });
-              speakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
+              ttsSpeakAsync(`Selected ${match.name}`).then(() => setLangSubStep(2));
             } else {
               setRetryMessage(`I heard "${t}". Say yes, no, or a language.`);
             }
@@ -419,242 +610,317 @@ useAlwaysOnListening({
         }
       } else if (langSubStep === 2) {
         const yn = matchYesNo(t);
-        if (yn === true) { stopContinuousRec(); setSignLanguage(true); setStep(3); }
-        else if (yn === false) { stopContinuousRec(); setSignLanguage(false); setStep(3); }
+        if (yn === true) { setSignLanguage(true); setStep(3); }
+        else if (yn === false) { setSignLanguage(false); setStep(3); }
         else setRetryMessage(`I heard "${t}". Say yes or no.`);
       }
     } else if (step === 3) {
-      // Voice setup — say voice name or "continue"
-      if (["continue", "next", "skip"].some((w) => lower.includes(w))) { stopContinuousRec(); setStep(4); return; }
-      const matchingVoice = filteredVoices.find((v) => lower.includes(v.name.toLowerCase()) || v.name.toLowerCase().includes(lower));
-      if (matchingVoice) {
-        setVoiceSettings((s) => ({ ...s, voiceURI: matchingVoice.voiceURI }));
+      if (["continue", "next", "skip"].some((w) => lower.includes(w))) {
+        clearSpoken();
         setRetryMessage(null);
+        setStep(4);
+        return;
+      }
+      const matchingVoice = availableVoices.find((v) => lower.includes(v.name.toLowerCase()) || v.name.toLowerCase().includes(lower));
+      if (matchingVoice) {
+        setVoiceSettings((s) => ({ ...s, voiceURI: matchingVoice.voiceURI, elevenLabsVoiceId: null, elevenLabsVoiceName: null }));
+        setRetryMessage(null);
+        clearSpoken();
+        ttsSpeakAsync(`Great choice. Moving on to the next step.`).then(() => setStep(4));
       } else {
         setRetryMessage(`I heard "${t}" — say a voice name or "continue".`);
       }
     } else if (step === 4) {
-      const method = matchCommMethod(t);
-      if (method && !commMethods.includes(method)) {
-        const updated = [...commMethods, method].slice(0, 3);
-        setCommMethods(updated);
-        const label = COMMUNICATION_METHODS.find((m) => m.id === method)?.label || method;
-        speak(`Added: ${label}.`);
+      if (["continue", "next", "okay", "ok", "got it", "yes"].some((w) => lower.includes(w))) {
+        clearSpoken();
+        setRetryMessage(null);
+        setStep(5);
+      }
+    } else if (step === 5) {
+      const yn = matchYesNo(t);
+      if (yn === true || ["got it", "continue", "ok", "okay", "yes"].some((w) => lower.includes(w))) {
+        clearSpoken();
+        setRetryMessage(null);
+        setStep(6);
+      } else {
+        setRetryMessage(`I heard "${t}" — say yes or got it to continue.`);
       }
     }
-  }, [step, langSubStep, wantSecondary, commMethods, stopContinuousRec, voices, voiceSettings]);
+  }, [step, langSubStep, wantSecondary, voiceSettings]);
 
   handleVoiceRef.current = handleVoiceInput;
 
-  /* ─── Helpers ─── */
-  const toggleComm = (id: string) => {
-    setRetryMessage(null);
-    setCommMethods((prev) => {
-      if (prev.includes(id)) return prev.filter((m) => m !== id);
-      if (prev.length >= 3) return prev;
-      return [...prev, id];
-    });
-  };
-
-  const getLangName = (code: string) =>
-    WORLD_LANGUAGES.find((l) => l.code === code)?.name || code;
-
-  const filteredVoices = voices.filter((v) => {
-    if (voiceSettings.genderPref === "neutral") return true;
-    return guessGender(v.name) === voiceSettings.genderPref || guessGender(v.name) === "neutral";
-  });
+  const getLangName = (code: string) => WORLD_LANGUAGES.find((l) => l.code === code)?.name || code;
 
   const handleSelectLang = (code: string, name: string, next: () => void) => {
-    stopContinuousRec();
     setPrimaryLang(code);
     setRetryMessage(null);
-    hasSpokenRef.current = "";
+    clearSpoken();
     savePreferences({ primaryLanguage: code });
-    if (isSpeakMode) speakAsync(`Got it — ${name} selected.`).then(next);
+    if (isSpeakMode) ttsSpeakAsync(`Got it — ${name} selected.`).then(next);
     else next();
   };
 
   const handleSelectSecondaryLang = (code: string, name: string) => {
-    stopContinuousRec();
     setSecondaryLang(code);
     setRetryMessage(null);
-    hasSpokenRef.current = "";
+    clearSpoken();
     savePreferences({ secondaryLanguage: code });
-    if (isSpeakMode) speakAsync(`Selected ${name}`).then(() => setLangSubStep(2));
+    if (isSpeakMode) ttsSpeakAsync(`Selected ${name}`).then(() => setLangSubStep(2));
     else setLangSubStep(2);
   };
 
-  /* ─── Input method cards config ─── */
-  const INPUT_METHOD_CARDS: { id: InputMethod; label: string; emoji: string; desc: string }[] = [
-    { id: "speak", label: "Speak It", emoji: "🗣️", desc: "Use your voice" },
-    { id: "sign", label: "Sign It", emoji: "🤟", desc: "Use sign language" },
-    { id: "point", label: "Point It", emoji: "👆", desc: "Tap cards & pictures" },
-    { id: "type", label: "Type It", emoji: "⌨️", desc: "Use your keyboard" },
-    { id: "connect", label: "Connect Device", emoji: "🔌", desc: "AAC, eye gaze, Bluetooth" },
+  const testVoice = useCallback((voice: CuratedVoice) => {
+    if (!("speechSynthesis" in window)) return;
+    const synth = window.speechSynthesis;
+    synth.cancel();
+
+    let safetyTimer: ReturnType<typeof setTimeout> | null = null;
+    const clear = () => {
+      if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
+      setPlayingVoiceURI(null);
+    };
+
+    const attempt = (tries: number) => {
+      const allVoices = synth.getVoices();
+      const u = new SpeechSynthesisUtterance("Hello, I am here with you.");
+      u.rate = voiceSettings.speed;
+      u.volume = voiceSettings.volume;
+      u.pitch = 1;
+      const picked = pickSynthVoice(voice, allVoices);
+      if (picked) u.voice = picked;
+      u.onend = clear;
+      u.onerror = () => {
+        if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
+        if (tries < 3) {
+          setTimeout(() => { synth.cancel(); synth.resume(); attempt(tries + 1); }, 200);
+        } else {
+          setPlayingVoiceURI(null);
+        }
+      };
+      synth.resume();
+      synth.speak(u);
+      safetyTimer = setTimeout(clear, 8000);
+    };
+
+    setPlayingVoiceURI(voice.id);
+    const voices = synth.getVoices();
+    if (voices.length > 0) { attempt(1); }
+    else { synth.onvoiceschanged = () => { synth.onvoiceschanged = null; attempt(1); }; }
+  }, [voiceSettings.speed, voiceSettings.volume]);
+
+  const INPUT_METHOD_CARDS: {
+    id: InputMethod; label: string; emoji: string; desc: string; detail?: string;
+    grad: string; border: string; glow: string; iconGrad: string;
+  }[] = [
+    {
+      id: "speak", label: "Speak It", emoji: "🗣️", desc: "Use your voice",
+      grad: "from-violet-500/20 to-purple-700/10", border: "border-violet-400/30",
+      glow: "hover:shadow-[0_0_28px_rgba(167,139,250,0.35)]", iconGrad: "from-violet-500 to-purple-600",
+    },
+    {
+      id: "sign", label: "Sign It", emoji: "🤟", desc: "Use sign language with camera",
+      grad: "from-teal-400/20 to-emerald-600/10", border: "border-teal-400/30",
+      glow: "hover:shadow-[0_0_28px_rgba(52,211,153,0.35)]", iconGrad: "from-teal-400 to-emerald-500",
+    },
+    {
+      id: "point", label: "Point It", emoji: "👆", desc: "Tap cards & pictures",
+      grad: "from-rose-400/20 to-pink-600/10", border: "border-rose-400/30",
+      glow: "hover:shadow-[0_0_28px_rgba(251,113,133,0.35)]", iconGrad: "from-rose-400 to-pink-500",
+    },
+    {
+      id: "type", label: "Type It", emoji: "⌨️", desc: "Use your keyboard or on-screen text",
+      grad: "from-amber-400/20 to-orange-500/10", border: "border-amber-400/30",
+      glow: "hover:shadow-[0_0_28px_rgba(251,191,36,0.35)]", iconGrad: "from-amber-400 to-orange-500",
+    },
+    {
+      id: "connect", label: "Connect My Device", emoji: "🔌",
+      desc: "Braille display, AAC device, eye gaze, or switch access",
+      detail: "Connect via USB, Bluetooth, or 3.5mm audio port",
+      grad: "from-sky-400/20 to-blue-600/10", border: "border-sky-400/30",
+      glow: "hover:shadow-[0_0_28px_rgba(56,189,248,0.35)]", iconGrad: "from-sky-400 to-blue-500",
+    },
   ];
 
-  /* ═══════════════════ RENDER ═══════════════════ */
   return (
-    <div
-      className="fixed inset-0 z-50 bg-background flex items-center justify-center p-4 overflow-y-auto"
-      role="main"
-      aria-label="Soul Echoes Onboarding"
-    >
+    <div className="fixed inset-0 z-50 bg-[radial-gradient(ellipse_at_top,hsl(270,50%,8%)_0%,hsl(260,40%,4%)_100%)] flex items-center justify-center p-4 overflow-y-auto" role="main" aria-label="Soul Echoes Onboarding">
       <AnimatePresence mode="wait">
-        {/* ─── STEP 0: Input Method Selection ─── */}
+
+        {/* STEP 0: Input Method */}
         {step === 0 && (
-          <motion.div key="input-method" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-6 text-center">
-            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
-              How would you like to interact?
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Choose your preferred way to communicate. This will be used throughout the app.
-            </p>
+          <motion.div key="input-method" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-6">
+            {/* Header */}
+            <div className="text-center space-y-3">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-violet-500/20 to-pink-500/20 border border-violet-400/20">
+                <span className="text-xs font-medium text-violet-300 tracking-wide uppercase">Welcome</span>
+              </div>
+              <h1 className="font-display text-2xl sm:text-3xl font-bold bg-gradient-to-r from-teal-300 via-violet-300 to-pink-300 bg-clip-text text-transparent">
+                How shall we guide you?
+              </h1>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
+                Just for this setup — not a permanent choice.<br />
+                <span className="text-foreground/60">All options stay available everywhere, always.</span>
+              </p>
+            </div>
+            {/* Availability ribbon */}
+            <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground/50 px-2">
+              {["🗣️ Talk","⌨️ Type","🤟 Sign","👆 Point","⠿ Braille","💻 AAC","👁️ Eye gaze","🔘 Switch"].map((t) => (
+                <span key={t}>{t}</span>
+              ))}
+              <span className="w-full text-center text-foreground/30 mt-0.5">switch any of these anytime, anywhere in the app</span>
+            </div>
+            {/* Cards */}
             <div className="grid gap-3">
               {INPUT_METHOD_CARDS.map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => {
-                    setInputMethod(m.id);
-                    savePreferences({ inputMethod: m.id });
-                    if (m.id === "sign") setCameraOpen(true);
-                    setStep(1);
-                  }}
-                  className="flex items-center gap-4 px-5 py-5 rounded-2xl border-2 border-border bg-card text-left transition-all hover:border-primary/50 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
-                  aria-label={`${m.label} — ${m.desc}`}
+                  onClick={() => { setInputMethod(m.id); savePreferences({ inputMethod: m.id }); if (m.id === "sign") setCameraOpen(true); setStep(1); }}
+                  className={`flex items-center gap-4 px-5 py-4 rounded-3xl border bg-gradient-to-br ${m.grad} ${m.border} ${m.glow} text-left transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-violet-500/40`}
                 >
-                  <span className="text-4xl" aria-hidden="true">{m.emoji}</span>
-                  <div>
-                    <p className="text-lg font-semibold text-foreground">{m.label}</p>
-                    <p className="text-sm text-muted-foreground">{m.desc}</p>
+                  <div className={`shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br ${m.iconGrad} flex items-center justify-center shadow-lg`}>
+                    <span className="text-2xl leading-none" role="img" aria-hidden="true">{m.emoji}</span>
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-semibold text-foreground">{m.label}</p>
+                    <p className="text-sm text-muted-foreground/80 leading-snug">{m.desc}</p>
+                    {m.detail && <p className="text-xs text-sky-300/70 mt-0.5">{m.detail}</p>}
+                  </div>
+                  <ChevronRight className="shrink-0 h-4 w-4 text-muted-foreground/40" />
                 </button>
               ))}
             </div>
           </motion.div>
         )}
 
-        {/* ─── STEP 1: Welcome ─── */}
+        {/* STEP 1: Welcome */}
         {step === 1 && (
-          <motion.div
-            key="welcome"
-            {...fadeSlide}
-            className="text-center max-w-2xl mx-auto space-y-8 cursor-pointer"
-            onClick={() => setStep(2)}
-            role="button"
-            aria-label="Tap to continue"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === "Enter" && setStep(2)}
-          >
+          <motion.div key="welcome" {...fadeSlide} className="text-center max-w-2xl mx-auto space-y-8 cursor-pointer px-4"
+            onClick={() => { window.speechSynthesis?.cancel(); setStep(2); }} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") { window.speechSynthesis?.cancel(); setStep(2); } }}>
+            {/* glow orb */}
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center" aria-hidden="true">
+              <div className="w-96 h-96 rounded-full bg-gradient-radial from-violet-600/20 via-purple-600/5 to-transparent blur-3xl" />
+            </div>
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-block px-5 py-1.5 rounded-full border border-purple-400/30 bg-purple-500/10 backdrop-blur-sm"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 120 }}
+              className="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-teal-400 via-violet-500 to-pink-500 flex items-center justify-center shadow-[0_0_40px_rgba(167,139,250,0.5)]"
             >
-              <span className="text-sm font-medium text-purple-300">Your sanctuary for healing</span>
+              <span className="text-4xl" aria-hidden="true">✦</span>
             </motion.div>
-            <motion.h1
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-tight bg-gradient-to-r from-teal-400 via-pink-400 to-purple-500 bg-clip-text text-transparent"
-            >
+            <div className="inline-block px-5 py-1.5 rounded-full border border-violet-400/30 bg-violet-500/10">
+              <span className="text-sm font-medium text-violet-300 tracking-wide">Your sanctuary for healing</span>
+            </div>
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-tight bg-gradient-to-r from-teal-300 via-pink-300 to-violet-400 bg-clip-text text-transparent">
               Soul Echoes
-            </motion.h1>
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="text-lg sm:text-xl text-foreground">
-              Your daily healing advocate.
-            </motion.p>
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="text-base text-muted-foreground leading-relaxed">
+            </h1>
+            <p className="text-lg sm:text-xl text-foreground/90 font-light">Your daily healing advocate.</p>
+            <p className="text-base text-muted-foreground/70 leading-relaxed max-w-md mx-auto">
               A sacred space to release, heal, and find closure.
-            </motion.p>
+            </p>
             {welcomeDone && (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-muted-foreground animate-pulse">
+              <motion.p
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+                className="text-sm text-violet-300/60 animate-pulse"
+              >
                 Tap anywhere to continue
               </motion.p>
             )}
           </motion.div>
         )}
 
-        {/* ─── STEP 2: Language ─── */}
+        {/* STEP 2: Language */}
         {step === 2 && (
-          <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 bg-gradient-to-b from-[hsl(220,60%,12%)] to-[hsl(230,50%,18%)] rounded-3xl p-4 sm:p-6">
-            {/* Speak mode indicator */}
-            {isSpeakMode && (
-              <ListeningIndicator visible={isListening} />
-            )}
-            {retryMessage && <p className="text-sm text-center text-destructive" role="alert">{retryMessage}</p>}
-
-            {/* Sign mode: camera */}
+          <motion.div key="language" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-5 bg-gradient-to-b from-[hsl(260,45%,10%)] to-[hsl(260,35%,7%)] border border-white/[0.07] rounded-3xl p-5 sm:p-7 shadow-2xl">
+            {isSpeakMode && <ListeningIndicator visible={isListening} level={inputLevel} />}
+            {retryMessage && <p className="text-sm text-center text-rose-400" role="alert">{retryMessage}</p>}
             {inputMethod === "sign" && <ASLCameraPanel open={true} onClose={() => {}} />}
-
-            {/* Connect device message */}
             {inputMethod === "connect" && (
-              <div className="bg-card border border-border rounded-2xl p-4 text-center space-y-2 mb-4">
-                <p className="text-2xl">🔌</p>
-                <p className="text-sm text-muted-foreground">Connect your AAC device, eye gaze tracker, or external communication equipment via Bluetooth or USB.</p>
-                <p className="text-xs text-muted-foreground">Use your device or tap below to select.</p>
+              <div className="flex items-center gap-3 bg-sky-500/10 border border-sky-400/20 rounded-2xl p-4">
+                <div className="shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center shadow-lg">
+                  <span className="text-lg" aria-hidden="true">🔌</span>
+                </div>
+                <p className="text-sm text-muted-foreground/80">Connect your AAC device, eye gaze tracker, or external equipment via Bluetooth or USB.</p>
               </div>
             )}
 
             {langSubStep === 0 && (
-              <div className="space-y-3">
-                <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
+              <div className="space-y-4">
+                <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground text-center">
                   What is your primary language?
                 </h2>
-
-                {/* Type mode: text input */}
                 {inputMethod === "type" && (
-                  <div className="space-y-2">
-                    <Input
-                      placeholder="Type your language..."
-                      value={typedLang}
-                      onChange={(e) => setTypedLang(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && typedLang.trim()) {
-                          const match = matchLanguage(typedLang);
-                          if (match) handleSelectLang(match.code, match.name, () => setLangSubStep(1));
-                          else setRetryMessage(`"${typedLang}" not found. Try another name.`);
-                        }
-                      }}
-                      className="text-lg py-6 rounded-2xl"
-                      autoFocus
-                    />
-                  </div>
+                  <Input placeholder="Type your language..." value={typedLang} onChange={(e) => setTypedLang(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && typedLang.trim()) { const match = matchLanguage(typedLang); if (match) handleSelectLang(match.code, match.name, () => setLangSubStep(1)); else setRetryMessage(`"${typedLang}" not found.`); }}}
+                    className="text-lg py-6 rounded-2xl bg-white/5 border-white/10 focus:border-violet-400/50" autoFocus />
                 )}
+                {(inputMethod === "point" || inputMethod === "speak" || inputMethod === "sign" || inputMethod === "connect") && (() => {
+                  const cards = inputMethod === "point" ? LANGUAGE_POINT_CARDS.map(l => ({ code: l.code, name: l.label, cc: l.cc })) : FLAG_LANGUAGES;
+                  const sel = primaryLang;
+                  return (
+                    <div className="max-h-[380px] overflow-y-auto rounded-xl p-1">
+                      <div className="grid grid-cols-3 gap-2">
+                        {cards.map((lang) => (
+                          <button key={lang.code} onClick={() => handleSelectLang(lang.code, lang.name, () => setLangSubStep(1))}
+                            className={`flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all duration-200 ${
+                              sel === lang.code
+                                ? "border-violet-400/70 bg-violet-500/20 scale-105 shadow-[0_0_16px_rgba(167,139,250,0.4)]"
+                                : "border-white/10 bg-white/[0.04] hover:border-violet-400/40 hover:bg-white/[0.08] hover:shadow-[0_0_10px_rgba(167,139,250,0.15)] hover:scale-[1.03]"
+                            }`}>
+                            <img src={`https://flagcdn.com/48x36/${lang.cc}.png`}
+                              srcSet={`https://flagcdn.com/96x72/${lang.cc}.png 2x`}
+                              alt={lang.name} className="w-12 h-9 rounded-md object-cover shadow-md" />
+                            <span className="text-[11px] font-medium text-foreground/85 text-center leading-tight">{lang.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
 
-                {/* Point mode: large emoji cards */}
-                {inputMethod === "point" && (
-                  <div className="grid grid-cols-3 gap-2 max-h-[400px] overflow-y-auto">
-                    {LANGUAGE_POINT_CARDS.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => handleSelectLang(lang.code, lang.label, () => setLangSubStep(1))}
-                        className={`flex flex-col items-center gap-1 p-4 rounded-2xl border-2 transition-all ${
-                          primaryLang === lang.code ? "border-primary bg-primary/10 scale-105" : "border-border bg-card hover:border-primary/40"
-                        }`}
-                      >
-                        <span className="text-3xl">{lang.emoji}</span>
-                        <span className="text-sm font-medium text-foreground">{lang.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Speak, Sign, Connect modes + fallback: flag grid */}
-                {(inputMethod === "speak" || inputMethod === "sign" || inputMethod === "connect") && (
-                  <div className="max-h-[420px] overflow-y-auto rounded-xl p-1">
-                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                      {FLAG_LANGUAGES.map((lang) => (
-                        <button
-                          key={lang.code}
-                          onClick={() => handleSelectLang(lang.code, lang.name, () => setLangSubStep(1))}
-                          className={`flex flex-col items-center gap-1 p-3 rounded-2xl border-2 transition-all ${
-                            primaryLang === lang.code ? "border-primary bg-white scale-105 shadow-lg" : "border-white/20 bg-white/90 hover:bg-white shadow-sm"
-                          }`}
-                        >
-                          <img src={`https://flagcdn.com/48x36/${lang.cc}.png`} alt={lang.name} className="w-12 h-9 object-cover rounded-sm" />
-                          <span className="text-xs font-medium text-gray-800">{lang.name}</span>
+            {langSubStep === 1 && (
+              <div className="space-y-5">
+                <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground text-center">
+                  Add a second language?
+                </h2>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => { setWantSecondary(true); setRetryMessage(null); clearSpoken(); }}
+                    className={`flex items-center gap-2 px-7 py-4 rounded-2xl border text-base font-semibold transition-all duration-200 ${
+                      wantSecondary === true
+                        ? "border-teal-400/70 bg-teal-500/20 text-teal-300 shadow-[0_0_18px_rgba(52,211,153,0.35)]"
+                        : "border-white/10 bg-white/5 text-foreground/80 hover:border-teal-400/40 hover:shadow-[0_0_12px_rgba(52,211,153,0.2)]"
+                    }`}
+                  >
+                    <span className="text-xl" aria-hidden="true">✨</span> Yes
+                  </button>
+                  <button
+                    onClick={() => { setWantSecondary(false); setSecondaryLang(null); setRetryMessage(null); clearSpoken(); setLangSubStep(2); }}
+                    className={`flex items-center gap-2 px-7 py-4 rounded-2xl border text-base font-semibold transition-all duration-200 ${
+                      wantSecondary === false
+                        ? "border-rose-400/70 bg-rose-500/20 text-rose-300 shadow-[0_0_18px_rgba(251,113,133,0.35)]"
+                        : "border-white/10 bg-white/5 text-foreground/80 hover:border-rose-400/40 hover:shadow-[0_0_12px_rgba(251,113,133,0.2)]"
+                    }`}
+                  >
+                    <span className="text-xl" aria-hidden="true">🌿</span> No
+                  </button>
+                </div>
+                {wantSecondary && (
+                  <div className="max-h-[280px] overflow-y-auto rounded-xl p-1">
+                    <div className="grid grid-cols-3 gap-2">
+                      {FLAG_LANGUAGES.filter((l) => l.code !== primaryLang).map((lang) => (
+                        <button key={lang.code} onClick={() => handleSelectSecondaryLang(lang.code, lang.name)}
+                          className={`flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all duration-200 ${
+                            secondaryLang === lang.code
+                              ? "border-violet-400/70 bg-violet-500/20 scale-105 shadow-[0_0_16px_rgba(167,139,250,0.4)]"
+                              : "border-white/10 bg-white/[0.04] hover:border-violet-400/40 hover:bg-white/[0.08] hover:shadow-[0_0_10px_rgba(167,139,250,0.15)] hover:scale-[1.03]"
+                          }`}>
+                          <img src={`https://flagcdn.com/48x36/${lang.cc}.png`}
+                            srcSet={`https://flagcdn.com/96x72/${lang.cc}.png 2x`}
+                            alt={lang.name} className="w-12 h-9 rounded-md object-cover shadow-md" />
+                          <span className="text-[11px] font-medium text-foreground/85 text-center leading-tight">{lang.name}</span>
                         </button>
                       ))}
                     </div>
@@ -663,328 +929,323 @@ useAlwaysOnListening({
               </div>
             )}
 
-            {langSubStep === 1 && (
-              <div className="space-y-4">
-                <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
-                  Would you like to add a second language?
-                </h2>
-                <div className="flex gap-4 justify-center">
-                  <Button
-                    size="lg"
-                    className="text-lg px-8 py-6 rounded-2xl min-w-[120px] gap-2"
-                    onClick={() => { setWantSecondary(true); setRetryMessage(null); hasSpokenRef.current = ""; }}
-                    variant={wantSecondary === true ? "default" : "outline"}
-                  >
-                    <span className="text-2xl">✅</span> Yes
-                  </Button>
-                  <Button
-                    size="lg"
-                    className="text-lg px-8 py-6 rounded-2xl min-w-[120px] gap-2"
-                    onClick={() => { setWantSecondary(false); setSecondaryLang(null); setRetryMessage(null); hasSpokenRef.current = ""; setLangSubStep(2); }}
-                    variant={wantSecondary === false ? "default" : "outline"}
-                  >
-                    <span className="text-2xl">❌</span> No
-                  </Button>
-                </div>
-                {wantSecondary && (
-                  <>
-                    {inputMethod === "type" && (
-                      <Input
-                        placeholder="Type second language..."
-                        value={typedLang}
-                        onChange={(e) => setTypedLang(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && typedLang.trim()) {
-                            const match = matchLanguage(typedLang);
-                            if (match) handleSelectSecondaryLang(match.code, match.name);
-                            else setRetryMessage(`"${typedLang}" not found.`);
-                          }
-                        }}
-                        className="text-lg py-6 rounded-2xl"
-                        autoFocus
-                      />
-                    )}
-                    {inputMethod === "point" && (
-                      <div className="grid grid-cols-3 gap-2 max-h-[300px] overflow-y-auto">
-                        {LANGUAGE_POINT_CARDS.filter((l) => l.code !== primaryLang).map((lang) => (
-                          <button
-                            key={lang.code}
-                            onClick={() => handleSelectSecondaryLang(lang.code, lang.label)}
-                            className={`flex flex-col items-center gap-1 p-4 rounded-2xl border-2 transition-all ${
-                              secondaryLang === lang.code ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"
-                            }`}
-                          >
-                            <span className="text-3xl">{lang.emoji}</span>
-                            <span className="text-sm font-medium text-foreground">{lang.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {(inputMethod === "speak" || inputMethod === "sign" || inputMethod === "connect") && (
-                      <div className="max-h-[300px] overflow-y-auto rounded-xl p-1">
-                        <div className="grid grid-cols-3 gap-2">
-                          {FLAG_LANGUAGES.filter((l) => l.code !== primaryLang).map((lang) => (
-                            <button
-                              key={lang.code}
-                              onClick={() => handleSelectSecondaryLang(lang.code, lang.name)}
-                              className={`flex flex-col items-center gap-1 p-3 rounded-2xl border-2 transition-all ${
-                                secondaryLang === lang.code ? "border-primary bg-white scale-105 shadow-lg" : "border-white/20 bg-white/90 shadow-sm"
-                              }`}
-                            >
-                              <img src={`https://flagcdn.com/48x36/${lang.cc}.png`} alt={lang.name} className="w-12 h-9 object-cover rounded-sm" />
-                              <span className="text-xs font-medium text-gray-800">{lang.name}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-
             {langSubStep === 2 && (
               <div className="space-y-6">
-                <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
-                  Would you like to enable Sign Language?
-                </h2>
-                <div className="flex gap-4 justify-center">
-                  <Button
-                    size="lg"
-                    className="text-xl px-10 py-7 rounded-2xl min-w-[140px] gap-3"
-                    onClick={() => { setSignLanguage(true); setRetryMessage(null); setStep(3); }}
-                    variant={signLanguage === true ? "default" : "outline"}
-                  >
-                    <span className="text-3xl">🤟</span> Yes
-                  </Button>
-                  <Button
-                    size="lg"
-                    className="text-xl px-10 py-7 rounded-2xl min-w-[140px] gap-3"
-                    onClick={() => { setSignLanguage(false); setRetryMessage(null); setStep(3); }}
-                    variant={signLanguage === false ? "default" : "outline"}
-                  >
-                    <span className="text-3xl">❌</span> No
-                  </Button>
+                <div className="text-center space-y-1">
+                  <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center shadow-[0_0_24px_rgba(52,211,153,0.4)] mb-4">
+                    <span className="text-3xl" aria-hidden="true">🤟</span>
+                  </div>
+                  <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">Enable Sign Language?</h2>
                 </div>
-                <p className="text-center text-muted-foreground text-sm">
-                  Selected: {getLangName(primaryLang)}{secondaryLang && ` + ${getLangName(secondaryLang)}`}
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => { setSignLanguage(true); setRetryMessage(null); setStep(3); }}
+                    className={`flex items-center gap-2 px-7 py-4 rounded-2xl border text-base font-semibold transition-all duration-200 ${
+                      signLanguage === true
+                        ? "border-teal-400/70 bg-teal-500/20 text-teal-300 shadow-[0_0_18px_rgba(52,211,153,0.35)]"
+                        : "border-white/10 bg-white/5 text-foreground/80 hover:border-teal-400/40 hover:shadow-[0_0_12px_rgba(52,211,153,0.2)]"
+                    }`}
+                  >
+                    <span className="text-xl" aria-hidden="true">🤟</span> Yes
+                  </button>
+                  <button
+                    onClick={() => { setSignLanguage(false); setRetryMessage(null); setStep(3); }}
+                    className={`flex items-center gap-2 px-7 py-4 rounded-2xl border text-base font-semibold transition-all duration-200 ${
+                      signLanguage === false
+                        ? "border-rose-400/70 bg-rose-500/20 text-rose-300 shadow-[0_0_18px_rgba(251,113,133,0.35)]"
+                        : "border-white/10 bg-white/5 text-foreground/80 hover:border-rose-400/40 hover:shadow-[0_0_12px_rgba(251,113,133,0.2)]"
+                    }`}
+                  >
+                    <span className="text-xl" aria-hidden="true">🌿</span> No
+                  </button>
+                </div>
+                <p className="text-center text-muted-foreground/60 text-xs">
+                  {getLangName(primaryLang)}{secondaryLang && ` · ${getLangName(secondaryLang)}`}
                 </p>
               </div>
             )}
           </motion.div>
         )}
 
-        {/* ─── STEP 3: Voice Setup ─── */}
-        {step === 3 && (
-          <motion.div key="voice" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-4 max-h-[80vh] overflow-y-auto">
-            {isSpeakMode && <ListeningIndicator visible={isListening} />}
-            {retryMessage && <p className="text-sm text-center text-destructive">{retryMessage}</p>}
+        {/* STEP 3: Voice Setup — auto-play */}
+        {step === 3 && (() => {
+          const currentVoice = CURATED_VOICES[autoPlayIdx];
+          const chooseVoice = () => {
+            window.speechSynthesis?.cancel();
+            try { autoRecRef.current?.abort(); } catch {}
+            autoRecRef.current = null;
+            clearSpoken();
+            setStep(4);
+          };
+          const goTo = (idx: number) => {
+            window.speechSynthesis?.cancel();
+            try { autoRecRef.current?.abort(); } catch {}
+            autoRecRef.current = null;
+            setAutoPlayIdx(idx);
+            setAutoPhase("playing");
+          };
+          return (
+            <motion.div key="voice" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-5 bg-gradient-to-b from-[hsl(260,45%,10%)] to-[hsl(260,35%,7%)] border border-white/[0.07] rounded-3xl p-5 sm:p-7 shadow-2xl">
+              {/* Header */}
+              <div className="text-center space-y-1">
+                <div className="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center shadow-[0_0_20px_rgba(167,139,250,0.5)] mb-3">
+                  <span className="text-2xl" aria-hidden="true">🎙️</span>
+                </div>
+                <h2 className="font-display text-xl sm:text-2xl font-bold bg-gradient-to-r from-violet-300 to-pink-300 bg-clip-text text-transparent">
+                  Choose Your AI Voice
+                </h2>
+                <p className="text-muted-foreground/70 text-sm">
+                  {autoPhase === "idle"
+                    ? "Tap a voice to preview it, then tap Choose."
+                    : autoPhase === "playing"
+                    ? `Playing ${currentVoice?.name ?? ""}…`
+                    : 'Say "next", "pick this one", or "stop"'}
+                </p>
+              </div>
 
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
-              Choose Your AI Voice
-            </h2>
-            <p className="text-center text-muted-foreground text-sm">Pick the voice Soul Echoes will use to speak to you.</p>
-
-            {/* Gender */}
-            <div className="flex gap-3">
-              {(["feminine", "masculine", "neutral"] as const).map((g) => {
-                const gIcons = { feminine: "♀️", masculine: "♂️", neutral: "⚧️" };
-                return (
-                  <button
-                    key={g}
-                    onClick={() => setVoiceSettings((s) => ({ ...s, genderPref: g }))}
-                    className={`flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all flex items-center justify-center gap-2 ${
-                      voiceSettings.genderPref === g ? "border-primary bg-primary/10 text-foreground" : "border-border bg-card text-muted-foreground hover:border-primary/40"
-                    }`}
-                  >
-                    <span className="text-lg">{gIcons[g]}</span>
-                    {g.charAt(0).toUpperCase() + g.slice(1)}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Speed */}
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-foreground">Speed — {voiceSettings.speed <= 0.75 ? "Slow 🐢" : voiceSettings.speed >= 1.25 ? "Fast 🐇" : "Normal"}</p>
-              <Slider value={[voiceSettings.speed]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, speed: v }))} min={0.5} max={1.5} step={0.1} />
-            </div>
-
-            {/* Volume */}
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-foreground">Volume — {voiceSettings.volume <= 0.35 ? "Soft 🔈" : voiceSettings.volume >= 0.75 ? "Loud 🔊" : "Medium 🔉"}</p>
-              <Slider value={[voiceSettings.volume]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, volume: v }))} min={0.1} max={1} step={0.05} />
-            </div>
-
-            {/* Voice list — ElevenLabs voices */}
-            <div className="space-y-1 max-h-48 overflow-y-auto rounded-xl border border-border bg-card p-2">
-              {ELEVENLABS_VOICES.filter((v) => {
-                if (voiceSettings.genderPref === "neutral") return true;
-                return v.gender === voiceSettings.genderPref || v.gender === "neutral";
-              }).map((elVoice) => {
-                const isSelected = voiceSettings.elevenLabsVoiceId === elVoice.id;
-                return (
-                  <div
-                    key={elVoice.id}
-                    onClick={() => setVoiceSettings((s) => ({ ...s, elevenLabsVoiceId: elVoice.id, elevenLabsVoiceName: elVoice.name }))}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all ${
-                      isSelected ? "bg-primary/15 border border-primary/30" : "hover:bg-muted"
-                    }`}
-                  >
-                    <button
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        setTestingVoice(true);
-                        try {
-                          const { data: { session } } = await supabase.auth.getSession();
-                          const token = session?.access_token;
-                          if (!token) throw new Error("No auth");
-                          const response = await fetch(
-                            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-                            {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json",
-                                apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-                                Authorization: `Bearer ${token}`,
-                              },
-                              body: JSON.stringify({ text: "Hello, I am here with you.", voiceId: elVoice.id }),
-                            }
-                          );
-                          if (!response.ok) throw new Error("TTS failed");
-                          const blob = await response.blob();
-                          const url = URL.createObjectURL(blob);
-                          const audio = new Audio(url);
-                          audio.volume = voiceSettings.volume;
-                          audio.onended = () => URL.revokeObjectURL(url);
-                          await audio.play();
-                        } catch {
-                          // Fallback to browser TTS
-                          window.speechSynthesis.cancel();
-                          const u = new SpeechSynthesisUtterance("Hello, I am here with you.");
-                          u.rate = voiceSettings.speed;
-                          u.volume = voiceSettings.volume;
-                          window.speechSynthesis.speak(u);
-                        } finally {
-                          setTestingVoice(false);
-                        }
-                      }}
-                      disabled={testingVoice}
-                      className="shrink-0 h-7 w-7 rounded-full bg-muted flex items-center justify-center hover:bg-primary/20 disabled:opacity-50"
-                    >
-                      <Play className="h-3 w-3 text-foreground" />
-                    </button>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{elVoice.name}</p>
-                      <p className="text-xs text-muted-foreground">{elVoice.accent} · {elVoice.description}</p>
+              {/* Progress + animation */}
+              {autoPhase !== "idle" && (
+                <div className="flex flex-col items-center gap-2 py-1">
+                  <p className="text-xs text-muted-foreground/50">{autoPlayIdx + 1} of {CURATED_VOICES.length}</p>
+                  {autoPhase === "playing" ? (
+                    <div className="flex gap-1.5 items-end h-9 px-2 py-1 rounded-xl bg-violet-500/10 border border-violet-400/20" aria-label="Playing audio" role="img">
+                      {[7, 14, 20, 16, 9, 18, 12].map((h, i) => (
+                        <div key={i} className="w-1.5 bg-gradient-to-t from-violet-500 to-pink-400 rounded-full animate-pulse"
+                          style={{ height: h, animationDelay: `${i * 0.11}s`, animationDuration: "0.75s" }} />
+                      ))}
                     </div>
-                    {isSelected && <Check className="h-4 w-4 text-primary shrink-0" />}
-                  </div>
-                );
-              })}
-            </div>
+                  ) : (
+                    <div className="px-3 py-1.5 rounded-xl bg-teal-500/10 border border-teal-400/20">
+                      <ListeningIndicator visible={true} level={0} />
+                    </div>
+                  )}
+                </div>
+              )}
 
-            {/* Continue */}
-            <div className="flex gap-3">
-              <Button onClick={() => { stopContinuousRec(); setStep(4); }} className="flex-1 rounded-2xl">
-                Continue <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </motion.div>
-        )}
+              {/* Speed + Volume */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide">Speed — {voiceSettings.speed <= 0.75 ? "Slow" : voiceSettings.speed >= 1.25 ? "Fast" : "Normal"}</p>
+                  <Slider value={[voiceSettings.speed]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, speed: v }))} min={0.5} max={1.5} step={0.1} aria-label="Speech speed" />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wide">Volume — {voiceSettings.volume <= 0.35 ? "Soft" : voiceSettings.volume >= 0.75 ? "Loud" : "Medium"}</p>
+                  <Slider value={[voiceSettings.volume]} onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, volume: v }))} min={0.1} max={1} step={0.05} aria-label="Speech volume" />
+                </div>
+              </div>
 
-        {/* ─── STEP 4: Communication ─── */}
-        {step === 4 && (
-          <motion.div key="communication" {...fadeSlide} className="w-full max-w-2xl mx-auto space-y-4">
-            {isSpeakMode && <ListeningIndicator visible={isListening} />}
-            {retryMessage && <p className="text-sm text-center text-destructive">{retryMessage}</p>}
-
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground text-center">
-              How do you like to communicate?
-            </h2>
-            <p className="text-center text-muted-foreground text-sm">
-              Choose up to 3 methods. {commMethods.length}/3 selected.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {COMMUNICATION_METHODS.map((method) => {
-                const selected = commMethods.includes(method.id);
-                const disabled = !selected && commMethods.length >= 3;
-                return (
-                  <button
-                    key={method.id}
-                    onClick={() => toggleComm(method.id)}
-                    disabled={disabled}
-                    className={`flex items-center gap-4 px-5 py-5 rounded-2xl border-2 text-left text-base font-medium transition-all ${
-                      selected
-                        ? "border-primary bg-primary/10 text-foreground shadow-md"
-                        : disabled
-                        ? "border-border bg-card text-muted-foreground/50 cursor-not-allowed"
-                        : "border-border bg-card text-foreground hover:border-primary/50"
-                    }`}
-                    style={{ borderLeftWidth: 5, borderLeftColor: method.color }}
-                  >
-                    <span className="text-3xl">{method.picture}</span>
-                    <span className="flex-1">{method.label}</span>
-                    {selected && <Check className="h-5 w-5 text-primary shrink-0" />}
+              {/* Manual controls */}
+              <div className="flex flex-wrap gap-2 justify-center">
+                {[
+                  { label: "← Prev", action: () => goTo((autoPlayIdx - 1 + CURATED_VOICES.length) % CURATED_VOICES.length), aria: "Previous voice", style: "border-white/10 bg-white/5 hover:border-violet-400/40 text-foreground/70" },
+                  { label: "↺ Replay", action: () => { window.speechSynthesis?.cancel(); try { autoRecRef.current?.abort(); } catch {} autoRecRef.current = null; setAutoPhase("playing"); }, aria: "Replay current voice", style: "border-white/10 bg-white/5 hover:border-violet-400/40 text-foreground/70" },
+                  { label: "Next →", action: () => goTo((autoPlayIdx + 1) % CURATED_VOICES.length), aria: "Next voice", style: "border-white/10 bg-white/5 hover:border-violet-400/40 text-foreground/70" },
+                ].map(({ label, action, aria, style }) => (
+                  <button key={label} onClick={action} aria-label={aria}
+                    className={`px-3 py-1.5 rounded-xl border text-sm transition-all duration-200 ${style}`}>
+                    {label}
                   </button>
-                );
-              })}
-            </div>
-            {commMethods.length > 0 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center pt-2">
-                <Button
-                  size="lg"
-                  className="text-lg px-8 py-6 rounded-2xl"
-                  onClick={() => {
-                    stopContinuousRec();
-                    setStep(5);
-                  }}
-                >
-                  Continue <ChevronRight className="ml-2 h-5 w-5" />
-                </Button>
-              </motion.div>
-            )}
-          </motion.div>
-        )}
+                ))}
+                <button onClick={chooseVoice} aria-label="Choose this voice and continue"
+                  className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-pink-500 text-white text-sm font-semibold shadow-[0_0_14px_rgba(167,139,250,0.4)] hover:shadow-[0_0_20px_rgba(167,139,250,0.6)] transition-all duration-200">
+                  ✓ Choose This Voice
+                </button>
+                {autoPhase !== "idle" && (
+                  <button onClick={() => { window.speechSynthesis?.cancel(); try { autoRecRef.current?.abort(); } catch {} autoRecRef.current = null; setAutoPhase("idle"); }}
+                    aria-label="Stop auto-play"
+                    className="px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 text-sm text-muted-foreground/60 hover:border-rose-400/30 transition-all duration-200">
+                    Stop
+                  </button>
+                )}
+              </div>
 
-        {/* ─── STEP 5: Safety Info ─── */}
-        {step === 5 && (
-          <motion.div key="safety-info" {...fadeSlide} className="w-full max-w-lg mx-auto space-y-8 text-center">
-            <p className="text-lg sm:text-xl text-foreground leading-relaxed">
-              This app includes a private safety feature. You can access it anytime from the main menu. Only you will know what it does.
-            </p>
-            <Button
-              size="lg"
-              className="text-lg px-10 py-6 rounded-2xl"
-              onClick={() => setStep(6)}
-            >
-              Got it
-            </Button>
-          </motion.div>
-        )}
+              {/* Voice list */}
+              <div ref={voiceListRef} className="space-y-0.5 max-h-[240px] overflow-y-auto rounded-2xl border border-white/[0.07] bg-black/20 p-2" role="listbox" aria-label="Voice options">
+                {CURATED_VOICES.map((voice, idx) => {
+                  const isCurrent = idx === autoPlayIdx;
+                  const isPlaying = isCurrent && autoPhase === "playing";
+                  const isManualPlaying = playingVoiceURI === voice.id;
+                  return (
+                    <div
+                      key={voice.id}
+                      data-voice-id={voice.id}
+                      role="option"
+                      aria-selected={isCurrent}
+                      onClick={() => { setVoiceSettings((s) => ({ ...s, elevenLabsVoiceId: voice.id, elevenLabsVoiceName: voice.name, voiceURI: null })); goTo(idx); }}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 ${
+                        isCurrent
+                          ? "bg-violet-500/20 border border-violet-400/40 shadow-[0_0_10px_rgba(167,139,250,0.25)]"
+                          : "hover:bg-white/[0.05] border border-transparent"
+                      }`}
+                    >
+                      <button
+                        onClick={(e) => { e.stopPropagation(); testVoice(voice); }}
+                        disabled={playingVoiceURI !== null && !isManualPlaying}
+                        aria-label={isPlaying || isManualPlaying ? `Playing ${voice.name}` : `Preview ${voice.name}`}
+                        className={`shrink-0 h-7 w-7 rounded-full flex items-center justify-center transition-all ${
+                          isPlaying || isManualPlaying
+                            ? "bg-violet-500/30 border border-violet-400/50"
+                            : "bg-white/5 border border-white/10 hover:bg-violet-500/20 hover:border-violet-400/40 disabled:opacity-40"
+                        }`}
+                      >
+                        {isPlaying || isManualPlaying
+                          ? <span className="h-3 w-3 rounded-full border-2 border-violet-400 border-t-transparent animate-spin block" />
+                          : <Play className="h-3 w-3 text-foreground/60" />}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground/90 truncate">{voice.name}</p>
+                        <p className="text-xs text-muted-foreground/50">{voice.accent}</p>
+                      </div>
+                      {isCurrent && <Check className="h-4 w-4 text-violet-400 shrink-0" />}
+                    </div>
+                  );
+                })}
+              </div>
 
-        {/* ─── STEP 6: Confirmation ─── */}
-        {step === 6 && (
-          <motion.div key="confirm" {...fadeSlide} className="text-center max-w-xl mx-auto space-y-6">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200, damping: 15 }}
-              className="w-20 h-20 rounded-full bg-secondary/20 flex items-center justify-center mx-auto"
-            >
-              <Check className="h-10 w-10 text-secondary" />
+              <button onClick={() => { clearSpoken(); setStep(4); }}
+                className="w-full py-3 rounded-2xl border border-white/10 bg-white/5 text-sm text-muted-foreground/60 hover:border-white/20 hover:text-muted-foreground transition-all duration-200 flex items-center justify-center gap-2">
+                Skip <ChevronRight className="h-4 w-4" />
+              </button>
             </motion.div>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
-              You are all set.
-            </h2>
-            <p className="text-lg text-foreground">
-              Welcome to Soul Echoes. I am here for you every day.
-            </p>
-            <p className="text-xl font-display font-bold text-primary">
-              Let's begin.
-            </p>
+          );
+        })()}
+
+        {/* STEP 4: Communication */}
+        {step === 4 && (
+          <motion.div key="communication" {...fadeSlide} className="w-full max-w-2xl mx-auto space-y-5">
+            {isSpeakMode && <ListeningIndicator visible={isListening} level={inputLevel} />}
+            <div className="text-center space-y-2">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-pink-400 to-violet-600 flex items-center justify-center shadow-[0_0_24px_rgba(167,139,250,0.45)] mb-3">
+                <span className="text-2xl" aria-hidden="true">🌈</span>
+              </div>
+              <h2 className="font-display text-xl sm:text-2xl font-bold bg-gradient-to-r from-teal-300 via-violet-300 to-pink-300 bg-clip-text text-transparent">
+                Every way to communicate
+              </h2>
+              <p className="text-muted-foreground/70 text-sm max-w-md mx-auto leading-relaxed">
+                All methods are always available. Switch anytime, from any room, without leaving where you are.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {COMMUNICATION_METHODS.map((method) => (
+                <div key={method.id}
+                  className="flex items-center gap-4 px-4 py-4 rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm"
+                  style={{ boxShadow: `0 0 14px ${method.color}22` }}>
+                  <div className="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-2xl shadow-md"
+                    style={{ background: `linear-gradient(135deg, ${method.color}55, ${method.color}22)`, border: `1px solid ${method.color}44` }}>
+                    {method.picture}
+                  </div>
+                  <span className="flex-1 text-sm font-medium text-foreground/90">{method.label}</span>
+                  <Check className="h-4 w-4 shrink-0" style={{ color: method.color }} />
+                </div>
+              ))}
+            </div>
+            {/* External devices */}
+            <div className="rounded-2xl border border-sky-400/20 bg-sky-500/[0.06] p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center shadow">
+                  <span className="text-sm" aria-hidden="true">🔌</span>
+                </div>
+                <p className="text-sm font-semibold text-foreground/90">Connect an external device</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground/70">
+                <div className="flex items-start gap-2"><span className="text-sky-400">⠿</span><span><strong className="text-foreground/80">Braille display</strong> — USB or Bluetooth</span></div>
+                <div className="flex items-start gap-2"><span className="text-sky-400">💻</span><span><strong className="text-foreground/80">AAC / speech device</strong> — USB, Bluetooth, audio</span></div>
+                <div className="flex items-start gap-2"><span className="text-sky-400">👁️</span><span><strong className="text-foreground/80">Eye gaze tracker</strong> — USB</span></div>
+                <div className="flex items-start gap-2"><span className="text-sky-400">🔘</span><span><strong className="text-foreground/80">Switch access</strong> — 3.5mm or Bluetooth</span></div>
+              </div>
+              <p className="text-[11px] text-muted-foreground/50">Pair your device first, then use the 🔌 switcher in the app header anytime.</p>
+            </div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center pt-1">
+              <button onClick={() => { setStep(5); }}
+                className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-500 to-pink-500 text-white font-semibold text-base shadow-[0_0_24px_rgba(167,139,250,0.45)] hover:shadow-[0_0_32px_rgba(167,139,250,0.6)] transition-all duration-300 hover:scale-[1.02]">
+                Continue <ChevronRight className="h-5 w-5" />
+              </button>
+            </motion.div>
           </motion.div>
         )}
+
+        {/* STEP 5: Safety Info */}
+        {step === 5 && (
+          <motion.div key="safety-info" {...fadeSlide} className="w-full max-w-md mx-auto space-y-8 text-center px-4">
+            <motion.div
+              initial={{ scale: 0.7, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 140, damping: 14 }}
+              className="w-20 h-20 mx-auto rounded-full bg-green-500/20 border-2 border-green-400/50 flex items-center justify-center shadow-[0_0_36px_rgba(74,222,128,0.6),0_0_70px_rgba(74,222,128,0.2)]"
+            >
+              <svg viewBox="0 0 80 46" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-9 w-16" aria-hidden="true">
+                <defs>
+                  <radialGradient id="ob5wg" cx="40" cy="44" r="56" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%"   stopColor="#15803d" stopOpacity="1" />
+                    <stop offset="30%"  stopColor="#4ade80" stopOpacity="0.92" />
+                    <stop offset="65%"  stopColor="#86efac" stopOpacity="0.88" />
+                    <stop offset="100%" stopColor="#ffffff" stopOpacity="1" />
+                  </radialGradient>
+                  <filter id="ob5glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="1.6" result="blur" />
+                    <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.13  0 0 0 0 0.77  0 0 0 0 0.36  0 0 0 0.75 0" result="coloredBlur" />
+                    <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                  </filter>
+                </defs>
+                <g filter="url(#ob5glow)">
+                  <path d="M40,44 C35,36 25,26 15,17 C9,11 3,7 3,7 C2,5 3,4 5,5 C9,6 16,12 24,20 C32,28 38,37 40,44Z" fill="url(#ob5wg)" />
+                  <path d="M40,44 C36,37 28,29 20,22 C15,17 11,13 11,13 C12,12 15,14 19,18 C26,25 35,36 40,44Z" fill="url(#ob5wg)" opacity="0.78" />
+                  <path d="M40,44 C37,39 31,33 25,28 C22,24 19,21 20,20 C21,19 23,22 26,25 C31,30 37,39 40,44Z" fill="url(#ob5wg)" opacity="0.55" />
+                  <path d="M40,44 C31,33 18,21 6,10"  fill="none" stroke="white" strokeOpacity="0.5" strokeWidth="0.85" strokeLinecap="round" />
+                  <path d="M40,44 C33,35 22,25 13,16" fill="none" stroke="white" strokeOpacity="0.38" strokeWidth="0.7" strokeLinecap="round" />
+                  <path d="M40,44 C35,37 26,29 18,22" fill="none" stroke="white" strokeOpacity="0.32" strokeWidth="0.65" strokeLinecap="round" />
+                  <path d="M40,44 C45,36 55,26 65,17 C71,11 77,7 77,7 C78,5 77,4 75,5 C71,6 64,12 56,20 C48,28 42,37 40,44Z" fill="url(#ob5wg)" />
+                  <path d="M40,44 C44,37 52,29 60,22 C65,17 69,13 69,13 C68,12 65,14 61,18 C54,25 45,36 40,44Z" fill="url(#ob5wg)" opacity="0.78" />
+                  <path d="M40,44 C43,39 49,33 55,28 C58,24 61,21 60,20 C59,19 57,22 54,25 C49,30 43,39 40,44Z" fill="url(#ob5wg)" opacity="0.55" />
+                  <path d="M40,44 C49,33 62,21 74,10"  fill="none" stroke="white" strokeOpacity="0.5" strokeWidth="0.85" strokeLinecap="round" />
+                  <path d="M40,44 C47,35 58,25 67,16"  fill="none" stroke="white" strokeOpacity="0.38" strokeWidth="0.7" strokeLinecap="round" />
+                  <path d="M40,44 C45,37 54,29 62,22"  fill="none" stroke="white" strokeOpacity="0.32" strokeWidth="0.65" strokeLinecap="round" />
+                </g>
+              </svg>
+            </motion.div>
+            <div className="space-y-3">
+              <h2 className="font-display text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-300 to-emerald-300 bg-clip-text text-transparent">
+                Your private safety feature
+              </h2>
+              <p className="text-base text-foreground/80 leading-relaxed max-w-sm mx-auto">
+                The green angel icon is your private silent distress beacon. Tap it anytime to send a code to a dispatcher on call.
+              </p>
+              <p className="text-sm text-muted-foreground/60">Only you will know what it does.</p>
+            </div>
+            <button onClick={() => setStep(6)}
+              className="px-10 py-4 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold text-base shadow-[0_0_20px_rgba(74,222,128,0.4)] hover:shadow-[0_0_30px_rgba(74,222,128,0.6)] transition-all duration-300 hover:scale-[1.03]">
+              Got it
+            </button>
+          </motion.div>
+        )}
+
+        {/* STEP 6: Confirmation */}
+        {step === 6 && (
+          <motion.div key="confirm" {...fadeSlide} className="text-center max-w-xl mx-auto space-y-7 px-4">
+            <motion.div
+              initial={{ scale: 0, rotate: -20 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 180, damping: 13 }}
+              className="w-28 h-28 mx-auto rounded-3xl bg-gradient-to-br from-teal-400 via-violet-500 to-pink-500 flex items-center justify-center shadow-[0_0_48px_rgba(167,139,250,0.6)]"
+            >
+              <Check className="h-14 w-14 text-white" strokeWidth={2.5} />
+            </motion.div>
+            <div className="space-y-3">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold bg-gradient-to-r from-teal-300 via-violet-300 to-pink-300 bg-clip-text text-transparent">
+                You are all set.
+              </h2>
+              <p className="text-lg text-foreground/80 font-light">Welcome to Soul Echoes.</p>
+              <p className="text-base text-muted-foreground/60">I am here for you every day.</p>
+            </div>
+            <motion.p
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+              className="text-xl font-display font-bold bg-gradient-to-r from-teal-300 to-violet-300 bg-clip-text text-transparent"
+            >
+              Let's begin. ✦
+            </motion.p>
+          </motion.div>
+        )}
+
       </AnimatePresence>
     </div>
   );

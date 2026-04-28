@@ -1,7 +1,34 @@
 import {
-  BookOpen, Wind, VolumeX, Eclipse, Sparkles, Compass, Users, Stethoscope,
-  ShieldAlert, Brain, Volume2, Settings, Lock, CreditCard,
+  BookOpen, Wind, VolumeX, Eclipse, Sparkles, Compass,
+  Brain, Volume2, Settings, Lock, CreditCard,
 } from "lucide-react";
+
+function PortalIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      {/* teal outer glow ring */}
+      <circle cx="12" cy="12" r="10" stroke="#2dd4bf" strokeWidth="1.2" strokeOpacity="0.6" />
+      {/* gold ring */}
+      <circle cx="12" cy="12" r="8.5" stroke="#f59e0b" strokeWidth="2.2" />
+      {/* teal inner ring */}
+      <circle cx="12" cy="12" r="6.5" stroke="#2dd4bf" strokeWidth="0.8" strokeOpacity="0.7" />
+      {/* 4-point star burst — long cardinal rays */}
+      <line x1="12" y1="6.8" x2="12" y2="9.2" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="12" y1="14.8" x2="12" y2="17.2" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="6.8" y1="12" x2="9.2" y2="12" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="14.8" y1="12" x2="17.2" y2="12" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" />
+      {/* diagonal rays */}
+      <line x1="8.5" y1="8.5" x2="9.9" y2="9.9" stroke="#2dd4bf" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="14.1" y1="14.1" x2="15.5" y2="15.5" stroke="#2dd4bf" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="15.5" y1="8.5" x2="14.1" y2="9.9" stroke="#2dd4bf" strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="9.9" y1="14.1" x2="8.5" y2="15.5" stroke="#2dd4bf" strokeWidth="1.2" strokeLinecap="round" />
+      {/* bright center */}
+      <circle cx="12" cy="12" r="1.8" fill="#fde68a" />
+      <circle cx="12" cy="12" r="0.9" fill="#ffffff" />
+    </svg>
+  );
+}
+
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -17,9 +44,7 @@ const healingRooms = [
   { title: "Shadow Work", url: "/shadow-work", icon: Eclipse, color: "text-healing-shadow", free: false },
   { title: "Wisdom", url: "/wisdom", icon: Sparkles, color: "text-healing-wisdom", free: false },
   { title: "Spiritual Tools", url: "/spiritual-tools", icon: Compass, color: "text-healing-tools", free: false },
-  { title: "Community", url: "/community", icon: Users, color: "text-healing-community", free: false },
-  { title: "Practitioner Connect", url: "/practitioner", icon: Stethoscope, color: "text-healing-practitioner", free: false },
-  { title: "Crisis Counselor", url: "/crisis", icon: ShieldAlert, color: "text-healing-crisis", free: true },
+  { title: "Portal", url: "/shop", icon: PortalIcon, color: "text-teal-400", free: true },
 ];
 
 export function AppSidebar() {
@@ -89,7 +114,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <NavLink to="/voice-settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
+              <NavLink to="/voice-settings" aria-label="Voice Settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
                 <Volume2 className={`h-5 w-5 shrink-0 ${location.pathname === "/voice-settings" ? "text-sidebar-primary" : "text-muted-foreground"}`} />
                 {!collapsed && <span className="text-sm">Voice Settings</span>}
               </NavLink>
@@ -97,7 +122,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <NavLink to="/pricing" className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
+              <NavLink to="/pricing" aria-label="Pricing" className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
                 <CreditCard className={`h-5 w-5 shrink-0 ${location.pathname === "/pricing" ? "text-sidebar-primary" : "text-muted-foreground"}`} />
                 {!collapsed && <span className="text-sm">Pricing</span>}
               </NavLink>
@@ -105,7 +130,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <NavLink to="/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
+              <NavLink to="/settings" aria-label="Settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
                 <Settings className={`h-5 w-5 shrink-0 ${location.pathname === "/settings" ? "text-sidebar-primary" : "text-muted-foreground"}`} />
                 {!collapsed && <span className="text-sm">Settings</span>}
               </NavLink>

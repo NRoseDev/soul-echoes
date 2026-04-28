@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppLayout } from "@/components/AppLayout";
 import BrainDump from "./pages/BrainDump";
 import HealingRoom from "./pages/HealingRoom";
+import HealingResources from "./pages/HealingResources";
 import BreathePage from "./pages/BreathePage";
 import BreatheDetail from "./pages/BreatheDetail";
 import NotFound from "./pages/NotFound";
@@ -15,10 +16,23 @@ import VoiceSettings from "./pages/VoiceSettings";
 import Settings from "./pages/Settings";
 import PractitionerSignup from "./pages/PractitionerSignup";
 import Pricing from "./pages/Pricing";
+import JournalRoom from "./pages/JournalRoom";
+import JournalSection from "./pages/JournalSection";
+import UnspokenRoom from "./pages/UnspokenRoom";
+import UnspokenDetail from "./pages/UnspokenDetail";
+import ShadowWorkRoom from "./pages/ShadowWorkRoom";
+import ShadowWorkDetail from "./pages/ShadowWorkDetail";
+import WisdomRoom from "./pages/WisdomRoom";
+import WisdomDetail from "./pages/WisdomDetail";
+import PortalRoom from "./pages/PortalRoom";
+import Auth from "./pages/Auth";
+import SpiritualToolsRoom from "./pages/SpiritualToolsRoom";
+import SpiritualToolsDetail from "./pages/SpiritualToolsDetail";
 import DistressSignal from "./components/DistressSignal";
 import AIGuideAnnouncer from "./components/AIGuideAnnouncer";
 import AlwaysOnVoice from "./components/AlwaysOnVoice";
 import { getPreferences } from "./lib/preferences";
+import ASLImages from "./pages/ASLImages"; // <-- Added import
 
 const queryClient = new QueryClient();
 
@@ -46,20 +60,29 @@ const App = () => {
           <AppLayout>
             <Routes>
               <Route path="/" element={<BrainDump />} />
-              <Route path="/journal" element={<HealingRoom />} />
+              <Route path="/journal" element={<JournalRoom />} />
+              <Route path="/journal/:section" element={<JournalSection />} />
               <Route path="/breathe" element={<BreathePage />} />
               <Route path="/breathe/:section" element={<BreatheDetail />} />
-              <Route path="/unspoken" element={<HealingRoom />} />
-              <Route path="/shadow-work" element={<HealingRoom />} />
-              <Route path="/wisdom" element={<HealingRoom />} />
-              <Route path="/spiritual-tools" element={<HealingRoom />} />
+              <Route path="/unspoken" element={<UnspokenRoom />} />
+              <Route path="/unspoken/:section" element={<UnspokenDetail />} />
+              <Route path="/shadow-work" element={<ShadowWorkRoom />} />
+              <Route path="/shadow-work/:module" element={<ShadowWorkDetail />} />
+              <Route path="/wisdom" element={<WisdomRoom />} />
+              <Route path="/wisdom/:section" element={<WisdomDetail />} />
+              <Route path="/shop" element={<PortalRoom />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/spiritual-tools" element={<SpiritualToolsRoom />} />
+              <Route path="/spiritual-tools/:section" element={<SpiritualToolsDetail />} />
               <Route path="/community" element={<HealingRoom />} />
               <Route path="/practitioner" element={<HealingRoom />} />
               <Route path="/practitioner/signup" element={<PractitionerSignup />} />
+              <Route path="/resources" element={<HealingResources />} />
               <Route path="/crisis" element={<HealingRoom />} />
               <Route path="/voice-settings" element={<VoiceSettings />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/pricing" element={<Pricing />} />
+              <Route path="/asl-images" element={<ASLImages />} /> {/* <-- Added route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>
