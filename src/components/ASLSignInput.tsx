@@ -1,9 +1,7 @@
-import { useState, useRef, useEffect } from "react";
-import { Hand, X, CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// ── ASL Alphabet ─────────────────────────────────────────────────────────────
+// ── ASL Alphabet ─────────────────────────────────────────────
 const ASL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => ({
   id: letter,
   label: letter,
@@ -14,7 +12,7 @@ const ASL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => ({
 const LOCAL = "/asl/signs";
 const LP = "https://www.lifeprint.com/asl101/gifs";
 
-// ── COMMON WORDS ─────────────────────────────────────────────────────────────
+// ── COMMON WORDS ─────────────────────────────────────────────
 const ASL_COMMON_WORDS = [
   { id: "hello", label: "Hello", emoji: "👋", img: `${LOCAL}/hello.jpg` },
   { id: "thank-you", label: "Thank You", emoji: "🙏", img: `${LOCAL}/thank-you.gif` },
@@ -40,7 +38,7 @@ const ASL_COMMON_WORDS = [
   { id: "i-dont-know", label: "I Don't Know", emoji: "🤷", img: `${LOCAL}/i-dont-know.gif` },
 ];
 
-// ── FEELINGS ────────────────────────────────────────────────────────────────
+// ── FEELINGS ────────────────────────────────────────────────
 const ASL_FEELINGS = [
   { id: "happy", label: "Happy", emoji: "😊", img: `${LOCAL}/happy.gif` },
   { id: "sad", label: "Sad", emoji: "😢", img: `${LOCAL}/sad.gif` },
@@ -66,18 +64,8 @@ const ASL_FEELINGS = [
   { id: "i-dont-know", label: "I Don't Know", emoji: "🤷", img: `${LOCAL}/i-dont-know.gif` },
 ];
 
-// ── FIXED SIGN CARD ──────────────────────────────────────────────────────────
-function ASLSignCard({
-  img,
-  gifFallback,
-  emoji,
-  label,
-}: {
-  img: string;
-  gifFallback?: string;
-  emoji: string;
-  label: string;
-}) {
+// ── FIXED CARD (this was your main bug) ─────────────────────
+function ASLSignCard({ img, gifFallback, emoji, label }: any) {
   const [step, setStep] = useState(0);
 
   const source =
@@ -86,29 +74,24 @@ function ASLSignCard({
     null;
 
   if (!source) {
-    return (
-      <span className="text-2xl w-10 h-10 flex items-center justify-center">
-        {emoji}
-      </span>
-    );
+    return <span className="text-2xl">{emoji}</span>;
   }
 
   return (
     <img
       src={source}
       alt={label}
-      className="h-10 w-10 object-contain rounded bg-white shrink-0"
+      className="h-10 w-10 object-contain"
       onError={() => setStep((s) => s + 1)}
     />
   );
 }
 
-// ── MAIN ─────────────────────────────────────────────────────────────────────
+// ── MAIN ─────────────────────────────────────────────────────
 export default function ASLSignInput({ onSend, disabled }: any) {
   const [cardTab, setCardTab] = useState("words");
   const [selectedLetters, setSelectedLetters] = useState<string[]>([]);
   const [pendingCard, setPendingCard] = useState<any>(null);
-  const [lastSent, setLastSent] = useState("");
 
   const sendCard = (label: string, emoji?: string) => {
     if (disabled) return;
@@ -117,15 +100,13 @@ export default function ASLSignInput({ onSend, disabled }: any) {
 
   const confirmCard = () => {
     if (!pendingCard) return;
-    setLastSent(pendingCard.label);
-    onSend(pendingCard.label);
+    onSend(`[ASL Sign] ${pendingCard.label}`);
     setPendingCard(null);
   };
 
   const sendSpelledWord = () => {
     const word = selectedLetters.join("");
-    setLastSent(word);
-    onSend(word);
+    onSend(`[ASL Fingerspell] ${word}`);
     setSelectedLetters([]);
   };
 
@@ -146,7 +127,7 @@ export default function ASLSignInput({ onSend, disabled }: any) {
               <button
                 key={c.id}
                 onClick={() => sendCard(c.label, c.emoji)}
-                className="flex flex-col items-center gap-1 p-2 border rounded-xl bg-white"
+                className="flex flex-col items-center p-2 border rounded-xl"
               >
                 <ASLSignCard img={c.img} emoji={c.emoji} label={c.label} />
                 <span className="text-[10px]">{c.label}</span>
@@ -162,7 +143,7 @@ export default function ASLSignInput({ onSend, disabled }: any) {
               <button
                 key={c.id}
                 onClick={() => sendCard(c.label, c.emoji)}
-                className="flex flex-col items-center gap-1 p-2 border rounded-xl bg-white"
+                className="flex flex-col items-center p-2 border rounded-xl"
               >
                 <ASLSignCard img={c.img} emoji={c.emoji} label={c.label} />
                 <span className="text-[10px]">{c.label}</span>
@@ -178,7 +159,7 @@ export default function ASLSignInput({ onSend, disabled }: any) {
               <button
                 key={c.id}
                 onClick={() => setSelectedLetters((p) => [...p, c.label])}
-                className="flex flex-col items-center p-2 border rounded-xl bg-white"
+                className="p-2 border rounded-xl"
               >
                 <ASLSignCard
                   img={c.imgGif}
@@ -186,7 +167,7 @@ export default function ASLSignInput({ onSend, disabled }: any) {
                   emoji={c.label}
                   label={c.label}
                 />
-                <span className="text-[10px] font-bold">{c.label}</span>
+                <span className="text-[10px]">{c.label}</span>
               </button>
             ))}
           </div>
