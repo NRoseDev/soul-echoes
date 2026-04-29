@@ -1,18 +1,15 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// ── Paths ─────────────────────────
 const LOCAL = "/asl/signs";
 const ALPHA = "/asl/alpha";
 
-// ── Alphabet ──────────────────────
 const ASL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((l) => ({
   id: l,
   label: l,
   img: `${ALPHA}/${l.toLowerCase()}.gif`,
 }));
 
-// ── COMMON WORDS (FIXED: no broken JPG/GIF mix issues) ──────────────────────
 const ASL_COMMON_WORDS = [
   { id: "hello", label: "Hello", emoji: "👋", img: `${LOCAL}/hello.gif` },
   { id: "thank-you", label: "Thank You", emoji: "🙏", img: `${LOCAL}/thank-you.gif` },
@@ -35,10 +32,9 @@ const ASL_COMMON_WORDS = [
   { id: "breathe", label: "Breathe", emoji: "🌬️", img: `${LOCAL}/breathe.gif` },
   { id: "wait", label: "Wait", emoji: "⏳", img: `${LOCAL}/wait.gif` },
   { id: "bathroom", label: "Bathroom", emoji: "🚽", img: `${LOCAL}/bathroom.gif` },
-  { id: "i-dont-know", label: "I Don’t Know", emoji: "🤷", img: `${LOCAL}/i-dont-know.gif` },
+  { id: "i-dont-know", label: "I Don’t Know", emoji: "🤷", img: null },
 ];
 
-// ── FEELINGS (FIXED: removed broken LP links causing blank/multi renders) ────
 const ASL_FEELINGS = [
   { id: "happy", label: "Happy", emoji: "😊", img: `${LOCAL}/happy.gif` },
   { id: "sad", label: "Sad", emoji: "😢", img: `${LOCAL}/sad.gif` },
@@ -61,36 +57,29 @@ const ASL_FEELINGS = [
   { id: "confused", label: "Confused", emoji: "🌀", img: `${LOCAL}/confused.gif` },
   { id: "peaceful", label: "Peaceful", emoji: "🕊️", img: `${LOCAL}/peaceful.gif` },
   { id: "stuck", label: "Stuck", emoji: "🪨", img: `${LOCAL}/stuck.gif` },
-  { id: "i-dont-know", label: "I Don’t Know", emoji: "🤷", img: `${LOCAL}/i-dont-know.gif` },
+  { id: "i-dont-know", label: "I Don’t Know", emoji: "🤷", img: null },
 ];
 
-// ── SAFE IMAGE COMPONENT (prevents duplicate render glitches) ───────────────
-function SignImg({ src, alt, emoji }: any) {
-  const [fail, setFail] = useState(false);
+function SignImg({ src, emoji, label }: any) {
+  const [ok, setOk] = useState(true);
 
-  if (fail || !src) {
+  if (!src || !ok) {
     return <span className="text-xl">{emoji}</span>;
   }
 
   return (
     <img
       src={src}
-      alt={alt}
+      alt={label}
       className="h-10 w-10 object-contain"
-      onError={() => setFail(true)}
+      onError={() => setOk(false)}
     />
   );
 }
 
-// ── MAIN ─────────────────────────────────────────────────────────────────────
 export default function ASLSignInput({ onSend, disabled }: any) {
   const [tab, setTab] = useState("words");
   const [letters, setLetters] = useState<string[]>([]);
-
-  const send = (text: string) => {
-    if (disabled) return;
-    onSend(text);
-  };
 
   return (
     <div className="px-4 py-3 space-y-3">
@@ -102,39 +91,36 @@ export default function ASLSignInput({ onSend, disabled }: any) {
           <TabsTrigger value="alphabet">ABC</TabsTrigger>
         </TabsList>
 
-        {/* WORDS */}
         <TabsContent value="words">
           <div className="grid grid-cols-4 gap-2">
             {ASL_COMMON_WORDS.map((c) => (
               <button
                 key={c.id}
-                onClick={() => send(c.label)}
+                onClick={() => onSend(c.label)}
                 className="p-2 border rounded-xl flex flex-col items-center"
               >
-                <SignImg src={c.img} alt={c.label} emoji={c.emoji} />
+                <SignImg src={c.img} emoji={c.emoji} label={c.label} />
                 <span className="text-[10px]">{c.label}</span>
               </button>
             ))}
           </div>
         </TabsContent>
 
-        {/* FEELINGS */}
         <TabsContent value="feelings">
           <div className="grid grid-cols-4 gap-2">
             {ASL_FEELINGS.map((c) => (
               <button
                 key={c.id}
-                onClick={() => send(c.label)}
+                onClick={() => onSend(c.label)}
                 className="p-2 border rounded-xl flex flex-col items-center"
               >
-                <SignImg src={c.img} alt={c.label} emoji={c.emoji} />
+                <SignImg src={c.img} emoji={c.emoji} label={c.label} />
                 <span className="text-[10px]">{c.label}</span>
               </button>
             ))}
           </div>
         </TabsContent>
 
-        {/* ALPHABET */}
         <TabsContent value="alphabet">
           <div className="grid grid-cols-6 gap-2">
             {ASL_ALPHABET.map((c) => (
@@ -143,8 +129,8 @@ export default function ASLSignInput({ onSend, disabled }: any) {
                 onClick={() => setLetters((p) => [...p, c.label])}
                 className="p-2 border rounded-xl flex flex-col items-center"
               >
-                <SignImg src={c.img} alt={c.label} emoji={c.label} />
-                <span className="text-[10px]">{c.label}</span>
+                <SignImg src={c.img} emoji={c.label} label={c.label} />
+                <span className="text-[10px] font-bold">{c.label}</span>
               </button>
             ))}
           </div>
@@ -153,7 +139,7 @@ export default function ASLSignInput({ onSend, disabled }: any) {
             <button
               className="mt-3 w-full p-2 bg-black text-white rounded-xl"
               onClick={() => {
-                send(letters.join(""));
+                onSend(letters.join(""));
                 setLetters([]);
               }}
             >
