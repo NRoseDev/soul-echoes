@@ -60,23 +60,22 @@ const ASL_FEELINGS = [
   { id: "i-dont-know", label: "I Don’t Know", emoji: "🤷", img: null },
 ];
 
-function SignImg({ src, emoji, label }: any) {
-  const [ok, setOk] = useState(true);
+function SignImg({ gif, img, emoji, label }: any) {
+  const [step, setStep] = useState(0);
 
-  if (!src || !ok) {
-    return <span className="text-xl">{emoji}</span>;
-  }
+  const source = step === 0 ? gif : step === 1 ? img : null;
+
+  if (!source) return <span className="text-xl">{emoji}</span>;
 
   return (
     <img
-      src={src}
+      src={source}
       alt={label}
       className="h-10 w-10 object-contain"
-      onError={() => setOk(false)}
+      onError={() => setStep((s) => s + 1)}
     />
   );
 }
-
 export default function ASLSignInput({ onSend, disabled }: any) {
   const [tab, setTab] = useState("words");
   const [letters, setLetters] = useState<string[]>([]);
