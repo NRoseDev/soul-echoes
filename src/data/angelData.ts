@@ -28,12 +28,15 @@ export interface AngelPalette {
   subtitle: string;
 }
 
+import { type ChakraKey } from "@/data/chakraData";
+
 export interface ArchangelProfile {
   name: string;
   meaning: string;
   assignment: string;
   energyColor: string;
   frequency: string;
+  chakra: ChakraKey;
   healingGifts: string[];
   whenToCall: string[];
   palette: AngelPalette;
@@ -46,6 +49,7 @@ export const ARCHANGELS: ArchangelProfile[] = [
     assignment: "Protection, spiritual warfare, justice, strength, and cutting of spiritual bonds. The commander of the angelic army. Call on Michael when you need protection, courage in battle, or help breaking spiritual chains.",
     energyColor: "Royal Blue / Gold",
     frequency: "741 Hz — Clearing & Protection",
+    chakra: "root",
     healingGifts: [
       "Protection from spiritual attack and dark assignments",
       "Courage and strength in the face of fear",
@@ -81,6 +85,7 @@ export const ARCHANGELS: ArchangelProfile[] = [
     assignment: "Divine communication, revelation, announcements, and creative conception. Gabriel carries messages of destiny and new beginnings. Present at births, callings, and prophetic unfolding.",
     energyColor: "White / Silver",
     frequency: "417 Hz — Facilitating Change",
+    chakra: "throat",
     healingGifts: [
       "Delivering divine messages with crystal clarity",
       "Unlocking prophetic gifts and spiritual hearing",
@@ -116,6 +121,7 @@ export const ARCHANGELS: ArchangelProfile[] = [
     assignment: "Physical, emotional, and spiritual healing. The physician of heaven. Raphael is present in hospital rooms, at the bedsides of the sick, and wherever healing is being sought.",
     energyColor: "Emerald Green",
     frequency: "528 Hz — Miracle Tone / DNA Repair",
+    chakra: "heart",
     healingGifts: [
       "Physical healing of illness, injury, and chronic conditions",
       "Emotional and trauma restoration",
@@ -151,6 +157,7 @@ export const ARCHANGELS: ArchangelProfile[] = [
     assignment: "Wisdom, illumination, intellectual clarity, and aligning with divine truth. Uriel brings light into confusion and helps interpret prophetic revelation.",
     energyColor: "Red / Gold",
     frequency: "396 Hz — Liberation from Fear",
+    chakra: "thirdEye",
     healingGifts: [
       "Illuminating dark or confusing situations with divine clarity",
       "Interpreting prophetic dreams and spiritual visions",
@@ -186,6 +193,7 @@ export const ARCHANGELS: ArchangelProfile[] = [
     assignment: "Nature, animals, the earth, and elemental healing. Ariel oversees the natural world and can be invited into work involving earth healing, animal communication, and grounding.",
     energyColor: "Pale Pink / Iridescent",
     frequency: "432 Hz — Earth Harmony",
+    chakra: "root",
     healingGifts: [
       "Healing the connection to the earth and natural world",
       "Animal healing and communication",
@@ -221,6 +229,7 @@ export const ARCHANGELS: ArchangelProfile[] = [
     assignment: "Love, compassion, peace, and finding what is lost — including lost relationships, lost purpose, and lost peace. Chamuel works to restore the heart.",
     energyColor: "Pale Green / Pink",
     frequency: "639 Hz — Heart Reconnection",
+    chakra: "heart",
     healingGifts: [
       "Healing fractured relationships and restoring love",
       "Finding what is lost — people, purpose, and peace",
@@ -256,6 +265,7 @@ export const ARCHANGELS: ArchangelProfile[] = [
     assignment: "Grace, intuition, the moon cycle, feminine energy, and spiritual vision. Haniel helps develop and refine clairvoyance and intuitive gifts.",
     energyColor: "Moonstone / Silver Blue",
     frequency: "852 Hz — Spiritual Intuition",
+    chakra: "thirdEye",
     healingGifts: [
       "Developing and refining intuitive and clairvoyant gifts",
       "Aligning with the moon cycles for healing and release",
@@ -291,6 +301,7 @@ export const ARCHANGELS: ArchangelProfile[] = [
     assignment: "Beauty, creativity, wisdom, and slowing down long enough to perceive the sacred. Jophiel combats mental clutter and helps artists, teachers, and creators align with divine beauty.",
     energyColor: "Yellow / Gold",
     frequency: "285 Hz — Energy Field Restoration",
+    chakra: "crown",
     healingGifts: [
       "Clearing mental clutter and negative thought patterns",
       "Awakening creativity and artistic expression",
@@ -326,6 +337,7 @@ export const ARCHANGELS: ArchangelProfile[] = [
     assignment: "Justice, harmony, order, and right relationships. Raguel resolves disputes, restores fairness, and brings clarity where there has been injustice or relational chaos.",
     energyColor: "Light Blue / Aqua",
     frequency: "174 Hz — Foundation & Justice",
+    chakra: "throat",
     healingGifts: [
       "Restoring divine justice in broken situations",
       "Bringing order to chaotic relationships and systems",
@@ -361,6 +373,7 @@ export const ARCHANGELS: ArchangelProfile[] = [
     assignment: "Divine mysteries, esoteric wisdom, the akashic records, and understanding the hidden dimensions of reality. Raziel helps those being initiated into deeper spiritual understanding.",
     energyColor: "Rainbow / Iridescent",
     frequency: "963 Hz — Divine Connection",
+    chakra: "soulStar",
     healingGifts: [
       "Unlocking hidden divine mysteries and sacred knowledge",
       "Accessing the akashic records and soul history",
@@ -396,6 +409,7 @@ export const ARCHANGELS: ArchangelProfile[] = [
     assignment: "Forgiveness, mercy, freedom from guilt, and transformation. Zadkiel oversees the violet flame of transmutation — the divine fire that transforms darkness into light.",
     energyColor: "Violet / Indigo",
     frequency: "741 Hz — Transmutation",
+    chakra: "crown",
     healingGifts: [
       "Deep forgiveness — of others and of self",
       "Freedom from guilt, shame, and condemnation",

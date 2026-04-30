@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import AngelSvg from "@/components/AngelSvg";
 import type { ArchangelProfile } from "@/data/angelData";
+import { chakraColorMap } from "@/data/chakraData";
 
 interface Props {
   angel: ArchangelProfile;
@@ -10,6 +11,7 @@ interface Props {
 
 export default function AngelProfileModal({ angel, onClose }: Props) {
   const p = angel.palette;
+  const chakra = chakraColorMap[angel.chakra];
 
   return (
     <motion.div
@@ -59,6 +61,25 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
           <span className="px-3 py-1 rounded-full text-xs font-semibold border border-white/20 text-white/60">
             {angel.frequency}
           </span>
+        </div>
+
+        {/* Chakra association */}
+        <div
+          className="w-full max-w-sm mt-4 rounded-2xl p-3 flex items-center gap-3"
+          style={{ background: chakra.colors[0] + "18", border: `1px solid ${chakra.colors[0]}44` }}
+        >
+          <div
+            className="h-8 w-8 rounded-full shrink-0"
+            style={{ background: `linear-gradient(135deg, ${chakra.colors[0]}, ${chakra.colors[1]})` }}
+          />
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: chakra.colors[0] }}>
+              {chakra.name} Chakra
+            </p>
+            <p className="text-xs text-white/50 mt-0.5 capitalize">
+              {chakra.gifts.join(" · ")}
+            </p>
+          </div>
         </div>
 
         <div className="w-full max-w-sm mt-2 border-t border-white/10 pt-5 space-y-5">
