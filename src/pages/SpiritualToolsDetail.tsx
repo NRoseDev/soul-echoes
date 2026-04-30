@@ -1177,5 +1177,6 @@ export default function SpiritualToolsDetail() {
         />
       )}
     </AnimatePresence>
+    </>
   );
 }
