@@ -1,46 +1,54 @@
 export const angels = [
   {
     id: "michael",
-    name: "Archangel Michael",
+    name: "Michael",
+    image: "/images/angels/michael.jpg",
     gifts: [
       "Protection",
       "Courage",
       "Cutting energetic cords",
       "Strength during conflict"
     ],
-    description: "Call when you need protection, clarity, or to remove negative attachments."
+    description:
+      "Call when you need protection, clarity, or to remove negative attachments."
   },
   {
     id: "gabriel",
-    name: "Archangel Gabriel",
+    name: "Gabriel",
+    image: "/images/angels/gabriel.jpg",
     gifts: [
       "Communication",
       "Messages",
       "Creativity",
       "Guidance for life purpose"
     ],
-    description: "Call when you need guidance, inspiration, or clear communication."
+    description:
+      "Call when you need guidance, inspiration, or clear communication."
   },
   {
     id: "raphael",
-    name: "Archangel Raphael",
+    name: "Raphael",
+    image: "/images/angels/raphael.jpg",
     gifts: [
       "Healing",
       "Restoration",
       "Emotional balance",
       "Travel protection"
     ],
-    description: "Call when you need healing—physical, emotional, or spiritual."
+    description:
+      "Call when you need healing—physical, emotional, or spiritual."
   },
   {
     id: "uriel",
-    name: "Archangel Uriel",
+    name: "Uriel",
+    image: "/images/angels/uriel.jpg",
     gifts: [
       "Wisdom",
       "Insight",
       "Problem-solving",
       "Calm during chaos"
     ],
-    description: "Call when you need clarity, wisdom, or solutions."
+    description:
+      "Call when you need clarity, wisdom, or solutions."
   }
 ];
