@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, HeartHandshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ARCHANGELS, type ArchangelProfile } from "@/data/angelData";
+import AngelProfileModal from "@/components/AngelProfileModal";
 
 type SectionKey =
   | "source-tools-vs-source"
@@ -100,7 +103,7 @@ function ScriptureCard({ reference, text, emotion }: { reference: string; text: 
   );
 }
 
-function SectionContent({ id }: { id: SectionKey }) {
+function SectionContent({ id, onOpenAngel }: { id: SectionKey; onOpenAngel: (a: ArchangelProfile) => void }) {
   switch (id) {
 
     case "source-tools-vs-source":
@@ -224,23 +227,20 @@ function SectionContent({ id }: { id: SectionKey }) {
           </Block>
           <Block title="The 11 Archangels — Their Names, Assignments, and Frequencies">
             <div className="space-y-3">
-              {[
-                { name: "Michael", meaning: "Who is like God", assignment: "Protection, spiritual warfare, justice, strength, and cutting of spiritual bonds. The commander of the angelic army. Call on Michael when you need protection, courage in battle, or help breaking spiritual chains.", color: "Royal Blue / Gold" },
-                { name: "Gabriel", meaning: "Strength of God", assignment: "Divine communication, revelation, announcements, and creative conception. Gabriel carries messages of destiny and new beginnings. Present at births, callings, and prophetic unfolding.", color: "White / Silver" },
-                { name: "Raphael", meaning: "God heals", assignment: "Physical, emotional, and spiritual healing. The physician of heaven. Raphael is present in hospital rooms, at the bedsides of the sick, and wherever healing is being sought.", color: "Emerald Green" },
-                { name: "Uriel", meaning: "Fire of God / Light of God", assignment: "Wisdom, illumination, intellectual clarity, and aligning with divine truth. Uriel brings light into confusion and helps interpret prophetic revelation.", color: "Red / Gold" },
-                { name: "Ariel", meaning: "Lioness of God", assignment: "Nature, animals, the earth, and elemental healing. Ariel oversees the natural world and can be invited into work involving earth healing, animal communication, and grounding.", color: "Pale Pink / Iridescent" },
-                { name: "Chamuel", meaning: "He who sees God / One who seeks God", assignment: "Love, compassion, peace, and finding what is lost — including lost relationships, lost purpose, and lost peace. Chamuel works to restore the heart.", color: "Pale Green / Pink" },
-                { name: "Haniel", meaning: "Grace of God", assignment: "Grace, intuition, the moon cycle, feminine energy, and spiritual vision. Haniel helps develop and refine clairvoyance and intuitive gifts.", color: "Moonstone / Silver Blue" },
-                { name: "Jophiel", meaning: "Beauty of God", assignment: "Beauty, creativity, wisdom, and slowing down long enough to perceive the sacred. Jophiel combats mental clutter and helps artists, teachers, and creators align with divine beauty.", color: "Yellow / Gold" },
-                { name: "Raguel", meaning: "Friend of God", assignment: "Justice, harmony, order, and right relationships. Raguel resolves disputes, restores fairness, and brings clarity where there has been injustice or relational chaos.", color: "Light Blue / Aqua" },
-                { name: "Raziel", meaning: "Secrets of God", assignment: "Divine mysteries, esoteric wisdom, the akashic records, and understanding the hidden dimensions of reality. Raziel helps those being initiated into deeper spiritual understanding.", color: "Rainbow / Iridescent" },
-                { name: "Zadkiel", meaning: "Righteousness of God", assignment: "Forgiveness, mercy, freedom from guilt, and transformation. Zadkiel oversees the violet flame of transmutation — the divine fire that transforms darkness into light.", color: "Violet / Indigo" },
-              ].map((a) => (
+              {ARCHANGELS.map((a) => (
                 <div key={a.name} className="border border-border/40 rounded-xl p-3 space-y-1">
                   <div className="flex items-center justify-between">
-                    <p className="font-semibold text-foreground text-sm">{a.name}</p>
-                    <span className="text-xs text-muted-foreground italic">{a.color}</span>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-foreground text-sm">{a.name}</p>
+                      <button
+                        onClick={() => onOpenAngel(a)}
+                        className="text-base leading-none hover:scale-125 active:scale-110 transition-transform"
+                        aria-label={`Open ${a.name} angel profile`}
+                      >
+                        🪽
+                      </button>
+                    </div>
+                    <span className="text-xs text-muted-foreground italic">{a.energyColor}</span>
                   </div>
                   <p className="text-xs opacity-70">Meaning: {a.meaning}</p>
                   <p className="text-xs">{a.assignment}</p>
@@ -1101,6 +1101,7 @@ export default function SpiritualToolsDetail() {
   const id = section as SectionKey;
   const title = sectionTitles[id];
   const isDeepWork = deepWorkSections.includes(id);
+  const [selectedAngel, setSelectedAngel] = useState<ArchangelProfile | null>(null);
 
   if (!title) {
     navigate("/spiritual-tools", { replace: true });
@@ -1140,7 +1141,7 @@ export default function SpiritualToolsDetail() {
           </div>
         )}
 
-        <SectionContent id={id} />
+        <SectionContent id={id} onOpenAngel={setSelectedAngel} />
 
         {/* Bottom intercessor CTA */}
         <div className="mt-8 bg-card/80 border border-border rounded-3xl p-5 space-y-3">
@@ -1166,5 +1167,14 @@ export default function SpiritualToolsDetail() {
         </div>
       </div>
     </motion.div>
+
+    <AnimatePresence>
+      {selectedAngel && (
+        <AngelProfileModal
+          angel={selectedAngel}
+          onClose={() => setSelectedAngel(null)}
+        />
+      )}
+    </AnimatePresence>
   );
 }
