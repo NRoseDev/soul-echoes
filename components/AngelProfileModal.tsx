@@ -36,7 +36,7 @@ export default function AngelProfileModal({ angel, onClose }) {
         >
           <div className="w-full flex justify-center mb-4">
             <Image
-              src="/images/angels/default.jpg"
+              src={angel.image}
               alt={angel.name}
               width={420}
               height={420}
