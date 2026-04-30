@@ -2,14 +2,10 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { angels } from "@/data/angels";
 import { angelChakraMap } from "@/data/angelChakraMap";
 import { chakraColorMap } from "@/data/chakraColorMap";
 
-export default function AngelProfileModal({ angelId, onClose }) {
-  if (!angelId) return null;
-
-  const angel = angels.find((a) => a.id === angelId);
+export default function AngelProfileModal({ angel, onClose }) {
   if (!angel) return null;
 
   const chakra = Object.entries(angelChakraMap).find(([_, ids]) =>
