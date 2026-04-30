@@ -8,7 +8,7 @@ export default function AngelList({ onSelect }) {
       {angels.map((angel) => (
         <button
           key={angel.id}
-          onClick={() => onSelect(angel.id)}
+          onClick={() => onSelect(angel)}
           className="w-full text-left py-3 px-4 rounded-lg bg-white/5 hover:bg-white/10 transition flex items-center gap-2"
         >
           <span className="text-xl">🪽</span>
