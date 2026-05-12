@@ -93,16 +93,6 @@ function Step({ number, title, desc }: { number: number; title: string; desc: st
   );
 }
 
-function ScriptureCard({ reference, text, emotion }: { reference: string; text: string; emotion?: string }) {
-  return (
-    <div className="border border-border/40 rounded-xl p-3 space-y-1">
-      {emotion && <p className="text-xs font-bold text-primary uppercase tracking-wide">{emotion}</p>}
-      <p className="text-sm text-foreground leading-relaxed italic">"{text}"</p>
-      <p className="text-xs text-muted-foreground font-semibold">— {reference}</p>
-    </div>
-  );
-}
-
 function SectionContent({ id, onOpenAngel }: { id: SectionKey; onOpenAngel: (a: ArchangelProfile) => void }) {
   switch (id) {
 
