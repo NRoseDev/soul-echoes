@@ -12,7 +12,7 @@ type SectionKey =
   | "lightworker-persecution-clearing"
   | "angels-and-archangels"
   | "bloodline-healing"
-  | "archangel-michael-shield"
+  
   | "energy-clearing"
   | "crystals-how-to-use"
   | "essential-oils-how-to-use"
@@ -21,7 +21,7 @@ type SectionKey =
   | "numerology-in-practice"
   | "nature-signs-synchronicities"
   | "animal-messengers"
-  | "healing-scripture-by-emotion"
+  
   | "generational-patterns-breaking-cycles"
   | "prayer-templates"
   | "intercessor-connection"
@@ -36,7 +36,7 @@ const sectionTitles: Record<SectionKey, string> = {
   "lightworker-persecution-clearing": "Lightworker Persecution Clearing",
   "angels-and-archangels": "Angels and Archangels",
   "bloodline-healing": "Bloodline Healing",
-  "archangel-michael-shield": "Archangel Michael Shield and Protection",
+  
   "energy-clearing": "Energy Clearing",
   "crystals-how-to-use": "Crystals and Stones — How to Use",
   "essential-oils-how-to-use": "Essential Oils and Plant Medicine",
@@ -45,7 +45,7 @@ const sectionTitles: Record<SectionKey, string> = {
   "numerology-in-practice": "Numerology in Practice",
   "nature-signs-synchronicities": "Nature Signs and Synchronicities",
   "animal-messengers": "Animal Messengers",
-  "healing-scripture-by-emotion": "Healing Scripture by Emotion",
+  
   "generational-patterns-breaking-cycles": "Generational Patterns and Breaking Cycles",
   "prayer-templates": "Prayer Templates",
   "intercessor-connection": "Intercessor Connection",
