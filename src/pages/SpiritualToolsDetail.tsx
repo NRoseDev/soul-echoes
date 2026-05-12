@@ -257,6 +257,40 @@ function SectionContent({ id, onOpenAngel }: { id: SectionKey; onOpenAngel: (a: 
               "Test all spiritual encounters: Does this point me toward Source? Does it increase peace, love, and sound mind?",
             ]} />
           </Block>
+          <Block title="Working with Archangel Michael — Shield and Protection">
+            <p>Michael — meaning 'Who is like God?' — is the archangel of protection, divine justice, and spiritual warfare. He is referenced in Daniel 10 and 12, Jude 1:9, and Revelation 12 as the commander of the heavenly armies. His assignment is specifically to stand against the adversary and to protect those under Source's covering.</p>
+            <p>Working with Michael does not mean calling on Michael independently. It means praying to Source — aligning yourself with divine protection, inviting Source to deploy Michael's assignment in your situation.</p>
+          </Block>
+          <Block title="Michael's Covering — What He Protects Against">
+            <List items={[
+              "Direct spiritual attack and targeted assignments against your person or calling",
+              "Nighttime attack — oppression during sleep, spiritual interference in dreams",
+              "Fear, specifically the spirit of fear as an oppressive spiritual force",
+              "False accusation and spiritual slander",
+              "Witchcraft prayers and curses sent through human vessels",
+              "Territorial spirits over geographic areas you are called to serve",
+            ]} />
+          </Block>
+          <Block title="The Michael Shield — A Daily Practice">
+            <div className="space-y-2">
+              {[
+                { step: 1, title: "Ground in Source", desc: "Begin in prayer, not in ritual. Centre your identity in Source — 'I belong to you. I am covered by your blood. I stand in your authority.'" },
+                { step: 2, title: "Invoke the Shield", desc: "Pray: 'Father, I ask you to deploy Archangel Michael and his angelic company to stand at every entrance of my life, my home, my body, my mind, and my calling. Let no assignment of darkness pass through without first encountering your fire.'" },
+                { step: 3, title: "Visualize the Covering", desc: "Many practitioners find it helpful to visualize a shield of brilliant light — royal blue and gold — surrounding them entirely. This is not the imagination creating protection. It is the imagination engaging with what is spiritually real." },
+                { step: 4, title: "Declare the Perimeter", desc: "'No weapon formed against me shall prosper. Every tongue that rises against me in judgment I condemn. This is the heritage of the servants of the Lord (Isaiah 54:17).'" },
+                { step: 5, title: "Release the Outcome", desc: "After invoking the shield, release control. Trust that Source and Michael's company are holding what you have committed. Do not return to fear — that reopens what you just closed." },
+              ].map((s) => <Step key={s.step} number={s.step} title={s.title} desc={s.desc} />)}
+            </div>
+          </Block>
+          <Block title="When to Invoke Michael's Protection">
+            <List items={[
+              "Before sleep, especially during seasons of nighttime oppression",
+              "Before entering spiritually charged environments or doing deep healing work",
+              "When you sense spiritual attack, unusual fear, or targeted disruption",
+              "When traveling or entering new territories",
+              "When covering your family, home, or ministry space",
+            ]} />
+          </Block>
         </div>
       );
 
