@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
   Sun, Layers, Brain, Activity, Music2, Map, GitBranch, Wind,
   Volume2, Zap, Gift, MessageSquare, Hand, Leaf, Droplet,
-  Diamond, Flower2, Moon, Star, Hexagon, Sparkles, Hash,
+  Diamond, Flower2, Moon, Star, Hexagon, Sparkles, Hash, BookOpen,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
@@ -30,6 +30,7 @@ const sections = [
   { id: "sacred-geometry", title: "Sacred Geometry", description: "The Flower of Life, Fibonacci sequence, golden ratio, and how divine patterns underlie all creation.", icon: Hexagon, colorClass: "text-violet-300" },
   { id: "your-spiritual-gifts", title: "Understanding Your Spiritual Gifts", description: "Empath, Prophet, Seer, Healer, Intercessor, Lightworker, Starseed, Medicine Person and more — honestly explained.", icon: Sparkles, colorClass: "text-sky-300" },
   { id: "numerology-and-angel-numbers", title: "Numerology and Angel Numbers", description: "Life Path numbers, soul urge, and the meaning behind 111, 222, 333, 444, 555, 777, 888, 999, and 1111.", icon: Hash, colorClass: "text-rose-300" },
+  { id: "healing-scripture-by-emotion", title: "Healing Scripture by Emotion", description: "Scripture organized by what you are feeling right now — for fear, grief, anger, shame, loneliness, anxiety, and depression.", icon: BookOpen, colorClass: "text-amber-300" },
 ];
 
 export default function WisdomRoom() {

@@ -12,7 +12,7 @@ type SectionKey =
   | "lightworker-persecution-clearing"
   | "angels-and-archangels"
   | "bloodline-healing"
-  | "archangel-michael-shield"
+  
   | "energy-clearing"
   | "crystals-how-to-use"
   | "essential-oils-how-to-use"
@@ -21,7 +21,7 @@ type SectionKey =
   | "numerology-in-practice"
   | "nature-signs-synchronicities"
   | "animal-messengers"
-  | "healing-scripture-by-emotion"
+  
   | "generational-patterns-breaking-cycles"
   | "prayer-templates"
   | "intercessor-connection"
@@ -36,7 +36,7 @@ const sectionTitles: Record<SectionKey, string> = {
   "lightworker-persecution-clearing": "Lightworker Persecution Clearing",
   "angels-and-archangels": "Angels and Archangels",
   "bloodline-healing": "Bloodline Healing",
-  "archangel-michael-shield": "Archangel Michael Shield and Protection",
+  
   "energy-clearing": "Energy Clearing",
   "crystals-how-to-use": "Crystals and Stones — How to Use",
   "essential-oils-how-to-use": "Essential Oils and Plant Medicine",
@@ -45,7 +45,7 @@ const sectionTitles: Record<SectionKey, string> = {
   "numerology-in-practice": "Numerology in Practice",
   "nature-signs-synchronicities": "Nature Signs and Synchronicities",
   "animal-messengers": "Animal Messengers",
-  "healing-scripture-by-emotion": "Healing Scripture by Emotion",
+  
   "generational-patterns-breaking-cycles": "Generational Patterns and Breaking Cycles",
   "prayer-templates": "Prayer Templates",
   "intercessor-connection": "Intercessor Connection",
@@ -89,16 +89,6 @@ function Step({ number, title, desc }: { number: number; title: string; desc: st
         <p className="font-semibold text-foreground text-sm">{title}</p>
         <p className="text-xs mt-0.5">{desc}</p>
       </div>
-    </div>
-  );
-}
-
-function ScriptureCard({ reference, text, emotion }: { reference: string; text: string; emotion?: string }) {
-  return (
-    <div className="border border-border/40 rounded-xl p-3 space-y-1">
-      {emotion && <p className="text-xs font-bold text-primary uppercase tracking-wide">{emotion}</p>}
-      <p className="text-sm text-foreground leading-relaxed italic">"{text}"</p>
-      <p className="text-xs text-muted-foreground font-semibold">— {reference}</p>
     </div>
   );
 }
@@ -257,6 +247,40 @@ function SectionContent({ id, onOpenAngel }: { id: SectionKey; onOpenAngel: (a: 
               "Test all spiritual encounters: Does this point me toward Source? Does it increase peace, love, and sound mind?",
             ]} />
           </Block>
+          <Block title="Working with Archangel Michael — Shield and Protection">
+            <p>Michael — meaning 'Who is like God?' — is the archangel of protection, divine justice, and spiritual warfare. He is referenced in Daniel 10 and 12, Jude 1:9, and Revelation 12 as the commander of the heavenly armies. His assignment is specifically to stand against the adversary and to protect those under Source's covering.</p>
+            <p>Working with Michael does not mean calling on Michael independently. It means praying to Source — aligning yourself with divine protection, inviting Source to deploy Michael's assignment in your situation.</p>
+          </Block>
+          <Block title="Michael's Covering — What He Protects Against">
+            <List items={[
+              "Direct spiritual attack and targeted assignments against your person or calling",
+              "Nighttime attack — oppression during sleep, spiritual interference in dreams",
+              "Fear, specifically the spirit of fear as an oppressive spiritual force",
+              "False accusation and spiritual slander",
+              "Witchcraft prayers and curses sent through human vessels",
+              "Territorial spirits over geographic areas you are called to serve",
+            ]} />
+          </Block>
+          <Block title="The Michael Shield — A Daily Practice">
+            <div className="space-y-2">
+              {[
+                { step: 1, title: "Ground in Source", desc: "Begin in prayer, not in ritual. Centre your identity in Source — 'I belong to you. I am covered by your blood. I stand in your authority.'" },
+                { step: 2, title: "Invoke the Shield", desc: "Pray: 'Father, I ask you to deploy Archangel Michael and his angelic company to stand at every entrance of my life, my home, my body, my mind, and my calling. Let no assignment of darkness pass through without first encountering your fire.'" },
+                { step: 3, title: "Visualize the Covering", desc: "Many practitioners find it helpful to visualize a shield of brilliant light — royal blue and gold — surrounding them entirely. This is not the imagination creating protection. It is the imagination engaging with what is spiritually real." },
+                { step: 4, title: "Declare the Perimeter", desc: "'No weapon formed against me shall prosper. Every tongue that rises against me in judgment I condemn. This is the heritage of the servants of the Lord (Isaiah 54:17).'" },
+                { step: 5, title: "Release the Outcome", desc: "After invoking the shield, release control. Trust that Source and Michael's company are holding what you have committed. Do not return to fear — that reopens what you just closed." },
+              ].map((s) => <Step key={s.step} number={s.step} title={s.title} desc={s.desc} />)}
+            </div>
+          </Block>
+          <Block title="When to Invoke Michael's Protection">
+            <List items={[
+              "Before sleep, especially during seasons of nighttime oppression",
+              "Before entering spiritually charged environments or doing deep healing work",
+              "When you sense spiritual attack, unusual fear, or targeted disruption",
+              "When traveling or entering new territories",
+              "When covering your family, home, or ministry space",
+            ]} />
+          </Block>
         </div>
       );
 
@@ -294,46 +318,6 @@ function SectionContent({ id, onOpenAngel }: { id: SectionKey; onOpenAngel: (a: 
           </Block>
           <Block title="This Work May Need Support">
             <p>Deep bloodline healing is most effective with a mature intercessor, spiritual director, or healing minister present. If this prayer surfaces grief, rage, or overwhelm you are not ready to hold alone — stop and reach out.</p>
-          </Block>
-        </div>
-      );
-
-    case "archangel-michael-shield":
-      return (
-        <div className="space-y-4">
-          <Block title="Who is Michael?">
-            <p>Michael — meaning 'Who is like God?' — is the archangel of protection, divine justice, and spiritual warfare. He is referenced in Daniel 10 and 12, Jude 1:9, and Revelation 12 as the commander of the heavenly armies. His assignment is specifically to stand against the adversary and to protect those under Source's covering.</p>
-            <p>Working with Michael does not mean calling on Michael independently. It means praying to Source — aligning yourself with divine protection, inviting Source to deploy Michael's assignment in your situation.</p>
-          </Block>
-          <Block title="Michael's Covering — What He Protects Against">
-            <List items={[
-              "Direct spiritual attack and targeted assignments against your person or calling",
-              "Nighttime attack — oppression during sleep, spiritual interference in dreams",
-              "Fear, specifically the spirit of fear as an oppressive spiritual force",
-              "False accusation and spiritual slander",
-              "Witchcraft prayers and curses sent through human vessels",
-              "Territorial spirits over geographic areas you are called to serve",
-            ]} />
-          </Block>
-          <Block title="The Michael Shield — A Daily Practice">
-            <div className="space-y-2">
-              {[
-                { step: 1, title: "Ground in Source", desc: "Begin in prayer, not in ritual. Centre your identity in Source — 'I belong to you. I am covered by your blood. I stand in your authority.'" },
-                { step: 2, title: "Invoke the Shield", desc: "Pray: 'Father, I ask you to deploy Archangel Michael and his angelic company to stand at every entrance of my life, my home, my body, my mind, and my calling. Let no assignment of darkness pass through without first encountering your fire.'" },
-                { step: 3, title: "Visualize the Covering", desc: "Many practitioners find it helpful to visualize a shield of brilliant light — royal blue and gold — surrounding them entirely. This is not the imagination creating protection. It is the imagination engaging with what is spiritually real." },
-                { step: 4, title: "Declare the Perimeter", desc: "'No weapon formed against me shall prosper. Every tongue that rises against me in judgment I condemn. This is the heritage of the servants of the Lord (Isaiah 54:17).'" },
-                { step: 5, title: "Release the Outcome", desc: "After invoking the shield, release control. Trust that Source and Michael's company are holding what you have committed. Do not return to fear — that reopens what you just closed." },
-              ].map((s) => <Step key={s.step} number={s.step} title={s.title} desc={s.desc} />)}
-            </div>
-          </Block>
-          <Block title="When to Invoke Michael's Protection">
-            <List items={[
-              "Before sleep, especially during seasons of nighttime oppression",
-              "Before entering spiritually charged environments or doing deep healing work",
-              "When you sense spiritual attack, unusual fear, or targeted disruption",
-              "When traveling or entering new territories",
-              "When covering your family, home, or ministry space",
-            ]} />
           </Block>
         </div>
       );
@@ -712,65 +696,6 @@ function SectionContent({ id, onOpenAngel }: { id: SectionKey; onOpenAngel: (a: 
               "Do not manufacture meaning where there is none — trust the inner sense of significance to guide you",
             ]} />
           </Block>
-        </div>
-      );
-
-    case "healing-scripture-by-emotion":
-      return (
-        <div className="space-y-4">
-          <Block title="The Word as Living Medicine">
-            <p>Hebrews 4:12 describes the Word of God as living, active, and sharper than any double-edged sword — able to divide soul and spirit, to judge the thoughts and attitudes of the heart. Scripture is not just text. It is living spiritual frequency that directly affects your spirit, soul, and body when received with faith.</p>
-            <p>Find what you are feeling below and let these words meet you there.</p>
-          </Block>
-          <div className="space-y-5">
-            {[
-              { emotion: "Fear", verses: [
-                { ref: "Isaiah 41:10", text: "Do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you; I will uphold you with my righteous right hand." },
-                { ref: "2 Timothy 1:7", text: "For the Spirit God gave us does not make us timid, but gives us power, love and self-discipline." },
-                { ref: "Psalm 27:1", text: "The Lord is my light and my salvation — whom shall I fear? The Lord is the stronghold of my life — of whom shall I be afraid?" },
-              ]},
-              { emotion: "Grief and Loss", verses: [
-                { ref: "Psalm 34:18", text: "The Lord is close to the brokenhearted and saves those who are crushed in spirit." },
-                { ref: "Revelation 21:4", text: "He will wipe every tear from their eyes. There will be no more death or mourning or crying or pain." },
-                { ref: "Matthew 5:4", text: "Blessed are those who mourn, for they will be comforted." },
-              ]},
-              { emotion: "Anxiety and Overwhelm", verses: [
-                { ref: "Philippians 4:6-7", text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and minds." },
-                { ref: "1 Peter 5:7", text: "Cast all your anxiety on him because he cares for you." },
-                { ref: "Matthew 11:28", text: "Come to me, all you who are weary and burdened, and I will give you rest." },
-              ]},
-              { emotion: "Shame and Condemnation", verses: [
-                { ref: "Romans 8:1", text: "Therefore, there is now no condemnation for those who are in Christ Jesus." },
-                { ref: "Isaiah 54:4", text: "Do not be afraid; you will not be put to shame. Do not fear disgrace; you will not be humiliated." },
-                { ref: "Psalm 103:12", text: "As far as the east is from the west, so far has he removed our transgressions from us." },
-              ]},
-              { emotion: "Loneliness", verses: [
-                { ref: "Deuteronomy 31:6", text: "Be strong and courageous. Do not be afraid or terrified, for the Lord your God goes with you; he will never leave you nor forsake you." },
-                { ref: "Psalm 139:7-10", text: "Where can I go from your Spirit? Where can I flee from your presence? If I go up to the heavens, you are there; if I make my bed in the depths, you are there." },
-                { ref: "John 14:18", text: "I will not leave you as orphans; I will come to you." },
-              ]},
-              { emotion: "Anger and Injustice", verses: [
-                { ref: "Psalm 37:8-9", text: "Refrain from anger and turn from wrath; do not fret — it leads only to evil. For those who are evil will be destroyed, but those who hope in the Lord will inherit the land." },
-                { ref: "Romans 12:19", text: "Do not take revenge, my dear friends, but leave room for God's wrath, for it is written: 'It is mine to avenge; I will repay,' says the Lord." },
-                { ref: "Psalm 46:1", text: "God is our refuge and strength, an ever-present help in trouble." },
-              ]},
-              { emotion: "Depression and Hopelessness", verses: [
-                { ref: "Psalm 42:11", text: "Why, my soul, are you downcast? Why so disturbed within me? Put your hope in God, for I will yet praise him, my Savior and my God." },
-                { ref: "Isaiah 40:31", text: "Those who hope in the Lord will renew their strength. They will soar on wings like eagles; they will run and not grow weary, they will walk and not be faint." },
-                { ref: "Lamentations 3:22-23", text: "Because of the Lord's great love we are not consumed, for his compassions never fail. They are new every morning; great is your faithfulness." },
-              ]},
-              { emotion: "Unworthiness and Rejection", verses: [
-                { ref: "Ephesians 1:4-5", text: "He chose us in him before the creation of the world to be holy and blameless in his sight. In love he predestined us for adoption to sonship through Jesus Christ." },
-                { ref: "Romans 8:38-39", text: "Neither death nor life, neither angels nor demons, neither the present nor the future, nor any powers, neither height nor depth, nor anything else in all creation, will be able to separate us from the love of God." },
-                { ref: "Jeremiah 31:3", text: "I have loved you with an everlasting love; I have drawn you with unfailing kindness." },
-              ]},
-            ].map((group) => (
-              <div key={group.emotion} className="space-y-2">
-                <h3 className="font-display text-sm font-bold text-primary uppercase tracking-wide">{group.emotion}</h3>
-                {group.verses.map((v) => <ScriptureCard key={v.ref} reference={v.ref} text={v.text} />)}
-              </div>
-            ))}
-          </div>
         </div>
       );
 

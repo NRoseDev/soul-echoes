@@ -25,7 +25,8 @@ type SectionKey =
   | "astrology-basics"
   | "sacred-geometry"
   | "your-spiritual-gifts"
-  | "numerology-and-angel-numbers";
+  | "numerology-and-angel-numbers"
+  | "healing-scripture-by-emotion";
 
 const sectionTitles: Record<SectionKey, string> = {
   "what-is-source": "What is Source",
@@ -50,6 +51,7 @@ const sectionTitles: Record<SectionKey, string> = {
   "sacred-geometry": "Sacred Geometry",
   "your-spiritual-gifts": "Understanding Your Spiritual Gifts",
   "numerology-and-angel-numbers": "Numerology and Angel Numbers",
+  "healing-scripture-by-emotion": "Healing Scripture by Emotion",
 };
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
@@ -66,6 +68,15 @@ function List({ items }: { items: string[] }) {
     <ul className="list-disc list-inside space-y-1">
       {items.map((item, i) => <li key={i}>{item}</li>)}
     </ul>
+  );
+}
+
+function ScriptureCard({ reference, text }: { reference: string; text: string }) {
+  return (
+    <div className="border border-border/40 rounded-xl p-3 space-y-1">
+      <p className="text-sm text-foreground leading-relaxed italic">"{text}"</p>
+      <p className="text-xs text-muted-foreground font-semibold">— {reference}</p>
+    </div>
   );
 }
 
@@ -1036,6 +1047,65 @@ function SectionContent({ id }: { id: SectionKey }) {
               ))}
             </div>
           </Block>
+        </div>
+      );
+
+    case "healing-scripture-by-emotion":
+      return (
+        <div className="space-y-4">
+          <Block title="The Word as Living Medicine">
+            <p>Hebrews 4:12 describes the Word of God as living, active, and sharper than any double-edged sword — able to divide soul and spirit, to judge the thoughts and attitudes of the heart. Scripture is not just text. It is living spiritual frequency that directly affects your spirit, soul, and body when received with faith.</p>
+            <p>Find what you are feeling below and let these words meet you there.</p>
+          </Block>
+          <div className="space-y-5">
+            {[
+              { emotion: "Fear", verses: [
+                { ref: "Isaiah 41:10", text: "Do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you; I will uphold you with my righteous right hand." },
+                { ref: "2 Timothy 1:7", text: "For the Spirit God gave us does not make us timid, but gives us power, love and self-discipline." },
+                { ref: "Psalm 27:1", text: "The Lord is my light and my salvation — whom shall I fear? The Lord is the stronghold of my life — of whom shall I be afraid?" },
+              ]},
+              { emotion: "Grief and Loss", verses: [
+                { ref: "Psalm 34:18", text: "The Lord is close to the brokenhearted and saves those who are crushed in spirit." },
+                { ref: "Revelation 21:4", text: "He will wipe every tear from their eyes. There will be no more death or mourning or crying or pain." },
+                { ref: "Matthew 5:4", text: "Blessed are those who mourn, for they will be comforted." },
+              ]},
+              { emotion: "Anxiety and Overwhelm", verses: [
+                { ref: "Philippians 4:6-7", text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and minds." },
+                { ref: "1 Peter 5:7", text: "Cast all your anxiety on him because he cares for you." },
+                { ref: "Matthew 11:28", text: "Come to me, all you who are weary and burdened, and I will give you rest." },
+              ]},
+              { emotion: "Shame and Condemnation", verses: [
+                { ref: "Romans 8:1", text: "Therefore, there is now no condemnation for those who are in Christ Jesus." },
+                { ref: "Isaiah 54:4", text: "Do not be afraid; you will not be put to shame. Do not fear disgrace; you will not be humiliated." },
+                { ref: "Psalm 103:12", text: "As far as the east is from the west, so far has he removed our transgressions from us." },
+              ]},
+              { emotion: "Loneliness", verses: [
+                { ref: "Deuteronomy 31:6", text: "Be strong and courageous. Do not be afraid or terrified, for the Lord your God goes with you; he will never leave you nor forsake you." },
+                { ref: "Psalm 139:7-10", text: "Where can I go from your Spirit? Where can I flee from your presence? If I go up to the heavens, you are there; if I make my bed in the depths, you are there." },
+                { ref: "John 14:18", text: "I will not leave you as orphans; I will come to you." },
+              ]},
+              { emotion: "Anger and Injustice", verses: [
+                { ref: "Psalm 37:8-9", text: "Refrain from anger and turn from wrath; do not fret — it leads only to evil. For those who are evil will be destroyed, but those who hope in the Lord will inherit the land." },
+                { ref: "Romans 12:19", text: "Do not take revenge, my dear friends, but leave room for God's wrath, for it is written: 'It is mine to avenge; I will repay,' says the Lord." },
+                { ref: "Psalm 46:1", text: "God is our refuge and strength, an ever-present help in trouble." },
+              ]},
+              { emotion: "Depression and Hopelessness", verses: [
+                { ref: "Psalm 42:11", text: "Why, my soul, are you downcast? Why so disturbed within me? Put your hope in God, for I will yet praise him, my Savior and my God." },
+                { ref: "Isaiah 40:31", text: "Those who hope in the Lord will renew their strength. They will soar on wings like eagles; they will run and not grow weary, they will walk and not be faint." },
+                { ref: "Lamentations 3:22-23", text: "Because of the Lord's great love we are not consumed, for his compassions never fail. They are new every morning; great is your faithfulness." },
+              ]},
+              { emotion: "Unworthiness and Rejection", verses: [
+                { ref: "Ephesians 1:4-5", text: "He chose us in him before the creation of the world to be holy and blameless in his sight. In love he predestined us for adoption to sonship through Jesus Christ." },
+                { ref: "Romans 8:38-39", text: "Neither death nor life, neither angels nor demons, neither the present nor the future, nor any powers, neither height nor depth, nor anything else in all creation, will be able to separate us from the love of God." },
+                { ref: "Jeremiah 31:3", text: "I have loved you with an everlasting love; I have drawn you with unfailing kindness." },
+              ]},
+            ].map((group) => (
+              <div key={group.emotion} className="space-y-2">
+                <h3 className="font-display text-sm font-bold text-primary uppercase tracking-wide">{group.emotion}</h3>
+                {group.verses.map((v) => <ScriptureCard key={v.ref} reference={v.ref} text={v.text} />)}
+              </div>
+            ))}
+          </div>
         </div>
       );
 

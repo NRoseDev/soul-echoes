@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Unlock, Eye, Shield, Star, Trees, ShieldCheck, Wind, Diamond,
-  Droplet, Link2, Scissors, Hash, Leaf, Bird, BookOpen, Repeat,
+  Unlock, Eye, Shield, Star, Trees, Wind, Diamond,
+  Droplet, Link2, Scissors, Hash, Leaf, Bird, Repeat,
   MessageSquare, HeartHandshake, Moon, Zap, Search, Sun,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -13,7 +13,7 @@ const sections = [
   { id: "lightworker-persecution-clearing", title: "Lightworker Persecution Clearing", description: "Healing from spiritual targeting, rejection, and assignment. You were made for this — learn how to clear what has been sent against you.", icon: Shield, colorClass: "text-blue-400" },
   { id: "angels-and-archangels", title: "Angels and Archangels", description: "All 11 archangels — who they are, what they carry, and how to work with their assignments in Source-rooted practice.", icon: Star, colorClass: "text-yellow-400" },
   { id: "bloodline-healing", title: "Bloodline Healing", description: "Identifying and breaking inherited curses, covenants, and patterns in your family line through prayer, renunciation, and declaration.", icon: Trees, colorClass: "text-orange-400" },
-  { id: "archangel-michael-shield", title: "Archangel Michael Shield and Protection", description: "How to invoke the protection of Michael, use his shield in prayer, and walk daily in divine covering.", icon: ShieldCheck, colorClass: "text-sky-400" },
+  
   { id: "energy-clearing", title: "Energy Clearing", description: "How to clear your body, aura, space, and objects of stagnant, discordant, or foreign energy — practically and spiritually.", icon: Wind, colorClass: "text-cyan-400" },
   { id: "crystals-how-to-use", title: "Crystals and Stones — How to Use", description: "Cleansing, programming, placement, grids, and wearing crystals as tools that amplify divine intention — not replace it.", icon: Diamond, colorClass: "text-fuchsia-400" },
   { id: "essential-oils-how-to-use", title: "Essential Oils and Plant Medicine", description: "Safe blending, dilution ratios, application methods, and healing formulas rooted in the intelligence of creation.", icon: Droplet, colorClass: "text-emerald-400" },
@@ -22,7 +22,7 @@ const sections = [
   { id: "numerology-in-practice", title: "Numerology in Practice", description: "How to use your life path, personal year, and daily numbers as a practical spiritual compass in real decisions.", icon: Hash, colorClass: "text-indigo-400" },
   { id: "nature-signs-synchronicities", title: "Nature Signs and Synchronicities", description: "How Source speaks through clouds, weather, feathers, numbers, and perfectly timed events — and how to read it.", icon: Leaf, colorClass: "text-lime-400" },
   { id: "animal-messengers", title: "Animal Messengers", description: "The spiritual significance of animals that cross your path — totem animals, spirit messengers, and how to receive their guidance.", icon: Bird, colorClass: "text-teal-400" },
-  { id: "healing-scripture-by-emotion", title: "Healing Scripture by Emotion", description: "Scripture organized by what you are feeling right now — for fear, grief, anger, shame, loneliness, anxiety, and depression.", icon: BookOpen, colorClass: "text-amber-300" },
+  
   { id: "generational-patterns-breaking-cycles", title: "Generational Patterns and Breaking Cycles", description: "The practical steps of identifying inherited patterns, renouncing them at the root, and establishing new declarations.", icon: Repeat, colorClass: "text-purple-400" },
   { id: "prayer-templates", title: "Prayer Templates", description: "Ready-to-use frameworks for morning prayer, intercession, healing, protection, repentance, warfare, and declaration.", icon: MessageSquare, colorClass: "text-violet-300" },
   { id: "intercessor-connection", title: "Intercessor Connection", description: "What intercessors carry, how to work with one, and what to expect when you invite this kind of spiritual partnership.", icon: HeartHandshake, colorClass: "text-pink-300" },
