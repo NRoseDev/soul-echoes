@@ -25,7 +25,8 @@ type SectionKey =
   | "astrology-basics"
   | "sacred-geometry"
   | "your-spiritual-gifts"
-  | "numerology-and-angel-numbers";
+  | "numerology-and-angel-numbers"
+  | "healing-scripture-by-emotion";
 
 const sectionTitles: Record<SectionKey, string> = {
   "what-is-source": "What is Source",
@@ -50,6 +51,7 @@ const sectionTitles: Record<SectionKey, string> = {
   "sacred-geometry": "Sacred Geometry",
   "your-spiritual-gifts": "Understanding Your Spiritual Gifts",
   "numerology-and-angel-numbers": "Numerology and Angel Numbers",
+  "healing-scripture-by-emotion": "Healing Scripture by Emotion",
 };
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
@@ -66,6 +68,15 @@ function List({ items }: { items: string[] }) {
     <ul className="list-disc list-inside space-y-1">
       {items.map((item, i) => <li key={i}>{item}</li>)}
     </ul>
+  );
+}
+
+function ScriptureCard({ reference, text }: { reference: string; text: string }) {
+  return (
+    <div className="border border-border/40 rounded-xl p-3 space-y-1">
+      <p className="text-sm text-foreground leading-relaxed italic">"{text}"</p>
+      <p className="text-xs text-muted-foreground font-semibold">— {reference}</p>
+    </div>
   );
 }
 
