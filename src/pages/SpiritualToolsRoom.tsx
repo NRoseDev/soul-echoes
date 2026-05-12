@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Unlock, Eye, Shield, Star, Trees, ShieldCheck, Wind, Diamond,
-  Droplet, Link2, Scissors, Hash, Leaf, Bird, BookOpen, Repeat,
+  Unlock, Eye, Shield, Star, Trees, Wind, Diamond,
+  Droplet, Link2, Scissors, Hash, Leaf, Bird, Repeat,
   MessageSquare, HeartHandshake, Moon, Zap, Search, Sun,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
