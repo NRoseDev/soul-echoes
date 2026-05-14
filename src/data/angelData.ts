@@ -623,3 +623,123 @@ export const ARCHANGELS: ArchangelProfile[] = [
     },
   },
 ];
+
+export interface AngelSpiritualTools {
+  crystal: string;
+  association: string;
+  halo: string;
+}
+
+export interface AngelDetails {
+  ancestralConnections: string[];
+  spiritualTools: AngelSpiritualTools;
+}
+
+export const ANGEL_DETAILS: Record<string, AngelDetails> = {
+  Michael: {
+    ancestralConnections: [
+      "Lineage Protector: Guarded the ancient patriarchs across generations.",
+      "Defender of the Bloodline: Shields family lines from inherited or generational fear.",
+    ],
+    spiritualTools: { crystal: "Sugilite", association: "Sephirah Chesed (Mercy/Loving-kindness)", halo: "Cobalt Blue" },
+  },
+  Uriel: {
+    ancestralConnections: [
+      "Illuminator of Ancestral Wisdom: Brought divine law and prophetic light to Noah and Enoch.",
+      "Mindset Shifter: Clears confusion and intellectual blocks deeply rooted in family history.",
+    ],
+    spiritualTools: { crystal: "Amber", association: "Sephirah Malkuth (The Kingdom/Earth)", halo: "Ruby and Gold" },
+  },
+  Azrael: {
+    ancestralConnections: [
+      "Guide of Transitioned Ancestors: Ushers souls safely out of the earthly plane back to Source.",
+      "Grief Comforter: Heals the lingering weight of unspoken or unresolved grief in your lineage.",
+    ],
+    spiritualTools: { crystal: "Yellow Calcite", association: "The Void / Transition Realm", halo: "Cream and Vanilla" },
+  },
+  Gabriel: {
+    ancestralConnections: [
+      "Lineage Messenger: Announced sacred births and divine callings to the ancestors.",
+      "Keeper of the Divine Word: Preserves the original spiritual decrees of your bloodline.",
+    ],
+    spiritualTools: { crystal: "Clear Quartz", association: "Sephirah Yesod (The Foundation)", halo: "Copper and Pure White" },
+  },
+  Haniel: {
+    ancestralConnections: [
+      "Guardian of Intuitive Lineages: Aligned ancestral matriarchs with cosmic timing and natural rhythms.",
+      "Awakener of Grace: Restores ancient spiritual gifts that were hidden or suppressed by ancestors.",
+    ],
+    spiritualTools: { crystal: "Moonstone", association: "Sephirah Netzach (Victory/Endurance)", halo: "Bluish-White" },
+  },
+  Jophiel: {
+    ancestralConnections: [
+      "Beautifier of the Soul's History: Clears ancestral mental clutter, heavy thoughts, and negativity.",
+      "Restorer of Divine Perspective: Helps you see the beauty and lessons embedded in your family tree.",
+    ],
+    spiritualTools: { crystal: "Rubellite", association: "Sephirah Chokhmah (Wisdom)", halo: "Deep Pink" },
+  },
+  Ariel: {
+    ancestralConnections: [
+      "Steward of Earthly Lineages: Supported ancestral survival through nature, harvest, and resources.",
+      "Provider of Elements: Aligns your present life with the elemental grace your ancestors relied on.",
+    ],
+    spiritualTools: { crystal: "Rose Quartz", association: "Nature and Elemental Realms", halo: "Pale Pink" },
+  },
+  Raphael: {
+    ancestralConnections: [
+      "Lineage Healer: Restores the health, vitality, and energetic blueprints of family lines.",
+      "Guardian of Generational Vitality: Mends historical vulnerabilities passed down the tree.",
+    ],
+    spiritualTools: { crystal: "Emerald", association: "Sephirah Tiphereth (Beauty/Harmony)", halo: "Emerald Green" },
+  },
+  Chamuel: {
+    ancestralConnections: [
+      "Restorer of Family Bonds: Heals historical rifts, estrangements, and heartbreaks between ancestors.",
+      "Heart Awakener: Reopens the capacity for love that may have been shut down in your lineage.",
+    ],
+    spiritualTools: { crystal: "Fluorite", association: "Sephirah Gevurah (Strength/Severity)", halo: "Pale Green" },
+  },
+  Zadkiel: {
+    ancestralConnections: [
+      "Transmuter of Generational Guilt: Releases ancestral shame and blame using the violet flame.",
+      "Lineage Liberator: Dissolves unforgiveness that has bound family members together for decades.",
+    ],
+    spiritualTools: { crystal: "Amethyst", association: "Sephirah Chesed (Mercy/Loving-kindness)", halo: "Deep Violet" },
+  },
+  Raziel: {
+    ancestralConnections: [
+      "Primordial Ancestor: Passed to Adam to find his way back to divine grace.",
+      "Lineage of Wisdom: Guided Enoch, Noah, and King Solomon through generations.",
+      "Bloodline Healing: Clears family karma, past-life traumas, and inherited soul vows.",
+    ],
+    spiritualTools: { crystal: "Clear Quartz", association: "Sephirah Chokhmah (Wisdom)", halo: "Rainbow-hued spectrum of divine light" },
+  },
+  Metatron: {
+    ancestralConnections: [
+      "Scribe of the Lineage: Anchors sacred geometry and records the complete ascension history of your family.",
+      "Ascension Guide: Uses Metatron's Cube to clear dense, lower-vibrational patterns out of your DNA.",
+    ],
+    spiritualTools: { crystal: "Watermelon Tourmaline", association: "Sephirah Keter (The Crown)", halo: "Green and Pink" },
+  },
+  Sandalphon: {
+    ancestralConnections: [
+      "Deliverer of Ancestral Prayers: Carries the silent cries and heart prayers of your entire lineage to Source.",
+      "Harmonic Weaver: Intertwines the musical and prayerful legacy of your ancestors into your life.",
+    ],
+    spiritualTools: { crystal: "Turquoise", association: "Sephirah Malkuth (The Kingdom/Earth)", halo: "Turquoise" },
+  },
+  Raguel: {
+    ancestralConnections: [
+      "Restorer of Ancestral Justice: Untangles long-standing family disputes and inherited injustice.",
+      "Harmonizer of Bloodlines: Rebuilds right relationship across generations of conflict.",
+    ],
+    spiritualTools: { crystal: "Aquamarine", association: "Justice and Right Order", halo: "Pale Aqua Blue" },
+  },
+  Jeremiel: {
+    ancestralConnections: [
+      "Reviewer of Lineage History: Conducts life reviews for souls and reveals the deeper meaning of family trials.",
+      "Prophetic Visionary: Helps you look back at ancestral suffering to extract the gold and spiritual triumph.",
+    ],
+    spiritualTools: { crystal: "Amethyst", association: "Soul Records and Reviews", halo: "Purple" },
+  },
+};
