@@ -13,6 +13,24 @@ export default function AngelProfileModal({ angel, onClose }) {
   )?.[0];
 
   const glow = chakra ? chakraColorMap[chakra][0] : "#ffffff";
+    const playFrequency = (frequencyHz: number) => {
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AudioContext();
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = frequencyHz;
+      gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 3);
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      oscillator.start();
+      oscillator.stop(ctx.currentTime + 3);
+    } catch (error) {
+      console.error("Audio error:", error);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -69,6 +87,20 @@ export default function AngelProfileModal({ angel, onClose }) {
             </h3>
             <p className="text-gray-300">{angel.description}</p>
           </div>
+          <div className="mt-4 flex flex-col items-center">
+  <button 
+    onClick={() => {
+      // Plays 528Hz for Raphael, 963Hz for Raziel, or defaults to 432Hz safely
+      const hz = angel.id.includes("raphael") ? 528 : angel.id.includes("raziel") ? 963 : 432;
+      playFrequency(hz);
+    }}
+    className="flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition active:scale-95 cursor-pointer shadow-md bg-white/5 hover:bg-white/10"
+    style={{ borderColor: `${glow}44`, color: glow }}
+  >
+    <span>🔊</span>
+    <span>Play Divine Frequency Tone</span>
+  </button>
+</div>
 
           <button
             onClick={onClose}
