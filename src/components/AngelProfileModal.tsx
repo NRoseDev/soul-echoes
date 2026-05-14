@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import type { ArchangelProfile } from "@/data/angelData";
 import { ANGEL_EXTRAS } from "@/data/angelExtras";
 import { chakraColorMap } from "@/data/chakraData";
+import { angels as ROOT_ANGELS } from "../../angels";
 
 interface Props {
   angel: ArchangelProfile;
@@ -12,6 +13,11 @@ interface Props {
 export default function AngelProfileModal({ angel, onClose }: Props) {
   const p = angel.palette;
   const chakra = chakraColorMap[angel.chakra];
+  const rootAngel = ROOT_ANGELS.find(
+    (a) => a.name.toLowerCase() === `archangel ${angel.name.toLowerCase()}`
+  );
+  const ancestralConnections = rootAngel?.ancestralConnections;
+  const spiritualTools = rootAngel?.spiritualTools;
 
   return (
     <motion.div
