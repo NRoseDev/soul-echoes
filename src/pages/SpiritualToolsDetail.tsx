@@ -216,27 +216,36 @@ function SectionContent({ id, onOpenAngel }: { id: SectionKey; onOpenAngel: (a: 
           <Block title="Understanding Angelic Ministry">
             <p>Angels are created spiritual beings assigned to serve the purposes of Source and to minister to those who will inherit salvation (Hebrews 1:14). They are not to be worshipped or petitioned independently — but they are real, active, and available as ministers of divine will. You do not command angels directly. You align with Source, and Source dispatches the angelic realm.</p>
           </Block>
-          <Block title="The 11 Archangels — Their Names, Assignments, and Frequencies">
-            <div className="space-y-3">
-              {ARCHANGELS.map((a) => (
-                <div key={a.name} className="border border-border/40 rounded-xl p-3 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-foreground text-sm">{a.name}</p>
-                      <button
-                        onClick={() => onOpenAngel(a)}
-                        className="text-base leading-none hover:scale-125 active:scale-110 transition-transform"
-                        aria-label={`Open ${a.name} angel profile`}
-                      >
-                        🪽
-                      </button>
+          <Block title="The 15 Archangels — Tap a Card to Open Their Portal">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {ARCHANGELS.map((a) => {
+                const extras = ANGEL_EXTRAS[a.name];
+                return (
+                  <button
+                    key={a.name}
+                    onClick={() => onOpenAngel(a)}
+                    className="text-left rounded-2xl p-3 border transition-all hover:scale-[1.02] active:scale-[0.99]"
+                    style={{
+                      background: a.palette.atmosphere + "cc",
+                      borderColor: a.palette.accentMid + "55",
+                    }}
+                    aria-label={`Open ${a.name} angel profile`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="font-display font-bold text-base" style={{ color: a.palette.nameColor }}>
+                        {a.name}
+                      </p>
+                      <span className="text-base leading-none">🪽</span>
                     </div>
-                    <span className="text-xs text-muted-foreground italic">{a.energyColor}</span>
-                  </div>
-                  <p className="text-xs opacity-70">Meaning: {a.meaning}</p>
-                  <p className="text-xs">{a.assignment}</p>
-                </div>
-              ))}
+                    <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: a.palette.accentMid }}>
+                      {a.energyColor}
+                    </p>
+                    <p className="text-xs leading-snug text-white/75">
+                      {extras?.shortDescription ?? a.assignment}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
           </Block>
           <Block title="How to Work with Angels Correctly">
