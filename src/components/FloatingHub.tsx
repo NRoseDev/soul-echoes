@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Hand, MessageCircle, X } from "lucide-react";
-import AngelIcon from "@/components/AngelIcon";
+
 import ASLSignInput from "@/components/ASLSignInput";
 import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 import { toast } from "sonner";
@@ -246,9 +246,13 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               onClick={openSOS}
               aria-label="SOS — angel safety beacon"
               title="SOS — connect to intercessor or healer"
-              className="h-11 w-11 rounded-full flex items-center justify-center bg-green-500/15 backdrop-blur-sm border-2 border-green-400/40 shadow-[0_0_16px_rgba(74,222,128,0.5)] hover:scale-110 active:scale-95 transition-all"
+              className="h-12 w-12 rounded-full flex items-center justify-center bg-black/60 backdrop-blur-sm border-2 border-blue-300/60 shadow-[0_0_18px_rgba(147,197,253,0.55)] hover:scale-110 active:scale-95 transition-all overflow-hidden"
             >
-              <AngelIcon className="h-5 w-9" />
+              <img
+                src="/images/angels-icon.jpg"
+                alt="Angel wings"
+                className="h-10 w-10 object-cover rounded-full"
+              />
             </button>
 
             {/* AI guide / voice */}

@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import AngelSvg from "@/components/AngelSvg";
 import type { ArchangelProfile } from "@/data/angelData";
+import { ANGEL_EXTRAS } from "@/data/angelExtras";
 import { chakraColorMap } from "@/data/chakraData";
 
 interface Props {
@@ -118,6 +119,52 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
               ))}
             </ul>
           </div>
+
+          {/* Symbols */}
+          {ANGEL_EXTRAS[angel.name]?.symbols && (
+            <div className="space-y-2">
+              <h2
+                className="text-xs font-bold uppercase tracking-widest"
+                style={{ color: p.subtitleColor }}
+              >
+                Symbols
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {ANGEL_EXTRAS[angel.name].symbols.map((s, i) => (
+                  <span
+                    key={i}
+                    className="px-3 py-1 rounded-full text-xs border"
+                    style={{ borderColor: p.accentMid + "55", color: p.accentLight }}
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Prayer to Invoke */}
+          {ANGEL_EXTRAS[angel.name]?.prayer && (
+            <div className="space-y-2">
+              <h2
+                className="text-xs font-bold uppercase tracking-widest"
+                style={{ color: p.subtitleColor }}
+              >
+                Prayer to Invoke
+              </h2>
+              <div
+                className="rounded-2xl p-4 border"
+                style={{
+                  background: p.atmosphere + "cc",
+                  borderColor: p.accentMid + "55",
+                }}
+              >
+                <p className="text-sm italic leading-relaxed text-white/85">
+                  {ANGEL_EXTRAS[angel.name].prayer}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </motion.div>
     </motion.div>
