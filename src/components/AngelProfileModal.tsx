@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Play, Pause } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { ArchangelProfile } from "@/data/angelData";
+import { ANGEL_DETAILS } from "@/data/angelData";
 import { ANGEL_EXTRAS } from "@/data/angelExtras";
 import { chakraColorMap } from "@/data/chakraData";
-import { angels as ROOT_ANGELS } from "../../angels";
 
 interface Props {
   angel: ArchangelProfile;
@@ -13,11 +14,56 @@ interface Props {
 export default function AngelProfileModal({ angel, onClose }: Props) {
   const p = angel.palette;
   const chakra = chakraColorMap[angel.chakra];
-  const rootAngel = ROOT_ANGELS.find(
-    (a) => a.name.toLowerCase() === `archangel ${angel.name.toLowerCase()}`
-  );
-  const ancestralConnections = rootAngel?.ancestralConnections;
-  const spiritualTools = rootAngel?.spiritualTools;
+  const details = ANGEL_DETAILS[angel.name];
+  const ancestralConnections = details?.ancestralConnections;
+  const spiritualTools = details?.spiritualTools;
+
+  // Parse Hz from strings like "741 Hz — Clearing & Protection"
+  const frequencyHz = (() => {
+    const m = angel.frequency.match(/(\d+(?:\.\d+)?)\s*Hz/i);
+    return m ? parseFloat(m[1]) : null;
+  })();
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<{ ctx: AudioContext; osc: OscillatorNode; gain: GainNode } | null>(null);
+
+  const stopTone = () => {
+    if (audioRef.current) {
+      try {
+        audioRef.current.gain.gain.linearRampToValueAtTime(
+          0,
+          audioRef.current.ctx.currentTime + 0.15,
+        );
+        audioRef.current.osc.stop(audioRef.current.ctx.currentTime + 0.2);
+        audioRef.current.ctx.close();
+      } catch {
+        // no-op
+      }
+      audioRef.current = null;
+    }
+    setIsPlaying(false);
+  };
+
+  const startTone = () => {
+    if (!frequencyHz) return;
+    stopTone();
+    const Ctx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new Ctx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = frequencyHz;
+    gain.gain.value = 0;
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.4);
+    audioRef.current = { ctx, osc, gain };
+    setIsPlaying(true);
+  };
+
+  useEffect(() => () => stopTone(), []);
 
   return (
     <motion.div
