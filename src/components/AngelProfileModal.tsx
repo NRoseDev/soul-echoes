@@ -117,9 +117,27 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
           >
             {angel.energyColor}
           </span>
-          <span className="px-3 py-1 rounded-full text-xs font-semibold border border-white/20 text-white/60">
-            {angel.frequency}
-          </span>
+          {frequencyHz ? (
+            <button
+              type="button"
+              onClick={isPlaying ? stopTone : startTone}
+              aria-pressed={isPlaying}
+              aria-label={`${isPlaying ? "Stop" : "Play"} ${frequencyHz} Hz healing tone`}
+              className="px-3 py-1 rounded-full text-xs font-semibold border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition-colors flex items-center gap-1.5"
+              style={
+                isPlaying
+                  ? { borderColor: p.accentMid + "aa", color: p.accentMid, background: p.accentMid + "15" }
+                  : undefined
+              }
+            >
+              {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+              {angel.frequency}
+            </button>
+          ) : (
+            <span className="px-3 py-1 rounded-full text-xs font-semibold border border-white/20 text-white/60">
+              {angel.frequency}
+            </span>
+          )}
         </div>
 
         {/* Chakra association */}
