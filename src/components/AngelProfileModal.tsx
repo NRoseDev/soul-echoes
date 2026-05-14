@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
-import AngelSvg from "@/components/AngelSvg";
 import type { ArchangelProfile } from "@/data/angelData";
 import { ANGEL_EXTRAS } from "@/data/angelExtras";
 import { chakraColorMap } from "@/data/chakraData";
