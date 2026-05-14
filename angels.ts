@@ -82,6 +82,17 @@ export const angels: AngelProfile[] = [
     description:
       "Keeper of divine mysteries, intuition, and psychic insight.",
     gifts: ["intuition", "psychic", "insight", "wisdom"],
+        ancestralConnections: [
+      "Primordial Ancestor: Passed to Adam to find his way back to divine grace.",
+      "Lineage of Wisdom: Guided Enoch, Noah, and King Solomon through generations.",
+      "Bloodline Healing: Clears family karma, past-life traumas, and inherited soul vows."
+    ],
+    spiritualTools: {
+      crystal: "Clear Quartz",
+      association: "Sephirah Chokhmah (Wisdom)",
+      halo: "Rainbow-hued spectrum of divine light"
+    },
+
   },
   {
     id: "archangel_metatron",
