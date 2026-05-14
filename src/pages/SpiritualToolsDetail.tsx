@@ -218,53 +218,28 @@ function SectionContent({ id, onOpenAngel }: { id: SectionKey; onOpenAngel: (a: 
           </Block>
           <Block title="The 15 Archangels — Tap a Card to Open Their Portal">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {ARCHANGELS.map((a) => {
-                const extras = ANGEL_EXTRAS[a.name];
-                return (
-                  <button
-                    key={a.name}
-                    onClick={() => onOpenAngel(a)}
-                    className="text-left rounded-2xl p-3 border transition-all hover:scale-[1.02] active:scale-[0.99]"
-                    style={{
-                      background: a.palette.atmosphere + "cc",
-                      borderColor: a.palette.accentMid + "55",
-                    }}
-                    aria-label={`Open ${a.name} angel profile`}
-                  >
-                    <div
-                      className="w-full aspect-square rounded-xl overflow-hidden mb-2 border"
-                      style={{ borderColor: a.palette.accentMid + "55" }}
-                    >
-                      <img
-                        src={`/images/Angel${a.name === "Jeremiel" ? "Jermial" : a.name}.png`}
-                        alt={`${a.name} archangel portrait`}
-                        loading="lazy"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = "none";
-                        }}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between mb-1 gap-2">
-                      <p className="font-display font-bold text-base" style={{ color: a.palette.nameColor }}>
-                        {a.name}
-                      </p>
-                      <img
-                        src="/images/Wings.jpg"
-                        alt=""
-                        aria-hidden="true"
-                        className="h-5 w-5 object-contain shrink-0"
-                      />
-                    </div>
-                    <p className="text-[11px] uppercase tracking-widest mb-2" style={{ color: a.palette.accentMid }}>
-                      {a.energyColor}
-                    </p>
-                    <p className="text-xs leading-snug text-white/75">
-                      {extras?.shortDescription ?? a.assignment}
-                    </p>
-                  </button>
-                );
-              })}
+              {ARCHANGELS.map((a) => (
+                <button
+                  key={a.name}
+                  onClick={() => onOpenAngel(a)}
+                  className="text-left rounded-2xl p-3 border transition-all hover:scale-[1.02] active:scale-[0.99] flex items-center gap-3"
+                  style={{
+                    background: a.palette.atmosphere + "cc",
+                    borderColor: a.palette.accentMid + "55",
+                  }}
+                  aria-label={`Open ${a.name} angel profile`}
+                >
+                  <img
+                    src="/images/Wings.jpg"
+                    alt=""
+                    aria-hidden="true"
+                    className="h-5 w-5 object-contain shrink-0"
+                  />
+                  <p className="font-display font-bold text-base" style={{ color: a.palette.nameColor }}>
+                    {a.name}
+                  </p>
+                </button>
+              ))}
             </div>
           </Block>
           <Block title="How to Work with Angels Correctly">
