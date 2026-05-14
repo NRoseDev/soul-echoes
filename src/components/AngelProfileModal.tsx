@@ -177,6 +177,70 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
               </div>
             </div>
           )}
+
+          {/* Ancestral Connections */}
+          {ancestralConnections && ancestralConnections.length > 0 && (
+            <div className="space-y-2">
+              <h2
+                className="text-xs font-bold uppercase tracking-widest"
+                style={{ color: p.subtitleColor }}
+              >
+                Ancestral Connections
+              </h2>
+              <ul className="space-y-2">
+                {ancestralConnections.map((line, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-sm text-white/80 leading-snug rounded-xl p-3 border"
+                    style={{
+                      background: p.atmosphere + "99",
+                      borderColor: p.accentMid + "33",
+                    }}
+                  >
+                    <span className="mt-0.5 shrink-0" style={{ color: p.accentMid }}>☥</span>
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Spiritual Tools */}
+          {spiritualTools && (
+            <div className="space-y-2">
+              <h2
+                className="text-xs font-bold uppercase tracking-widest"
+                style={{ color: p.subtitleColor }}
+              >
+                Spiritual Tools
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {[
+                  { label: "Crystal", value: spiritualTools.crystal, icon: "✦" },
+                  { label: "Association", value: spiritualTools.association, icon: "✶" },
+                  { label: "Halo", value: spiritualTools.halo, icon: "◎" },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-xl p-3 border flex flex-col gap-1"
+                    style={{
+                      background: p.atmosphere + "cc",
+                      borderColor: p.accentMid + "55",
+                    }}
+                  >
+                    <div
+                      className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest"
+                      style={{ color: p.accentMid }}
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.label}</span>
+                    </div>
+                    <p className="text-sm text-white/85 leading-snug">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </motion.div>
     </motion.div>
