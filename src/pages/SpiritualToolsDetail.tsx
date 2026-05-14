@@ -236,7 +236,7 @@ function SectionContent({ id, onOpenAngel }: { id: SectionKey; onOpenAngel: (a: 
                       style={{ borderColor: a.palette.accentMid + "55" }}
                     >
                       <img
-                        src={`/images/${a.name}.jpg`}
+                        src={`/images/Angel${a.name === "Jeremiel" ? "Jermial" : a.name}.png`}
                         alt={`${a.name} archangel portrait`}
                         loading="lazy"
                         className="w-full h-full object-cover"
