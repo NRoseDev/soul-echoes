@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, HeartHandshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ARCHANGELS, type ArchangelProfile } from "@/data/angelData";
+import { ANGEL_EXTRAS } from "@/data/angelExtras";
 import AngelProfileModal from "@/components/AngelProfileModal";
 
 type SectionKey =
