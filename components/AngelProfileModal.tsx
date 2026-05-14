@@ -11,20 +11,25 @@ export default function AngelProfileModal({ angel, onClose }) {
   const chakra = Object.entries(angelChakraMap).find(([_, ids]) =>
     ids.includes(angel.id)
   )?.[0];
-
+  
   const glow = chakra ? chakraColorMap[chakra][0] : "#ffffff";
-    const playFrequency = (frequencyHz: number) => {
+
+  const playFrequency = (frequencyHz: number) => {
     try {
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       const ctx = new AudioContext();
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
+      
       oscillator.type = 'sine';
       oscillator.frequency.value = frequencyHz;
+      
       gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 3);
+      
       oscillator.connect(gainNode);
       gainNode.connect(ctx.destination);
+      
       oscillator.start();
       oscillator.stop(ctx.currentTime + 3);
     } catch (error) {
@@ -63,19 +68,32 @@ export default function AngelProfileModal({ angel, onClose }) {
             />
           </div>
 
-          <h2
-            className="text-2xl font-bold text-center mb-2"
-            style={{ color: glow }}
-          >
+          <h2 className="text-2xl font-bold text-center mb-2" style={{ color: glow }}>
             {angel.name}
           </h2>
+
+          {angel.frequency && (
+            <div className="mt-2 flex flex-col items-center">
+              <button
+                onClick={() => {
+                  const hzNumber = parseInt(angel.frequency);
+                  if (!isNaN(hzNumber)) playFrequency(hzNumber);
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition active:scale-95 cursor-pointer shadow-md bg-white/5 hover:bg-white/10"
+                style={{ borderColor: `${glow}44`, color: glow }}
+              >
+                <span>🔊</span>
+                <span>Play {angel.frequency}</span>
+              </button>
+            </div>
+          )}
 
           <div className="mt-4">
             <h3 className="text-lg font-semibold mb-1" style={{ color: glow }}>
               Gifts
             </h3>
             <ul className="text-gray-300 space-y-1">
-              {angel.gifts.map((g) => (
+              {angel.gifts?.map((g) => (
                 <li key={g}>• {g}</li>
               ))}
             </ul>
@@ -87,20 +105,38 @@ export default function AngelProfileModal({ angel, onClose }) {
             </h3>
             <p className="text-gray-300">{angel.description}</p>
           </div>
-          <div className="mt-4 flex flex-col items-center">
-  <button 
-    onClick={() => {
-      // Plays 528Hz for Raphael, 963Hz for Raziel, or defaults to 432Hz safely
-      const hz = angel.id.includes("raphael") ? 528 : angel.id.includes("raziel") ? 963 : 432;
-      playFrequency(hz);
-    }}
-    className="flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition active:scale-95 cursor-pointer shadow-md bg-white/5 hover:bg-white/10"
-    style={{ borderColor: `${glow}44`, color: glow }}
-  >
-    <span>🔊</span>
-    <span>Play Divine Frequency Tone</span>
-  </button>
-</div>
+
+          {angel.ancestralConnections && (
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold mb-1" style={{ color: glow }}>
+                Ancestral Connections
+              </h3>
+              <ul className="text-gray-300 space-y-1">
+                {angel.ancestralConnections.map((conn, idx) => (
+                  <li key={idx}>☥ {conn}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {angel.spiritualTools && (
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold mb-1" style={{ color: glow }}>
+                Spiritual Tools
+              </h3>
+              <ul className="text-gray-300 space-y-1">
+                {angel.spiritualTools.crystal && (
+                  <li>✦ <span className="font-semibold">Crystal:</span> {angel.spiritualTools.crystal}</li>
+                )}
+                {angel.spiritualTools.association && (
+                  <li>✶ <span className="font-semibold">Association:</span> {angel.spiritualTools.association}</li>
+                )}
+                {angel.spiritualTools.halo && (
+                  <li>◎ <span className="font-semibold">Halo:</span> {angel.spiritualTools.halo}</li>
+                )}
+              </ul>
+            </div>
+          )}
 
           <button
             onClick={onClose}
