@@ -42,12 +42,172 @@ export interface ArchangelProfile {
   palette: AngelPalette;
 }
 
+// ─── ROOT CHAKRA palette bases (#FF0000 / #B30000) ──────────────────────────
+// Michael — warrior fire: pure red with gold divine cross
+const michaelPalette: AngelPalette = {
+  atmosphere: "#180000", rays: "#ffbbaa", beam: "#ffd8cc",
+  wingTip: "#ffcc88", wingPrimary: "#ff3300", wingDeep: "#660000", wingVein: "#ff6644",
+  robeLight: "#fff0ee", robeMid: "#ffaaaa", robeDark: "#180000",
+  armorLight: "#ffddcc", armorDark: "#440000",
+  accentLight: "#fff0b0", accentMid: "#ffcc44", accentDark: "#bb8800",
+  hoodLight: "#ffcccc", hoodDark: "#180000",
+  tipGlow: "#ffeeaa", mist: "#cc0000",
+  eye: "#ff4400", eyeHL: "#fff8ee", armorVein: "#ffaa99", shadow: "#ff2200",
+  nameColor: "#ff9988", subtitleColor: "#aa4433",
+  name: "MICHAEL", subtitle: "Guardian · Protection · Courage",
+};
+
+// Ariel — earth fire: terracotta warmth, rose-gold accent
+const arielPalette: AngelPalette = {
+  atmosphere: "#160800", rays: "#ffccaa", beam: "#ffddcc",
+  wingTip: "#ffd0b0", wingPrimary: "#ee4400", wingDeep: "#550a00", wingVein: "#ffaa77",
+  robeLight: "#fff5f0", robeMid: "#ffbb99", robeDark: "#160800",
+  armorLight: "#ffeedd", armorDark: "#3a1000",
+  accentLight: "#ffeedd", accentMid: "#ee8844", accentDark: "#aa4422",
+  hoodLight: "#ffd0b8", hoodDark: "#160800",
+  tipGlow: "#ffddc0", mist: "#bb3300",
+  eye: "#ee5500", eyeHL: "#fff5ee", armorVein: "#ffbb99", shadow: "#cc3300",
+  nameColor: "#ffaa88", subtitleColor: "#994422",
+  name: "ARIEL", subtitle: "Earth Healing · Nature · Elemental Grace",
+};
+
+// ─── THROAT CHAKRA palette bases (#3399FF / #0066CC) ────────────────────────
+// Gabriel — celestial blue: gold warmth at tips, divine messenger gold cross
+const gabrielPalette: AngelPalette = {
+  atmosphere: "#000a18", rays: "#aaccff", beam: "#cce0ff",
+  wingTip: "#ffe0a0", wingPrimary: "#3399ff", wingDeep: "#003388", wingVein: "#55aaff",
+  robeLight: "#eef5ff", robeMid: "#99bbee", robeDark: "#000a18",
+  armorLight: "#cce8ff", armorDark: "#0a2040",
+  accentLight: "#fff0b0", accentMid: "#ffcc44", accentDark: "#bb8800",
+  hoodLight: "#aaddff", hoodDark: "#00081a",
+  tipGlow: "#ffe8aa", mist: "#0066cc",
+  eye: "#3399ff", eyeHL: "#ffffff", armorVein: "#88bbee", shadow: "#0077cc",
+  nameColor: "#88bbee", subtitleColor: "#4477aa",
+  name: "GABRIEL", subtitle: "Divine Message · Revelation · New Beginnings",
+};
+
+// Raguel — justice blue: cooler aqua tone, aqua cross/halo
+const raguelPalette: AngelPalette = {
+  atmosphere: "#000c14", rays: "#aaeeff", beam: "#ccf4ff",
+  wingTip: "#ddfff8", wingPrimary: "#0088cc", wingDeep: "#003355", wingVein: "#44ccee",
+  robeLight: "#eefcff", robeMid: "#88ccdd", robeDark: "#000c14",
+  armorLight: "#ccf0ff", armorDark: "#082030",
+  accentLight: "#e8ffff", accentMid: "#44ccee", accentDark: "#007799",
+  hoodLight: "#aaeeff", hoodDark: "#000c14",
+  tipGlow: "#ccf8ff", mist: "#0088bb",
+  eye: "#00bbdd", eyeHL: "#f0ffff", armorVein: "#88ddee", shadow: "#0088bb",
+  nameColor: "#55ddee", subtitleColor: "#226688",
+  name: "RAGUEL", subtitle: "Justice · Harmony · Right Relationship",
+};
+
+// ─── HEART CHAKRA palette bases (#00CC66 / #FFB7C5) ─────────────────────────
+// Raphael — pure healing emerald, gold cross (divine physician)
+const raphaelPalette: AngelPalette = {
+  atmosphere: "#001208", rays: "#aaffcc", beam: "#ccffee",
+  wingTip: "#ffddee", wingPrimary: "#00cc66", wingDeep: "#004422", wingVein: "#44ffaa",
+  robeLight: "#eeffee", robeMid: "#88ddaa", robeDark: "#001408",
+  armorLight: "#ccffee", armorDark: "#0a2820",
+  accentLight: "#fff0b0", accentMid: "#ffcc44", accentDark: "#bb8800",
+  hoodLight: "#ccffee", hoodDark: "#001508",
+  tipGlow: "#ffbbcc", mist: "#00cc66",
+  eye: "#00cc66", eyeHL: "#ffffff", armorVein: "#88ffcc", shadow: "#00aa44",
+  nameColor: "#44ffaa", subtitleColor: "#228855",
+  name: "RAPHAEL", subtitle: "Healing · Restoration · Divine Physician",
+};
+
+// Chamuel — heart pink-green: rose-tinted, soft pink accent
+const chamuelPalette: AngelPalette = {
+  atmosphere: "#080c08", rays: "#ccffdd", beam: "#ddfff0",
+  wingTip: "#ffccdd", wingPrimary: "#44cc88", wingDeep: "#0a3320", wingVein: "#99ffcc",
+  robeLight: "#f5fff8", robeMid: "#aaddbb", robeDark: "#080c08",
+  armorLight: "#ddfff0", armorDark: "#0a2818",
+  accentLight: "#fff0f5", accentMid: "#ffaacc", accentDark: "#cc4477",
+  hoodLight: "#ccffdd", hoodDark: "#080c08",
+  tipGlow: "#ffccee", mist: "#44cc88",
+  eye: "#44ddaa", eyeHL: "#f0fff8", armorVein: "#aaffcc", shadow: "#33bb77",
+  nameColor: "#88ddbb", subtitleColor: "#337755",
+  name: "CHAMUEL", subtitle: "Love · Compassion · Restoring the Heart",
+};
+
+// ─── THIRD EYE CHAKRA palette bases (#4B0082 / #2E0059) ─────────────────────
+// Uriel — electric indigo, gold cross (fire of God)
+const urielPalette: AngelPalette = {
+  atmosphere: "#080012", rays: "#cc99ff", beam: "#ddc0ff",
+  wingTip: "#e8d8ff", wingPrimary: "#7744cc", wingDeep: "#2e0059", wingVein: "#9966dd",
+  robeLight: "#f0e8ff", robeMid: "#aa88cc", robeDark: "#080012",
+  armorLight: "#e0d8ff", armorDark: "#220044",
+  accentLight: "#fff0b0", accentMid: "#ffcc44", accentDark: "#bb8800",
+  hoodLight: "#d8c0ff", hoodDark: "#060010",
+  tipGlow: "#e8d8ff", mist: "#4b0082",
+  eye: "#8844ee", eyeHL: "#f0e8ff", armorVein: "#cc99ff", shadow: "#6600aa",
+  nameColor: "#cc99ff", subtitleColor: "#7744aa",
+  name: "URIEL", subtitle: "Wisdom · Divine Light · Sacred Truth",
+};
+
+// Haniel — moonlit indigo, silver-moonstone accent
+const hanielPalette: AngelPalette = {
+  atmosphere: "#060010", rays: "#bbaadd", beam: "#d8ccee",
+  wingTip: "#f0eaff", wingPrimary: "#6655bb", wingDeep: "#220055", wingVein: "#aaaadd",
+  robeLight: "#f5f0ff", robeMid: "#bbaadd", robeDark: "#060010",
+  armorLight: "#eeeeff", armorDark: "#1a1a44",
+  accentLight: "#f0eeff", accentMid: "#ccccee", accentDark: "#8888aa",
+  hoodLight: "#e8e0ff", hoodDark: "#050010",
+  tipGlow: "#f0eeff", mist: "#4455aa",
+  eye: "#9988cc", eyeHL: "#f5f0ff", armorVein: "#ccbbee", shadow: "#555599",
+  nameColor: "#bbaadd", subtitleColor: "#665588",
+  name: "HANIEL", subtitle: "Grace · Intuition · Moon Wisdom",
+};
+
+// ─── CROWN CHAKRA palette bases (#9933FF / #FFFFFF) ──────────────────────────
+// Jophiel — bright violet-white, white tips (beauty of God)
+const jophielPalette: AngelPalette = {
+  atmosphere: "#080012", rays: "#ddbbff", beam: "#f0e0ff",
+  wingTip: "#ffffff", wingPrimary: "#9933ff", wingDeep: "#330066", wingVein: "#cc88ff",
+  robeLight: "#f8f0ff", robeMid: "#cc99ff", robeDark: "#080012",
+  armorLight: "#eeddff", armorDark: "#2a0055",
+  accentLight: "#ffffff", accentMid: "#ddbbff", accentDark: "#9933ff",
+  hoodLight: "#eeddff", hoodDark: "#06000e",
+  tipGlow: "#ffffff", mist: "#9933ff",
+  eye: "#cc66ff", eyeHL: "#ffffff", armorVein: "#ddbbff", shadow: "#9933ff",
+  nameColor: "#ddbbff", subtitleColor: "#9955cc",
+  name: "JOPHIEL", subtitle: "Beauty · Creativity · Sacred Perception",
+};
+
+// Zadkiel — deep violet-indigo, violet flame accent
+const zadkielPalette: AngelPalette = {
+  atmosphere: "#060010", rays: "#cc99ff", beam: "#eedbff",
+  wingTip: "#f0e4ff", wingPrimary: "#7711cc", wingDeep: "#280055", wingVein: "#bb55ff",
+  robeLight: "#f5eaff", robeMid: "#bb88dd", robeDark: "#060010",
+  armorLight: "#eeddff", armorDark: "#220044",
+  accentLight: "#f0ddff", accentMid: "#bb44ff", accentDark: "#770099",
+  hoodLight: "#ddc8ff", hoodDark: "#050010",
+  tipGlow: "#f0ddff", mist: "#8800cc",
+  eye: "#cc44ff", eyeHL: "#f8f0ff", armorVein: "#ddbbff", shadow: "#8800cc",
+  nameColor: "#cc88ff", subtitleColor: "#7722aa",
+  name: "ZADKIEL", subtitle: "Forgiveness · Mercy · Violet Flame Transmutation",
+};
+
+// ─── SOUL STAR CHAKRA palette base (#FFD700 / #FFFFFF) ───────────────────────
+// Raziel — pure divine gold and white (akashic records, divine mysteries)
+const razielPalette: AngelPalette = {
+  atmosphere: "#0c0900", rays: "#fff8aa", beam: "#fffff0",
+  wingTip: "#ffffff", wingPrimary: "#ffd700", wingDeep: "#664400", wingVein: "#ffeeaa",
+  robeLight: "#fffff8", robeMid: "#ffeeaa", robeDark: "#100c00",
+  armorLight: "#fff8cc", armorDark: "#332200",
+  accentLight: "#ffffff", accentMid: "#ffd700", accentDark: "#886600",
+  hoodLight: "#fff8cc", hoodDark: "#0c0900",
+  tipGlow: "#ffffff", mist: "#ffd700",
+  eye: "#ffd700", eyeHL: "#ffffff", armorVein: "#ffeeaa", shadow: "#ccaa00",
+  nameColor: "#ffeeaa", subtitleColor: "#aa8800",
+  name: "RAZIEL", subtitle: "Divine Mystery · Hidden Wisdom · Akashic Light",
+};
+
 export const ARCHANGELS: ArchangelProfile[] = [
   {
     name: "Michael",
     meaning: "Who is like God",
     assignment: "Protection, spiritual warfare, justice, strength, and cutting of spiritual bonds. The commander of the angelic army. Call on Michael when you need protection, courage in battle, or help breaking spiritual chains.",
-    energyColor: "Royal Blue / Gold",
+    energyColor: "Root Red / Gold",
     frequency: "741 Hz — Clearing & Protection",
     chakra: "root",
     healingGifts: [
@@ -66,24 +226,13 @@ export const ARCHANGELS: ArchangelProfile[] = [
       "When you need protection over your home or loved ones",
       "When going into spiritually dangerous territory",
     ],
-    palette: {
-      atmosphere: "#001a2e", rays: "#aaddff", beam: "#a0e6ff",
-      wingTip: "#ffe0a0", wingPrimary: "#00eedd", wingDeep: "#004466", wingVein: "#55eeff",
-      robeLight: "#e8f8ff", robeMid: "#aaddee", robeDark: "#001428",
-      armorLight: "#d0f0ff", armorDark: "#1a3c55",
-      accentLight: "#fff0b0", accentMid: "#ffcc44", accentDark: "#bb8800",
-      hoodLight: "#c0eeff", hoodDark: "#001830",
-      tipGlow: "#ffeeaa", mist: "#00aadd",
-      eye: "#44ccee", eyeHL: "#ffffff", armorVein: "#99ddee", shadow: "#00b4dc",
-      nameColor: "#88ccee", subtitleColor: "#4488aa",
-      name: "MICHAEL", subtitle: "Guardian · Protection · Courage",
-    },
+    palette: michaelPalette,
   },
   {
     name: "Gabriel",
     meaning: "Strength of God",
     assignment: "Divine communication, revelation, announcements, and creative conception. Gabriel carries messages of destiny and new beginnings. Present at births, callings, and prophetic unfolding.",
-    energyColor: "White / Silver",
+    energyColor: "Celestial Blue / Gold",
     frequency: "417 Hz — Facilitating Change",
     chakra: "throat",
     healingGifts: [
@@ -102,24 +251,13 @@ export const ARCHANGELS: ArchangelProfile[] = [
       "When developing prophetic or communicative spiritual gifts",
       "When you need to deliver a difficult but necessary message",
     ],
-    palette: {
-      atmosphere: "#060814", rays: "#c0ccff", beam: "#e8eeff",
-      wingTip: "#f5f5ff", wingPrimary: "#d0dcf8", wingDeep: "#2a3355", wingVein: "#c8d8ff",
-      robeLight: "#f8f8ff", robeMid: "#c8d8f0", robeDark: "#0a0b28",
-      armorLight: "#e8eeff", armorDark: "#1a2040",
-      accentLight: "#f8f8ff", accentMid: "#c8c8ee", accentDark: "#8888cc",
-      hoodLight: "#e8eeff", hoodDark: "#0a0b1e",
-      tipGlow: "#f8f8ff", mist: "#8899cc",
-      eye: "#88aacc", eyeHL: "#f8f8ff", armorVein: "#c8d8ee", shadow: "#8899cc",
-      nameColor: "#c0d0ee", subtitleColor: "#6677aa",
-      name: "GABRIEL", subtitle: "Divine Message · Revelation · New Beginnings",
-    },
+    palette: gabrielPalette,
   },
   {
     name: "Raphael",
     meaning: "God heals",
     assignment: "Physical, emotional, and spiritual healing. The physician of heaven. Raphael is present in hospital rooms, at the bedsides of the sick, and wherever healing is being sought.",
-    energyColor: "Emerald Green",
+    energyColor: "Emerald Green / Gold",
     frequency: "528 Hz — Miracle Tone / DNA Repair",
     chakra: "heart",
     healingGifts: [
@@ -138,24 +276,13 @@ export const ARCHANGELS: ArchangelProfile[] = [
       "Before surgery, procedures, or medical treatments",
       "When traveling or protecting travelers",
     ],
-    palette: {
-      atmosphere: "#001208", rays: "#aaffcc", beam: "#aaffee",
-      wingTip: "#ccffe8", wingPrimary: "#00dd88", wingDeep: "#003322", wingVein: "#44ffaa",
-      robeLight: "#e8fff5", robeMid: "#88ddcc", robeDark: "#001408",
-      armorLight: "#aaffdd", armorDark: "#0f2820",
-      accentLight: "#fff0b0", accentMid: "#ffcc44", accentDark: "#bb8800",
-      hoodLight: "#aaffe8", hoodDark: "#001508",
-      tipGlow: "#ccffe8", mist: "#00aa44",
-      eye: "#00ee88", eyeHL: "#ffffff", armorVein: "#88ffcc", shadow: "#00aa44",
-      nameColor: "#44ffaa", subtitleColor: "#228855",
-      name: "RAPHAEL", subtitle: "Healing · Restoration · Divine Physician",
-    },
+    palette: raphaelPalette,
   },
   {
     name: "Uriel",
     meaning: "Fire of God / Light of God",
     assignment: "Wisdom, illumination, intellectual clarity, and aligning with divine truth. Uriel brings light into confusion and helps interpret prophetic revelation.",
-    energyColor: "Red / Gold",
+    energyColor: "Deep Indigo / Gold",
     frequency: "396 Hz — Liberation from Fear",
     chakra: "thirdEye",
     healingGifts: [
@@ -174,24 +301,13 @@ export const ARCHANGELS: ArchangelProfile[] = [
       "When you need truth revealed in a complex situation",
       "When academic or creative work feels spiritually blocked",
     ],
-    palette: {
-      atmosphere: "#140800", rays: "#ffddaa", beam: "#ffeecc",
-      wingTip: "#ffddaa", wingPrimary: "#ff8800", wingDeep: "#441100", wingVein: "#ffcc66",
-      robeLight: "#fff0dd", robeMid: "#ffcc88", robeDark: "#180800",
-      armorLight: "#ffeecc", armorDark: "#3a1800",
-      accentLight: "#fff0b0", accentMid: "#ffcc44", accentDark: "#bb8800",
-      hoodLight: "#ffddbb", hoodDark: "#140800",
-      tipGlow: "#ffeeaa", mist: "#ff4400",
-      eye: "#ff8800", eyeHL: "#ffffee", armorVein: "#ffddaa", shadow: "#ff4400",
-      nameColor: "#ffcc88", subtitleColor: "#aa6622",
-      name: "URIEL", subtitle: "Wisdom · Divine Light · Sacred Truth",
-    },
+    palette: urielPalette,
   },
   {
     name: "Ariel",
     meaning: "Lioness of God",
     assignment: "Nature, animals, the earth, and elemental healing. Ariel oversees the natural world and can be invited into work involving earth healing, animal communication, and grounding.",
-    energyColor: "Pale Pink / Iridescent",
+    energyColor: "Earth Red / Terracotta",
     frequency: "432 Hz — Earth Harmony",
     chakra: "root",
     healingGifts: [
@@ -210,24 +326,13 @@ export const ARCHANGELS: ArchangelProfile[] = [
       "When environmental concerns feel heavy",
       "When the body's connection to the earth needs restoration",
     ],
-    palette: {
-      atmosphere: "#130a10", rays: "#ffccee", beam: "#ffeef8",
-      wingTip: "#ffeef5", wingPrimary: "#ff99cc", wingDeep: "#440022", wingVein: "#ffaacc",
-      robeLight: "#fff5f8", robeMid: "#ffbbdd", robeDark: "#180008",
-      armorLight: "#ffeeff", armorDark: "#331020",
-      accentLight: "#fff0f5", accentMid: "#ffaacc", accentDark: "#cc4488",
-      hoodLight: "#ffeeff", hoodDark: "#120810",
-      tipGlow: "#ffddee", mist: "#cc4488",
-      eye: "#ff88bb", eyeHL: "#fff8ff", armorVein: "#ffd0ee", shadow: "#cc4488",
-      nameColor: "#ffaacc", subtitleColor: "#994466",
-      name: "ARIEL", subtitle: "Earth Healing · Nature · Elemental Grace",
-    },
+    palette: arielPalette,
   },
   {
     name: "Chamuel",
     meaning: "He who seeks God",
     assignment: "Love, compassion, peace, and finding what is lost — including lost relationships, lost purpose, and lost peace. Chamuel works to restore the heart.",
-    energyColor: "Pale Green / Pink",
+    energyColor: "Heart Green / Rose",
     frequency: "639 Hz — Heart Reconnection",
     chakra: "heart",
     healingGifts: [
@@ -246,24 +351,13 @@ export const ARCHANGELS: ArchangelProfile[] = [
       "When forgiveness is needed but feels out of reach",
       "When you are searching for your purpose or sense of belonging",
     ],
-    palette: {
-      atmosphere: "#040c08", rays: "#aaffcc", beam: "#ccffee",
-      wingTip: "#e8fff0", wingPrimary: "#88ffcc", wingDeep: "#113322", wingVein: "#88eecc",
-      robeLight: "#f0fff8", robeMid: "#aaeecc", robeDark: "#081408",
-      armorLight: "#ccfff0", armorDark: "#0f2820",
-      accentLight: "#e8fff0", accentMid: "#88ddaa", accentDark: "#226644",
-      hoodLight: "#ccffee", hoodDark: "#041008",
-      tipGlow: "#ccffee", mist: "#44cc88",
-      eye: "#44ddaa", eyeHL: "#f0fff8", armorVein: "#88ddcc", shadow: "#44aa88",
-      nameColor: "#88ddbb", subtitleColor: "#338855",
-      name: "CHAMUEL", subtitle: "Love · Compassion · Restoring the Heart",
-    },
+    palette: chamuelPalette,
   },
   {
     name: "Haniel",
     meaning: "Grace of God",
     assignment: "Grace, intuition, the moon cycle, feminine energy, and spiritual vision. Haniel helps develop and refine clairvoyance and intuitive gifts.",
-    energyColor: "Moonstone / Silver Blue",
+    energyColor: "Moonlit Indigo / Silver",
     frequency: "852 Hz — Spiritual Intuition",
     chakra: "thirdEye",
     healingGifts: [
@@ -282,24 +376,13 @@ export const ARCHANGELS: ArchangelProfile[] = [
       "When in a major life transition that requires trust",
       "When feminine healing work — cycles, hormones, womb — is needed",
     ],
-    palette: {
-      atmosphere: "#040810", rays: "#c0ccee", beam: "#ddeeff",
-      wingTip: "#ddeeff", wingPrimary: "#aabbee", wingDeep: "#1a2a44", wingVein: "#99bbdd",
-      robeLight: "#eef5ff", robeMid: "#bbccee", robeDark: "#080c18",
-      armorLight: "#ddeeff", armorDark: "#182030",
-      accentLight: "#eef5ff", accentMid: "#99aace", accentDark: "#4455aa",
-      hoodLight: "#c8ddf5", hoodDark: "#050810",
-      tipGlow: "#ddeeff", mist: "#4466aa",
-      eye: "#88aacc", eyeHL: "#eef5ff", armorVein: "#aac0dd", shadow: "#4466aa",
-      nameColor: "#99bbdd", subtitleColor: "#446688",
-      name: "HANIEL", subtitle: "Grace · Intuition · Moon Wisdom",
-    },
+    palette: hanielPalette,
   },
   {
     name: "Jophiel",
     meaning: "Beauty of God",
     assignment: "Beauty, creativity, wisdom, and slowing down long enough to perceive the sacred. Jophiel combats mental clutter and helps artists, teachers, and creators align with divine beauty.",
-    energyColor: "Yellow / Gold",
+    energyColor: "Crown Violet / White",
     frequency: "285 Hz — Energy Field Restoration",
     chakra: "crown",
     healingGifts: [
@@ -318,24 +401,13 @@ export const ARCHANGELS: ArchangelProfile[] = [
       "When an artist, teacher, or creator needs divine alignment",
       "When joy needs to be restored after a long season of grief or work",
     ],
-    palette: {
-      atmosphere: "#100c00", rays: "#ffffcc", beam: "#ffffe8",
-      wingTip: "#ffffcc", wingPrimary: "#ffee44", wingDeep: "#332200", wingVein: "#ffee66",
-      robeLight: "#fffff0", robeMid: "#ffee88", robeDark: "#151000",
-      armorLight: "#fffff0", armorDark: "#332800",
-      accentLight: "#ffffcc", accentMid: "#ffdd00", accentDark: "#aa8800",
-      hoodLight: "#ffffc8", hoodDark: "#100c00",
-      tipGlow: "#ffffaa", mist: "#ddaa00",
-      eye: "#ffcc00", eyeHL: "#fffff8", armorVein: "#ffeeaa", shadow: "#ddaa00",
-      nameColor: "#ffee88", subtitleColor: "#997722",
-      name: "JOPHIEL", subtitle: "Beauty · Creativity · Sacred Perception",
-    },
+    palette: jophielPalette,
   },
   {
     name: "Raguel",
     meaning: "Friend of God",
     assignment: "Justice, harmony, order, and right relationships. Raguel resolves disputes, restores fairness, and brings clarity where there has been injustice or relational chaos.",
-    energyColor: "Light Blue / Aqua",
+    energyColor: "Justice Blue / Aqua",
     frequency: "174 Hz — Foundation & Justice",
     chakra: "throat",
     healingGifts: [
@@ -354,24 +426,13 @@ export const ARCHANGELS: ArchangelProfile[] = [
       "When you are waiting for justice and growing weary",
       "When boundaries need to be established in love",
     ],
-    palette: {
-      atmosphere: "#000c10", rays: "#aaeeff", beam: "#ccfffe",
-      wingTip: "#ccffff", wingPrimary: "#44eedd", wingDeep: "#002233", wingVein: "#44eedd",
-      robeLight: "#eeffff", robeMid: "#88ddee", robeDark: "#000e18",
-      armorLight: "#ccffff", armorDark: "#0a2030",
-      accentLight: "#e8ffff", accentMid: "#88ddee", accentDark: "#2299aa",
-      hoodLight: "#c8f8ff", hoodDark: "#000c18",
-      tipGlow: "#ddfff8", mist: "#0099bb",
-      eye: "#00ccee", eyeHL: "#f0ffff", armorVein: "#88ddee", shadow: "#0099bb",
-      nameColor: "#66eeff", subtitleColor: "#2288aa",
-      name: "RAGUEL", subtitle: "Justice · Harmony · Right Relationship",
-    },
+    palette: raguelPalette,
   },
   {
     name: "Raziel",
     meaning: "Secrets of God",
     assignment: "Divine mysteries, esoteric wisdom, the akashic records, and understanding the hidden dimensions of reality. Raziel helps those being initiated into deeper spiritual understanding.",
-    energyColor: "Rainbow / Iridescent",
+    energyColor: "Divine Gold / White",
     frequency: "963 Hz — Divine Connection",
     chakra: "soulStar",
     healingGifts: [
@@ -390,24 +451,13 @@ export const ARCHANGELS: ArchangelProfile[] = [
       "When doing akashic or past-life healing work",
       "When the deeper meaning of your suffering needs to surface",
     ],
-    palette: {
-      atmosphere: "#04001a", rays: "#ddc0ff", beam: "#ddc0ff",
-      wingTip: "#f0e0ff", wingPrimary: "#aa44ff", wingDeep: "#220044", wingVein: "#cc88ff",
-      robeLight: "#f0e0ff", robeMid: "#9966dd", robeDark: "#0a0018",
-      armorLight: "#f0e8ff", armorDark: "#220033",
-      accentLight: "#ffbbff", accentMid: "#cc44ff", accentDark: "#6600cc",
-      hoodLight: "#e8d8ff", hoodDark: "#06000e",
-      tipGlow: "#f0e0ff", mist: "#6600cc",
-      eye: "#aa44ff", eyeHL: "#f8f0ff", armorVein: "#ddbbff", shadow: "#6600cc",
-      nameColor: "#cc88ff", subtitleColor: "#6633aa",
-      name: "RAZIEL", subtitle: "Divine Mystery · Hidden Wisdom · Akashic Light",
-    },
+    palette: razielPalette,
   },
   {
     name: "Zadkiel",
     meaning: "Righteousness of God",
     assignment: "Forgiveness, mercy, freedom from guilt, and transformation. Zadkiel oversees the violet flame of transmutation — the divine fire that transforms darkness into light.",
-    energyColor: "Violet / Indigo",
+    energyColor: "Violet Flame / Indigo",
     frequency: "741 Hz — Transmutation",
     chakra: "crown",
     healingGifts: [
@@ -426,18 +476,7 @@ export const ARCHANGELS: ArchangelProfile[] = [
       "When a spiritual purification or renewal is needed",
       "When darkness feels too heavy to transmute alone",
     ],
-    palette: {
-      atmosphere: "#080014", rays: "#ddbbff", beam: "#f0ddff",
-      wingTip: "#eeddff", wingPrimary: "#cc44ff", wingDeep: "#330055", wingVein: "#cc66ff",
-      robeLight: "#f5eeff", robeMid: "#bb88ee", robeDark: "#0a0020",
-      armorLight: "#eeddff", armorDark: "#2a0044",
-      accentLight: "#f5eeff", accentMid: "#cc66ff", accentDark: "#8800cc",
-      hoodLight: "#ddc8ff", hoodDark: "#06001a",
-      tipGlow: "#eeddf8", mist: "#8800cc",
-      eye: "#cc44ff", eyeHL: "#f8f0ff", armorVein: "#ddbbff", shadow: "#8800cc",
-      nameColor: "#cc88ff", subtitleColor: "#7722aa",
-      name: "ZADKIEL", subtitle: "Forgiveness · Mercy · Violet Flame Transmutation",
-    },
+    palette: zadkielPalette,
   },
   {
     name: "Azrael",
