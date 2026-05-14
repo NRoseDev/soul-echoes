@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
-import AngelSvg from "@/components/AngelSvg";
 import type { ArchangelProfile } from "@/data/angelData";
 import { ANGEL_EXTRAS } from "@/data/angelExtras";
 import { chakraColorMap } from "@/data/chakraData";
@@ -37,9 +36,16 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1, duration: 0.35 }}
       >
-        {/* Angel illustration */}
-        <div className="w-full max-w-xs">
-          <AngelSvg palette={p} />
+        {/* Angel portrait */}
+        <div className="w-full max-w-xs rounded-xl overflow-hidden border" style={{ borderColor: p.accentMid + "55" }}>
+          <img
+            src={`/images/Angel${angel.name === "Jeremiel" ? "Jermial" : angel.name}.png`}
+            alt={`${angel.name} archangel portrait`}
+            className="w-full h-auto object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+            }}
+          />
         </div>
 
         {/* Name */}
