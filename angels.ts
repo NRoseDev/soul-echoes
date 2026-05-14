@@ -1,8 +1,16 @@
+export interface AngelSpiritualTools {
+  crystal: string;
+  association: string;
+  halo: string;
+}
+
 export interface AngelProfile {
   id: string;
   name: string;
   description: string;
   gifts: string[];
+  ancestralConnections?: string[];
+  spiritualTools?: AngelSpiritualTools;
 }
 
 export const angels: AngelProfile[] = [
