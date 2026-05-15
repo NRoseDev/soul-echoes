@@ -47,23 +47,30 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
   const startTone = () => {
     if (!frequencyHz) return;
     stopTone();
-    const Ctx =
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     const ctx = new Ctx();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
+
     osc.type = "sine";
     osc.frequency.value = frequencyHz;
     gain.gain.value = 0;
+
     osc.connect(gain).connect(ctx.destination);
     osc.start();
     gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.4);
+
     audioRef.current = { ctx, osc, gain };
     setIsPlaying(true);
   };
 
   useEffect(() => () => stopTone(), []);
+
+  const handleChakraNavigation = () => {
+    if (onClose) onClose();
+    window.location.hash = `#/wisdom?chakra=${encodeURIComponent(angel.chakra.toLowerCase())}`;
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  };
 
   return (
     <motion.div
@@ -117,6 +124,7 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
           >
             {angel.energyColor}
           </span>
+
           {frequencyHz ? (
             <button
               type="button"
@@ -140,32 +148,33 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
           )}
         </div>
 
-        {/* Chakra association */}
-        <div
-          className="w-full max-w-sm mt-4 rounded-2xl p-3 flex items-center gap-3"
-          style={{ background: chakra.colors[0] + "18", border: `1px solid ${chakra.colors[0]}44` }}
+        {/* Chakra association (Actionable Button Layout) */}
+        <button
+          type="button"
+          onClick={handleChakraNavigation}
+          className="w-full max-w-sm mt-4 rounded-2xl p-3 flex items-center gap-3 border text-left transition-all duration-200 active:scale-[0.99] hover:bg-white/5 group"
+          style={{ background: chakra.colors[0] + "18", borderColor: chakra.colors[0] + "44" }}
         >
-          <div
-            className="h-8 w-8 rounded-full shrink-0"
-            style={{ background: `linear-gradient(135deg, ${chakra.colors[0]}, ${chakra.colors[1]})` }}
-          />
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: chakra.colors[0] }}>
-              {chakra.name} Chakra
-            </p>
+          <div className="h-8 w-8 rounded-full shrink-0" style={{ background: `linear-gradient(135deg, ${chakra.colors[0]}, ${chakra.colors[1]})` }} />
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: chakra.colors[0] }}>
+                {chakra.name} Chakra
+              </p>
+              <span className="text-[10px] uppercase font-bold tracking-wider opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: p.accentMid }}>
+                Visit Wisdom ➔
+              </span>
+            </div>
             <p className="text-xs text-white/50 mt-0.5 capitalize">
               {chakra.gifts.join(" · ")}
             </p>
           </div>
-        </div>
+        </button>
 
         <div className="w-full max-w-sm mt-2 border-t border-white/10 pt-5 space-y-5">
           {/* Healing Gifts */}
           <div className="space-y-2">
-            <h2
-              className="text-xs font-bold uppercase tracking-widest"
-              style={{ color: p.subtitleColor }}
-            >
+            <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: p.subtitleColor }}>
               Healing Gifts
             </h2>
             <ul className="space-y-2">
@@ -180,10 +189,7 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
 
           {/* When to Call */}
           <div className="space-y-2">
-            <h2
-              className="text-xs font-bold uppercase tracking-widest"
-              style={{ color: p.subtitleColor }}
-            >
+            <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: p.subtitleColor }}>
               When to Call
             </h2>
             <ul className="space-y-2">
@@ -199,10 +205,7 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
           {/* Symbols */}
           {ANGEL_EXTRAS[angel.name]?.symbols && (
             <div className="space-y-2">
-              <h2
-                className="text-xs font-bold uppercase tracking-widest"
-                style={{ color: p.subtitleColor }}
-              >
+              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: p.subtitleColor }}>
                 Symbols
               </h2>
               <div className="flex flex-wrap gap-2">
@@ -222,18 +225,12 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
           {/* Prayer to Invoke */}
           {ANGEL_EXTRAS[angel.name]?.prayer && (
             <div className="space-y-2">
-              <h2
-                className="text-xs font-bold uppercase tracking-widest"
-                style={{ color: p.subtitleColor }}
-              >
+              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: p.subtitleColor }}>
                 Prayer to Invoke
               </h2>
               <div
                 className="rounded-2xl p-4 border"
-                style={{
-                  background: p.atmosphere + "cc",
-                  borderColor: p.accentMid + "55",
-                }}
+                style={{ background: p.atmosphere + "cc", borderColor: p.accentMid + "55" }}
               >
                 <p className="text-sm italic leading-relaxed text-white/85">
                   {ANGEL_EXTRAS[angel.name].prayer}
@@ -245,10 +242,7 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
           {/* Ancestral Connections */}
           {ancestralConnections && ancestralConnections.length > 0 && (
             <div className="space-y-2">
-              <h2
-                className="text-xs font-bold uppercase tracking-widest"
-                style={{ color: p.subtitleColor }}
-              >
+              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: p.subtitleColor }}>
                 Ancestral Connections
               </h2>
               <ul className="space-y-2">
@@ -256,10 +250,7 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
                   <li
                     key={i}
                     className="flex items-start gap-2 text-sm text-white/80 leading-snug rounded-xl p-3 border"
-                    style={{
-                      background: p.atmosphere + "99",
-                      borderColor: p.accentMid + "33",
-                    }}
+                    style={{ background: p.atmosphere + "99", borderColor: p.accentMid + "33" }}
                   >
                     <span className="mt-0.5 shrink-0" style={{ color: p.accentMid }}>☥</span>
                     <span>{line}</span>
@@ -272,10 +263,7 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
           {/* Spiritual Tools */}
           {spiritualTools && (
             <div className="space-y-2">
-              <h2
-                className="text-xs font-bold uppercase tracking-widest"
-                style={{ color: p.subtitleColor }}
-              >
+              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: p.subtitleColor }}>
                 Spiritual Tools
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -287,10 +275,7 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
                   <div
                     key={item.label}
                     className="rounded-xl p-3 border flex flex-col gap-1"
-                    style={{
-                      background: p.atmosphere + "cc",
-                      borderColor: p.accentMid + "55",
-                    }}
+                    style={{ background: p.atmosphere + "cc", borderColor: p.accentMid + "55" }}
                   >
                     <div
                       className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest"
