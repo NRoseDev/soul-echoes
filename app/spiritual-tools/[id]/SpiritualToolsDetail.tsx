@@ -321,7 +321,7 @@ export default function SpiritualToolsDetail() {
           <p>• "I express my emotions safely"</p>
           <p>• "I am worthy of success"</p>
           <p>• "My children inherit healing, not trauma"</p>
-        </div>
+                  </div>
 
         <div className="pt-2 border-t border-purple-900/20 space-y-1.5 text-[11px] text-gray-400 italic">
           <p className="font-bold text-purple-400 not-italic uppercase tracking-widest text-[9px]">📖 Scriptural Foundation</p>
@@ -340,3 +340,30 @@ export default function SpiritualToolsDetail() {
           <span className="p-2 bg-purple-950/40 rounded border border-purple-900/40 cursor-pointer hover:bg-purple-900/20">Healing Prayer</span>
           <span className="p-2 bg-purple-950/40 rounded border border-purple-900/40 cursor-pointer hover:bg-purple-900/20">Guidance Prayer</span>
           <span className="p-2
+
+           bg-purple-950/40 rounded border border-purple-900/40 cursor-pointer hover:bg-purple-900/20">Release Prayer</span>
+        </div>
+        <div className="pt-2 border-t border-purple-900/20 space-y-1 text-[11px] text-gray-400 italic">
+          <p className="font-bold text-purple-400 not-italic uppercase tracking-widest text-[9px]">📖 Scriptural Foundation for Prayer</p>
+          <p>Philippians 4:6 "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God."</p>
+          <p>Matthew 7:7 "Ask and it will be given to you; seek and you will find; knock and the door will be opened to you."</p>
+          <p>James 5:16 "The prayer of a righteous person is powerful and effective."</p>
+        </div>
+      </div>
+
+      {/* FIXED FLOW LOOP ACTION BUTTON */}
+      <div className="p-6 rounded-xl border border-purple-500/20 bg-purple-950/20 text-center shadow-lg mt-8">
+        <p className="text-sm text-gray-300 mb-4 font-medium">
+          Ready to re-enter the presence of the guardians and integrate this work into your journey?
+        </p>
+        <button
+          onClick={handleAngelsNavigation}
+          className="px-6 py-3 rounded-full bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer shadow-md inline-flex items-center gap-2 mx-auto"
+        >
+          <span>Return to Angels Portal Room</span>
+          <span>➔</span>
+        </button>
+      </div>
+    </div>
+  );
+}
