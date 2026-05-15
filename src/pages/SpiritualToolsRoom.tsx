@@ -337,4 +337,18 @@ export default function SpiritualToolsRoom() {
           <span className="p-2 bg-purple-950/40 rounded border border-purple-900/40 cursor-pointer hover:bg-purple-900/20">Guidance Prayer</span>
           <span className="p-2 bg-purple-950/40 rounded border border-purple-900/40 cursor-pointer hover:bg-purple-900/20">Release Prayer</span>
         </div>
-        <div className="pt-2 border-t border-purple-900/20 space-y-1 text-[11
+      </div>
+
+      {/* ANGELS NAVIGATION */}
+      <div className="mt-6">
+        <button
+          onClick={handleAngelsNavigation}
+          className="w-full p-4 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-500/30 rounded-xl text-purple-200 font-bold uppercase tracking-wider transition"
+        >
+          ✨ Explore the Archangels
+        </button>
+      </div>
+    </div>
+  );
+}
+
