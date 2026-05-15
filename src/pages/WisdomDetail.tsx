@@ -21,7 +21,7 @@ export default function WisdomDetail() {
   }, []);
 
   const handleToolsNavigation = () => {
-    // Navigates the user smoothly into the Spiritual Tools view
+    // Navigates the user smoothly into the Spiritual Tools view using your hash route layout
     window.location.hash = `#/tools?source=wisdom&chakra=${encodeURIComponent(activeChakra || "all")}`;
     window.dispatchEvent(new HashChangeEvent("hashchange"));
   };
