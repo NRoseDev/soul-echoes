@@ -1,21 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 export default function SpiritualToolsRoom() {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [activeChakra, setActiveChakra] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const chakraParam = params.get("chakra");
-      if (chakraParam && chakraParam !== "all") {
-        setActiveChakra(chakraParam);
-      }
+    const chakraParam = searchParams.get("chakra");
+    if (chakraParam && chakraParam !== "all") {
+      setActiveChakra(chakraParam);
     }
-  }, []);
+  }, [searchParams]);
 
   const handleAngelsNavigation = () => {
     navigate("/angels");
@@ -100,42 +98,42 @@ export default function SpiritualToolsRoom() {
 
       {/* CORE TOPIC DIRECTORY LINKS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30">
+        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30 hover:border-purple-500/40 transition-colors">
           <h4 className="font-bold text-purple-300 mb-1">💫 Understanding the Spiritual Realm</h4>
           <p className="text-xs text-gray-400 mb-2">Learn about the veil, spiritual gifts, protection, and what to expect before deep healing work.</p>
           <span className="text-xs font-bold text-purple-400">Essential Reading →</span>
         </div>
-        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30">
+        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30 hover:border-purple-500/40 transition-colors">
           <h4 className="font-bold text-purple-300 mb-1">🕊️ Lightworker Persecution Imprint Clearing</h4>
           <p className="text-xs text-gray-400 mb-2">For healers, empaths, and intuitives carrying ancient persecution wounds that block visibility, success, and abundance.</p>
           <span className="text-xs font-bold text-purple-400">Clear Your Blocks →</span>
         </div>
-        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30">
+        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30 hover:border-purple-500/40 transition-colors">
           <h4 className="font-bold text-purple-300 mb-1">💙 Understanding the Empath</h4>
           <p className="text-xs text-gray-400 mb-2">If you feel everything and absorb everyone's emotions - learn to manage your gift and thrive instead of just surviving.</p>
           <span className="text-xs font-bold text-purple-400">Master Your Gift →</span>
         </div>
-        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30">
+        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30 hover:border-purple-500/40 transition-colors">
           <h4 className="font-bold text-purple-300 mb-1">🩸 Bloodline Healing 🧬</h4>
           <p className="text-xs text-gray-400 mb-2">Deeper than breaking generational curses — clearing spiritual attacks on your entire family's divine purpose and destiny.</p>
           <span className="text-xs font-bold text-purple-400">Heal Your Bloodline →</span>
         </div>
-        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30">
+        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30 hover:border-purple-500/40 transition-colors">
           <h4 className="font-bold text-purple-300 mb-1">⚔️ Archangel Michael - Warring Angels</h4>
           <p className="text-xs text-gray-400 mb-2">Michael's shield protects those in danger. Learn the sacred code and join his army of light.</p>
           <span className="text-xs font-bold text-purple-400">Enter Michael's Shield →</span>
         </div>
-        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30">
+        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30 hover:border-purple-500/40 transition-colors">
           <h4 className="font-bold text-purple-300 mb-1">🪶 Energy Clearing</h4>
           <p className="text-xs text-gray-400 mb-2">Remove energetic blocks, limiting beliefs, and inherited trauma patterns including poverty consciousness.</p>
           <span className="text-xs font-bold text-purple-400">Begin Clearing →</span>
         </div>
-        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30">
+        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30 hover:border-purple-500/40 transition-colors">
           <h4 className="font-bold text-purple-300 mb-1">🔮 Crystals & Stones</h4>
           <p className="text-xs text-gray-400 mb-2">Earth medicine for healing, protection, and manifestation - used with Source-centered intention.</p>
           <span className="text-xs font-bold text-purple-400">Learn Crystal Work →</span>
         </div>
-        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30">
+        <div className="p-4 bg-purple-950/20 rounded-xl border border-purple-900/30 hover:border-purple-500/40 transition-colors">
           <h4 className="font-bold text-purple-300 mb-1">🌿 Essential Oils & Plant Medicine</h4>
           <p className="text-xs text-gray-400 mb-2">Sacred plant allies for protection, healing, and spiritual work - always Source-centered.</p>
           <span className="text-xs font-bold text-purple-400">Learn Plant Medicine →</span>
@@ -147,14 +145,14 @@ export default function SpiritualToolsRoom() {
         <h3 className="text-xl font-bold text-purple-300 border-b border-purple-900/20 pb-2">💫 Soul Ties</h3>
         <p className="text-sm text-gray-300">Deep emotional/spiritual connections between people. Can be healthy (love, family) or unhealthy (trauma bonding, codependency).</p>
         <div className="flex gap-4 text-xs font-bold text-purple-400">
-          <span>Signs of Unhealthy Soul Ties ›</span>
-          <span>Steps to Release ›</span>
-          <span>📖 Scriptural Foundation ›</span>
+          <span className="hover:underline cursor-pointer">Signs of Unhealthy Soul Ties ›</span>
+          <span className="hover:underline cursor-pointer">Steps to Release ›</span>
+          <span className="hover:underline cursor-pointer">📖 Scriptural Foundation ›</span>
         </div>
         <div className="mt-4 p-4 rounded-lg bg-black/40 border border-purple-900/40">
           <h4 className="font-bold text-purple-300 text-sm">Cord Cutting Ritual ✂️</h4>
           <p className="text-xs text-gray-400 mt-1 mb-2">Guided visualization to energetically disconnect from toxic relationships. Release what no longer serves you.</p>
-          <span className="text-xs font-bold text-teal-400 cursor-pointer">Start Visualization →</span>
+          <span className="text-xs font-bold text-teal-400 hover:underline cursor-pointer">Start Visualization →</span>
         </div>
       </div>
 
@@ -163,20 +161,20 @@ export default function SpiritualToolsRoom() {
         <h3 className="text-xl font-bold text-purple-300 border-b border-purple-900/20 pb-2 mb-4">🔮 Numerology & Angel Numbers</h3>
         <p className="text-xs text-gray-400 italic mb-4">When you see these numbers repeatedly (clocks, receipts, addresses), the universe is speaking.</p>
         
-        <div className="space-y-3 max-h-72 overflow-y-auto pr-2 text-sm">
-          <p><strong>111 Awakening:</strong> New beginnings, manifestation, alignment with purpose</p>
-          <p><strong>222 Harmony:</strong> Trust the process, balance, partnership, everything working out</p>
-          <p><strong>333 Protection:</strong> Divine protection, Trinity, ascended masters near, creativity</p>
-          <p><strong>444 Foundation:</strong> Angels are with you, foundation, stability, divine support</p>
-          <p><strong>555 Change:</strong> Major change coming, transformation, freedom, embrace shift</p>
-          <p><strong>666 Rebalance:</strong> Rebalance (not evil), focus on spiritual not material</p>
-          <p><strong>777 Confirmation:</strong> You're on the right path, spiritual awakening, divine luck</p>
-          <p><strong>888 Abundance:</strong> Abundance coming, financial blessings, infinity, karma rewarding</p>
-          <p><strong>999 Completion:</strong> Completion, ending cycles, release what's done, new chapter</p>
-          <p><strong>000 Divine:</strong> God's presence, infinite possibilities, prayer answered</p>
-          <p><strong>1111 Portal:</strong> Wake-up call, portal opening, manifest now, pay attention</p>
-          <p><strong>1212 Growth:</strong> Stay positive, spiritual growth accelerating, trust journey</p>
-          <p><strong>1234 Progress:</strong> Step-by-step progress, you're moving forward, stay course</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-72 overflow-y-auto pr-2 text-sm text-gray-300">
+          <div className="p-3 bg-black/20 rounded-lg border border-purple-950/50"><strong>111 Awakening:</strong> New beginnings, manifestation, alignment with purpose</div>
+          <div className="p-3 bg-black/20 rounded-lg border border-purple-950/50"><strong>222 Harmony:</strong> Trust the process, balance, partnership, everything working out</div>
+          <div className="p-3 bg-black/20 rounded-lg border border-purple-950/50"><strong>333 Protection:</strong> Divine protection, Trinity, ascended masters near, creativity</div>
+          <div className="p-3 bg-black/20 rounded-lg border border-purple-950/50"><strong>444 Foundation:</strong> Angels are with you, foundation, stability, divine support</div>
+          <div className="p-3 bg-black/20 rounded-lg border border-purple-950/50"><strong>555 Change:</strong> Major change coming, transformation, freedom, embrace shift</div>
+          <div className="p-3 bg-black/20 rounded-lg border border-purple-950/50"><strong>666 Rebalance:</strong> Rebalance (not evil), focus on spiritual not material</div>
+          <div className="p-3 bg-black/20 rounded-lg border border-purple-950/50"><strong>777 Confirmation:</strong> You're on the right path, spiritual awakening, divine luck</div>
+          <div className="p-3 bg-black/20 rounded-lg border border-purple-950/50"><strong>888 Abundance:</strong> Abundance coming, financial blessings, infinity, karma rewarding</div>
+          <div className="p-3 bg-black/20 rounded-lg border border-purple-950/50"><strong>999 Completion:</strong> Completion, ending cycles, release what's done, new chapter</div>
+          <div className="p-3 bg-black/20 rounded-lg border border-purple-950/50"><strong>000 Divine:</strong> God's presence, infinite possibilities, prayer answered</div>
+          <div className="p-3 bg-black/20 rounded-lg border border-purple-950/50"><strong>1111 Portal:</strong> Wake-up call, portal opening, manifest now, pay attention</div>
+          <div className="p-3 bg-black/20 rounded-lg border border-purple-950/50"><strong>1212 Growth:</strong> Stay positive, spiritual growth accelerating, trust journey</div>
+          <div className="p-3 bg-black/20 rounded-lg border border-purple-950/50"><strong>1234 Progress:</strong> Step-by-step progress, you're moving forward, stay course</div>
         </div>
 
         <div className="mt-4 pt-4 border-t border-purple-900/20 space-y-2 text-xs text-gray-400 italic">
@@ -192,17 +190,16 @@ export default function SpiritualToolsRoom() {
         <div>
           <h3 className="text-xl font-bold text-purple-300 border-b border-purple-900/20 pb-2 mb-3">Nature Signs 🌿</h3>
           <p className="text-xs text-gray-400 italic mb-3">Nature speaks the language of the divine - learn to read its messages.</p>
-          <div className="grid grid-cols-2 gap-3 text-sm text-gray-300">
-            <p>🌈 <strong>Rainbow:</strong> Promise, hope after storm, covenant, blessing</p>
-            <p>🪶 <strong>Feather:</strong> Angels near, lightness, divine message, protection</p>
-            <p>🌙 <strong>Moon phases:</strong> Cycles, timing, divine feminine, trust flow</p>
-            <p>⭐ <strong>Shooting star:</strong> Make a wish, miracle coming, rare blessing</p>
-            <p>🌊 <strong>Ocean waves:</strong> Emotional cleansing, flow, surrender control</p>
-            <p>🌪️ <strong>Wind:</strong> Change, Holy Spirit moving, breakthrough coming</p>
-            <p>🔥 <strong>Fire:</strong> Purification, passion, transformation, burn old</p>
-            <p>💧 <strong>Water:</strong> Cleansing, emotions, flow of life, healing</p>
-            <p>🌱 <strong>Seedlings:</strong> New growth, patience, nurturing needed, trust timing</p>
-            <p>🍃 <strong>Falling leaves:</strong> Release, letting go, seasons changing, natural cycle</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm text-gray-300">
+            <div className="p-2 bg-black/20 rounded border border-purple-950/30 text-center">🌈 <strong>Rainbow</strong><p className="text-xs text-gray-500">Promise & Hope</p></div>
+            <div className="p-2 bg-black/20 rounded border border-purple-950/30 text-center">🪶 <strong>Feather</strong><p className="text-xs text-gray-500">Angels Near</p></div>
+            <div className="p-2 bg-black/20 rounded border border-purple-950/30 text-center">🌙 <strong>Moon Phases</strong><p className="text-xs text-gray-500">Cycles & Timing</p></div>
+            <div className="p-2 bg-black/20 rounded border border-purple-950/30 text-center">⭐ <strong>Shooting Star</strong><p className="text-xs text-gray-500">Miracle Coming</p></div>
+            <div className="p-2 bg-black/20 rounded border border-purple-950/30 text-center">🌊 <strong>Ocean Waves</strong><p className="text-xs text-gray-500">Cleansing Flow</p></div>
+            <div className="p-2 bg-black/20 rounded border border-purple-950/30 text-center">🌪️ <strong>Wind</strong><p className="text-xs text-gray-500">Breakthrough Coming</p></div>
+            <div className="p-2 bg-black/20 rounded border border-purple-950/30 text-center">🔥 <strong>Fire</strong><p className="text-xs text-gray-500">Purification</p></div>
+            <div className="p-2 bg-black/20 rounded border border-purple-950/30 text-center">💧 <strong>Water</strong><p className="text-xs text-gray-500">Healing Emotions</p></div>
+            <div className="p-2 bg-black/20 rounded border border-purple-950/30 text-center">🌱 <strong>Seedlings</strong><p className="text-xs text-gray-500">New Growth</p></div>
           </div>
         </div>
 
@@ -222,15 +219,6 @@ export default function SpiritualToolsRoom() {
             <p>• <strong>Unexpected phone call/message:</strong> Divine timing, synchronicity in communication</p>
           </div>
         </div>
-
-        <div className="bg-purple-900/10 p-4 rounded-lg border border-purple-500/10 text-xs space-y-1.5">
-          <p className="font-bold text-purple-300 uppercase tracking-wider text-[10px]">💫 How to Work With Signs</p>
-          <p>• Pay attention without obsessing - notice but don't force meanings</p>
-          <p>• Ask God/Universe for confirmation if you're unsure</p>
-          <p>• Journal the signs and watch for patterns over time</p>
-          <p>• Trust your intuition about what the sign means for you</p>
-          <p>• Thank the divine for speaking to you and guiding your path</p>
-        </div>
       </div>
 
       {/* ANIMAL MESSENGERS */}
@@ -243,7 +231,6 @@ export default function SpiritualToolsRoom() {
           <p>• Pay attention to HOW you encounter them (alive, dead, repeated sightings, dreams)</p>
           <p>• Notice your FEELING when you see them (fear, joy, peace, unease)</p>
           <p>• Look for PATTERNS (same animal 3+ times = pay attention)</p>
-          <p>• Ask GOD/SOURCE for clarification through prayer or meditation</p>
           <p>• Trust YOUR intuition over generic meanings (your relationship matters)</p>
           <p className="text-purple-400 mt-2">☠️ <strong>Dead animal</strong> = That energy is dying/transforming in your life</p>
           <p className="text-purple-400">✨ <strong>Alive & healthy</strong> = That energy is activating/growing</p>
@@ -293,7 +280,7 @@ export default function SpiritualToolsRoom() {
           <p>🧠 <strong>Anxiety (Philippians 4:6-7):</strong> "Do not be anxious about anything, but in every situation, by prayer and petition, present your requests to God"</p>
           <p>🛡️ <strong>Fear (Proverbs 3:5-6):</strong> "Trust in the Lord with all your heart and lean not on your own understanding"</p>
           <p>🤝 <strong>Forgiveness (Ephesians 4:32):</strong> "Be kind and compassionate to one another, forgiving each other, just as in Christ God forgave you"</p>
-          <p>🦁 <strong>Fear (Isaiah 41:10):</strong> "Do not fear, for I am with you; do not be dismayed, for I am your God"</p>
+          <p>🦁 <strong>Fear (Isaiah 41:10):</strong> "Do not be afraid, for I am with you; do not be dismayed, for I am your God"</p>
           <p>❤️‍🩹 <strong>Grief (Psalm 147:3):</strong> "He heals the brokenhearted and binds up their wounds"</p>
           <p>💤 <strong>Overwhelm (Matthew 11:28):</strong> "Come to me, all who are weary and burdened, and I will give you rest"</p>
           <p>⚓ <strong>Hope (Romans 8:28):</strong> "We know that in all things God works for the good of those who love him"</p>
@@ -345,32 +332,9 @@ export default function SpiritualToolsRoom() {
         <h3 className="text-xl font-bold text-purple-300 border-b border-purple-900/20 pb-2">🙏 Prayer Templates</h3>
         <p className="text-xs text-gray-400 italic">Fill-in-the-blank prayers for specific situations:</p>
         <div className="grid grid-cols-2 gap-2 text-xs font-bold text-purple-400 text-center">
-          <span className="p-2 bg-purple-950/40 rounded border border-purple-900/40">Protection Prayer</span>
-          <span className="p-2 bg-purple-950/40 rounded border border-purple-900/40">Healing Prayer</span>
-          <span className="p-2 bg-purple-950/40 rounded border border-purple-900/40">Guidance Prayer</span>
-          <span className="p-2 bg-purple-950/40 rounded border border-purple-900/40">Release Prayer</span>
+          <span className="p-2 bg-purple-950/40 rounded border border-purple-900/40 cursor-pointer hover:bg-purple-900/20">Protection Prayer</span>
+          <span className="p-2 bg-purple-950/40 rounded border border-purple-900/40 cursor-pointer hover:bg-purple-900/20">Healing Prayer</span>
+          <span className="p-2 bg-purple-950/40 rounded border border-purple-900/40 cursor-pointer hover:bg-purple-900/20">Guidance Prayer</span>
+          <span className="p-2 bg-purple-950/40 rounded border border-purple-900/40 cursor-pointer hover:bg-purple-900/20">Release Prayer</span>
         </div>
-        <div className="pt-2 border-t border-purple-900/20 space-y-1 text-[11px] text-gray-400 italic">
-          <p className="font-bold text-purple-400 not-italic uppercase tracking-widest text-[9px]">📖 Scriptural Foundation for Prayer</p>
-          <p>Philippians 4:6 "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God."</p>
-          <p>Matthew 7:7 "Ask and it will be given to you; seek and you will find; knock and the door will be opened to you."</p>
-          <p>James 5:16 "The prayer of a righteous person is powerful and effective."</p>
-        </div>
-      </div>
-
-      {/* ACTION NAVIGATION BUTTON */}
-      <div className="p-6 rounded-xl border border-purple-500/20 bg-purple-950/20 text-center shadow-lg mt-8">
-        <p className="text-sm text-gray-300 mb-4 font-medium">
-          Ready to re-enter the presence of the guardians and integrate this work into your journey?
-        </p>
-        <button
-          onClick={handleAngelsNavigation}
-          className="px-6 py-3 rounded-full bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer shadow-md inline-flex items-center gap-2 mx-auto"
-        >
-          <span>Return to Angels Portal Room</span>
-          <span>➔</span>
-        </button>
-      </div>
-    </div>
-  );
-}
+        <div className="pt-2 border-t border-purple-900/20 space-y-1 text-[11
