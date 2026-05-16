@@ -171,6 +171,11 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
     setActivePanel(activePanel === "asl" ? null : "asl");
   };
 
+  const handleRequestPrayer = () => {
+    toast.success("Prayer request sent. An intercessor will be with you shortly.", { duration: 4000 });
+    setIntercessorOpen(false);
+  };
+
   const handleASLSend = (text: string) => {
     toast.success(`Sent: ${text}`, { duration: 2500 });
     navigate("/");
