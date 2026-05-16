@@ -266,7 +266,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               title="Voice settings"
               className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden bg-white/10 border-white/20"
             >
-              <img src={voiceIcon} alt="Voice" className="w-full h-full object-contain p-1.5" />
+              <img src={voiceIcon} alt="Voice" loading="eager" decoding="async" className="w-full h-full object-cover rounded-full" />
             </button>
 
             <button
