@@ -1,11 +1,18 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Hand, MessageCircle, X } from "lucide-react";
+import { X } from "lucide-react";
 
 import ASLSignInput from "@/components/ASLSignInput";
 import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 import { toast } from "sonner";
+
+import aiNavigatorIcon from "@/assets/icons/Icon-AI navigator.png";
+import aslIcon from "@/assets/icons/Icon-ASL.png";
+import voiceIcon from "@/assets/icons/Icon-voice.png";
+import sosIcon from "@/assets/icons/Icon-sos.png";
+import prayerIcon from "@/assets/icons/Icon-prayer.png";
+import portalIcon from "@/assets/icons/Icon-portal.png";
 
 type IndicatorState = "idle" | "suggest" | "important" | "distress";
 
@@ -241,44 +248,60 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
             transition={{ duration: 0.18 }}
             className="flex flex-col items-end gap-2"
           >
-            {/* SOS / Angel wings */}
-            <button
-              onClick={openSOS}
-              aria-label="SOS — angel safety beacon"
-              title="SOS — connect to intercessor or healer"
-              className="h-12 w-12 rounded-full flex items-center justify-center bg-black/60 backdrop-blur-sm border-2 border-blue-300/60 shadow-[0_0_18px_rgba(147,197,253,0.55)] hover:scale-110 active:scale-95 transition-all overflow-hidden"
-            >
-              <img
-                src="/images/angels-icon.jpg"
-                alt="Angel wings"
-                className="h-10 w-10 object-cover rounded-full"
-              />
-            </button>
-
-            {/* AI guide / voice */}
-            <button
-              onClick={openAI}
-              aria-label="AI guide — suggestions and voice"
-              title="AI guide — suggestions and voice settings"
-              className={`h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 ${activePanel === "ai" ? "bg-purple-500/30 border-purple-400/60" : "bg-white/10 border-white/20"}`}
-            >
-              <MessageCircle className="h-5 w-5 text-purple-300" />
-            </button>
-
-            {/* ASL / hand */}
+            {/* ASL learning */}
             <button
               onClick={openASL}
               aria-label="ASL cards and camera"
               title="ASL sign cards and camera"
-              className={`h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 ${activePanel === "asl" ? "bg-teal-500/30 border-teal-400/60" : "bg-white/10 border-white/20"}`}
+              className={`h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden ${activePanel === "asl" ? "bg-teal-500/30 border-teal-400/60" : "bg-white/10 border-white/20"}`}
             >
-              <Hand className="h-5 w-5 text-teal-300" />
+              <img src={aslIcon} alt="ASL" className="w-full h-full object-contain p-1.5" />
+            </button>
+
+            {/* Voice settings */}
+            <button
+              onClick={() => { setHubOpen(false); setActivePanel(null); navigate("/voice-settings"); }}
+              aria-label="Voice settings"
+              title="Voice settings"
+              className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden bg-white/10 border-white/20"
+            >
+              <img src={voiceIcon} alt="Voice" className="w-full h-full object-contain p-1.5" />
+            </button>
+
+            {/* SOS angels */}
+            <button
+              onClick={openSOS}
+              aria-label="SOS — angel safety beacon"
+              title="SOS — connect to intercessor or healer"
+              className="h-11 w-11 rounded-full flex items-center justify-center bg-black/60 backdrop-blur-sm border-2 border-blue-300/60 shadow-[0_0_18px_rgba(147,197,253,0.55)] hover:scale-110 active:scale-95 transition-all overflow-hidden"
+            >
+              <img src={sosIcon} alt="SOS" className="w-full h-full object-contain p-1.5" />
+            </button>
+
+            {/* Prayer / intercessors */}
+            <button
+              onClick={() => { setHubOpen(false); setActivePanel(null); navigate("/spiritual-tools"); }}
+              aria-label="Intercessors and prayer"
+              title="Intercessors and prayer"
+              className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden bg-white/10 border-white/20"
+            >
+              <img src={prayerIcon} alt="Prayer" className="w-full h-full object-contain p-1.5" />
+            </button>
+
+            {/* Healer portal / shop */}
+            <button
+              onClick={() => { setHubOpen(false); setActivePanel(null); navigate("/shop"); }}
+              aria-label="Healer portal and shop"
+              title="Healer portal and shop"
+              className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden bg-white/10 border-white/20"
+            >
+              <img src={portalIcon} alt="Portal" className="w-full h-full object-contain p-1.5" />
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ── Main ✨ button ── */}
+      {/* ── Main AI navigator button ── */}
       <motion.button
         variants={pulseVariants}
         animate={indicatorState}
@@ -292,9 +315,16 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               <X className="h-5 w-5 text-foreground/70" />
             </motion.span>
           ) : (
-            <motion.span key="spark" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }} className="text-xl">
-              ✨
-            </motion.span>
+            <motion.img
+              key="ai-nav"
+              src={aiNavigatorIcon}
+              alt="Soul Echoes"
+              initial={{ rotate: 90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: -90, opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="w-full h-full object-contain p-1"
+            />
           )}
         </AnimatePresence>
       </motion.button>
