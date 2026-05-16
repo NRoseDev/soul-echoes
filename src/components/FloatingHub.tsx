@@ -290,7 +290,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               onClick={() => {
                 setHubOpen(false);
                 setActivePanel(null);
-                navigate("/spiritual-tools");
+                setIntercessorOpen(true);
               }}
               aria-label="Intercessors and prayer"
               title="Intercessors and prayer"
