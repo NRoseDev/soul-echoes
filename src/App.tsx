@@ -29,6 +29,7 @@ import Auth from "./pages/Auth";
 import SpiritualToolsRoom from "./pages/SpiritualToolsRoom";
 import SpiritualToolsDetail from "./pages/SpiritualToolsDetail";
 import DistressSignal from "./components/DistressSignal";
+import AINavigator from "./components/AINavigator";
 import AIGuideAnnouncer from "./components/AIGuideAnnouncer";
 import AlwaysOnVoice from "./components/AlwaysOnVoice";
 import { getPreferences } from "./lib/preferences";
@@ -87,6 +88,7 @@ const App = () => {
             </Routes>
           </AppLayout>
           <DistressSignal />
+          <AINavigator />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
