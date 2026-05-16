@@ -253,7 +253,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
                 activePanel === "asl" ? "bg-teal-500/30 border-teal-400/60" : "bg-white/10 border-white/20"
               }`}
             >
-              <img src={aslIcon} alt="ASL" className="w-full h-full object-contain p-1.5" />
+              <img src={aslIcon} alt="ASL" loading="eager" decoding="async" className="w-full h-full object-cover rounded-full" />
             </button>
 
             <button
@@ -266,7 +266,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               title="Voice settings"
               className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden bg-white/10 border-white/20"
             >
-              <img src={voiceIcon} alt="Voice" className="w-full h-full object-contain p-1.5" />
+              <img src={voiceIcon} alt="Voice" loading="eager" decoding="async" className="w-full h-full object-cover rounded-full" />
             </button>
 
             <button
@@ -275,7 +275,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               title="SOS — connect to intercessor or healer"
               className="h-11 w-11 rounded-full flex items-center justify-center bg-black/60 backdrop-blur-sm border-2 border-blue-300/60 shadow-[0_0_18px_rgba(147,197,253,0.55)] hover:scale-110 active:scale-95 transition-all overflow-hidden"
             >
-              <img src={sosIcon} alt="SOS" className="w-full h-full object-contain p-1.5" />
+              <img src={sosIcon} alt="SOS" loading="eager" decoding="async" className="w-full h-full object-cover rounded-full" />
             </button>
 
             <button
@@ -288,7 +288,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               title="Intercessors and prayer"
               className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden bg-white/10 border-white/20"
             >
-              <img src={prayerIcon} alt="Prayer" className="w-full h-full object-contain p-1.5" />
+              <img src={prayerIcon} alt="Prayer" loading="eager" decoding="async" className="w-full h-full object-cover rounded-full" />
             </button>
 
             <button
@@ -301,7 +301,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               title="Healer portal and shop"
               className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden bg-white/10 border-white/20"
             >
-              <img src={portalIcon} alt="Portal" className="w-full h-full object-contain p-1.5" />
+              <img src={portalIcon} alt="Portal" loading="eager" decoding="async" className="w-full h-full object-cover rounded-full" />
             </button>
           </motion.div>
         )}
@@ -337,7 +337,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: -90, opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="w-full h-full object-contain p-1"
+              className="w-full h-full object-cover rounded-full"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
               }}
