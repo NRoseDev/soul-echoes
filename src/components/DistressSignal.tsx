@@ -13,8 +13,8 @@ import {
 import GlitterBurst from "@/components/GlitterBurst";
 import AngelIcon from "@/components/AngelIcon";
 import { encryptSignal } from "@/lib/encryption";
-import angelMichaelImg from "@/assets/angel-michael.svg";
-import angelFaithImg from "@/assets/angel-faith.svg";
+const angelMichaelImg = "/placeholder.svg";
+const angelFaithImg = "/placeholder.svg";
 
 const SIGNAL_QUEUE_KEY = "soul-echoes-signal-queue";
 const INTRO_SEEN_KEY   = "soul-echoes-beacon-intro-seen";
