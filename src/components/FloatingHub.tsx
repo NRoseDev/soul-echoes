@@ -315,9 +315,16 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               <X className="h-5 w-5 text-foreground/70" />
             </motion.span>
           ) : (
-            <motion.span key="spark" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }} className="text-xl">
-              ✨
-            </motion.span>
+            <motion.img
+              key="ai-nav"
+              src={aiNavigatorIcon}
+              alt="Soul Echoes"
+              initial={{ rotate: 90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: -90, opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="w-full h-full object-contain p-1"
+            />
           )}
         </AnimatePresence>
       </motion.button>
