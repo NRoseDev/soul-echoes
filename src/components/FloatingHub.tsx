@@ -301,7 +301,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
         )}
       </AnimatePresence>
 
-      {/* ── Main ✨ button ── */}
+      {/* ── Main AI navigator button ── */}
       <motion.button
         variants={pulseVariants}
         animate={indicatorState}
