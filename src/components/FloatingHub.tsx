@@ -7,12 +7,12 @@ import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 import { toast } from "sonner";
 
 // Safe static asset paths that do not crash the bundler
-const aiNavigatorIcon = "/src/assets/icons/Icon-AI%20navigator.png";
-const aslIcon = "/src/assets/icons/Icon-ASL.png";
-const voiceIcon = "/src/assets/icons/Icon-voice.png";
-const sosIcon = "/src/assets/icons/Icon-sos.png";
-const prayerIcon = "/src/assets/icons/Icon-prayer.png";
-const portalIcon = "/src/assets/icons/Icon-portal.png";
+const aiNavigatorIcon = "/Icon-AI%20navigator.png";
+const aslIcon = "/Icon-ASL.png";
+const voiceIcon = "/Icon-voice.png";
+const sosIcon = "/Icon-sos.png";
+const prayerIcon = "/Icon-prayer.png";
+const portalIcon = "/Icon-portal.png";
 
 type IndicatorState = "idle" | "suggest" | "important" | "distress";
 
