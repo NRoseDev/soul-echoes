@@ -301,7 +301,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               title="Healer portal and shop"
               className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden bg-white/10 border-white/20"
             >
-              <img src={portalIcon} alt="Portal" className="w-full h-full object-contain p-1.5" />
+              <img src={portalIcon} alt="Portal" loading="eager" decoding="async" className="w-full h-full object-cover rounded-full" />
             </button>
           </motion.div>
         )}
