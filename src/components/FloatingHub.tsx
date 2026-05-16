@@ -275,7 +275,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               title="SOS — connect to intercessor or healer"
               className="h-11 w-11 rounded-full flex items-center justify-center bg-black/60 backdrop-blur-sm border-2 border-blue-300/60 shadow-[0_0_18px_rgba(147,197,253,0.55)] hover:scale-110 active:scale-95 transition-all overflow-hidden"
             >
-              <img src={sosIcon} alt="SOS" className="w-full h-full object-contain p-1.5" />
+              <img src={sosIcon} alt="SOS" loading="eager" decoding="async" className="w-full h-full object-cover rounded-full" />
             </button>
 
             <button
