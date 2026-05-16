@@ -7,6 +7,13 @@ import ASLSignInput from "@/components/ASLSignInput";
 import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 import { toast } from "sonner";
 
+import aiNavigatorIcon from "@/assets/icons/Icon-AI navigator.png";
+import aslIcon from "@/assets/icons/Icon-ASL.png";
+import voiceIcon from "@/assets/icons/Icon-voice.png";
+import sosIcon from "@/assets/icons/Icon-sos.png";
+import prayerIcon from "@/assets/icons/Icon-prayer.png";
+import portalIcon from "@/assets/icons/Icon-portal.png";
+
 type IndicatorState = "idle" | "suggest" | "important" | "distress";
 
 const ROOM_SUGGESTIONS: Record<string, { text: string; card: string; emoji: string }[]> = {
