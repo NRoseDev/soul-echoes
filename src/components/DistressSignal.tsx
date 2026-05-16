@@ -7,7 +7,6 @@ import {
   getSafetySettings,
   saveSafetySettings,
   MICHAEL_SITUATIONS,
-  FAITH_SITUATIONS,
   type AngelType,
 } from "@/lib/safetySettings";
 import GlitterBurst from "@/components/GlitterBurst";
@@ -17,8 +16,11 @@ import { encryptSignal } from "@/lib/encryption";
 // Safe asset string pointing straight to your premium golden wings image
 const sosWingsAsset = "/src/assets/icons/Icon-sos.png";
 
-const angelMichaelImg = "/src/assets/icons/Icon-sos.png";
-const angelFaithImg = "/src/assets/icons/Icon-sos.png";
+const angelImg = {
+  michael: "/images/AngelMichael.png",
+  ariel: "/images/AngelAriel.png",
+  jeremial: "/images/AngelJermial.png",
+};
 const SIGNAL_QUEUE_KEY = "soul-echoes-signal-queue";
 const INTRO_SEEN_KEY = "soul-echoes-beacon-intro-seen";
 
@@ -369,7 +371,9 @@ export default function DistressSignal() {
                       className="flex items-center gap-4 p-4 rounded-2xl border-2 border-blue-500/40 bg-blue-500/10 hover:border-blue-400 text-left transition-all"
                       aria-label="Archangel Michael"
                     >
-                      <img src={sosWingsAsset} alt="Archangel Michael" className="w-12 h-12 object-contain" />
+                      <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
+                        <img src={angelImg.michael} alt="Archangel Michael" className="w-full h-full object-cover object-top rounded-full" />
+                      </div>
                       <div>
                         <span className="font-display font-bold text-blue-300 text-sm block">Archangel Michael ⚔️</span>
                         <span className="text-xs text-muted-foreground">Male presence · Physical Safety</span>
@@ -384,7 +388,9 @@ export default function DistressSignal() {
                       className="flex items-center gap-4 p-4 rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/10 hover:border-emerald-400 text-left transition-all"
                       aria-label="Archangel Ariel"
                     >
-                      <img src={sosWingsAsset} alt="Archangel Ariel" className="w-12 h-12 object-contain" />
+                      <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
+                        <img src={angelImg.ariel} alt="Archangel Ariel" className="w-full h-full object-cover object-top rounded-full" />
+                      </div>
                       <div>
                         <span className="font-display font-bold text-emerald-300 text-sm block">Archangel Ariel 🌿</span>
                         <span className="text-xs text-muted-foreground">Nature presence · Courage & Support</span>
@@ -399,7 +405,9 @@ export default function DistressSignal() {
                       className="flex items-center gap-4 p-4 rounded-2xl border-2 border-purple-500/40 bg-purple-500/10 hover:border-purple-400 text-left transition-all"
                       aria-label="Archangel Jeremial"
                     >
-                      <img src={sosWingsAsset} alt="Archangel Jeremial" className="w-12 h-12 object-contain" />
+                      <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
+                        <img src={angelImg.jeremial} alt="Archangel Jeremial" className="w-full h-full object-cover object-top rounded-full" />
+                      </div>
                       <div>
                         <span className="font-display font-bold text-purple-300 text-sm block">Archangel Jeremial 💜</span>
                         <span className="text-xs text-muted-foreground">Divine presence · Emotional Healing</span>
@@ -479,7 +487,9 @@ export default function DistressSignal() {
                       className="flex items-center gap-4 p-4 rounded-2xl border-2 border-blue-500/40 bg-blue-500/10 hover:border-blue-400 text-left transition-all"
                       aria-label="Michael — physical safety"
                     >
-                      <img src={sosWingsAsset} alt="Michael" className="w-12 h-12 object-contain" />
+                      <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
+                        <img src={angelImg.michael} alt="Michael" className="w-full h-full object-cover object-top rounded-full" />
+                      </div>
                       <div>
                         <span className="font-display font-bold text-blue-300 block">Michael ⚔️</span>
                         <span className="text-xs text-muted-foreground">Physical Safety</span>
@@ -490,7 +500,9 @@ export default function DistressSignal() {
                       className="flex items-center gap-4 p-4 rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/10 hover:border-emerald-400 text-left transition-all"
                       aria-label="Ariel — courage and nature"
                     >
-                      <img src={sosWingsAsset} alt="Ariel" className="w-12 h-12 object-contain" />
+                      <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
+                        <img src={angelImg.ariel} alt="Ariel" className="w-full h-full object-cover object-top rounded-full" />
+                      </div>
                       <div>
                         <span className="font-display font-bold text-emerald-300 block">Ariel 🌿</span>
                         <span className="text-xs text-muted-foreground">Courage &amp; Support</span>
@@ -501,7 +513,9 @@ export default function DistressSignal() {
                       className="flex items-center gap-4 p-4 rounded-2xl border-2 border-purple-500/40 bg-purple-500/10 hover:border-purple-400 text-left transition-all"
                       aria-label="Jeremial — emotional healing"
                     >
-                      <img src={sosWingsAsset} alt="Jeremial" className="w-12 h-12 object-contain" />
+                      <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
+                        <img src={angelImg.jeremial} alt="Jeremial" className="w-full h-full object-cover object-top rounded-full" />
+                      </div>
                       <div>
                         <span className="font-display font-bold text-purple-300 block">Jeremial 💜</span>
                         <span className="text-xs text-muted-foreground">Emotional Healing</span>
