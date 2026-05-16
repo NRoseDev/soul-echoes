@@ -358,6 +358,51 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
           )}
         </AnimatePresence>
       </motion.button>
+
+      <Dialog open={intercessorOpen} onOpenChange={setIntercessorOpen}>
+        <DialogContent className="sm:max-w-md border-amber-200/40 bg-background/95 backdrop-blur-xl shadow-2xl">
+          <DialogHeader className="space-y-3">
+            <div className="flex items-center justify-center">
+              <div className="h-14 w-14 rounded-full bg-amber-100/60 flex items-center justify-center ring-2 ring-amber-300/40">
+                <Heart className="h-7 w-7 text-amber-600" fill="currentColor" />
+              </div>
+            </div>
+            <DialogTitle className="text-center text-xl font-semibold tracking-tight text-foreground">
+              Intercessor on Call
+            </DialogTitle>
+            <DialogDescription className="text-center text-sm leading-relaxed">
+              You are not alone. A caring intercessor is ready to hold space for you in prayer.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="flex items-center gap-3 rounded-xl border border-emerald-200/40 bg-emerald-50/40 px-4 py-3">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+              </span>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-emerald-800">Intercessors Available Now</p>
+                <p className="text-xs text-emerald-700/70">Typically responds within 5 minutes</p>
+              </div>
+              <Users className="h-5 w-5 text-emerald-600/60" />
+            </div>
+
+            <p className="text-sm text-muted-foreground text-center leading-relaxed px-2">
+              Whether you need comfort, guidance, or simply someone to walk with you through a heavy moment, 
+              we are here. Your request is received with love and kept in strict confidence.
+            </p>
+
+            <button
+              onClick={handleRequestPrayer}
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-600 px-5 py-3 text-sm font-medium text-white shadow-lg shadow-amber-600/20 transition-all hover:bg-amber-700 hover:shadow-amber-600/30 active:scale-[0.98]"
+            >
+              <Sparkles className="h-4 w-4" />
+              Request Prayer Support
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
