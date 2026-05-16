@@ -253,7 +253,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
                 activePanel === "asl" ? "bg-teal-500/30 border-teal-400/60" : "bg-white/10 border-white/20"
               }`}
             >
-              <img src={aslIcon} alt="ASL" className="w-full h-full object-contain p-1.5" />
+              <img src={aslIcon} alt="ASL" loading="eager" decoding="async" className="w-full h-full object-cover rounded-full" />
             </button>
 
             <button
