@@ -2,17 +2,17 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
-
 import ASLSignInput from "@/components/ASLSignInput";
 import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 import { toast } from "sonner";
 
-import aiNavigatorIcon from "@/assets/icons/Icon-AI navigator.png";
-import aslIcon from "@/assets/icons/Icon-ASL.png";
-import voiceIcon from "@/assets/icons/Icon-voice.png";
-import sosIcon from "@/assets/icons/Icon-sos.png";
-import prayerIcon from "@/assets/icons/Icon-prayer.png";
-import portalIcon from "@/assets/icons/Icon-portal.png";
+// Safe static asset paths that do not crash the bundler
+const aiNavigatorIcon = "/src/assets/icons/Icon-AI%20navigator.png";
+const aslIcon = "/src/assets/icons/Icon-ASL.png";
+const voiceIcon = "/src/assets/icons/Icon-voice.png";
+const sosIcon = "/src/assets/icons/Icon-sos.png";
+const prayerIcon = "/src/assets/icons/Icon-prayer.png";
+const portalIcon = "/src/assets/icons/Icon-portal.png";
 
 type IndicatorState = "idle" | "suggest" | "important" | "distress";
 
@@ -55,11 +55,7 @@ const ROOM_SUGGESTIONS: Record<string, { text: string; card: string; emoji: stri
   ],
 };
 
-const DISTRESS_CARD = {
-  text: "I'm here. You are safe. Do you need help?",
-  card: "Get Crisis Support",
-  emoji: "🆘",
-};
+const DISTRESS_CARD = { text: "I'm here. You are safe. Do you need help?", card: "Get Crisis Support", emoji: "🆘" };
 
 const ROOM_MAP: Record<string, string> = {
   "Take me to Breathe": "/breathe",
@@ -80,9 +76,8 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
   const location = useLocation();
   const navigate = useNavigate();
   const currentRoom = location.pathname;
-
-  const [hubOpen, setHubOpen]             = useState(false);
-  const [activePanel, setActivePanel]     = useState<"ai" | "asl" | null>(null);
+  const [hubOpen, setHubOpen] = useState(false);
+  const [activePanel, setActivePanel] = useState<"ai" | "asl" | null>(null);
   const [indicatorState, setIndicatorState] = useState<IndicatorState>("idle");
   const [currentSuggestion, setCurrentSuggestion] = useState<{ text: string; card: string; emoji: string } | null>(null);
   const suggestionIndexRef = useRef(0);
@@ -92,7 +87,8 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = 0.9; u.pitch = 1.1;
+    u.rate = 0.9;
+    u.pitch = 1.1;
     window.speechSynthesis.speak(u);
   }, []);
 
@@ -111,6 +107,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
       suggestionIndexRef.current++;
       setIndicatorState("suggest");
     }, 120000);
+
     return () => clearTimeout(timer);
   }, [currentRoom]);
 
@@ -172,24 +169,23 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
   };
 
   const stateStyles = {
-    idle:      { bg: "bg-white/10",      border: "border-white/20",      glow: "" },
-    suggest:   { bg: "bg-purple-500/20", border: "border-purple-400/40", glow: "shadow-purple-500/30 shadow-lg" },
+    idle: { bg: "bg-white/10", border: "border-white/20", glow: "" },
+    suggest: { bg: "bg-purple-500/20", border: "border-purple-400/40", glow: "shadow-purple-500/30 shadow-lg" },
     important: { bg: "bg-yellow-500/20", border: "border-yellow-400/40", glow: "shadow-yellow-500/40 shadow-lg" },
-    distress:  { bg: "bg-red-500/20",    border: "border-red-400/60",    glow: "shadow-red-500/50 shadow-xl" },
+    distress: { bg: "bg-red-500/20", border: "border-red-400/60", glow: "shadow-red-500/50 shadow-xl" },
   };
+
   const style = stateStyles[indicatorState];
 
   const pulseVariants: Record<string, any> = {
-    idle:      { scale: 1, opacity: 0.7 },
-    suggest:   { scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7], transition: { duration: 2, repeat: Infinity } },
-    important: { scale: [1, 1.2, 1],  opacity: [0.8, 1, 0.8], transition: { duration: 1.5, repeat: Infinity } },
-    distress:  { scale: [1, 1.3, 1],  opacity: [0.9, 1, 0.9], transition: { duration: 0.8, repeat: Infinity } },
+    idle: { scale: 1, opacity: 0.7 },
+    suggest: { scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7], transition: { duration: 2, repeat: Infinity } },
+    important: { scale: [1, 1.2, 1], opacity: [0.8, 1, 0.8], transition: { duration: 1.5, repeat: Infinity } },
+    distress: { scale: [1, 1.3, 1], opacity: [0.9, 1, 0.9], transition: { duration: 0.8, repeat: Infinity } },
   };
 
   return (
     <div className="fixed bottom-24 right-4 z-50 flex flex-col items-end gap-2">
-
-      {/* ── AI suggestion panel ── */}
       <AnimatePresence>
         {hubOpen && activePanel === "ai" && currentSuggestion && (
           <motion.div
@@ -217,7 +213,6 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
         )}
       </AnimatePresence>
 
-      {/* ── ASL panel ── */}
       <AnimatePresence>
         {hubOpen && activePanel === "asl" && (
           <motion.div
@@ -229,7 +224,10 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
           >
             <div className="flex items-center justify-between px-4 pt-4 pb-2">
               <p className="text-sm font-semibold text-foreground">ASL Cards &amp; Camera</p>
-              <button onClick={() => setActivePanel(null)} className="h-6 w-6 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80">
+              <button
+                onClick={() => setActivePanel(null)}
+                className="h-6 w-6 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80"
+              >
                 <X className="h-3 w-3" />
               </button>
             </div>
@@ -238,7 +236,6 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
         )}
       </AnimatePresence>
 
-      {/* ── 3 sub-buttons when hub is open ── */}
       <AnimatePresence>
         {hubOpen && (
           <motion.div
@@ -248,19 +245,23 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
             transition={{ duration: 0.18 }}
             className="flex flex-col items-end gap-2"
           >
-            {/* ASL learning */}
             <button
               onClick={openASL}
               aria-label="ASL cards and camera"
               title="ASL sign cards and camera"
-              className={`h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden ${activePanel === "asl" ? "bg-teal-500/30 border-teal-400/60" : "bg-white/10 border-white/20"}`}
+              className={`h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden ${
+                activePanel === "asl" ? "bg-teal-500/30 border-teal-400/60" : "bg-white/10 border-white/20"
+              }`}
             >
               <img src={aslIcon} alt="ASL" className="w-full h-full object-contain p-1.5" />
             </button>
 
-            {/* Voice settings */}
             <button
-              onClick={() => { setHubOpen(false); setActivePanel(null); navigate("/voice-settings"); }}
+              onClick={() => {
+                setHubOpen(false);
+                setActivePanel(null);
+                navigate("/voice-settings");
+              }}
               aria-label="Voice settings"
               title="Voice settings"
               className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden bg-white/10 border-white/20"
@@ -268,7 +269,6 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               <img src={voiceIcon} alt="Voice" className="w-full h-full object-contain p-1.5" />
             </button>
 
-            {/* SOS angels */}
             <button
               onClick={openSOS}
               aria-label="SOS — angel safety beacon"
@@ -278,9 +278,12 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               <img src={sosIcon} alt="SOS" className="w-full h-full object-contain p-1.5" />
             </button>
 
-            {/* Prayer / intercessors */}
             <button
-              onClick={() => { setHubOpen(false); setActivePanel(null); navigate("/spiritual-tools"); }}
+              onClick={() => {
+                setHubOpen(false);
+                setActivePanel(null);
+                navigate("/spiritual-tools");
+              }}
               aria-label="Intercessors and prayer"
               title="Intercessors and prayer"
               className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden bg-white/10 border-white/20"
@@ -288,9 +291,12 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               <img src={prayerIcon} alt="Prayer" className="w-full h-full object-contain p-1.5" />
             </button>
 
-            {/* Healer portal / shop */}
             <button
-              onClick={() => { setHubOpen(false); setActivePanel(null); navigate("/shop"); }}
+              onClick={() => {
+                setHubOpen(false);
+                setActivePanel(null);
+                navigate("/shop");
+              }}
               aria-label="Healer portal and shop"
               title="Healer portal and shop"
               className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden bg-white/10 border-white/20"
@@ -301,17 +307,25 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
         )}
       </AnimatePresence>
 
-      {/* ── Main AI navigator button ── */}
       <motion.button
         variants={pulseVariants}
         animate={indicatorState}
-        onClick={() => { setHubOpen((o) => !o); if (hubOpen) setActivePanel(null); }}
+        onClick={() => {
+          setHubOpen((o) => !o);
+          if (hubOpen) setActivePanel(null);
+        }}
         aria-label="Soul Echoes guide — tap to open"
         className={`w-12 h-12 rounded-full border-2 flex items-center justify-center backdrop-blur-md transition-all cursor-pointer ${style.bg} ${style.border} ${style.glow}`}
       >
         <AnimatePresence mode="wait">
           {hubOpen ? (
-            <motion.span key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
+            <motion.span
+              key="close"
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
               <X className="h-5 w-5 text-foreground/70" />
             </motion.span>
           ) : (
@@ -324,6 +338,9 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               exit={{ rotate: -90, opacity: 0 }}
               transition={{ duration: 0.15 }}
               className="w-full h-full object-contain p-1"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
             />
           )}
         </AnimatePresence>
