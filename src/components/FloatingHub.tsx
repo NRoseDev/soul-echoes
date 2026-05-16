@@ -337,7 +337,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: -90, opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="w-full h-full object-contain p-1"
+              className="w-full h-full object-cover rounded-full"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
               }}
