@@ -288,7 +288,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               title="Intercessors and prayer"
               className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden bg-white/10 border-white/20"
             >
-              <img src={prayerIcon} alt="Prayer" className="w-full h-full object-contain p-1.5" />
+              <img src={prayerIcon} alt="Prayer" loading="eager" decoding="async" className="w-full h-full object-cover rounded-full" />
             </button>
 
             <button
