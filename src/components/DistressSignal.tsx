@@ -66,8 +66,28 @@ function WingsGlow({ size = "sm" }: { size?: "sm" | "lg" }) {
       ? "shadow-[0_0_52px_rgba(74,222,128,0.7),0_0_100px_rgba(74,222,128,0.3)]"
       : "shadow-[0_0_28px_rgba(74,222,128,0.55),0_0_56px_rgba(74,222,128,0.22)]";
   return (
-    <div className={`${dim} mx-auto rounded-full bg-green-500/15 border-2 border-green-400/40 flex items-center justify-center overflow-hidden ${glow}`}>
-      <img src={sosWingsAsset} alt="SOS Wings" className="w-full h-full object-contain p-2 filter drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]" />
+    <div
+      className={`${dim} mx-auto bg-green-500/15 border-2 border-green-400/40 ${glow}`}
+      style={{
+        overflow: "hidden",
+        borderRadius: "9999px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <img
+        src={sosWingsAsset}
+        alt="SOS Wings"
+        className="filter drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]"
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "top",
+          borderRadius: "9999px",
+        }}
+      />
     </div>
   );
 }
