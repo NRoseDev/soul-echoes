@@ -50,7 +50,6 @@ const DISTRESS_CODES = [
   { symbol: "⚠️", label: "Immediate safe house relocation", color: "text-yellow-500", bg: "bg-yellow-500/10", border: "border-yellow-500/25" }
 ] as const;
 
-/* ─── Signal queue ───────────────────────────────────────────────────────── */
 interface DistressSignalData {
   angel: AngelType | string;
   situationCode: string;
