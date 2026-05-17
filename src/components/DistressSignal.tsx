@@ -407,7 +407,7 @@ export default function DistressSignal() {
                       className="flex items-center gap-4 p-4 rounded-2xl border-2 border-blue-500/40 bg-blue-500/10 hover:border-blue-400 text-left transition-all"
                       aria-label="Archangel Michael"
                     >
-                      <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 border border-white/20 relative bg-black"><img src={angelImg.michael} alt="Archangel Michael" className="absolute w-[280%] h-[280%] max-w-none object-contain top-[-10%] left-[-85%]" /></div>
+                      <img src={angelImg.michael} alt="Archangel Michael" className="w-14 h-14 object-cover rounded-full shrink-0 border border-white/20" />
                       <div>
                         <span className="font-display font-bold text-blue-300 text-sm block">Archangel Michael ⚔️</span>
                         <span className="text-xs text-muted-foreground">Male presence · Physical Safety</span>
@@ -422,7 +422,7 @@ export default function DistressSignal() {
                       className="flex items-center gap-4 p-4 rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/10 hover:border-emerald-400 text-left transition-all"
                       aria-label="Archangel Ariel"
                     >
-                      <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 border border-white/20 relative bg-black"><img src={angelImg.ariel} alt="Archangel Ariel" className="absolute w-[280%] h-[280%] max-w-none object-contain top-[-10%] left-[-85%]" /></div>
+                      <img src={angelImg.ariel} alt="Archangel Ariel" className="w-14 h-14 object-cover rounded-full shrink-0 border border-white/20" />
                       <div>
                         <span className="font-display font-bold text-emerald-300 text-sm block">Archangel Ariel 🌿</span>
                         <span className="text-xs text-muted-foreground">Nature presence · Courage & Support</span>
@@ -437,7 +437,7 @@ export default function DistressSignal() {
                       className="flex items-center gap-4 p-4 rounded-2xl border-2 border-purple-500/40 bg-purple-500/10 hover:border-purple-400 text-left transition-all"
                       aria-label="Archangel Jeremial"
                     >
-                      <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 border border-white/20 relative bg-black"><img src={angelImg.jeremial} alt="Archangel Jeremial" className="absolute w-[280%] h-[280%] max-w-none object-contain top-[-10%] left-[-85%]" /></div>
+                      <img src={angelImg.jeremial} alt="Archangel Jeremial" className="w-14 h-14 object-cover rounded-full shrink-0 border border-white/20" />
                       <div>
                         <span className="font-display font-bold text-purple-300 text-sm block">Archangel Jeremial 💜</span>
                         <span className="text-xs text-muted-foreground">Divine presence · Emotional Healing</span>
@@ -517,7 +517,7 @@ export default function DistressSignal() {
                       className="flex items-center gap-4 p-4 rounded-2xl border-2 border-blue-500/40 bg-blue-500/10 hover:border-blue-400 text-left transition-all"
                       aria-label="Michael — physical safety"
                     >
-                      <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 border border-white/20 relative bg-black"><img src={angelImg.michael} alt="Michael" className="absolute w-[280%] h-[280%] max-w-none object-contain top-[-10%] left-[-85%]" /></div>
+                      <img src={angelImg.michael} alt="Michael" className="w-14 h-14 object-cover rounded-full shrink-0 border border-white/20" />
                       <div>
                         <span className="font-display font-bold text-blue-300 block">Michael ⚔️</span>
                         <span className="text-xs text-muted-foreground">Physical Safety</span>
@@ -528,7 +528,7 @@ export default function DistressSignal() {
                       className="flex items-center gap-4 p-4 rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/10 hover:border-emerald-400 text-left transition-all"
                       aria-label="Ariel — courage and nature"
                     >
-                      <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 border border-white/20 relative bg-black"><img src={angelImg.ariel} alt="Ariel" className="absolute w-[280%] h-[280%] max-w-none object-contain top-[-10%] left-[-85%]" /></div>
+                      <img src={angelImg.ariel} alt="Ariel" className="w-14 h-14 object-cover rounded-full shrink-0 border border-white/20" />
                       <div>
                         <span className="font-display font-bold text-emerald-300 block">Ariel 🌿</span>
                         <span className="text-xs text-muted-foreground">Courage &amp; Support</span>
@@ -539,7 +539,7 @@ export default function DistressSignal() {
                       className="flex items-center gap-4 p-4 rounded-2xl border-2 border-purple-500/40 bg-purple-500/10 hover:border-purple-400 text-left transition-all"
                       aria-label="Jeremial — emotional healing"
                     >
-                      <div className="w-14 h-14 rounded-full overflow-hidden shrink-0 border border-white/20 relative bg-black"><img src={angelImg.jeremial} alt="Jeremial" className="absolute w-[280%] h-[280%] max-w-none object-contain top-[-10%] left-[-85%]" /></div>
+                      <img src={angelImg.jeremial} alt="Jeremial" className="w-14 h-14 object-cover rounded-full shrink-0 border border-white/20" />
                       <div>
                         <span className="font-display font-bold text-purple-300 block">Jeremial 💜</span>
                         <span className="text-xs text-muted-foreground">Emotional Healing</span>
