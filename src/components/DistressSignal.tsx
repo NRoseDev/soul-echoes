@@ -16,10 +16,14 @@ import { encryptSignal } from "@/lib/encryption";
 // Safe asset string pointing straight to your premium golden wings image
 const sosWingsAsset = "/src/assets/icons/Icon-sos.png";
 
+import michaelHeadshot from "@/assets/icons/Michaelheadshot.jpg";
+import arielHeadshot from "@/assets/icons/Arielheadshot.jpg";
+import jeremialHeadshot from "@/assets/icons/Jermialheadshot.jpg";
+
 const angelImg = {
-  michael: "/images/AngelMichael.png",
-  ariel: "/images/AngelAriel.png",
-  jeremial: "/images/AngelJermial.png",
+  michael: michaelHeadshot,
+  ariel: arielHeadshot,
+  jeremial: jeremialHeadshot,
 };
 const SIGNAL_QUEUE_KEY = "soul-echoes-signal-queue";
 const INTRO_SEEN_KEY = "soul-echoes-beacon-intro-seen";
