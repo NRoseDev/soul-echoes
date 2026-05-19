@@ -3,6 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 export type ChatMessage = {
   role: "user" | "assistant";
   content: string;
+  emotion?: string; // detected emotion (user messages only)
+  intensity?: number; // emotion intensity 1-10 (user messages only)
+  inputType?: "text" | "voice" | "card"; // how the user communicated (user messages only)
 };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
@@ -12,11 +15,13 @@ export async function streamChat({
   onDelta,
   onDone,
   onError,
+  emotion,
 }: {
   messages: ChatMessage[];
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (error: string) => void;
+  emotion?: string; // current detected emotion for context
 }) {
   try {
     // Get the current user's session token
@@ -29,7 +34,10 @@ export async function streamChat({
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({
+        messages,
+        emotion, // pass the detected emotion to the backend
+      }),
     });
 
     if (resp.status === 401) {

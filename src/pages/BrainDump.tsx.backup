@@ -15,11 +15,6 @@ import { getPreferences, COMMUNICATION_METHODS } from "@/lib/preferences";
 import ListeningIndicator from "@/components/ListeningIndicator";
 import ASLSignInput from "@/components/ASLSignInput";
 import { useNavigate } from "react-router-dom";
-import {
-  detectEmotion,
-  formatEmotionSignal,
-  type EmotionSignal,
-} from "@/lib/emotionDetector";
 
 const WELCOME_MESSAGE: ChatMessage = {
   role: "assistant",
@@ -431,89 +426,61 @@ export default function BrainDump() {
   const prefs = getPreferences();
   const [autoRead, setAutoRead] = useState(prefs.autoReadEnabled);
 
-  // NEW: Track the current emotion for the AI to use
-  const [currentEmotion, setCurrentEmotion] = useState<EmotionSignal | null>(null);
-
   const activeMethods = COMMUNICATION_METHODS.map((m) => m.id);
   const [activeTab, setActiveTab] = useState(activeMethods[0]);
   const [analysis, setAnalysis] = useState<ResponseAnalysis | null>(null);
   const [showCardScreen, setShowCardScreen] = useState(false);
   const [cardInfo, setCardInfo] = useState<{ emoji: string; label: string; category: string } | null>(null);
 
-  const send = useCallback(
-    async (text: string, inputType: "text" | "voice" | "card" = "text") => {
-      const trimmed = text.trim();
-      if (!trimmed || isLoading) return;
+  const send = useCallback(async (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || isLoading) return;
 
-      // STEP 1: Detect emotion from the user input
-      const emotionSignal = detectEmotion(trimmed, inputType);
-      setCurrentEmotion(emotionSignal);
+    const userMsg: ChatMessage = { role: "user", content: trimmed };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+    const newAnalysis = buildResponseAnalysis(trimmed);
+    setAnalysis(newAnalysis);
+    const parsed = parseCardMessage(trimmed);
+    if (parsed) {
+      setCardInfo(parsed);
+      setShowCardScreen(true);
+    }
+    setIsLoading(true);
 
-      // Log emotion detection for debugging
-      if (emotionSignal) {
-        console.log(`[EMOTION DETECTED] ${formatEmotionSignal(emotionSignal)}`);
-      }
+    let assistantSoFar = "";
 
-      // STEP 2: Create user message with emotion metadata
-      const userMsg: ChatMessage = {
-        role: "user",
-        content: trimmed,
-        emotion: emotionSignal?.emotion,
-        intensity: emotionSignal?.intensity,
-        inputType,
-      };
-
-      setMessages((prev) => [...prev, userMsg]);
-      setInput("");
-
-      // Update local analysis for UI immediate feedback
-      const newAnalysis = buildResponseAnalysis(trimmed);
-      setAnalysis(newAnalysis);
-
-      const parsed = parseCardMessage(trimmed);
-      if (parsed) {
-        setCardInfo(parsed);
-        setShowCardScreen(true);
-      }
-      setIsLoading(true);
-
-      let assistantSoFar = "";
-
-      const upsertAssistant = (chunk: string) => {
-        assistantSoFar += chunk;
-        setMessages((prev) => {
-          const last = prev[prev.length - 1];
-          if (last?.role === "assistant" && prev.length > 1 && prev[prev.length - 2]?.role === "user") {
-            return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
-          }
-          return [...prev, { role: "assistant", content: assistantSoFar }];
-        });
-      };
-
-      // STEP 3: Send to backend with emotion context
-      await streamChat({
-        messages: [...messages, userMsg].filter((m) => m !== WELCOME_MESSAGE),
-        emotion: emotionSignal?.emotion, // Pass the detected emotion to the backend
-        onDelta: upsertAssistant,
-        onDone: () => {
-          setIsLoading(false);
-          if (autoRead) ttsSpeak(stripMarkdown(assistantSoFar));
-        },
-        onError: (err) => {
-          setIsLoading(false);
-          toast({ title: "Connection interrupted", description: err, variant: "destructive" });
-        },
+    const upsertAssistant = (chunk: string) => {
+      assistantSoFar += chunk;
+      setMessages((prev) => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant" && prev.length > 1 && prev[prev.length - 2]?.role === "user") {
+          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+        }
+        return [...prev, { role: "assistant", content: assistantSoFar }];
       });
+    };
 
-      textareaRef.current?.focus();
-    },
-    [isLoading, messages, autoRead, ttsSpeak, toast]
-  );
+    await streamChat({
+      messages: [...messages, userMsg].filter((m) => m !== WELCOME_MESSAGE),
+      onDelta: upsertAssistant,
+      onDone: () => {
+        setIsLoading(false);
+        if (autoRead) ttsSpeak(stripMarkdown(assistantSoFar));
+      },
+      onError: (err) => {
+        setIsLoading(false);
+        toast({ title: "Connection interrupted", description: err, variant: "destructive" });
+      },
+    });
+
+    textareaRef.current?.focus();
+  }, [isLoading, messages, autoRead, ttsSpeak, toast]);
 
   const speech = useSpeechRecognition({
     onResult: (transcript) => {
       setIsListening(false);
-      send(transcript, "voice");
+      send(transcript);
     },
     continuous: false,
   });
@@ -544,7 +511,7 @@ export default function BrainDump() {
   }, [messages]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input, "text"); }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); }
   };
 
   const replayMessage = (text: string) => { ttsStop(); ttsSpeak(stripMarkdown(text)); };
@@ -557,7 +524,7 @@ export default function BrainDump() {
       case "eyetrack":
         return (
           <div className="px-4 py-3">
-            <form onSubmit={(e) => { e.preventDefault(); send(input, "text"); }} className="flex gap-2 items-end max-w-3xl mx-auto">
+            <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex gap-2 items-end max-w-3xl mx-auto">
               <Textarea
                 ref={textareaRef}
                 value={input}
@@ -601,14 +568,14 @@ export default function BrainDump() {
         );
 
       case "sign":
-        return <ASLSignInput onSend={(text) => send(text, "text")} disabled={isLoading} />;
+        return <ASLSignInput onSend={send} disabled={isLoading} />;
 
       case "point":
       case "pictures":
-        return <PointToItCards onSend={(text) => send(text, "card")} disabled={isLoading} />;
+        return <PointToItCards onSend={send} disabled={isLoading} />;
 
       case "colors":
-        return <ColorSymbolCanvas onSend={(text) => send(text, "text")} disabled={isLoading} />;
+        return <ColorSymbolCanvas onSend={send} disabled={isLoading} />;
 
       case "connect":
       case "device":
@@ -637,11 +604,6 @@ export default function BrainDump() {
           {messages.map((msg, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === "user" ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-card text-card-foreground border border-border rounded-bl-sm"}`}>
-                {msg.role === "user" && msg.emotion && (
-                  <div className="text-[10px] uppercase tracking-wider opacity-60 mb-1">
-                    {msg.emotion} detected
-                  </div>
-                )}
                 {msg.role === "assistant" ? (
                   <div className="space-y-2">
                     <div className="prose prose-sm prose-invert max-w-none prose-p:my-1 prose-headings:font-display">
