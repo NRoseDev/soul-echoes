@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Volume2, Mic, Eye, Hand } from "lucide-react";
+import { ArrowRight, Volume2, Mic, Heart, Users, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPreferences, savePreferences, COMMUNICATION_METHODS } from "@/lib/preferences";
 import { getVoiceSettings, saveVoiceSettings, CURATED_VOICES } from "@/lib/voiceSettings";
@@ -9,7 +9,7 @@ import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { announceGuide } from "@/components/AIGuideAnnouncer";
 import { playCue } from "@/lib/waitingCues";
 
-type OnboardingStep = "welcome" | "input-method" | "voice-selection" | "ready";
+type OnboardingStep = "welcome" | "input-method" | "voice-selection" | "mission" | "impact" | "pricing" | "healers" | "ready";
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
@@ -32,7 +32,6 @@ export default function OnboardingPage() {
       setIsListening(false);
 
       if (step === "input-method") {
-        // Match input method
         for (const method of COMMUNICATION_METHODS) {
           if (lower.includes(method.id) || lower.includes(method.label.toLowerCase())) {
             setSelectedInput(method.id);
@@ -40,19 +39,25 @@ export default function OnboardingPage() {
             return;
           }
         }
-        // No match, ask again
         announceGuide("I didn't catch that. You can say: Speak, Type, Sign, Point, or Colors.");
         setTimeout(() => startListening(), 1500);
       } else if (step === "voice-selection") {
-        // Match voice preference
         if (lower.includes("feminine") || lower.includes("female") || lower.includes("woman")) {
           setSelectedVoice(CURATED_VOICES[0].id);
-          setTimeout(() => completeOnboarding(), 800);
+          setTimeout(() => moveToMission(), 800);
         } else if (lower.includes("masculine") || lower.includes("male") || lower.includes("man")) {
           setSelectedVoice(CURATED_VOICES[1].id);
-          setTimeout(() => completeOnboarding(), 800);
+          setTimeout(() => moveToMission(), 800);
         } else {
           announceGuide("I didn't catch that. You can say: Feminine or Masculine.");
+          setTimeout(() => startListening(), 1500);
+        }
+      } else if (["mission", "impact", "pricing", "healers"].includes(step)) {
+        // For info screens, just listen for "next" or "continue"
+        if (lower.includes("next") || lower.includes("continue") || lower.includes("ok") || lower.includes("ready")) {
+          moveToNextStep();
+        } else {
+          announceGuide("You can say: Next or Continue to move forward.");
           setTimeout(() => startListening(), 1500);
         }
       }
@@ -81,10 +86,48 @@ export default function OnboardingPage() {
     setTimeout(() => startListening(), 1500);
   }, [startListening]);
 
+  const moveToMission = useCallback(() => {
+    setStep("mission");
+    announceGuide(
+      "Soul Echoes is a safe, judgment-free space where you can express yourself freely. I'm here to listen, help you understand your emotions, and guide you toward healing. Say Next when you're ready to learn more."
+    );
+    setTimeout(() => startListening(), 2000);
+  }, [startListening]);
+
+  const moveToImpact = useCallback(() => {
+    setStep("impact");
+    announceGuide(
+      "Here's what makes Soul Echoes different: All proceeds from paid subscriptions go directly toward building non-profits that support mental health, spiritual healing, and accessibility. Your healing helps others heal. Say Next to learn about our pricing."
+    );
+    setTimeout(() => startListening(), 2500);
+  }, [startListening]);
+
+  const moveToPricing = useCallback(() => {
+    setStep("pricing");
+    announceGuide(
+      "Brain Dump is always free and unlimited. Paid tiers unlock access to more healing rooms, priority features, and yearly savings. You can also connect with professional healers and practitioners anytime. Say Next to learn about our healer community."
+    );
+    setTimeout(() => startListening(), 2500);
+  }, [startListening]);
+
+  const moveToHealers = useCallback(() => {
+    setStep("healers");
+    announceGuide(
+      "Soul Echoes connects you with certified spiritual practitioners, therapists, and healers. Whether you need deeper guidance, professional support, or spiritual direction, our healer network is here for you. Say Next when you're ready to begin."
+    );
+    setTimeout(() => startListening(), 2500);
+  }, [startListening]);
+
+  const moveToNextStep = useCallback(() => {
+    if (step === "mission") moveToImpact();
+    else if (step === "impact") moveToPricing();
+    else if (step === "pricing") moveToHealers();
+    else if (step === "healers") completeOnboarding();
+  }, [step]);
+
   const completeOnboarding = useCallback(() => {
     if (!selectedInput || !selectedVoice) return;
 
-    // Save preferences
     const prefs = getPreferences();
     savePreferences({ ...prefs, inputMethod: selectedInput });
 
@@ -92,7 +135,7 @@ export default function OnboardingPage() {
     saveVoiceSettings({ ...voiceSettings, elevenLabsVoiceId: selectedVoice });
 
     setStep("ready");
-    announceGuide("Perfect! You're all set. Let's begin.");
+    announceGuide("Perfect! You're all set. Let's begin your healing journey.");
     setTimeout(() => {
       navigate("/");
     }, 2000);
@@ -230,7 +273,7 @@ export default function OnboardingPage() {
           <button
             onClick={() => {
               setSelectedVoice(CURATED_VOICES[0].id);
-              setTimeout(() => completeOnboarding(), 800);
+              setTimeout(() => moveToMission(), 800);
             }}
             className={`flex flex-col items-center gap-2 px-4 py-4 rounded-xl border-2 transition-all ${
               selectedVoice === CURATED_VOICES[0].id
@@ -244,7 +287,7 @@ export default function OnboardingPage() {
           <button
             onClick={() => {
               setSelectedVoice(CURATED_VOICES[1].id);
-              setTimeout(() => completeOnboarding(), 800);
+              setTimeout(() => moveToMission(), 800);
             }}
             className={`flex flex-col items-center gap-2 px-4 py-4 rounded-xl border-2 transition-all ${
               selectedVoice === CURATED_VOICES[1].id
@@ -256,6 +299,182 @@ export default function OnboardingPage() {
             <span className="text-xs font-medium text-foreground">Masculine</span>
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // Mission step
+  if (step === "mission") {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 max-w-2xl mx-auto text-center space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4"
+        >
+          <div className="h-16 w-16 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto">
+            <Heart className="h-8 w-8 text-blue-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">Our Mission</h2>
+          <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
+            Soul Echoes is a safe, judgment-free space where you can express yourself freely. I'm here to listen, help you understand your emotions, and guide you toward healing.
+          </p>
+          <p className="text-sm text-muted-foreground italic">
+            {isListening ? "Listening…" : "Say Next to continue"}
+          </p>
+        </motion.div>
+
+        {isListening && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center gap-2 text-primary"
+          >
+            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-medium">Waiting for your response…</span>
+          </motion.div>
+        )}
+
+        <Button
+          onClick={() => moveToImpact()}
+          variant="outline"
+          size="lg"
+          className="rounded-2xl gap-2"
+        >
+          <ArrowRight className="h-4 w-4" /> Next
+        </Button>
+      </div>
+    );
+  }
+
+  // Impact step
+  if (step === "impact") {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 max-w-2xl mx-auto text-center space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4"
+        >
+          <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto">
+            <TrendingUp className="h-8 w-8 text-green-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">Our Impact</h2>
+          <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
+            All proceeds from paid subscriptions go directly toward building non-profits that support mental health, spiritual healing, and accessibility. Your healing helps others heal.
+          </p>
+          <p className="text-sm text-muted-foreground italic">
+            {isListening ? "Listening…" : "Say Next to continue"}
+          </p>
+        </motion.div>
+
+        {isListening && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center gap-2 text-primary"
+          >
+            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-medium">Waiting for your response…</span>
+          </motion.div>
+        )}
+
+        <Button
+          onClick={() => moveToPricing()}
+          variant="outline"
+          size="lg"
+          className="rounded-2xl gap-2"
+        >
+          <ArrowRight className="h-4 w-4" /> Next
+        </Button>
+      </div>
+    );
+  }
+
+  // Pricing step
+  if (step === "pricing") {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 max-w-2xl mx-auto text-center space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4"
+        >
+          <div className="h-16 w-16 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto">
+            <span className="text-2xl">💎</span>
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">Pricing & Access</h2>
+          <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
+            Brain Dump is always free and unlimited. Paid tiers unlock access to more healing rooms, priority features, and yearly savings. You can also connect with professional healers and practitioners anytime.
+          </p>
+          <p className="text-sm text-muted-foreground italic">
+            {isListening ? "Listening…" : "Say Next to continue"}
+          </p>
+        </motion.div>
+
+        {isListening && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center gap-2 text-primary"
+          >
+            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-medium">Waiting for your response…</span>
+          </motion.div>
+        )}
+
+        <Button
+          onClick={() => moveToHealers()}
+          variant="outline"
+          size="lg"
+          className="rounded-2xl gap-2"
+        >
+          <ArrowRight className="h-4 w-4" /> Next
+        </Button>
+      </div>
+    );
+  }
+
+  // Healers step
+  if (step === "healers") {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 max-w-2xl mx-auto text-center space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4"
+        >
+          <div className="h-16 w-16 rounded-full bg-pink-500/20 flex items-center justify-center mx-auto">
+            <Users className="h-8 w-8 text-pink-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">Our Healer Community</h2>
+          <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
+            Soul Echoes connects you with certified spiritual practitioners, therapists, and healers. Whether you need deeper guidance, professional support, or spiritual direction, our healer network is here for you.
+          </p>
+          <p className="text-sm text-muted-foreground italic">
+            {isListening ? "Listening…" : "Say Next to begin"}
+          </p>
+        </motion.div>
+
+        {isListening && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center gap-2 text-primary"
+          >
+            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-medium">Waiting for your response…</span>
+          </motion.div>
+        )}
+
+        <Button
+          onClick={() => completeOnboarding()}
+          variant="outline"
+          size="lg"
+          className="rounded-2xl gap-2"
+        >
+          <ArrowRight className="h-4 w-4" /> Begin
+        </Button>
       </div>
     );
   }
