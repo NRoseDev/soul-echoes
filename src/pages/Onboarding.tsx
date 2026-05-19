@@ -1,13 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useCallback } from "react";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Volume2, Mic, Heart, Users, TrendingUp } from "lucide-react";
+import { ArrowRight, Heart, Users, TrendingUp, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { getPreferences, savePreferences, COMMUNICATION_METHODS } from "@/lib/preferences";
 import { getVoiceSettings, saveVoiceSettings, CURATED_VOICES } from "@/lib/voiceSettings";
-import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+import { useMultiModalInput } from "@/hooks/use-multi-modal-input";
 import { announceGuide } from "@/components/AIGuideAnnouncer";
 import { playCue } from "@/lib/waitingCues";
+import { MultiModalInput } from "@/lib/multiModalInput";
 
 type OnboardingStep = "welcome" | "input-method" | "voice-selection" | "mission" | "impact" | "pricing" | "healers" | "ready";
 
@@ -16,107 +18,97 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<OnboardingStep>("welcome");
   const [selectedInput, setSelectedInput] = useState<string | null>(null);
   const [selectedVoice, setSelectedVoice] = useState<string | null>(null);
-  const [isListening, setIsListening] = useState(false);
-  const [waitingForResponse, setWaitingForResponse] = useState(false);
+  const [textInput, setTextInput] = useState("");
+  const [lastInputMethod, setLastInputMethod] = useState<string | null>(null);
 
-  const speech = useSpeechRecognition({
-    onResult: (transcript) => {
-      handleVoiceResponse(transcript);
-    },
-    continuous: false,
-  });
-
-  const handleVoiceResponse = useCallback(
-    (transcript: string) => {
-      const lower = transcript.toLowerCase().trim();
-      setIsListening(false);
+  const handleMultiModalInput = useCallback(
+    (input: MultiModalInput) => {
+      setLastInputMethod(input.method);
+      const value = input.value.toLowerCase().trim();
 
       if (step === "input-method") {
         for (const method of COMMUNICATION_METHODS) {
-          if (lower.includes(method.id) || lower.includes(method.label.toLowerCase())) {
+          if (value.includes(method.id) || value.includes(method.label.toLowerCase())) {
             setSelectedInput(method.id);
             setTimeout(() => moveToVoiceSelection(), 800);
             return;
           }
         }
-        announceGuide("I didn't catch that. You can say: Speak, Type, Sign, Point, or Colors.");
-        setTimeout(() => startListening(), 1500);
+        announceGuide("I didn't catch that. You can say, type, or click: Speak, Type, Sign, Point, or Colors.");
+        setTimeout(() => multiModal.startListening(), 1500);
       } else if (step === "voice-selection") {
-        if (lower.includes("feminine") || lower.includes("female") || lower.includes("woman")) {
+        if (value.includes("feminine") || value.includes("female") || value.includes("woman")) {
           setSelectedVoice(CURATED_VOICES[0].id);
           setTimeout(() => moveToMission(), 800);
-        } else if (lower.includes("masculine") || lower.includes("male") || lower.includes("man")) {
+        } else if (value.includes("masculine") || value.includes("male") || value.includes("man")) {
           setSelectedVoice(CURATED_VOICES[1].id);
           setTimeout(() => moveToMission(), 800);
         } else {
-          announceGuide("I didn't catch that. You can say: Feminine or Masculine.");
-          setTimeout(() => startListening(), 1500);
+          announceGuide("You can say, type, or click: Feminine or Masculine.");
+          setTimeout(() => multiModal.startListening(), 1500);
         }
       } else if (["mission", "impact", "pricing", "healers"].includes(step)) {
-        // For info screens, just listen for "next" or "continue"
-        if (lower.includes("next") || lower.includes("continue") || lower.includes("ok") || lower.includes("ready")) {
+        if (value.includes("next") || value.includes("continue") || value.includes("ok") || value.includes("ready")) {
           moveToNextStep();
         } else {
-          announceGuide("You can say: Next or Continue to move forward.");
-          setTimeout(() => startListening(), 1500);
+          announceGuide("You can say, type, or click: Next to continue.");
+          setTimeout(() => multiModal.startListening(), 1500);
         }
       }
     },
     [step]
   );
 
-  const startListening = useCallback(() => {
-    setWaitingForResponse(true);
-    setIsListening(true);
-    playCue("listening");
-    speech.start("en-US");
-  }, [speech]);
+  const multiModal = useMultiModalInput({
+    onInput: handleMultiModalInput,
+    enabled: true,
+  });
 
   const moveToInputMethod = useCallback(() => {
     setStep("input-method");
     announceGuide(
-      "How will you communicate with me? You can say: Speak, Type, Sign, Point, or Colors."
+      "How will you communicate with me? You can speak, type, or click: Speak, Type, Sign, Point, or Colors."
     );
-    setTimeout(() => startListening(), 1500);
-  }, [startListening]);
+    setTimeout(() => multiModal.startListening(), 1500);
+  }, [multiModal]);
 
   const moveToVoiceSelection = useCallback(() => {
     setStep("voice-selection");
-    announceGuide("How should I sound to you? You can say: Feminine or Masculine.");
-    setTimeout(() => startListening(), 1500);
-  }, [startListening]);
+    announceGuide("How should I sound to you? You can speak, type, or click: Feminine or Masculine.");
+    setTimeout(() => multiModal.startListening(), 1500);
+  }, [multiModal]);
 
   const moveToMission = useCallback(() => {
     setStep("mission");
     announceGuide(
-      "Soul Echoes is a safe, judgment-free space where you can express yourself freely. I'm here to listen, help you understand your emotions, and guide you toward healing. Say Next when you're ready to learn more."
+      "Soul Echoes is a safe, judgment-free space where you can express yourself freely. I'm here to listen, help you understand your emotions, and guide you toward healing. Say, type, or click Next when you're ready to learn more."
     );
-    setTimeout(() => startListening(), 2000);
-  }, [startListening]);
+    setTimeout(() => multiModal.startListening(), 2000);
+  }, [multiModal]);
 
   const moveToImpact = useCallback(() => {
     setStep("impact");
     announceGuide(
-      "Here's what makes Soul Echoes different: All proceeds from paid subscriptions go directly toward building non-profits that support mental health, spiritual healing, and accessibility. Your healing helps others heal. Say Next to learn about our pricing."
+      "Here's what makes Soul Echoes different: All proceeds from paid subscriptions go directly toward building non-profits that support mental health, spiritual healing, and accessibility. Your healing helps others heal. Say, type, or click Next to learn about our pricing."
     );
-    setTimeout(() => startListening(), 2500);
-  }, [startListening]);
+    setTimeout(() => multiModal.startListening(), 2500);
+  }, [multiModal]);
 
   const moveToPricing = useCallback(() => {
     setStep("pricing");
     announceGuide(
-      "Brain Dump is always free and unlimited. Paid tiers unlock access to more healing rooms, priority features, and yearly savings. You can also connect with professional healers and practitioners anytime. Say Next to learn about our healer community."
+      "Brain Dump is always free and unlimited. Paid tiers unlock access to more healing rooms, priority features, and yearly savings. You can also connect with professional healers and practitioners anytime. Say, type, or click Next to learn about our healer community."
     );
-    setTimeout(() => startListening(), 2500);
-  }, [startListening]);
+    setTimeout(() => multiModal.startListening(), 2500);
+  }, [multiModal]);
 
   const moveToHealers = useCallback(() => {
     setStep("healers");
     announceGuide(
-      "Soul Echoes connects you with certified spiritual practitioners, therapists, and healers. Whether you need deeper guidance, professional support, or spiritual direction, our healer network is here for you. Say Next when you're ready to begin."
+      "Soul Echoes connects you with certified spiritual practitioners, therapists, and healers. Whether you need deeper guidance, professional support, or spiritual direction, our healer network is here for you. Say, type, or click Next when you're ready to begin."
     );
-    setTimeout(() => startListening(), 2500);
-  }, [startListening]);
+    setTimeout(() => multiModal.startListening(), 2500);
+  }, [multiModal]);
 
   const moveToNextStep = useCallback(() => {
     if (step === "mission") moveToImpact();
@@ -176,18 +168,7 @@ export default function OnboardingPage() {
             size="lg"
             className="rounded-2xl gap-2 h-14 text-base"
           >
-            <Mic className="h-5 w-5" /> Start with Voice
-          </Button>
-          <Button
-            onClick={() => {
-              setSelectedInput("type");
-              moveToVoiceSelection();
-            }}
-            variant="outline"
-            size="lg"
-            className="rounded-2xl gap-2 h-14 text-base"
-          >
-            <span className="text-xl">⌨️</span> I'll Type Instead
+            <Mic className="h-5 w-5" /> Get Started
           </Button>
         </motion.div>
       </div>
@@ -205,18 +186,18 @@ export default function OnboardingPage() {
         >
           <h2 className="text-2xl font-bold text-foreground">How will you communicate?</h2>
           <p className="text-sm text-muted-foreground">
-            {isListening ? "Listening…" : "Choose or say your preference"}
+            Speak, type, or click your preference
           </p>
         </motion.div>
 
-        {isListening && (
+        {multiModal.isListening && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex items-center gap-2 text-primary"
           >
             <div className="h-3 w-3 rounded-full bg-primary animate-pulse" />
-            <span className="text-sm font-medium">Waiting for your response…</span>
+            <span className="text-sm font-medium">Listening…</span>
           </motion.div>
         )}
 
@@ -224,10 +205,7 @@ export default function OnboardingPage() {
           {COMMUNICATION_METHODS.slice(0, 4).map((method) => (
             <button
               key={method.id}
-              onClick={() => {
-                setSelectedInput(method.id);
-                setTimeout(() => moveToVoiceSelection(), 800);
-              }}
+              onClick={() => multiModal.handleClickInput(method.id)}
               className={`flex flex-col items-center gap-2 px-4 py-4 rounded-xl border-2 transition-all ${
                 selectedInput === method.id
                   ? "border-primary bg-primary/10"
@@ -238,6 +216,20 @@ export default function OnboardingPage() {
               <span className="text-xs font-medium text-foreground text-center">{method.label}</span>
             </button>
           ))}
+        </div>
+
+        <div className="w-full max-w-sm">
+          <Input
+            type="text"
+            placeholder="Or type your choice…"
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                multiModal.handleTextInput((e.target as HTMLInputElement).value);
+                (e.target as HTMLInputElement).value = "";
+              }
+            }}
+            className="rounded-xl"
+          />
         </div>
       </div>
     );
@@ -254,27 +246,24 @@ export default function OnboardingPage() {
         >
           <h2 className="text-2xl font-bold text-foreground">How should I sound?</h2>
           <p className="text-sm text-muted-foreground">
-            {isListening ? "Listening…" : "Choose or say your preference"}
+            Speak, type, or click your preference
           </p>
         </motion.div>
 
-        {isListening && (
+        {multiModal.isListening && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex items-center gap-2 text-primary"
           >
             <div className="h-3 w-3 rounded-full bg-primary animate-pulse" />
-            <span className="text-sm font-medium">Waiting for your response…</span>
+            <span className="text-sm font-medium">Listening…</span>
           </motion.div>
         )}
 
         <div className="grid grid-cols-2 gap-3 w-full">
           <button
-            onClick={() => {
-              setSelectedVoice(CURATED_VOICES[0].id);
-              setTimeout(() => moveToMission(), 800);
-            }}
+            onClick={() => multiModal.handleClickInput("feminine")}
             className={`flex flex-col items-center gap-2 px-4 py-4 rounded-xl border-2 transition-all ${
               selectedVoice === CURATED_VOICES[0].id
                 ? "border-primary bg-primary/10"
@@ -285,10 +274,7 @@ export default function OnboardingPage() {
             <span className="text-xs font-medium text-foreground">Feminine</span>
           </button>
           <button
-            onClick={() => {
-              setSelectedVoice(CURATED_VOICES[1].id);
-              setTimeout(() => moveToMission(), 800);
-            }}
+            onClick={() => multiModal.handleClickInput("masculine")}
             className={`flex flex-col items-center gap-2 px-4 py-4 rounded-xl border-2 transition-all ${
               selectedVoice === CURATED_VOICES[1].id
                 ? "border-primary bg-primary/10"
@@ -298,6 +284,20 @@ export default function OnboardingPage() {
             <span className="text-3xl">👨</span>
             <span className="text-xs font-medium text-foreground">Masculine</span>
           </button>
+        </div>
+
+        <div className="w-full max-w-sm">
+          <Input
+            type="text"
+            placeholder="Or type your choice…"
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                multiModal.handleTextInput((e.target as HTMLInputElement).value);
+                (e.target as HTMLInputElement).value = "";
+              }
+            }}
+            className="rounded-xl"
+          />
         </div>
       </div>
     );
@@ -319,30 +319,40 @@ export default function OnboardingPage() {
           <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
             Soul Echoes is a safe, judgment-free space where you can express yourself freely. I'm here to listen, help you understand your emotions, and guide you toward healing.
           </p>
-          <p className="text-sm text-muted-foreground italic">
-            {isListening ? "Listening…" : "Say Next to continue"}
-          </p>
         </motion.div>
 
-        {isListening && (
+        {multiModal.isListening && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex items-center gap-2 text-primary"
           >
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-xs font-medium">Waiting for your response…</span>
+            <span className="text-xs font-medium">Listening…</span>
           </motion.div>
         )}
 
-        <Button
-          onClick={() => moveToImpact()}
-          variant="outline"
-          size="lg"
-          className="rounded-2xl gap-2"
-        >
-          <ArrowRight className="h-4 w-4" /> Next
-        </Button>
+        <div className="flex flex-col gap-2 w-full">
+          <Button
+            onClick={() => multiModal.handleClickInput("next")}
+            variant="outline"
+            size="lg"
+            className="rounded-2xl gap-2"
+          >
+            <ArrowRight className="h-4 w-4" /> Next
+          </Button>
+          <Input
+            type="text"
+            placeholder="Or type: Next…"
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                multiModal.handleTextInput((e.target as HTMLInputElement).value);
+                (e.target as HTMLInputElement).value = "";
+              }
+            }}
+            className="rounded-xl"
+          />
+        </div>
       </div>
     );
   }
@@ -363,30 +373,40 @@ export default function OnboardingPage() {
           <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
             All proceeds from paid subscriptions go directly toward building non-profits that support mental health, spiritual healing, and accessibility. Your healing helps others heal.
           </p>
-          <p className="text-sm text-muted-foreground italic">
-            {isListening ? "Listening…" : "Say Next to continue"}
-          </p>
         </motion.div>
 
-        {isListening && (
+        {multiModal.isListening && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex items-center gap-2 text-primary"
           >
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-xs font-medium">Waiting for your response…</span>
+            <span className="text-xs font-medium">Listening…</span>
           </motion.div>
         )}
 
-        <Button
-          onClick={() => moveToPricing()}
-          variant="outline"
-          size="lg"
-          className="rounded-2xl gap-2"
-        >
-          <ArrowRight className="h-4 w-4" /> Next
-        </Button>
+        <div className="flex flex-col gap-2 w-full">
+          <Button
+            onClick={() => multiModal.handleClickInput("next")}
+            variant="outline"
+            size="lg"
+            className="rounded-2xl gap-2"
+          >
+            <ArrowRight className="h-4 w-4" /> Next
+          </Button>
+          <Input
+            type="text"
+            placeholder="Or type: Next…"
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                multiModal.handleTextInput((e.target as HTMLInputElement).value);
+                (e.target as HTMLInputElement).value = "";
+              }
+            }}
+            className="rounded-xl"
+          />
+        </div>
       </div>
     );
   }
@@ -407,30 +427,40 @@ export default function OnboardingPage() {
           <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
             Brain Dump is always free and unlimited. Paid tiers unlock access to more healing rooms, priority features, and yearly savings. You can also connect with professional healers and practitioners anytime.
           </p>
-          <p className="text-sm text-muted-foreground italic">
-            {isListening ? "Listening…" : "Say Next to continue"}
-          </p>
         </motion.div>
 
-        {isListening && (
+        {multiModal.isListening && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex items-center gap-2 text-primary"
           >
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-xs font-medium">Waiting for your response…</span>
+            <span className="text-xs font-medium">Listening…</span>
           </motion.div>
         )}
 
-        <Button
-          onClick={() => moveToHealers()}
-          variant="outline"
-          size="lg"
-          className="rounded-2xl gap-2"
-        >
-          <ArrowRight className="h-4 w-4" /> Next
-        </Button>
+        <div className="flex flex-col gap-2 w-full">
+          <Button
+            onClick={() => multiModal.handleClickInput("next")}
+            variant="outline"
+            size="lg"
+            className="rounded-2xl gap-2"
+          >
+            <ArrowRight className="h-4 w-4" /> Next
+          </Button>
+          <Input
+            type="text"
+            placeholder="Or type: Next…"
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                multiModal.handleTextInput((e.target as HTMLInputElement).value);
+                (e.target as HTMLInputElement).value = "";
+              }
+            }}
+            className="rounded-xl"
+          />
+        </div>
       </div>
     );
   }
@@ -451,30 +481,40 @@ export default function OnboardingPage() {
           <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
             Soul Echoes connects you with certified spiritual practitioners, therapists, and healers. Whether you need deeper guidance, professional support, or spiritual direction, our healer network is here for you.
           </p>
-          <p className="text-sm text-muted-foreground italic">
-            {isListening ? "Listening…" : "Say Next to begin"}
-          </p>
         </motion.div>
 
-        {isListening && (
+        {multiModal.isListening && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex items-center gap-2 text-primary"
           >
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-xs font-medium">Waiting for your response…</span>
+            <span className="text-xs font-medium">Listening…</span>
           </motion.div>
         )}
 
-        <Button
-          onClick={() => completeOnboarding()}
-          variant="outline"
-          size="lg"
-          className="rounded-2xl gap-2"
-        >
-          <ArrowRight className="h-4 w-4" /> Begin
-        </Button>
+        <div className="flex flex-col gap-2 w-full">
+          <Button
+            onClick={() => multiModal.handleClickInput("next")}
+            variant="outline"
+            size="lg"
+            className="rounded-2xl gap-2"
+          >
+            <ArrowRight className="h-4 w-4" /> Begin
+          </Button>
+          <Input
+            type="text"
+            placeholder="Or type: Begin…"
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                multiModal.handleTextInput((e.target as HTMLInputElement).value);
+                (e.target as HTMLInputElement).value = "";
+              }
+            }}
+            className="rounded-xl"
+          />
+        </div>
       </div>
     );
   }
