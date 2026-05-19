@@ -61,27 +61,35 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
           if (mountedRef.current) setListening(false);
           return;
         }
+        
+        // Don't log common non-fatal errors
         if (event.error !== "no-speech" && event.error !== "aborted") {
           console.warn("Speech recognition error:", event.error);
         }
+
+        // Auto-restart on "no-speech" if we're in continuous mode
+        if (event.error === "no-speech" && isContinuous && activeRef.current && mountedRef.current) {
+          return; // onend will handle the restart
+        }
+
         if (event.error === "no-speech") {
           optionsRef.current.onNoMatch?.();
         }
-        // Only auto-restart on non-fatal errors if continuous
-        if (isContinuous && mountedRef.current && activeRef.current) {
-          setTimeout(() => start(lang), 300);
-        } else {
+
+        if (!isContinuous || event.error === "aborted") {
           activeRef.current = false;
           if (mountedRef.current) setListening(false);
         }
       };
 
       recognition.onend = () => {
-        activeRef.current = false;
-        // Auto-restart if continuous mode
-        if (isContinuous && mountedRef.current && activeRef.current) {
-          setTimeout(() => start(lang), 300);
+        // If we are still "active" but the engine stopped, it means it finished a segment
+        if (activeRef.current && isContinuous && mountedRef.current) {
+          setTimeout(() => {
+            if (activeRef.current) recognition.start();
+          }, 100);
         } else {
+          activeRef.current = false;
           if (mountedRef.current) setListening(false);
         }
       };

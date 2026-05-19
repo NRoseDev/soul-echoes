@@ -491,8 +491,13 @@ export default function BrainDump() {
       };
 
       // STEP 3: Send to backend with emotion context
+      // We clean the messages to only include role and content for backend compatibility
+      const cleanMessages = [...messages, userMsg]
+        .filter((m) => m !== WELCOME_MESSAGE)
+        .map(({ role, content }) => ({ role, content }));
+
       await streamChat({
-        messages: [...messages, userMsg].filter((m) => m !== WELCOME_MESSAGE),
+        messages: cleanMessages,
         emotion: emotionSignal?.emotion, // Pass the detected emotion to the backend
         onDelta: upsertAssistant,
         onDone: () => {
