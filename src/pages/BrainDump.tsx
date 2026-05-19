@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Loader2, Mic, MicOff, Volume2, VolumeX, ArrowRight, ArrowLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
