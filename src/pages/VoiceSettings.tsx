@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Volume2, Play, Save, Check, Loader2 } from "lucide-react";
+import { Volume2, Play, Save, Check, Loader2, Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -10,11 +10,12 @@ import {
   type VoiceSettings,
   type CuratedVoice,
 } from "@/lib/voiceSettings";
+import { getPreferences, savePreferences, COMMUNICATION_METHODS } from "@/lib/preferences";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useToast } from "@/hooks/use-toast";
 
 const PREVIEW_TEXT = "Hello, I am here with you. Let me be your voice on this healing journey.";
 
-// Keyword lists to find a gender-matching browser voice as fallback
 const FEMININE_KEYWORDS = ["female", "woman", "girl", "zira", "samantha", "victoria", "karen", "moira", "tessa", "fiona", "jenny", "aria", "natasha", "hazel", "susan", "kate", "allison", "ava", "emily", "emma", "sarah", "laura", "lisa", "nicky"];
 const MASCULINE_KEYWORDS = ["male", "man", "daniel", "david", "mark", "james", "fred", "alex", "ralph", "tom", "bruce", "george", "liam", "charlie", "brian", "eric", "will", "chris", "callum", "bill", "roger"];
 
@@ -39,10 +40,8 @@ function speakVoice(
     u.volume = volume;
     u.pitch = 1;
 
-    // 1. Try to find the exact Microsoft voice by name
     let picked = pool.find((v) => v.name.toLowerCase().includes(voice.speakName.toLowerCase()));
 
-    // 2. Fall back to a gender-matching browser voice
     if (!picked) {
       const nameLower = (v: SpeechSynthesisVoice) => v.name.toLowerCase();
       if (voice.gender === "feminine") {
@@ -52,7 +51,6 @@ function speakVoice(
       }
     }
 
-    // 3. Fall back to first available English voice
     if (!picked) picked = pool[0];
     if (picked) u.voice = picked;
 
@@ -62,7 +60,6 @@ function speakVoice(
     u.onerror = clear;
     synth.resume();
     synth.speak(u);
-    // Safety: re-enable if events never fire
     setTimeout(clear, 8000);
   };
 
@@ -77,94 +74,144 @@ function speakVoice(
 }
 
 export default function VoiceSettingsPage() {
-  const [settings, setSettings] = useState<VoiceSettings>(getVoiceSettings);
+  const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>(getVoiceSettings);
+  const [preferences, setPreferences] = useState(getPreferences());
   const [saved, setSaved] = useState(false);
   const [playingId, setPlayingId] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isListening, setIsListening] = useState(false);
   const { toast } = useToast();
+
+  const speech = useSpeechRecognition({
+    onResult: (transcript) => {
+      setIsListening(false);
+      toast({ title: "Heard", description: `"${transcript}"` });
+    },
+    continuous: false,
+  });
+
+  const startListening = useCallback(() => {
+    if (isListening) return;
+    setIsListening(true);
+    speech.start(preferences.primaryLanguage);
+  }, [isListening, speech, preferences.primaryLanguage]);
+
+  const stopListening = useCallback(() => {
+    setIsListening(false);
+    speech.stop();
+  }, [speech]);
 
   const playVoice = useCallback(
     (voice: CuratedVoice) => {
-      // Stop any browser speech in progress
-      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
       setPlayingId(voice.id);
       speakVoice(
         voice,
-        settings.speed,
-        settings.volume,
-        () => {}, // onStart — state already set above
+        voiceSettings.speed,
+        voiceSettings.volume,
+        () => {},
         () => setPlayingId(null)
       );
     },
-    [settings.speed, settings.volume]
+    [voiceSettings.speed, voiceSettings.volume]
   );
 
   const testVoice = useCallback(() => {
     const selected =
-      (settings.elevenLabsVoiceId
-        ? CURATED_VOICES.find((v) => v.id === settings.elevenLabsVoiceId)
+      (voiceSettings.elevenLabsVoiceId
+        ? CURATED_VOICES.find((v) => v.id === voiceSettings.elevenLabsVoiceId)
         : null) ?? CURATED_VOICES[0];
     playVoice(selected);
-  }, [settings.elevenLabsVoiceId, playVoice]);
+  }, [voiceSettings.elevenLabsVoiceId, playVoice]);
 
   const handleSave = () => {
-    saveVoiceSettings(settings);
+    saveVoiceSettings(voiceSettings);
+    savePreferences(preferences);
     setSaved(true);
-    toast({ title: "Voice settings saved", description: "Your voice will be used across all rooms." });
+    toast({ title: "Settings saved", description: "Your communication preferences have been updated." });
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const speedLabel = settings.speed <= 0.75 ? "Slow" : settings.speed >= 1.25 ? "Fast" : "Normal";
-  const volumeLabel = settings.volume <= 0.35 ? "Soft" : settings.volume >= 0.75 ? "Loud" : "Medium";
+  const speedLabel = voiceSettings.speed <= 0.75 ? "Slow" : voiceSettings.speed >= 1.25 ? "Fast" : "Normal";
+  const volumeLabel = voiceSettings.volume <= 0.35 ? "Soft" : voiceSettings.volume >= 0.75 ? "Loud" : "Medium";
 
   return (
     <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-2xl mx-auto space-y-8">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-3">
-          <Volume2 className="h-7 w-7 text-primary" /> Voice Settings
+          <Volume2 className="h-7 w-7 text-primary" /> Communication & Voice
         </h1>
-        <p className="text-muted-foreground mt-1">Choose how Soul Echoes speaks to you.</p>
+        <p className="text-muted-foreground mt-1">Choose how you communicate and how Soul Echoes speaks to you.</p>
       </motion.div>
 
-      <section className="space-y-3" aria-labelledby="speed-heading">
-        <h2 id="speed-heading" className="font-display text-lg font-semibold text-foreground">
-          Speech Speed — <span className="text-primary">{speedLabel}</span>
+      {/* ── Communication Method Selection ── */}
+      <section className="space-y-3" aria-labelledby="method-heading">
+        <h2 id="method-heading" className="font-display text-lg font-semibold text-foreground">
+          How You Communicate
         </h2>
-        <Slider
-          value={[settings.speed]}
-          onValueChange={([v]) => setSettings((s) => ({ ...s, speed: v }))}
-          min={0.5} max={1.5} step={0.1}
-          aria-label="Speech speed"
-        />
-        <div className="flex justify-between text-xs text-muted-foreground" aria-hidden="true">
-          <span>Slow</span><span>Normal</span><span>Fast</span>
+        <p className="text-sm text-muted-foreground">Select your primary communication method.</p>
+        <div className="grid grid-cols-2 gap-2">
+          {COMMUNICATION_METHODS.map((method) => {
+            const isSelected = preferences.inputMethod === method.id;
+            return (
+              <button
+                key={method.id}
+                onClick={() =>
+                  setPreferences((p) => ({ ...p, inputMethod: method.id }))
+                }
+                className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl border transition-all ${
+                  isSelected ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"
+                }`}
+              >
+                <span className="text-2xl">{method.emoji}</span>
+                <span className="text-xs font-medium text-foreground text-center">{method.label}</span>
+              </button>
+            );
+          })}
         </div>
       </section>
 
-      <section className="space-y-3" aria-labelledby="volume-heading">
-        <h2 id="volume-heading" className="font-display text-lg font-semibold text-foreground">
-          Speech Volume — <span className="text-primary">{volumeLabel}</span>
+      {/* ── Voice Input (Speak/Listen) ── */}
+      <section className="space-y-3" aria-labelledby="input-heading">
+        <h2 id="input-heading" className="font-display text-lg font-semibold text-foreground">
+          Voice Input
         </h2>
-        <Slider
-          value={[settings.volume]}
-          onValueChange={([v]) => setSettings((s) => ({ ...s, volume: v }))}
-          min={0.1} max={1} step={0.05}
-          aria-label="Speech volume"
-        />
-        <div className="flex justify-between text-xs text-muted-foreground" aria-hidden="true">
-          <span>Soft</span><span>Medium</span><span>Loud</span>
+        <p className="text-sm text-muted-foreground">Tap to start speaking. Soul Echoes will listen and respond.</p>
+        <div className="flex flex-col gap-3">
+          {isListening ? (
+            <div className="flex flex-col items-center gap-3 p-6 rounded-2xl border border-primary/30 bg-primary/5">
+              <div className="h-4 w-4 rounded-full bg-primary animate-pulse" />
+              <p className="text-sm font-medium text-foreground">Listening…</p>
+              <p className="text-xs text-muted-foreground text-center">Speak now. I'm here.</p>
+              <Button
+                onClick={stopListening}
+                variant="destructive"
+                size="lg"
+                className="rounded-2xl px-8 gap-2"
+              >
+                <MicOff className="h-5 w-5" /> Stop Listening
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={startListening}
+              size="lg"
+              className="rounded-2xl px-8 gap-2 h-14 text-base"
+            >
+              <Mic className="h-5 w-5" /> Tap to Speak
+            </Button>
+          )}
         </div>
       </section>
 
+      {/* ── Voice Selection ── */}
       <section className="space-y-3" aria-labelledby="voices-heading">
         <h2 id="voices-heading" className="font-display text-lg font-semibold text-foreground">
-          Available Voices
+          Soul Echo's Voice
         </h2>
         <p className="text-sm text-muted-foreground">Tap play to preview, then tap a voice to select it.</p>
 
         <div className="space-y-1 max-h-[400px] overflow-y-auto pr-1" role="listbox" aria-label="Voice options">
           {CURATED_VOICES.map((voice) => {
-            const isSelected = settings.elevenLabsVoiceId === voice.id;
+            const isSelected = voiceSettings.elevenLabsVoiceId === voice.id;
             const isPlaying = playingId === voice.id;
             return (
               <div
@@ -175,7 +222,7 @@ export default function VoiceSettingsPage() {
                   isSelected ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"
                 }`}
                 onClick={() =>
-                  setSettings((s) => ({
+                  setVoiceSettings((s) => ({
                     ...s,
                     elevenLabsVoiceId: voice.id,
                     elevenLabsVoiceName: voice.name,
@@ -203,6 +250,39 @@ export default function VoiceSettingsPage() {
         </div>
       </section>
 
+      {/* ── Speech Speed ── */}
+      <section className="space-y-3" aria-labelledby="speed-heading">
+        <h2 id="speed-heading" className="font-display text-lg font-semibold text-foreground">
+          Speech Speed — <span className="text-primary">{speedLabel}</span>
+        </h2>
+        <Slider
+          value={[voiceSettings.speed]}
+          onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, speed: v }))}
+          min={0.5} max={1.5} step={0.1}
+          aria-label="Speech speed"
+        />
+        <div className="flex justify-between text-xs text-muted-foreground" aria-hidden="true">
+          <span>Slow</span><span>Normal</span><span>Fast</span>
+        </div>
+      </section>
+
+      {/* ── Speech Volume ── */}
+      <section className="space-y-3" aria-labelledby="volume-heading">
+        <h2 id="volume-heading" className="font-display text-lg font-semibold text-foreground">
+          Speech Volume — <span className="text-primary">{volumeLabel}</span>
+        </h2>
+        <Slider
+          value={[voiceSettings.volume]}
+          onValueChange={([v]) => setVoiceSettings((s) => ({ ...s, volume: v }))}
+          min={0.1} max={1} step={0.05}
+          aria-label="Speech volume"
+        />
+        <div className="flex justify-between text-xs text-muted-foreground" aria-hidden="true">
+          <span>Soft</span><span>Medium</span><span>Loud</span>
+        </div>
+      </section>
+
+      {/* ── Save & Test ── */}
       <div className="flex flex-col sm:flex-row gap-3 pb-8">
         <Button
           onClick={testVoice}
