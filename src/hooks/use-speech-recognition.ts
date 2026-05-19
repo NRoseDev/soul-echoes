@@ -56,8 +56,8 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
       };
 
       recognition.onerror = (event: any) => {
-        activeRef.current = false;
         if (event.error === "not-allowed") {
+          activeRef.current = false;
           if (mountedRef.current) setListening(false);
           return;
         }
@@ -67,10 +67,11 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
         if (event.error === "no-speech") {
           optionsRef.current.onNoMatch?.();
         }
-        // Auto-restart on non-fatal errors if continuous
+        // Only auto-restart on non-fatal errors if continuous
         if (isContinuous && mountedRef.current && activeRef.current) {
           setTimeout(() => start(lang), 300);
         } else {
+          activeRef.current = false;
           if (mountedRef.current) setListening(false);
         }
       };
@@ -78,7 +79,7 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
       recognition.onend = () => {
         activeRef.current = false;
         // Auto-restart if continuous mode
-        if (isContinuous && mountedRef.current) {
+        if (isContinuous && mountedRef.current && activeRef.current) {
           setTimeout(() => start(lang), 300);
         } else {
           if (mountedRef.current) setListening(false);
