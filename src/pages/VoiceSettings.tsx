@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Volume2, Play, Save, Check, Loader2, Mic, MicOff } from "lucide-react";
+import { Volume2, Play, Save, Check, Loader2, Mic, MicOff, Skip2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/lib/voiceSettings";
 import { getPreferences, savePreferences, COMMUNICATION_METHODS } from "@/lib/preferences";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+import { useGuidedSetup } from "@/hooks/use-guided-setup";
 import { useToast } from "@/hooks/use-toast";
 
 const PREVIEW_TEXT = "Hello, I am here with you. Let me be your voice on this healing journey.";
@@ -79,7 +80,52 @@ export default function VoiceSettingsPage() {
   const [saved, setSaved] = useState(false);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
+  const [guidedSetupEnabled, setGuidedSetupEnabled] = useState(false);
   const { toast } = useToast();
+
+  // Define setup steps for guided mode
+  const setupSteps = [
+    {
+      id: "communication-method",
+      question: "How would you like to communicate? You can say: Speak, Type, Sign, or Point.",
+      options: [
+        { keyword: "speak", value: "speak", label: "Speak" },
+        { keyword: "type", value: "type", label: "Type" },
+        { keyword: "sign", value: "sign", label: "Sign" },
+        { keyword: "point", value: "point", label: "Point" },
+      ],
+      onAnswer: (value: string) => {
+        setPreferences((p) => ({ ...p, inputMethod: value }));
+      },
+    },
+    {
+      id: "voice-gender",
+      question: "Would you like a feminine or masculine voice?",
+      options: [
+        { keyword: "feminine", value: "feminine", label: "Feminine" },
+        { keyword: "masculine", value: "masculine", label: "Masculine" },
+      ],
+      onAnswer: (value: string) => {
+        const voiceId = value === "feminine" ? CURATED_VOICES[0].id : CURATED_VOICES[1].id;
+        setVoiceSettings((s) => ({
+          ...s,
+          elevenLabsVoiceId: voiceId,
+          elevenLabsVoiceName: CURATED_VOICES.find((v) => v.id === voiceId)?.name || "",
+        }));
+      },
+    },
+  ];
+
+  const setup = useGuidedSetup({
+    steps: setupSteps,
+    enabled: guidedSetupEnabled,
+    onComplete: () => {
+      saveVoiceSettings(voiceSettings);
+      savePreferences(preferences);
+      setGuidedSetupEnabled(false);
+      toast({ title: "Setup complete", description: "Your preferences are saved." });
+    },
+  });
 
   const speech = useSpeechRecognition({
     onResult: (transcript) => {
@@ -92,7 +138,7 @@ export default function VoiceSettingsPage() {
   const startListening = useCallback(() => {
     if (isListening) return;
     setIsListening(true);
-    speech.start(preferences.primaryLanguage);
+    speech.start(preferences.primaryLanguage || "en-US");
   }, [isListening, speech, preferences.primaryLanguage]);
 
   const stopListening = useCallback(() => {
@@ -133,6 +179,49 @@ export default function VoiceSettingsPage() {
   const speedLabel = voiceSettings.speed <= 0.75 ? "Slow" : voiceSettings.speed >= 1.25 ? "Fast" : "Normal";
   const volumeLabel = voiceSettings.volume <= 0.35 ? "Soft" : voiceSettings.volume >= 0.75 ? "Loud" : "Medium";
 
+  // Show guided setup if enabled
+  if (guidedSetupEnabled && setup.currentStep) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 max-w-2xl mx-auto space-y-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center space-y-4"
+        >
+          <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto">
+            <Mic className="h-8 w-8 text-primary animate-pulse" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">{setup.currentStep.question}</h2>
+          <p className="text-sm text-muted-foreground">
+            Step {setup.progress} of {setup.totalSteps}
+          </p>
+        </motion.div>
+
+        {setup.isListeningForAnswer && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center gap-2 text-primary"
+          >
+            <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-sm font-medium">Listening…</span>
+          </motion.div>
+        )}
+
+        <div className="flex flex-col gap-2 w-full">
+          <Button
+            onClick={setup.skipStep}
+            variant="outline"
+            size="lg"
+            className="rounded-2xl gap-2"
+          >
+            <Skip2 className="h-4 w-4" /> Skip This Step
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-2xl mx-auto space-y-8">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
@@ -140,6 +229,14 @@ export default function VoiceSettingsPage() {
           <Volume2 className="h-7 w-7 text-primary" /> Communication & Voice
         </h1>
         <p className="text-muted-foreground mt-1">Choose how you communicate and how Soul Echoes speaks to you.</p>
+        <Button
+          onClick={() => setGuidedSetupEnabled(true)}
+          variant="outline"
+          size="sm"
+          className="mt-3 gap-2"
+        >
+          <Mic className="h-4 w-4" /> Start Guided Setup
+        </Button>
       </motion.div>
 
       {/* ── Communication Method Selection ── */}
@@ -166,39 +263,6 @@ export default function VoiceSettingsPage() {
               </button>
             );
           })}
-        </div>
-      </section>
-
-      {/* ── Voice Input (Speak/Listen) ── */}
-      <section className="space-y-3" aria-labelledby="input-heading">
-        <h2 id="input-heading" className="font-display text-lg font-semibold text-foreground">
-          Voice Input
-        </h2>
-        <p className="text-sm text-muted-foreground">Tap to start speaking. Soul Echoes will listen and respond.</p>
-        <div className="flex flex-col gap-3">
-          {isListening ? (
-            <div className="flex flex-col items-center gap-3 p-6 rounded-2xl border border-primary/30 bg-primary/5">
-              <div className="h-4 w-4 rounded-full bg-primary animate-pulse" />
-              <p className="text-sm font-medium text-foreground">Listening…</p>
-              <p className="text-xs text-muted-foreground text-center">Speak now. I'm here.</p>
-              <Button
-                onClick={stopListening}
-                variant="destructive"
-                size="lg"
-                className="rounded-2xl px-8 gap-2"
-              >
-                <MicOff className="h-5 w-5" /> Stop Listening
-              </Button>
-            </div>
-          ) : (
-            <Button
-              onClick={startListening}
-              size="lg"
-              className="rounded-2xl px-8 gap-2 h-14 text-base"
-            >
-              <Mic className="h-5 w-5" /> Tap to Speak
-            </Button>
-          )}
         </div>
       </section>
 
