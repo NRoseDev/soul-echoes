@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Volume2, Play, Save, Check, Loader2, Mic, MicOff, Skip2 } from "lucide-react";
+import { Volume2, Play, Save, Check, Loader2, Mic, MicOff, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -215,7 +215,7 @@ export default function VoiceSettingsPage() {
             size="lg"
             className="rounded-2xl gap-2"
           >
-            <Skip2 className="h-4 w-4" /> Skip This Step
+            <SkipForward className="h-4 w-4" /> Skip This Step
           </Button>
         </div>
       </div>
