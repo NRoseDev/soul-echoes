@@ -11,7 +11,9 @@ import {
 } from "@/lib/safetySettings";
 import GlitterBurst from "@/components/GlitterBurst";
 import AngelIcon from "@/components/AngelIcon";
-import { encryptSignal } from "@/lib/encryption";
+// Note: distress signal labels are stored as plaintext in the database.
+// Client-side encryption was removed because hardcoded keys in a public
+// bundle provided no real confidentiality.
 
 // Safe asset string pointing straight to your premium golden wings image
 const sosWingsAsset = "/src/assets/icons/Icon-sos.png";
@@ -240,20 +242,7 @@ export default function DistressSignal() {
       gpsLng,
       offlineFlag: !navigator.onLine,
     };
-    const payload = JSON.stringify({
-      angel: signal.angel,
-      situationCode: signal.situationCode,
-      situationLabel: signal.situationLabel,
-      gpsLat: signal.gpsLat,
-      gpsLng: signal.gpsLng,
-    });
-    let encryptedPayload: string;
-    try {
-      encryptedPayload = await encryptSignal(payload);
-    } catch {
-      encryptedPayload = payload;
-    }
-    queueSignal({ ...signal, situationLabel: encryptedPayload });
+    queueSignal(signal);
     try {
       if (navigator.onLine) {
         const { supabase } = await import("@/integrations/supabase/client");
@@ -265,7 +254,7 @@ export default function DistressSignal() {
             user_id: user.id,
             angel: signal.angel,
             situation_code: signal.situationCode,
-            situation_label: encryptedPayload,
+            situation_label: signal.situationLabel,
             gps_lat: signal.gpsLat,
             gps_lng: signal.gpsLng,
             offline_flag: signal.offlineFlag,
