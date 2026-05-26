@@ -10,7 +10,7 @@ import {
   type VoiceSettings,
   type CuratedVoice,
 } from "@/lib/voiceSettings";
-import { getPreferences, savePreferences, COMMUNICATION_METHODS } from "@/lib/preferences";
+import { getPreferences, savePreferences, COMMUNICATION_METHODS, type InputMethod } from "@/lib/preferences";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useGuidedSetup } from "@/hooks/use-guided-setup";
 import { useToast } from "@/hooks/use-toast";

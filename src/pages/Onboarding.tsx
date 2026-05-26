@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Heart, Users, TrendingUp, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getPreferences, savePreferences, COMMUNICATION_METHODS } from "@/lib/preferences";
+import { getPreferences, savePreferences, COMMUNICATION_METHODS, type InputMethod } from "@/lib/preferences";
 import { getVoiceSettings, saveVoiceSettings, CURATED_VOICES } from "@/lib/voiceSettings";
 import { useMultiModalInput } from "@/hooks/use-multi-modal-input";
 import { announceGuide } from "@/components/AIGuideAnnouncer";
