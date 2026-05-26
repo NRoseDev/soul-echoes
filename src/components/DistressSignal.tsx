@@ -242,14 +242,7 @@ export default function DistressSignal() {
       gpsLng,
       offlineFlag: !navigator.onLine,
     };
-    const payload = JSON.stringify({
-      angel: signal.angel,
-      situationCode: signal.situationCode,
-      situationLabel: signal.situationLabel,
-      gpsLat: signal.gpsLat,
-      gpsLng: signal.gpsLng,
-    });
-    queueSignal({ ...signal, situationLabel: signal.situationLabel });
+    queueSignal(signal);
     try {
       if (navigator.onLine) {
         const { supabase } = await import("@/integrations/supabase/client");
