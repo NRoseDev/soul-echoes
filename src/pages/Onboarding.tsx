@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Heart, Users, TrendingUp, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getPreferences, savePreferences, COMMUNICATION_METHODS } from "@/lib/preferences";
+import { getPreferences, savePreferences, COMMUNICATION_METHODS, type InputMethod } from "@/lib/preferences";
 import { getVoiceSettings, saveVoiceSettings, CURATED_VOICES } from "@/lib/voiceSettings";
 import { useMultiModalInput } from "@/hooks/use-multi-modal-input";
 import { announceGuide } from "@/components/AIGuideAnnouncer";
@@ -13,7 +13,7 @@ import { MultiModalInput } from "@/lib/multiModalInput";
 
 type OnboardingStep = "welcome" | "input-method" | "voice-selection" | "mission" | "impact" | "pricing" | "healers" | "ready";
 
-export default function OnboardingPage() {
+export default function OnboardingPage({ onComplete }: { onComplete?: () => void } = {}) {
   const navigate = useNavigate();
   const [step, setStep] = useState<OnboardingStep>("welcome");
   const [selectedInput, setSelectedInput] = useState<string | null>(null);
@@ -121,7 +121,8 @@ export default function OnboardingPage() {
     if (!selectedInput || !selectedVoice) return;
 
     const prefs = getPreferences();
-    savePreferences({ ...prefs, inputMethod: selectedInput });
+    savePreferences({ ...prefs, inputMethod: selectedInput as InputMethod, onboardingComplete: true });
+    onComplete?.();
 
     const voiceSettings = getVoiceSettings();
     saveVoiceSettings({ ...voiceSettings, elevenLabsVoiceId: selectedVoice });
@@ -212,7 +213,7 @@ export default function OnboardingPage() {
                   : "border-border bg-card hover:border-primary/40"
               }`}
             >
-              <span className="text-3xl">{method.emoji}</span>
+              <span className="text-3xl">{method.icon}</span>
               <span className="text-xs font-medium text-foreground text-center">{method.label}</span>
             </button>
           ))}

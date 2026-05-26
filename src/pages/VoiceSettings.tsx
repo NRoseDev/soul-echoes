@@ -10,7 +10,7 @@ import {
   type VoiceSettings,
   type CuratedVoice,
 } from "@/lib/voiceSettings";
-import { getPreferences, savePreferences, COMMUNICATION_METHODS } from "@/lib/preferences";
+import { getPreferences, savePreferences, COMMUNICATION_METHODS, type InputMethod } from "@/lib/preferences";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useGuidedSetup } from "@/hooks/use-guided-setup";
 import { useToast } from "@/hooks/use-toast";
@@ -95,7 +95,7 @@ export default function VoiceSettingsPage() {
         { keyword: "point", value: "point", label: "Point" },
       ],
       onAnswer: (value: string) => {
-        setPreferences((p) => ({ ...p, inputMethod: value }));
+        setPreferences((p) => ({ ...p, inputMethod: value as InputMethod }));
       },
     },
     {
@@ -252,13 +252,13 @@ export default function VoiceSettingsPage() {
               <button
                 key={method.id}
                 onClick={() =>
-                  setPreferences((p) => ({ ...p, inputMethod: method.id }))
+                  setPreferences((p) => ({ ...p, inputMethod: method.id as InputMethod }))
                 }
                 className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl border transition-all ${
                   isSelected ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"
                 }`}
               >
-                <span className="text-2xl">{method.emoji}</span>
+                <span className="text-2xl">{method.icon}</span>
                 <span className="text-xs font-medium text-foreground text-center">{method.label}</span>
               </button>
             );
