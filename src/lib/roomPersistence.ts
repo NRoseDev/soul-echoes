@@ -1,4 +1,6 @@
-import { supabase } from "@/lib/supabase";
+import { supabase as supabaseClient } from "@/integrations/supabase/client";
+// Tables room_sessions and progress_logs are not in the generated types yet.
+const supabase = supabaseClient as any;
 
 export interface RoomSession {
   id: string;
