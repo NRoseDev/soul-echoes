@@ -1,4 +1,4 @@
-import { Volume2, Settings, Lock, CreditCard } from "lucide-react";
+import { Volume2, Settings, Lock, CreditCard, Sparkles } from "lucide-react";
 import {
   BrainDumpIcon, JournalIcon, FlowIcon, UnspokenIcon,
   ShadowIcon, WisdomIcon, ToolsIcon, PortalIcon,
