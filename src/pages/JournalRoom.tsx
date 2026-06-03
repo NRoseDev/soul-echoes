@@ -23,7 +23,10 @@ export default function JournalRoom() {
           </div>
         </div>
 
+        <LevelPath roomId="journal" className="mb-8 bg-white/5 border-white/10" />
+
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+
           {JOURNAL_SECTIONS.map((section) => (
             <Card
               key={section.id}
