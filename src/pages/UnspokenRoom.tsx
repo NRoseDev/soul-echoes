@@ -11,6 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { LevelPath } from "@/components/levels/LevelPath";
 
 const sections = [
   {
