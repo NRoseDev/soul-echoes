@@ -4,6 +4,7 @@ import {
   Diamond, Droplet, Hash, Leaf, Zap, Heart, Volume2, CheckSquare, Smile, Wind, Brain, Sparkles
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { LevelPath } from "@/components/levels/LevelPath";
 
 const sections = [
   // Practical Tools (5)
