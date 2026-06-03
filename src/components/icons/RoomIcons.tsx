@@ -2,25 +2,37 @@
  * Custom spiritual / sacred-geometry style icons for the healing rooms.
  * All icons use currentColor so existing text-color tokens still apply.
  */
-import brainDumpAsset from "@/assets/braindump-icon.png.asset.json";
-
 type Props = { className?: string };
 
 const base = "w-full h-full";
 
-
 export function BrainDumpIcon({ className }: Props) {
-  // Brain with chakra-colored tangled threads — uses the uploaded artwork
+  // Brain (left) with 7 chakra-colored threads flowing OUT to the right
   return (
-    <img
-      src={brainDumpAsset.url}
-      alt=""
-      aria-hidden="true"
-      className={(className ?? base) + " object-contain"}
-      draggable={false}
-    />
+    <svg viewBox="0 0 24 24" fill="none" className={className ?? base} aria-hidden="true">
+      {/* brain — twin hemispheres, left side */}
+      <g stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none">
+        <path d="M5.2 7.5c-1-.6-1.2-2 .2-2.7.1-1.3 1.4-2 2.6-1.4.6-1 2-1 2.6 0v12.2c-.6 1-2 1-2.6 0-1.2.6-2.5-.1-2.6-1.4-1.4-.7-1.2-2.1-.2-2.7-.9-.6-.9-2 0-2.7-.9-.6-.9-2 0-2.7z" />
+        <path d="M10.6 3.4c.6-1 2-1 2.6 0 1.2-.6 2.5.1 2.6 1.4 1.4.7 1.2 2.1.2 2.7.9.7.9 2 0 2.7.9.7.9 2 0 2.7 1 .6 1.2 2-.2 2.7-.1 1.3-1.4 2-2.6 1.4-.6 1-2 1-2.6 0" />
+        {/* central fissure */}
+        <path d="M10.6 3.4v12.2" opacity=".6" />
+        {/* gyri */}
+        <path d="M7 7.5h2M7 10.2h2M7 12.8h2M12 7.5h2M12 10.2h2M12 12.8h2" opacity=".5" />
+      </g>
+      {/* 7 chakra threads — emerge from right of brain, flow & tangle rightward */}
+      <g fill="none" strokeWidth="1.2" strokeLinecap="round">
+        <path d="M16 6c1.4.3 2 1.3 3.4 1 1-.2 1.8.5 2.6.2" stroke="#e11d48" />
+        <path d="M16 7.4c1.4.5 2-.6 3.4-.2 1 .3 1.8-.4 2.6 0" stroke="#f97316" />
+        <path d="M16 8.8c1.4.2 2 1.2 3.4.8 1-.3 1.8.5 2.6.1" stroke="#facc15" />
+        <path d="M16 10.2c1.4.5 2-.4 3.4.1 1 .4 1.8-.3 2.6.1" stroke="#22c55e" />
+        <path d="M16 11.6c1.4.3 2 1.2 3.4.8 1-.2 1.8.5 2.6.2" stroke="#0ea5e9" />
+        <path d="M16 13c1.4.5 2-.5 3.4 0 1 .4 1.8-.3 2.6.1" stroke="#6366f1" />
+        <path d="M16 14.4c1.4.3 2 1.2 3.4.9 1-.2 1.8.5 2.6.2" stroke="#a855f7" />
+      </g>
+    </svg>
   );
 }
+
 
 
 export function JournalIcon({ className }: Props) {
