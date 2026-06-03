@@ -39,11 +39,11 @@ import {
 const healingRooms = [
   { title: "Brain Dump", url: "/", icon: Brain, color: "text-primary", free: true },
   { title: "Journal", url: "/journal", icon: BookOpen, color: "text-healing-journal", free: false },
-  { title: "Breathe", url: "/breathe", icon: Wind, color: "text-healing-breathe", free: false },
+  { title: "Flow", url: "/flow", icon: Wind, color: "text-healing-breathe", free: false },
   { title: "Unspoken Chamber", url: "/unspoken", icon: VolumeX, color: "text-healing-unspoken", free: false },
   { title: "Shadow Work", url: "/shadow-work", icon: Eclipse, color: "text-healing-shadow", free: false },
   { title: "Wisdom", url: "/wisdom", icon: Sparkles, color: "text-healing-wisdom", free: false },
-  { title: "Spiritual Tools", url: "/spiritual-tools", icon: Compass, color: "text-healing-tools", free: false },
+  { title: "Tools", url: "/tools", icon: Compass, color: "text-healing-tools", free: false },
   { title: "Portal", url: "/shop", icon: PortalIcon, color: "text-teal-400", free: true },
 ];
 
