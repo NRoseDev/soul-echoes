@@ -56,48 +56,37 @@ export function FlowIcon({ className }: Props) {
 }
 
 export function UnspokenIcon({ className }: Props) {
-  // Open hand cradling a heart — "the unspoken held with care"
+  // Microphone framed by neon brackets — "the unspoken truth, spoken aloud"
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className ?? base} aria-hidden="true">
-      <path d="M12 8c-.9-1.4-3.2-1.4-4.1 0-.8 1.2-.3 2.7.9 3.8L12 15l3.2-3.2c1.2-1.1 1.7-2.6.9-3.8-.9-1.4-3.2-1.4-4.1 0z" />
-      <path d="M4.5 13c-.8 0-1.5.7-1.5 1.5v3C3 19.4 4.6 21 6.5 21h11c1.9 0 3.5-1.6 3.5-3.5v-3c0-.8-.7-1.5-1.5-1.5s-1.5.7-1.5 1.5V17H6v-2.5C6 13.7 5.3 13 4.5 13z" opacity=".85" />
-    </svg>
-  );
-}
-
-export function ShadowIcon({ className }: Props) {
-  // Crescent moon embracing a small star — shadow + light
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className ?? base} aria-hidden="true">
-      <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />
-      <path d="M15 6l.7 1.7L17.5 8l-1.8.6L15 10.5l-.7-1.9L12.5 8l1.8-.3z" opacity=".9" />
-    </svg>
-  );
-}
-
-export function WisdomIcon({ className }: Props) {
-  // Third eye inside a radiant burst
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className={className ?? base} aria-hidden="true">
-      <path d="M3 12c2.5-3.5 6-5 9-5s6.5 1.5 9 5c-2.5 3.5-6 5-9 5s-6.5-1.5-9-5z" fill="currentColor" fillOpacity=".15" />
-      <circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none" />
-      <path d="M12 3v2M12 19v2M4.5 4.5l1.4 1.4M18.1 18.1l1.4 1.4M3 12h2M19 12h2M4.5 19.5l1.4-1.4M18.1 5.9l1.4-1.4" opacity=".7" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className ?? base} aria-hidden="true">
+      {/* left bracket < */}
+      <path d="M5 8l-2.2 4L5 16" />
+      {/* right bracket > */}
+      <path d="M19 8l2.2 4L19 16" />
+      {/* mic capsule */}
+      <rect x="9.5" y="4.5" width="5" height="10" rx="2.5" fill="currentColor" stroke="none" />
+      {/* mic grille lines */}
+      <path d="M10.5 7.5h3M10.5 9.5h3M10.5 11.5h3" stroke="hsl(var(--background))" strokeWidth="0.6" opacity=".8" />
+      {/* mic stand arc */}
+      <path d="M7.5 13a4.5 4.5 0 0 0 9 0" />
+      {/* stand pole + base */}
+      <path d="M12 17.5v2.5M9.5 20h5" />
     </svg>
   );
 }
 
 export function ToolsIcon({ className }: Props) {
-  // Flower of life / seed-of-life sacred geometry
+  // Toolbox with a heart floating above — care + craft
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" className={className ?? base} aria-hidden="true">
-      <circle cx="12" cy="12" r="3.2" />
-      <circle cx="12" cy="8.2" r="3.2" />
-      <circle cx="12" cy="15.8" r="3.2" />
-      <circle cx="8.7" cy="10.1" r="3.2" />
-      <circle cx="15.3" cy="10.1" r="3.2" />
-      <circle cx="8.7" cy="13.9" r="3.2" />
-      <circle cx="15.3" cy="13.9" r="3.2" />
-      <circle cx="12" cy="12" r="9" opacity=".5" />
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className ?? base} aria-hidden="true">
+      {/* floating heart above */}
+      <path d="M12 2.8c-.9-1.1-2.7-1.1-3.6 0-.8 1-.5 2.3.4 3.2L12 9.4l3.2-3.4c.9-.9 1.2-2.2.4-3.2-.9-1.1-2.7-1.1-3.6 0z" />
+      {/* toolbox handle */}
+      <path d="M9 11.5v-.5a3 3 0 0 1 6 0v.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      {/* toolbox body */}
+      <rect x="3.5" y="11.5" width="17" height="9" rx="1.5" />
+      {/* latch */}
+      <rect x="10.5" y="14" width="3" height="2" rx="0.4" fill="hsl(var(--background))" />
     </svg>
   );
 }
