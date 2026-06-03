@@ -87,7 +87,7 @@ const CATEGORIES: { title: string; cards: Card[] }[] = [
       { emoji: "🤗", label: "A Hug",          asl: `${S}/love.gif` },
       { emoji: "🙏", label: "Help",           asl: `${S}/help.gif` },
       { emoji: "❗", label: "Need",           asl: `${S}/need.jpg` },
-      { emoji: "🙋", label: "Want",           asl: `${S}/want.jpg` },
+      { emoji: "🙋", label: "Want" },
       { emoji: "💊", label: "Resources" },
       { emoji: "🗣️", label: "To Talk" },
       { emoji: "🤫", label: "Quiet" },
