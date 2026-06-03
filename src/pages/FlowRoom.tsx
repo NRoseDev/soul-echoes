@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Brain, Wind, Zap, Music, Sparkles, Scissors, Activity, Users, Circle } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { LevelPath } from "@/components/levels/LevelPath";
 
 const sections = [
   { id: "meditation", title: "Meditation", description: "Discover the art of stillness and inner peace through 5 powerful meditation techniques.", icon: Brain, colorClass: "text-blue-400" },
