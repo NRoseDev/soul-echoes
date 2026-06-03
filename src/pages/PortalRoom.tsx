@@ -4,7 +4,7 @@ import {
   BookOpen, Gem, Droplet, Volume2, Headphones, Users, Star, Bookmark,
   BookmarkCheck, Bell, BellOff, ChevronDown, ChevronUp, Heart, Check,
   CreditCard, Sliders, Gift, Globe2, ArrowRight, ShieldCheck, Zap,
-  Wind, Sun, Flame, Music2, Sparkles,
+  Wind, Sun, Flame, Music2, Sparkles, ShieldAlert, Phone, MessageSquare, ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
