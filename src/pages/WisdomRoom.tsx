@@ -6,6 +6,7 @@ import {
   Diamond, Flower2, Moon, Star, Hexagon, Sparkles, Hash, BookOpen,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { LevelPath } from "@/components/levels/LevelPath";
 
 const sections = [
   { id: "what-is-source", title: "What is Source", description: "The divine intelligence behind all creation — God, Universe, the All. Understanding your origin changes everything.", icon: Sun, colorClass: "text-amber-400" },
