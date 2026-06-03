@@ -12,13 +12,13 @@ import {
 } from "@/components/ui/sidebar";
 
 const healingRooms = [
-  { title: "Brain Dump", url: "/", icon: BrainDumpIcon, color: "text-primary", free: true },
-  { title: "Journal", url: "/journal", icon: JournalIcon, color: "text-healing-journal", free: false },
-  { title: "Flow", url: "/flow", icon: FlowIcon, color: "text-healing-breathe", free: false },
-  { title: "Unspoken Chamber", url: "/unspoken", icon: UnspokenIcon, color: "text-healing-unspoken", free: false },
-  { title: "Shadow Work", url: "/shadow-work", icon: ShadowIcon, color: "text-healing-shadow", free: false },
-  { title: "Wisdom", url: "/wisdom", icon: WisdomIcon, color: "text-healing-wisdom", free: false },
-  { title: "Tools", url: "/tools", icon: ToolsIcon, color: "text-healing-tools", free: false },
+  { title: "Brain Dump", url: "/", icon: BrainDumpIcon, color: "text-violet-500", free: true },
+  { title: "Journal", url: "/journal", icon: JournalIcon, color: "text-orange-500", free: false },
+  { title: "Flow", url: "/flow", icon: FlowIcon, color: "text-emerald-500", free: false },
+  { title: "Unspoken Chamber", url: "/unspoken", icon: UnspokenIcon, color: "text-sky-500", free: false },
+  { title: "Shadow Work", url: "/shadow-work", icon: ShadowIcon, color: "text-red-600", free: false },
+  { title: "Wisdom", url: "/wisdom", icon: WisdomIcon, color: "text-indigo-500", free: false },
+  { title: "Tools", url: "/tools", icon: ToolsIcon, color: "text-yellow-400", free: false },
   { title: "Portal", url: "/shop", icon: PortalIcon, color: "text-teal-400", free: true },
 ];
 
