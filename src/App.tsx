@@ -14,6 +14,8 @@ import WisdomRoom from "./pages/WisdomRoom";
 import ToolsRoom from "./pages/ToolsRoom";
 import FlowRoom from "./pages/FlowRoom";
 import LevelPage from "./pages/LevelPage";
+import PortalRoom from "./pages/PortalRoom";
+import { AppLayout } from "@/components/AppLayout";
 
 const queryClient = new QueryClient();
 
