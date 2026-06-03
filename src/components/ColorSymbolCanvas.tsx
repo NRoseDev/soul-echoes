@@ -1,6 +1,18 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, X } from "lucide-react";
+import {
+  Accessibility, AlertTriangle, Apple, Bandage, Bath, BatteryLow, Bed, Bell, Brain,
+  BrickWall, Bus, Car, Circle, CircleOff, ClipboardList, Clock, CloudFog, CloudLightning,
+  Coffee, Compass, CupSoda, DollarSign, DoorClosed, DoorOpen, Droplets, Ear, Eye,
+  Flame, Flower, Flower2, Footprints, Gem, GitBranch, Globe2, Hand, HandCoins,
+  HandHeart, HandHelping, Handshake, Headphones, Heart, HeartCrack, HeartHandshake,
+  HeartPulse, Home, KeyRound, Lamp, Leaf, Lightbulb, Link, Lock, MapPin, MessageCircle,
+  Milk, Moon, Mountain, Pill, Rainbow, RefreshCcw, Route, Salad, Scissors, Send,
+  Shield, ShieldAlert, ShieldCheck, Shirt, ShowerHead, Siren, Snowflake, Soup, Sparkles,
+  Sprout, Star, Stethoscope, Sun, Sunrise, Sword, Theater, Thermometer, Toilet,
+  TreePine, UserRound, Users, Utensils, VolumeX, Waves, Weight, Wind, X, Zap,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // 33 feelings — color is meaningful, not decorative
@@ -223,7 +235,7 @@ interface Props {
 }
 
 type SelectedColor = typeof COLOR_MEANINGS[number];
-type SelectedSymbol = { emoji: string; name: string; meaning: string };
+type SelectedSymbol = { icon: LucideIcon; name: string; meaning: string };
 
 export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
   const [selectedFeelings, setSelectedFeelings] = useState<typeof FEELINGS[number][]>([]);
