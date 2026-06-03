@@ -2,9 +2,12 @@
  * Custom spiritual / sacred-geometry style icons for the healing rooms.
  * All icons use currentColor so existing text-color tokens still apply.
  */
+import brainDumpAsset from "@/assets/braindump-icon.png.asset.json";
+
 type Props = { className?: string };
 
 const base = "w-full h-full";
+
 
 export function BrainDumpIcon({ className }: Props) {
   // Brain outline with 7 chakra-colored threads flowing & tangling out the bottom
