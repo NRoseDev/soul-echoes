@@ -91,6 +91,27 @@ export function ToolsIcon({ className }: Props) {
   );
 }
 
+export function ShadowIcon({ className }: Props) {
+  // Crescent moon embracing a small star — shadow + light
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className ?? base} aria-hidden="true">
+      <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />
+      <path d="M15 6l.7 1.7L17.5 8l-1.8.6L15 10.5l-.7-1.9L12.5 8l1.8-.3z" opacity=".9" />
+    </svg>
+  );
+}
+
+export function WisdomIcon({ className }: Props) {
+  // Third eye inside a radiant burst
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className={className ?? base} aria-hidden="true">
+      <path d="M3 12c2.5-3.5 6-5 9-5s6.5 1.5 9 5c-2.5 3.5-6 5-9 5s-6.5-1.5-9-5z" fill="currentColor" fillOpacity=".15" />
+      <circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none" />
+      <path d="M12 3v2M12 19v2M4.5 4.5l1.4 1.4M18.1 18.1l1.4 1.4M3 12h2M19 12h2M4.5 19.5l1.4-1.4M18.1 5.9l1.4-1.4" opacity=".7" />
+    </svg>
+  );
+}
+
 export function PortalIcon({ className }: Props) {
   // Spiraling vortex gateway — silver arms fading to gold tips, dark event horizon at center
   return (
