@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Brain, Wind, Zap, Music, Sparkles, Scissors, Activity, Users, Circle } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { LevelPath } from "@/components/levels/LevelPath";
 
 const sections = [
   { id: "meditation", title: "Meditation", description: "Discover the art of stillness and inner peace through 5 powerful meditation techniques.", icon: Brain, colorClass: "text-blue-400" },
@@ -25,7 +26,12 @@ export default function FlowRoom() {
         <p className="text-muted-foreground text-center mb-6">Body, energy, and movement practices. Learn how to activate, move, and embody your healing through breathwork, meditation, sound, and somatic practices.</p>
       </motion.div>
 
+      <div className="max-w-2xl mx-auto mb-6">
+        <LevelPath roomId="flow" />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+
         {sections.map((s, i) => {
           const Icon = s.icon;
           return (

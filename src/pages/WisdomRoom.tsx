@@ -6,6 +6,7 @@ import {
   Diamond, Flower2, Moon, Star, Hexagon, Sparkles, Hash, BookOpen,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { LevelPath } from "@/components/levels/LevelPath";
 
 const sections = [
   { id: "what-is-source", title: "What is Source", description: "The divine intelligence behind all creation — God, Universe, the All. Understanding your origin changes everything.", icon: Sun, colorClass: "text-amber-400" },
@@ -57,8 +58,13 @@ export default function WisdomRoom() {
         </p>
       </motion.div>
 
+      <div className="max-w-6xl mx-auto mb-6">
+        <LevelPath roomId="wisdom" />
+      </div>
+
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {sections.map((section, index) => {
+
           const Icon = section.icon;
           const isPlaceholder = section.id.startsWith("placeholder");
           

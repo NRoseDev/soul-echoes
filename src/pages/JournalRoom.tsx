@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { JOURNAL_SECTIONS } from "@/lib/journal";
+import { LevelPath } from "@/components/levels/LevelPath";
 
 export default function JournalRoom() {
   const navigate = useNavigate();
@@ -22,7 +23,10 @@ export default function JournalRoom() {
           </div>
         </div>
 
+        <LevelPath roomId="journal" className="mb-8 bg-white/5 border-white/10" />
+
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+
           {JOURNAL_SECTIONS.map((section) => (
             <Card
               key={section.id}
