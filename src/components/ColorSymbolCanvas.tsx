@@ -98,6 +98,7 @@ const SYMBOL_GROUPS = [
       { emoji: "🌵", name: "Thorns",         meaning: "guarded, can't be touched" },
       { emoji: "🎢", name: "Roller Coaster", meaning: "emotions out of control" },
       { emoji: "🫥", name: "Disappearing",   meaning: "fading, going invisible" },
+      { emoji: "⚓", name: "Sinking",        meaning: "being pulled under" },
     ],
   },
   {
