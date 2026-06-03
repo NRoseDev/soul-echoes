@@ -149,6 +149,42 @@ export type Database = {
         }
         Relationships: []
       }
+      room_level_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          level: number
+          room_id: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          level: number
+          room_id: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          level?: number
+          room_id?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
