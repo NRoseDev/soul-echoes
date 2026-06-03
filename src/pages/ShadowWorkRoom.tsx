@@ -87,7 +87,12 @@ export default function ShadowWorkRoom() {
         </p>
       </motion.div>
 
+      <div className="max-w-6xl mx-auto mb-6">
+        <LevelPath roomId="shadow-work" />
+      </div>
+
       {/* What is Shadow Work */}
+
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
