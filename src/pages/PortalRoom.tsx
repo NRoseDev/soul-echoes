@@ -785,11 +785,6 @@ export default function PortalRoom() {
               </p>
             </motion.div>
           )}
-          {activeSection === "journeys" && (
-            <motion.div key="journeys" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-              <HealingJourneys onBack={() => setActiveSection("practitioners")} />
-            </motion.div>
-          )}
 
           {/* ════ BOOK A SESSION ════ */}
           {activeSection === "book" && (
