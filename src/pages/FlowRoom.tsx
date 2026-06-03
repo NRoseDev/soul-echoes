@@ -26,7 +26,12 @@ export default function FlowRoom() {
         <p className="text-muted-foreground text-center mb-6">Body, energy, and movement practices. Learn how to activate, move, and embody your healing through breathwork, meditation, sound, and somatic practices.</p>
       </motion.div>
 
+      <div className="max-w-2xl mx-auto mb-6">
+        <LevelPath roomId="flow" />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+
         {sections.map((s, i) => {
           const Icon = s.icon;
           return (
