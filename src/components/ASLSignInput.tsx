@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const LOCAL = "/asl/signs";
 const ALPHA = "/asl/alpha";
+const FINGER = "/asl/fingerspell";
 
 // Try .gif first, then .jpg, then emoji fallback
 const sign = (slug: string, emoji: string, label: string, exts: string[] = ["gif", "jpg"]) => ({
@@ -10,6 +11,20 @@ const sign = (slug: string, emoji: string, label: string, exts: string[] = ["gif
   label,
   emoji,
   sources: exts.map((e) => `${LOCAL}/${slug}.${e}`),
+});
+
+const fingerspell = (slug: string, emoji: string, label: string) => ({
+  id: slug,
+  label,
+  emoji,
+  sources: [`${FINGER}/${slug}.jpg`],
+});
+
+const createdSign = (slug: string, emoji: string, label: string) => ({
+  id: slug,
+  label,
+  emoji,
+  sources: [`${LOCAL}/${slug}-created.jpg`],
 });
 
 const ASL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((l) => ({
@@ -23,7 +38,7 @@ const ASL_COMMON_WORDS = [
   sign("hello", "👋", "Hello", ["jpg", "gif"]),
   sign("thank-you", "🙏", "Thank You"),
   sign("please", "🤲", "Please", ["jpg", "gif"]),
-  { id: "sorry", label: "Sorry", emoji: "😔", sources: [] as string[] },
+  { ...createdSign("sorry", "😔", "Sorry"), sources: [`${LOCAL}/sorry-created-2.jpg`] },
   sign("yes", "👍", "Yes"),
   sign("no", "👎", "No"),
   sign("help", "🆘", "Help"),
@@ -31,7 +46,7 @@ const ASL_COMMON_WORDS = [
   sign("wait", "⏳", "Wait"),
   sign("more", "➕", "More"),
   sign("again", "🔁", "Again", ["jpg", "gif"]),
-  { id: "want", label: "Want", emoji: "🙋", sources: [] as string[] },
+  createdSign("want", "🙋", "Want"),
   sign("need", "❗", "Need", ["jpg", "gif"]),
   sign("like", "💗", "Like", ["jpg", "gif"]),
   sign("love", "❤️", "Love"),
@@ -53,7 +68,7 @@ const ASL_COMMON_WORDS = [
   sign("pain", "😣", "Pain"),
   sign("breathe", "🌬️", "Flow", ["jpg", "gif"]),
   sign("good", "👌", "Good", ["jpg", "gif"]),
-  { id: "how", label: "How", emoji: "❓", sources: [] as string[] },
+  createdSign("how", "❓", "How"),
   sign("what", "❔", "What", ["jpg", "gif"]),
   sign("when", "🕐", "When", ["jpg", "gif"]),
   sign("where", "📍", "Where", ["jpg", "gif"]),
@@ -63,7 +78,7 @@ const ASL_COMMON_WORDS = [
   sign("trust", "🤲", "Trust", ["jpg", "gif"]),
   sign("peace", "🕊️", "Peace", ["jpg", "gif"]),
   sign("accept", "🙆", "Accept", ["jpg", "gif"]),
-  { id: "i-dont-know", label: "I Don't Know", emoji: "🤷", sources: [] as string[] },
+  fingerspell("i-dont-know", "🤷", "I Don't Know"),
 ];
 
 const ASL_FEELINGS = [
@@ -77,7 +92,7 @@ const ASL_FEELINGS = [
   sign("lonely", "🥀", "Lonely"),
   sign("jealous", "😒", "Jealous"),
   sign("embarrassed", "😳", "Embarrassed", ["jpg", "gif"]),
-  { id: "depressed", label: "Depressed", emoji: "😔", sources: [] as string[] },
+  createdSign("depressed", "😔", "Depressed"),
   sign("calm", "😌", "Calm", ["jpg", "gif"]),
   sign("hope", "🌅", "Hopeful", ["jpg", "gif"]),
   sign("grateful", "🙏", "Grateful", ["jpg", "gif"]),
@@ -100,17 +115,17 @@ const ASL_FEELINGS = [
   sign("breathe", "🌬️", "Flowing", ["jpg", "gif"]),
   sign("good", "👌", "Good", ["jpg", "gif"]),
   sign("like", "💗", "Like", ["jpg", "gif"]),
-  { id: "numb", label: "Numb", emoji: "🧊", sources: [] as string[] },
-  { id: "grief", label: "Grief", emoji: "🖤", sources: [] as string[] },
-  { id: "healing", label: "Healing", emoji: "🌱", sources: [] as string[] },
-  { id: "confused", label: "Confused", emoji: "🌀", sources: [] as string[] },
-  { id: "overwhelmed", label: "Overwhelmed", emoji: "🌊", sources: [] as string[] },
-  { id: "hopeless", label: "Hopeless", emoji: "😞", sources: [] as string[] },
-  { id: "betrayed", label: "Betrayed", emoji: "💢", sources: [] as string[] },
-  { id: "ashamed", label: "Ashamed", emoji: "🫣", sources: [] as string[] },
-  { id: "restless", label: "Restless", emoji: "😬", sources: [] as string[] },
-  { id: "disconnected", label: "Disconnected", emoji: "🌫️", sources: [] as string[] },
-  { id: "i-dont-know", label: "I Don't Know", emoji: "🤷", sources: [] as string[] },
+  createdSign("numb", "🧊", "Numb"),
+  fingerspell("grief", "🖤", "Grief"),
+  fingerspell("healing", "🌱", "Healing"),
+  fingerspell("confused", "🌀", "Confused"),
+  fingerspell("overwhelmed", "🌊", "Overwhelmed"),
+  fingerspell("hopeless", "😞", "Hopeless"),
+  fingerspell("betrayed", "💢", "Betrayed"),
+  fingerspell("ashamed", "🫣", "Ashamed"),
+  fingerspell("restless", "😬", "Restless"),
+  fingerspell("disconnected", "🌫️", "Disconnected"),
+  fingerspell("i-dont-know", "🤷", "I Don't Know"),
 ];
 
 function SignImg({ sources, emoji, label }: { sources: string[]; emoji: string; label: string }) {
