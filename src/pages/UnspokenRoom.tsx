@@ -82,7 +82,12 @@ export default function UnspokenRoom() {
         <p className="text-muted-foreground text-center mb-6">A safe, accessible place for expression beyond words. Use voice, sign, images, or quiet presence.</p>
       </motion.div>
 
+      <div className="max-w-6xl mx-auto mb-6">
+        <LevelPath roomId="unspoken" />
+      </div>
+
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
         {sections.map((section, index) => {
           const Icon = section.icon;
           return (
