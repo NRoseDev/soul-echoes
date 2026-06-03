@@ -34,8 +34,10 @@ const App = () => (
               <Route path="/wisdom" element={<WisdomRoom />} />
               <Route path="/tools" element={<ToolsRoom />} />
               <Route path="/flow" element={<FlowRoom />} />
+              <Route path="/:roomId/level/:levelNum" element={<LevelPage />} />
               {/* Fallback to Index for unknown routes */}
               <Route path="*" element={<Navigate to="/" replace />} />
+
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
