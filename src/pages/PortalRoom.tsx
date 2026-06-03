@@ -4,7 +4,7 @@ import {
   BookOpen, Gem, Droplet, Volume2, Headphones, Users, Star, Bookmark,
   BookmarkCheck, Bell, BellOff, ChevronDown, ChevronUp, Heart, Check,
   CreditCard, Sliders, Gift, Globe2, ArrowRight, ShieldCheck, Zap,
-  Wind, Sun, Flame, Music2, Sparkles,
+  Wind, Sun, Flame, Music2, Sparkles, ShieldAlert, Phone, MessageSquare, ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -277,9 +277,10 @@ const PAYMENT_METHODS = [
 ];
 
 const SECTION_TABS = [
-  { id: "products",       label: "Healing Products",     icon: Gem        },
+  { id: "products",       label: "Marketplace",          icon: Gem        },
   { id: "journeys",       label: "Healing Journeys",     icon: Sparkles   },
-  { id: "practitioners",  label: "Find a Practitioner",  icon: Users      },
+  { id: "practitioners",  label: "Practitioner Connect", icon: Users      },
+  { id: "crisis",         label: "Crisis Counselor",     icon: ShieldAlert },
   { id: "book",           label: "Book a Session",       icon: Star       },
   { id: "saved",          label: "Wait & Save",          icon: Bookmark   },
 ] as const;
@@ -678,7 +679,113 @@ export default function PortalRoom() {
             </motion.div>
           )}
 
-          {/* ════ HEALING JOURNEYS ════ */}
+          {/* ════ CRISIS COUNSELOR ════ */}
+          {activeSection === "crisis" && (
+            <motion.div key="crisis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-4">
+
+              {/* You are not alone banner */}
+              <div className="rounded-2xl bg-gradient-to-r from-rose-500/15 to-amber-500/15 border border-rose-400/30 p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="h-5 w-5 text-rose-300 shrink-0" />
+                  <p className="text-sm font-semibold text-foreground">You are not alone — help is here right now</p>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  If you're in crisis, hurting yourself, or thinking about ending your life — please reach out. These services are free, confidential, and available 24/7. You matter.
+                </p>
+              </div>
+
+              {/* Immediate crisis lines */}
+              <div className="space-y-2">
+                <p className="text-xs uppercase tracking-wider text-rose-300/80 font-semibold px-1">Call or text now · 24/7</p>
+
+                <a
+                  href="tel:988"
+                  className="flex items-center gap-3 p-4 rounded-2xl border border-rose-400/40 bg-rose-500/10 hover:bg-rose-500/15 transition-colors"
+                >
+                  <div className="shrink-0 w-11 h-11 rounded-xl bg-rose-500/25 border border-rose-400/40 flex items-center justify-center">
+                    <Phone className="h-5 w-5 text-rose-300" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground">988 — Suicide & Crisis Lifeline</p>
+                    <p className="text-xs text-muted-foreground">Call or text 988 · Free, confidential, 24/7 (US & Canada)</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-rose-300 shrink-0" />
+                </a>
+
+                <a
+                  href="sms:741741?body=HOME"
+                  className="flex items-center gap-3 p-4 rounded-2xl border border-amber-400/40 bg-amber-500/10 hover:bg-amber-500/15 transition-colors"
+                >
+                  <div className="shrink-0 w-11 h-11 rounded-xl bg-amber-500/25 border border-amber-400/40 flex items-center justify-center">
+                    <MessageSquare className="h-5 w-5 text-amber-300" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground">Crisis Text Line</p>
+                    <p className="text-xs text-muted-foreground">Text <span className="font-semibold text-amber-300">HOME</span> to 741741 · Free, 24/7</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-amber-300 shrink-0" />
+                </a>
+
+                <a
+                  href="tel:911"
+                  className="flex items-center gap-3 p-4 rounded-2xl border border-red-500/40 bg-red-500/10 hover:bg-red-500/15 transition-colors"
+                >
+                  <div className="shrink-0 w-11 h-11 rounded-xl bg-red-500/25 border border-red-400/40 flex items-center justify-center">
+                    <Phone className="h-5 w-5 text-red-300" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground">911 — Emergency</p>
+                    <p className="text-xs text-muted-foreground">If you or someone is in immediate physical danger</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-red-300 shrink-0" />
+                </a>
+              </div>
+
+              {/* Specialized support */}
+              <div className="space-y-2 pt-2">
+                <p className="text-xs uppercase tracking-wider text-teal-300/80 font-semibold px-1">Specialized support</p>
+
+                {[
+                  { name: "The Trevor Project", desc: "LGBTQ+ youth · Call 1-866-488-7386 · Text START to 678-678", href: "tel:18664887386", color: "violet" },
+                  { name: "Trans Lifeline", desc: "Peer support by & for trans people · 1-877-565-8860", href: "tel:18775658860", color: "pink" },
+                  { name: "Veterans Crisis Line", desc: "Dial 988 then press 1 · Text 838255", href: "tel:988", color: "emerald" },
+                  { name: "SAMHSA National Helpline", desc: "Substance use & mental health · 1-800-662-4357", href: "tel:18006624357", color: "sky" },
+                  { name: "RAINN — Sexual Assault Hotline", desc: "1-800-656-4673 · Confidential 24/7 support", href: "tel:18006564673", color: "indigo" },
+                  { name: "National Domestic Violence Hotline", desc: "1-800-799-7233 · Text START to 88788", href: "tel:18007997233", color: "rose" },
+                ].map((r) => (
+                  <a
+                    key={r.name}
+                    href={r.href}
+                    className="flex items-center gap-3 p-3.5 rounded-2xl border border-white/10 bg-white/[0.04] hover:border-white/20 transition-colors"
+                  >
+                    <div className="shrink-0 w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                      <Phone className="h-4 w-4 text-foreground/70" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground">{r.name}</p>
+                      <p className="text-xs text-muted-foreground leading-snug">{r.desc}</p>
+                    </div>
+                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  </a>
+                ))}
+              </div>
+
+              {/* Grounding right now */}
+              <div className="rounded-2xl bg-teal-500/10 border border-teal-400/25 p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Heart className="h-4 w-4 text-teal-300" />
+                  <p className="text-sm font-semibold text-foreground">While you wait — try this</p>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Breathe in for 4, hold for 4, breathe out for 8. Name 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell, 1 you can taste. You are here. You are safe in this moment.
+                </p>
+              </div>
+
+              <p className="text-[11px] text-center text-muted-foreground/60 italic pt-2">
+                Soul Echoes is not a replacement for emergency services or licensed mental health care.
+              </p>
+            </motion.div>
+          )}
           {activeSection === "journeys" && (
             <motion.div key="journeys" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
               <HealingJourneys onBack={() => setActiveSection("practitioners")} />

@@ -14,6 +14,8 @@ import WisdomRoom from "./pages/WisdomRoom";
 import ToolsRoom from "./pages/ToolsRoom";
 import FlowRoom from "./pages/FlowRoom";
 import LevelPage from "./pages/LevelPage";
+import PortalRoom from "./pages/PortalRoom";
+import { AppLayout } from "@/components/AppLayout";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,8 @@ const App = () => (
               <Route path="/wisdom" element={<WisdomRoom />} />
               <Route path="/tools" element={<ToolsRoom />} />
               <Route path="/flow" element={<FlowRoom />} />
+              <Route path="/shop" element={<AppLayout><PortalRoom /></AppLayout>} />
+              <Route path="/portal" element={<Navigate to="/shop" replace />} />
               <Route path="/:roomId/level/:levelNum" element={<LevelPage />} />
               {/* Fallback to Index for unknown routes */}
               <Route path="*" element={<Navigate to="/" replace />} />
