@@ -1,6 +1,18 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, X } from "lucide-react";
+import {
+  Accessibility, AlertTriangle, Apple, Bandage, Bath, BatteryLow, Bed, Bell, BookOpen,
+  Brain, BrickWall, Bus, Car, Circle, CircleOff, ClipboardList, Clock, CloudFog, CloudLightning,
+  Church, Coffee, Compass, CupSoda, DollarSign, DoorClosed, DoorOpen, Droplets, Ear, Eye,
+  Flame, Flower, Flower2, Footprints, Gem, GitBranch, Globe2, Hand, HandCoins,
+  HandHeart, HandHelping, Handshake, Headphones, Heart, HeartCrack, HeartHandshake,
+  HeartPulse, Home, KeyRound, Lamp, Leaf, Lightbulb, Link, Lock, MapPin, MessageCircle,
+  Milk, Moon, Mountain, Phone, Pill, Rainbow, RefreshCcw, Route, Salad, Scissors, Send,
+  ScrollText, Shield, ShieldAlert, ShieldCheck, Shirt, ShowerHead, Siren, Snowflake, Soup, Sparkles,
+  Sprout, Star, Stethoscope, Sun, Sunrise, Sword, Theater, Thermometer, Toilet,
+  TreePine, UserRound, Users, Utensils, VolumeX, Waves, Weight, Wind, X, Zap,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // 33 feelings — color is meaningful, not decorative
@@ -66,153 +78,175 @@ const SYMBOL_GROUPS = [
   {
     title: "Pain & Struggle",
     symbols: [
-      { emoji: "💔", name: "Broken Heart",   meaning: "loss, heartbreak" },
-      { emoji: "⛈️", name: "Storm",          meaning: "chaos, inner turmoil" },
-      { emoji: "🔥", name: "Fire",           meaning: "rage, burning inside" },
-      { emoji: "⛓️", name: "Chains",         meaning: "trapped, bound" },
-      { emoji: "🕳️", name: "Void",           meaning: "empty, hollow" },
-      { emoji: "🧱", name: "Wall",           meaning: "blocked, shut down" },
-      { emoji: "🌫️", name: "Fog",            meaning: "lost, can't see ahead" },
-      { emoji: "🌀", name: "Spiral",         meaning: "anxiety, spinning thoughts" },
-      { emoji: "🎭", name: "Mask",           meaning: "hiding how I truly feel" },
-      { emoji: "🪨", name: "Heavy Stone",    meaning: "weight on my chest" },
-      { emoji: "🌑", name: "Dark Night",     meaning: "deep in the shadows" },
-      { emoji: "🩹", name: "Open Wound",     meaning: "still hurting" },
-      { emoji: "🧊", name: "Ice",            meaning: "frozen, numb, shut off" },
-      { emoji: "🌪️", name: "Tornado",        meaning: "everything spinning out" },
-      { emoji: "🪞", name: "Cracked Mirror", meaning: "I don't recognize myself" },
-      { emoji: "🥀", name: "Wilted Rose",    meaning: "loneliness, grief" },
-      { emoji: "🗡️", name: "Sword",          meaning: "betrayal, pierced" },
-      { emoji: "🌋", name: "Volcano",        meaning: "pressure ready to erupt" },
-      { emoji: "🪤", name: "Trap",           meaning: "stuck in a cycle" },
-      { emoji: "🚪", name: "Closed Door",    meaning: "shut out, rejected" },
-      { emoji: "🕸️", name: "Web",            meaning: "tangled, can't get free" },
-      { emoji: "⏳", name: "Hourglass",      meaning: "running out, exhausted" },
-      { emoji: "🌚", name: "Hidden Face",    meaning: "wanting to disappear" },
-      { emoji: "🦴", name: "Bones",          meaning: "skeletal, emptied out" },
-      { emoji: "🪦", name: "Tombstone",      meaning: "grief that won't lift" },
-      { emoji: "🌧️", name: "Endless Rain",   meaning: "tears that won't stop" },
-      { emoji: "🩸", name: "Bleeding",       meaning: "wound that won't close" },
-      { emoji: "🥶", name: "Frozen",         meaning: "shut down, can't feel" },
-      { emoji: "🪓", name: "Cut Off",        meaning: "severed from love" },
-      { emoji: "🌵", name: "Thorns",         meaning: "guarded, can't be touched" },
-      { emoji: "🎢", name: "Roller Coaster", meaning: "emotions out of control" },
-      { emoji: "🫥", name: "Disappearing",   meaning: "fading, going invisible" },
-      { emoji: "⚓", name: "Sinking",        meaning: "being pulled under" },
+      { icon: HeartCrack, name: "Heartbroken", meaning: "loss, breakup, grief" },
+      { icon: CloudLightning, name: "Crisis", meaning: "everything feels urgent" },
+      { icon: Flame, name: "Angry", meaning: "mad, heated, ready to snap" },
+      { icon: Link, name: "Trapped", meaning: "can't get out" },
+      { icon: CircleOff, name: "Empty", meaning: "hollow, nothing inside" },
+      { icon: BrickWall, name: "Blocked", meaning: "can't move forward" },
+      { icon: CloudFog, name: "Foggy", meaning: "can't think clearly" },
+      { icon: RefreshCcw, name: "Spiraling", meaning: "thoughts won't stop" },
+      { icon: Theater, name: "Masking", meaning: "hiding how I feel" },
+      { icon: Weight, name: "Heavy", meaning: "weight on my body" },
+      { icon: Moon, name: "Dark Place", meaning: "deep sadness" },
+      { icon: Bandage, name: "Still Hurting", meaning: "the wound is active" },
+      { icon: Snowflake, name: "Frozen", meaning: "shut down, can't act" },
+      { icon: Zap, name: "Panic", meaning: "body alarm is going off" },
+      { icon: ShieldAlert, name: "Unsafe", meaning: "I don't feel safe" },
+      { icon: Flower2, name: "Grieving", meaning: "missing someone or something" },
+      { icon: Sword, name: "Betrayed", meaning: "trust was broken" },
+      { icon: Mountain, name: "Too Much", meaning: "overwhelmed by everything" },
+      { icon: Lock, name: "Stuck", meaning: "can't get free" },
+      { icon: DoorClosed, name: "Rejected", meaning: "shut out or unwanted" },
+      { icon: GitBranch, name: "Tangled", meaning: "messy, complicated, trapped" },
+      { icon: BatteryLow, name: "Exhausted", meaning: "running on empty" },
+      { icon: UserRound, name: "Want to Hide", meaning: "don't want to be seen" },
+      { icon: Scissors, name: "Cut Off", meaning: "disconnected from people" },
+      { icon: Shield, name: "Guarded", meaning: "can't let anyone close" },
+      { icon: Route, name: "Lost", meaning: "don't know what to do" },
+      { icon: Droplets, name: "Crying", meaning: "tears need to come out" },
+      { icon: AlertTriangle, name: "Triggered", meaning: "something set me off" },
+      { icon: Siren, name: "Flashback", meaning: "the past feels present" },
+      { icon: VolumeX, name: "Shutdown", meaning: "can't talk or respond" },
+      { icon: HeartPulse, name: "Tight Chest", meaning: "pressure in my chest" },
+      { icon: Brain, name: "Racing Thoughts", meaning: "mind won't slow down" },
+      { icon: Thermometer, name: "Body Pain", meaning: "my body hurts" },
+      { icon: Hand, name: "Headache", meaning: "head pain or pressure" },
+      { icon: HeartPulse, name: "Stomach Pain", meaning: "sick or tight stomach" },
+      { icon: Footprints, name: "Restless", meaning: "can't settle my body" },
+      { icon: Wind, name: "Can't Breathe", meaning: "breath feels hard" },
+      { icon: Bed, name: "Burned Out", meaning: "too drained to keep going" },
+      { icon: Eye, name: "Dissociated", meaning: "not fully here" },
+      { icon: MessageCircle, name: "Conflict", meaning: "argument or tension" },
+      { icon: Users, name: "Lonely", meaning: "I need connection" },
+      { icon: Headphones, name: "Overstimulated", meaning: "too much sound or input" },
+      { icon: MapPin, name: "Pressed", meaning: "too much pressure on me" },
+      { icon: Heart, name: "Not Okay", meaning: "I need help right now" },
     ],
   },
   {
     title: "Healing & Hope",
     symbols: [
-      { emoji: "🌅", name: "Sunrise",        meaning: "a new day is coming" },
-      { emoji: "🦋", name: "Butterfly",      meaning: "transformation in progress" },
-      { emoji: "🌱", name: "Sprout",         meaning: "something new is growing" },
-      { emoji: "🌈", name: "Rainbow",        meaning: "after the storm" },
-      { emoji: "🕯️", name: "Candle",         meaning: "small light in darkness" },
-      { emoji: "🗝️", name: "Key",            meaning: "a breakthrough unlocking" },
-      { emoji: "🌸", name: "Bloom",          meaning: "opening up, becoming" },
-      { emoji: "✨", name: "Sparkles",       meaning: "coming alive again" },
-      { emoji: "🌊", name: "Wave",           meaning: "releasing, letting go" },
-      { emoji: "🌿", name: "Leaves",         meaning: "grounding, returning to earth" },
-      { emoji: "❤️‍🩹", name: "Mending Heart", meaning: "healing from pain" },
-      { emoji: "🌟", name: "New Star",       meaning: "something bright emerging" },
-      { emoji: "🌳", name: "Tree",           meaning: "rooted, growing strong" },
-      { emoji: "🪴", name: "Potted Plant",   meaning: "tending to myself" },
-      { emoji: "🌻", name: "Sunflower",      meaning: "turning toward the light" },
-      { emoji: "🛤️", name: "Path",           meaning: "finding my way forward" },
-      { emoji: "🧘", name: "Stillness",      meaning: "coming back to center" },
-      { emoji: "🪷", name: "Lotus",          meaning: "beauty from the mud" },
-      { emoji: "🌤️", name: "Sun Breaking",   meaning: "light through the clouds" },
-      { emoji: "🪶", name: "Feather",        meaning: "light, soft, gentle with self" },
-      { emoji: "🧵", name: "Thread",         meaning: "weaving myself back together" },
-      { emoji: "🫧", name: "Bubbles",        meaning: "lightness, play returning" },
-      { emoji: "🍃", name: "Soft Breeze",    meaning: "ease moving through me" },
-      { emoji: "🐚", name: "Shell",          meaning: "carrying my own quiet" },
-      { emoji: "🌷", name: "First Tulip",    meaning: "spring inside me again" },
-      { emoji: "🪺", name: "Nest",           meaning: "tender, building safety" },
-      { emoji: "🍯", name: "Honey",          meaning: "sweetness coming back" },
-      { emoji: "🌠", name: "Wish",           meaning: "daring to hope again" },
-      { emoji: "🏞️", name: "Wide Open",      meaning: "room to breathe and become" },
-      { emoji: "🪞", name: "Clear Mirror",   meaning: "seeing my true self again" },
-      { emoji: "🎶", name: "Song",           meaning: "music returning to me" },
-      { emoji: "🌎", name: "Whole World",    meaning: "I'm part of something bigger" },
-      { emoji: "🪟", name: "Open Window",    meaning: "light coming in" },
+      { icon: Sunrise, name: "New Morning", meaning: "a fresh start" },
+      { icon: Sprout, name: "Growth", meaning: "small progress counts" },
+      { icon: Rainbow, name: "After Storm", meaning: "relief is possible" },
+      { icon: Lamp, name: "Small Light", meaning: "one hopeful thing" },
+      { icon: KeyRound, name: "Breakthrough", meaning: "something is unlocking" },
+      { icon: Flower, name: "Bloom", meaning: "opening slowly" },
+      { icon: Sparkles, name: "Spark", meaning: "life coming back" },
+      { icon: Waves, name: "Release", meaning: "letting emotion move" },
+      { icon: Leaf, name: "Grounding", meaning: "return to the body" },
+      { icon: HeartPulse, name: "Mending", meaning: "healing from pain" },
+      { icon: Star, name: "Hope", meaning: "light ahead" },
+      { icon: TreePine, name: "Rooted", meaning: "stable and supported" },
+      { icon: Flower2, name: "Tending", meaning: "gentle care" },
+      { icon: Sun, name: "Light", meaning: "warmth returning" },
+      { icon: Route, name: "Path Forward", meaning: "next steps appearing" },
+      { icon: Circle, name: "Stillness", meaning: "coming back to center" },
+      { icon: Sprout, name: "Starting Over", meaning: "beginning again" },
+      { icon: CloudLightning, name: "Clouds Parting", meaning: "hard moment easing" },
+      { icon: HandHeart, name: "Gentleness", meaning: "soft with myself" },
+      { icon: GitBranch, name: "Reconnecting", meaning: "pieces coming together" },
+      { icon: Wind, name: "Ease", meaning: "breathing room" },
+      { icon: Home, name: "Safe Base", meaning: "a place to recover" },
+      { icon: HeartHandshake, name: "Support", meaning: "not doing it alone" },
+      { icon: DoorOpen, name: "Opening", meaning: "a way forward" },
+      { icon: ShieldCheck, name: "Protected", meaning: "safe enough to heal" },
+      { icon: Coffee, name: "Comfort", meaning: "warmth and care" },
+      { icon: Lightbulb, name: "Insight", meaning: "understanding myself" },
+      { icon: Mountain, name: "Strength", meaning: "steady through it" },
+      { icon: Eye, name: "Seeing Clearly", meaning: "truth without shame" },
+      { icon: MessageCircle, name: "Voice", meaning: "I can speak again" },
+      { icon: Globe2, name: "Belonging", meaning: "I am not alone" },
+      { icon: HandCoins, name: "Grace", meaning: "receiving help" },
+      { icon: Heart, name: "Love", meaning: "held with care" },
     ],
   },
   {
     title: "Spirit & Faith",
     symbols: [
-      { emoji: "🕊️", name: "Dove",           meaning: "peace, the Holy Spirit" },
-      { emoji: "🙏", name: "Prayer",         meaning: "turning to God" },
-      { emoji: "🪽",  name: "Wings",          meaning: "watched over, angels near" },
-      { emoji: "⭐", name: "Guiding Star",   meaning: "divine direction" },
-      { emoji: "💫", name: "Holy Light",     meaning: "spiritual presence felt" },
-      { emoji: "🫶", name: "Held Heart",     meaning: "God is holding me" },
-      { emoji: "✝️", name: "Cross",          meaning: "faith, redemption, surrender" },
-      { emoji: "🌙", name: "Sacred Night",   meaning: "rest in the mystery" },
-      { emoji: "🔮", name: "Vision",         meaning: "receiving insight or clarity" },
-      { emoji: "🌐", name: "Universe",       meaning: "I am not alone in this" },
-      { emoji: "🪬", name: "Protection",     meaning: "I am shielded" },
-      { emoji: "💎", name: "Diamond",        meaning: "refined by pressure, precious" },
-      { emoji: "🔥", name: "Sacred Fire",    meaning: "Spirit is moving in me" },
-      { emoji: "💧", name: "Living Water",   meaning: "being made new" },
-      { emoji: "📜", name: "Scripture",      meaning: "a word for this moment" },
-      { emoji: "🛐", name: "Surrender",      meaning: "I let go and trust" },
-      { emoji: "🌀", name: "Sacred Spiral",  meaning: "unwound and remade" },
-      { emoji: "🌞", name: "Sun Glory",      meaning: "His face shining on me" },
-      { emoji: "🗻", name: "Holy Mountain",  meaning: "meeting God in the high place" },
-      { emoji: "🕯️", name: "Sanctuary",      meaning: "this is holy ground" },
-      { emoji: "🌌", name: "Heavens",        meaning: "held by something vast" },
-      { emoji: "🧎", name: "Kneeling",       meaning: "humble before the Holy" },
-      { emoji: "🤍", name: "Pure Heart",     meaning: "asking to be made clean" },
-      { emoji: "🔔", name: "Call",           meaning: "I hear You; here I am" },
-      { emoji: "🌊", name: "Tide of Grace",  meaning: "mercy washing over me" },
-      { emoji: "🪔", name: "Inner Lamp",     meaning: "the Spirit lit within me" },
-      { emoji: "🕌", name: "Holy House",     meaning: "I belong in sacred space" },
-      { emoji: "📖", name: "Open Book",      meaning: "ready to receive a word" },
-      { emoji: "🌒", name: "Crescent",       meaning: "growing into the light" },
-      { emoji: "🫧", name: "Anointing",      meaning: "set apart, blessed today" },
-      { emoji: "🐑", name: "Lamb",           meaning: "led by the Shepherd" },
-      { emoji: "🌳", name: "Tree of Life",   meaning: "rooted in something eternal" },
-      { emoji: "🤝", name: "Covenant",       meaning: "I am held by promise" },
+      { icon: ShieldCheck, name: "Peace", meaning: "peace, the Holy Spirit" },
+      { icon: Church, name: "Prayer", meaning: "turning to God" },
+      { icon: HandHeart, name: "Watched Over", meaning: "angels near" },
+      { icon: Star, name: "Guiding Star", meaning: "divine direction" },
+      { icon: Sparkles, name: "Holy Light", meaning: "spiritual presence felt" },
+      { icon: Heart, name: "Held Heart", meaning: "God is holding me" },
+      { icon: Circle, name: "Faith", meaning: "redemption, surrender" },
+      { icon: Moon, name: "Sacred Night", meaning: "rest in the mystery" },
+      { icon: Eye, name: "Vision", meaning: "receiving insight" },
+      { icon: Globe2, name: "Universe", meaning: "I am not alone" },
+      { icon: Shield, name: "Protection", meaning: "I am shielded" },
+      { icon: Gem, name: "Refined", meaning: "precious under pressure" },
+      { icon: Flame, name: "Sacred Fire", meaning: "Spirit is moving" },
+      { icon: Droplets, name: "Living Water", meaning: "being made new" },
+      { icon: ScrollText, name: "Scripture", meaning: "a word for this moment" },
+      { icon: HandHelping, name: "Surrender", meaning: "I let go and trust" },
+      { icon: RefreshCcw, name: "Unwinding", meaning: "being remade" },
+      { icon: Sun, name: "Sun Glory", meaning: "His face shining on me" },
+      { icon: Mountain, name: "Holy Mountain", meaning: "meeting God in the high place" },
+      { icon: Lamp, name: "Sanctuary", meaning: "this is holy ground" },
+      { icon: Sparkles, name: "Heavens", meaning: "held by something vast" },
+      { icon: Hand, name: "Humility", meaning: "humble before the Holy" },
+      { icon: HeartPulse, name: "Pure Heart", meaning: "asking to be made clean" },
+      { icon: Bell, name: "Call", meaning: "I hear You; here I am" },
+      { icon: Waves, name: "Grace", meaning: "mercy washing over me" },
+      { icon: Lamp, name: "Inner Lamp", meaning: "the Spirit lit within me" },
+      { icon: Home, name: "Holy House", meaning: "I belong in sacred space" },
+      { icon: BookOpen, name: "Open Book", meaning: "ready to receive a word" },
+      { icon: Moon, name: "Growing Light", meaning: "growing into the light" },
+      { icon: HandCoins, name: "Anointing", meaning: "set apart, blessed today" },
+      { icon: Route, name: "Led", meaning: "guided by the Shepherd" },
+      { icon: TreePine, name: "Tree of Life", meaning: "rooted in the eternal" },
+      { icon: Handshake, name: "Covenant", meaning: "I am held by promise" },
     ],
   },
   {
     title: "What I Need",
     symbols: [
-      { emoji: "🫂", name: "A Hug",          meaning: "need to be held" },
-      { emoji: "😭", name: "To Cry",         meaning: "need to release it" },
-      { emoji: "🗣️", name: "To Speak",       meaning: "need to say it out loud" },
-      { emoji: "👂", name: "To Be Heard",    meaning: "just listen to me" },
-      { emoji: "🛡️", name: "Safety",         meaning: "I need protection" },
-      { emoji: "🤝", name: "Support",        meaning: "walk beside me" },
-      { emoji: "💤", name: "Rest",           meaning: "I am depleted" },
-      { emoji: "🤲", name: "Help",           meaning: "I am reaching out" },
-      { emoji: "✋", name: "Boundary",       meaning: "I need space" },
-      { emoji: "🌬️", name: "Fresh Air",      meaning: "I need to breathe" },
-      { emoji: "🍵", name: "Comfort",        meaning: "warmth and care" },
-      { emoji: "💬", name: "Validation",     meaning: "tell me I'm not alone" },
-      { emoji: "🤫", name: "Quiet",          meaning: "I need it to be still" },
-      { emoji: "🧎", name: "To Be Witnessed",meaning: "see me as I am" },
-      { emoji: "🚪", name: "An Exit",        meaning: "I need to leave the situation" },
-      { emoji: "🧊", name: "To Slow Down",   meaning: "pause, cool everything off" },
-      { emoji: "🌱", name: "Tenderness",     meaning: "handle me gently" },
-      { emoji: "🔦", name: "Clarity",        meaning: "help me see what's true" },
-      { emoji: "🧭", name: "Direction",      meaning: "I don't know where to go" },
-      { emoji: "🙇", name: "Forgiveness",    meaning: "to give it or receive it" },
-      { emoji: "🤍", name: "To Be Loved",    meaning: "without having to earn it" },
-      { emoji: "🍞", name: "Nourishment",    meaning: "feed my body and soul" },
-      { emoji: "🧴", name: "Care",           meaning: "someone to tend to me" },
-      { emoji: "📿", name: "Prayer Covering",meaning: "intercession around me" },
-      { emoji: "🆘", name: "Rescue",         meaning: "I cannot do this alone" },
-      { emoji: "🌡️", name: "Regulation",     meaning: "help me come back to baseline" },
-      { emoji: "🧸", name: "Soft Comfort",   meaning: "something safe to hold" },
-      { emoji: "🛁", name: "To Be Cleansed", meaning: "wash today off of me" },
-      { emoji: "📞", name: "Connection",     meaning: "I need to hear a voice" },
-      { emoji: "🪴", name: "Tending",        meaning: "I need to be cared for like a plant" },
-      { emoji: "🕰️", name: "Time",           meaning: "let me move at my own pace" },
-      { emoji: "🫀", name: "Be With Me",     meaning: "stay close, don't leave" },
-      { emoji: "🤱", name: "Mothering",      meaning: "the kind of love I missed" },
+      { icon: Utensils, name: "Food", meaning: "I need to eat" },
+      { icon: Soup, name: "Warm Meal", meaning: "something filling and warm" },
+      { icon: Apple, name: "Snack", meaning: "something small to eat" },
+      { icon: CupSoda, name: "Water", meaning: "I need a drink" },
+      { icon: Milk, name: "Gentle Drink", meaning: "milk, tea, or something soothing" },
+      { icon: Toilet, name: "Bathroom", meaning: "I need the restroom" },
+      { icon: Bed, name: "Sleep", meaning: "I need to sleep" },
+      { icon: Bed, name: "Rest", meaning: "I need to lie down" },
+      { icon: Pill, name: "Medicine", meaning: "I need my medication" },
+      { icon: Stethoscope, name: "Medical Help", meaning: "I need care for my body" },
+      { icon: ShowerHead, name: "Shower", meaning: "I need to wash up" },
+      { icon: Bath, name: "Bath", meaning: "I need warm water" },
+      { icon: Shirt, name: "Clean Clothes", meaning: "I need to change" },
+      { icon: Thermometer, name: "Warmth", meaning: "I am cold" },
+      { icon: Wind, name: "Cool Air", meaning: "I am too hot" },
+      { icon: Home, name: "Safe Place", meaning: "I need somewhere safe" },
+      { icon: ShieldCheck, name: "Safety", meaning: "I need protection" },
+      { icon: DoorOpen, name: "Exit", meaning: "I need to leave" },
+      { icon: Bus, name: "Ride", meaning: "I need transportation" },
+      { icon: Car, name: "Pickup", meaning: "someone come get me" },
+      { icon: DollarSign, name: "Money Help", meaning: "I need financial help" },
+      { icon: Salad, name: "Groceries", meaning: "I need food at home" },
+      { icon: HandHeart, name: "Childcare", meaning: "I need help with kids" },
+      { icon: Accessibility, name: "Access Help", meaning: "I need disability support" },
+      { icon: ClipboardList, name: "Forms", meaning: "I need help with paperwork" },
+      { icon: Phone, name: "Phone Call", meaning: "I need to call someone" },
+      { icon: Users, name: "Company", meaning: "please stay with me" },
+      { icon: HeartHandshake, name: "Support", meaning: "walk beside me" },
+      { icon: HandHelping, name: "Help", meaning: "I cannot do this alone" },
+      { icon: Hand, name: "Space", meaning: "give me room" },
+      { icon: Shield, name: "Boundary", meaning: "please stop or step back" },
+      { icon: Wind, name: "Fresh Air", meaning: "I need to breathe outside" },
+      { icon: VolumeX, name: "Quiet", meaning: "lower the noise" },
+      { icon: Sun, name: "Lights Down", meaning: "the lights are too much" },
+      { icon: Coffee, name: "Comfort", meaning: "something warm and steady" },
+      { icon: MessageCircle, name: "To Talk", meaning: "I need to say it" },
+      { icon: Ear, name: "To Be Heard", meaning: "just listen to me" },
+      { icon: Heart, name: "A Hug", meaning: "need to be held" },
+      { icon: Droplets, name: "To Cry", meaning: "need to release it" },
+      { icon: Eye, name: "Validation", meaning: "believe what I'm saying" },
+      { icon: Lightbulb, name: "Clarity", meaning: "help me understand" },
+      { icon: Compass, name: "Direction", meaning: "tell me the next step" },
+      { icon: Clock, name: "Time", meaning: "let me move slowly" },
+      { icon: Church, name: "Prayer", meaning: "pray with or for me" },
     ],
   },
 ];
@@ -223,7 +257,7 @@ interface Props {
 }
 
 type SelectedColor = typeof COLOR_MEANINGS[number];
-type SelectedSymbol = { emoji: string; name: string; meaning: string };
+type SelectedSymbol = { icon?: LucideIcon; emoji?: string; name: string; meaning: string };
 
 export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
   const [selectedFeelings, setSelectedFeelings] = useState<typeof FEELINGS[number][]>([]);
@@ -242,7 +276,7 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
 
   const toggleSymbol = (s: SelectedSymbol) =>
     setSelectedSymbols((prev) =>
-      prev.find((x) => x.emoji === s.emoji) ? prev.filter((x) => x.emoji !== s.emoji) : [...prev, s]
+      prev.find((x) => x.name === s.name) ? prev.filter((x) => x.name !== s.name) : [...prev, s]
     );
 
   const hasSelection = selectedFeelings.length > 0 || selectedColors.length > 0 || selectedSymbols.length > 0;
@@ -259,7 +293,7 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
     if (selectedColors.length > 0)
       message += `Colors: ${selectedColors.map((c) => `${c.name} — ${c.meaning}`).join("; ")}\n`;
     if (selectedSymbols.length > 0)
-      message += `Symbols: ${selectedSymbols.map((s) => `${s.emoji} ${s.name} (${s.meaning})`).join(", ")}`;
+      message += `Symbols: ${selectedSymbols.map((s) => `${s.name} (${s.meaning})`).join(", ")}`;
     onSend(message.trim());
     setSelectedFeelings([]);
     setSelectedColors([]);
@@ -296,11 +330,10 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
             </button>
           ))}
           {selectedSymbols.map((s) => (
-            <button key={s.emoji} onClick={() => toggleSymbol(s)}
+            <button key={s.name} onClick={() => toggleSymbol(s)}
               className="inline-flex items-center gap-1 text-sm px-2 py-1 rounded-full bg-muted hover:bg-muted/70"
               aria-label={`Remove ${s.name}`}
             >
-              <span aria-hidden="true">{s.emoji}</span>
               <span>{s.name}</span>
               <X className="h-3 w-3" />
             </button>
@@ -372,9 +405,10 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
             </p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
               {group.symbols.map((s) => {
-                const selected = selectedSymbols.some((x) => x.emoji === s.emoji);
+                const selected = selectedSymbols.some((x) => x.name === s.name);
+                const Icon = s.icon;
                 return (
-                  <button key={s.emoji} onClick={() => toggleSymbol(s)} disabled={disabled}
+                  <button key={s.name} onClick={() => toggleSymbol(s)} disabled={disabled}
                     className={`flex flex-col items-center gap-0.5 p-2 rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-ring ${
                       selected
                         ? "bg-primary/15 border-primary ring-1 ring-primary scale-105"
@@ -383,7 +417,13 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
                     aria-label={`${s.name} — ${s.meaning}`} aria-pressed={selected}
                     title={s.meaning}
                   >
-                    <span className="text-2xl leading-none" aria-hidden="true">{s.emoji}</span>
+                    {Icon ? (
+                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary" aria-hidden="true">
+                        <Icon className="h-5 w-5 stroke-[1.9]" />
+                      </span>
+                    ) : (
+                      <span className="text-2xl leading-none" aria-hidden="true">{(s as SelectedSymbol).emoji}</span>
+                    )}
                     <span className="text-[9px] font-medium text-foreground leading-tight text-center">{s.name}</span>
                     <span className="text-[8px] text-muted-foreground leading-tight text-center hidden sm:block">{s.meaning}</span>
                   </button>
