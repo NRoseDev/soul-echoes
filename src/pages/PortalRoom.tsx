@@ -277,9 +277,10 @@ const PAYMENT_METHODS = [
 ];
 
 const SECTION_TABS = [
-  { id: "products",       label: "Healing Products",     icon: Gem        },
+  { id: "products",       label: "Marketplace",          icon: Gem        },
   { id: "journeys",       label: "Healing Journeys",     icon: Sparkles   },
-  { id: "practitioners",  label: "Find a Practitioner",  icon: Users      },
+  { id: "practitioners",  label: "Practitioner Connect", icon: Users      },
+  { id: "crisis",         label: "Crisis Counselor",     icon: ShieldAlert },
   { id: "book",           label: "Book a Session",       icon: Star       },
   { id: "saved",          label: "Wait & Save",          icon: Bookmark   },
 ] as const;
