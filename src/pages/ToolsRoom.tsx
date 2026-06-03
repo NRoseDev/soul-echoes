@@ -46,7 +46,12 @@ export default function ToolsRoom() {
         <p className="text-muted-foreground text-center mb-6">Practical tools and aids for healing (22 total). Learn the WHY in Wisdom, then apply it here. The AI can also send you directly to a tool when you need immediate help.</p>
       </motion.div>
 
+      <div className="max-w-2xl mx-auto mb-6">
+        <LevelPath roomId="tools" />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+
         {sections.map((s, i) => {
           const Icon = s.icon;
           const isPlaceholder = s.id.startsWith("placeholder");
