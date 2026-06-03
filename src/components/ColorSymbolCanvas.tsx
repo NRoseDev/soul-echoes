@@ -422,7 +422,7 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
                         <Icon className="h-5 w-5 stroke-[1.9]" />
                       </span>
                     ) : (
-                      <span className="text-2xl leading-none" aria-hidden="true">{s.emoji}</span>
+                      <span className="text-2xl leading-none" aria-hidden="true">{(s as SelectedSymbol).emoji}</span>
                     )}
                     <span className="text-[9px] font-medium text-foreground leading-tight text-center">{s.name}</span>
                     <span className="text-[8px] text-muted-foreground leading-tight text-center hidden sm:block">{s.meaning}</span>
