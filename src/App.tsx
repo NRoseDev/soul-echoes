@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import WisdomRoom from "./pages/WisdomRoom";
 import ToolsRoom from "./pages/ToolsRoom";
 import FlowRoom from "./pages/FlowRoom";
+import LevelPage from "./pages/LevelPage";
 
 const queryClient = new QueryClient();
 
