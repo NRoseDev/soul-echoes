@@ -246,7 +246,7 @@ interface Props {
 }
 
 type SelectedColor = typeof COLOR_MEANINGS[number];
-type SelectedSymbol = { icon: LucideIcon; name: string; meaning: string };
+type SelectedSymbol = { icon?: LucideIcon; emoji?: string; name: string; meaning: string };
 
 export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
   const [selectedFeelings, setSelectedFeelings] = useState<typeof FEELINGS[number][]>([]);
@@ -265,7 +265,7 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
 
   const toggleSymbol = (s: SelectedSymbol) =>
     setSelectedSymbols((prev) =>
-      prev.find((x) => x.emoji === s.emoji) ? prev.filter((x) => x.emoji !== s.emoji) : [...prev, s]
+      prev.find((x) => x.name === s.name) ? prev.filter((x) => x.name !== s.name) : [...prev, s]
     );
 
   const hasSelection = selectedFeelings.length > 0 || selectedColors.length > 0 || selectedSymbols.length > 0;
@@ -282,7 +282,7 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
     if (selectedColors.length > 0)
       message += `Colors: ${selectedColors.map((c) => `${c.name} — ${c.meaning}`).join("; ")}\n`;
     if (selectedSymbols.length > 0)
-      message += `Symbols: ${selectedSymbols.map((s) => `${s.emoji} ${s.name} (${s.meaning})`).join(", ")}`;
+      message += `Symbols: ${selectedSymbols.map((s) => `${s.name} (${s.meaning})`).join(", ")}`;
     onSend(message.trim());
     setSelectedFeelings([]);
     setSelectedColors([]);
