@@ -10,31 +10,18 @@ const base = "w-full h-full";
 
 
 export function BrainDumpIcon({ className }: Props) {
-  // Brain outline with 7 chakra-colored threads flowing & tangling out the bottom
+  // Brain with chakra-colored tangled threads — uses the uploaded artwork
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className ?? base} aria-hidden="true">
-      {/* brain outline — twin hemispheres */}
-      <g stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none">
-        <path d="M11.8 3.2c-1.6-1-3.8-.4-4.6 1.2-1.6.1-2.7 1.5-2.4 3-1.3.6-1.7 2.2-.8 3.3-.7 1.1-.2 2.6 1.1 3 .1 1.4 1.4 2.3 2.7 2 .5 1 1.7 1.5 2.8 1.1" />
-        <path d="M12.2 3.2c1.6-1 3.8-.4 4.6 1.2 1.6.1 2.7 1.5 2.4 3 1.3.6 1.7 2.2.8 3.3.7 1.1.2 2.6-1.1 3-.1 1.4-1.4 2.3-2.7 2-.5 1-1.7 1.5-2.8 1.1" />
-        {/* central fissure */}
-        <path d="M12 3.5v13.2" opacity=".7" />
-        {/* gyri squiggles */}
-        <path d="M7 7c.8.4 1.4 1 1.6 1.8M9 11c-.8.3-1.4 1-1.6 1.8M15 7c-.8.4-1.4 1-1.6 1.8M15 11c.8.3 1.4 1 1.6 1.8" opacity=".6" />
-      </g>
-      {/* 7 chakra threads tangling & flowing down */}
-      <g fill="none" strokeWidth="1.3" strokeLinecap="round">
-        <path d="M9 17c-.6 1.2.4 2 0 3.2-.3 1 .4 1.6 0 2.6" stroke="#e11d48" />
-        <path d="M10.2 17c.3 1.3-.7 2 .2 3.2.5.9-.3 1.7.1 2.6" stroke="#f97316" />
-        <path d="M11.4 17c-.2 1.3.8 2-.1 3.2-.5.9.4 1.7-.1 2.6" stroke="#facc15" />
-        <path d="M12 17.2c.5 1.2-.5 2 .2 3.2.5.9-.4 1.7.1 2.6" stroke="#22c55e" />
-        <path d="M12.8 17c-.3 1.3.7 2-.2 3.2-.5.9.4 1.7-.1 2.6" stroke="#0ea5e9" />
-        <path d="M13.8 17c.4 1.3-.7 2 .3 3.2.6.9-.3 1.7.1 2.6" stroke="#6366f1" />
-        <path d="M15 17c-.5 1.2.5 2-.2 3.2-.5.9.4 1.7-.1 2.6" stroke="#a855f7" />
-      </g>
-    </svg>
+    <img
+      src={brainDumpAsset.url}
+      alt=""
+      aria-hidden="true"
+      className={(className ?? base) + " object-contain"}
+      draggable={false}
+    />
   );
 }
+
 
 export function JournalIcon({ className }: Props) {
   // Closed journal: spine, ruled lines, bold SE monogram on cover, heart + bookmark
