@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Accessibility, AlertTriangle, Apple, Bandage, Bath, BatteryLow, Bed, Bell, Brain,
-  BrickWall, Bus, Car, Circle, CircleOff, ClipboardList, Clock, CloudFog, CloudLightning,
+  Accessibility, AlertTriangle, Apple, Bandage, Bath, BatteryLow, Bed, Bell, BookOpen,
+  Brain, BrickWall, Bus, Car, Circle, CircleOff, ClipboardList, Clock, CloudFog, CloudLightning,
   Church, Coffee, Compass, CupSoda, DollarSign, DoorClosed, DoorOpen, Droplets, Ear, Eye,
   Flame, Flower, Flower2, Footprints, Gem, GitBranch, Globe2, Hand, HandCoins,
   HandHeart, HandHelping, Handshake, Headphones, Heart, HeartCrack, HeartHandshake,
   HeartPulse, Home, KeyRound, Lamp, Leaf, Lightbulb, Link, Lock, MapPin, MessageCircle,
   Milk, Moon, Mountain, Phone, Pill, Rainbow, RefreshCcw, Route, Salad, Scissors, Send,
-  Shield, ShieldAlert, ShieldCheck, Shirt, ShowerHead, Siren, Snowflake, Soup, Sparkles,
+  ScrollText, Shield, ShieldAlert, ShieldCheck, Shirt, ShowerHead, Siren, Snowflake, Soup, Sparkles,
   Sprout, Star, Stethoscope, Sun, Sunrise, Sword, Theater, Thermometer, Toilet,
   TreePine, UserRound, Users, Utensils, VolumeX, Waves, Weight, Wind, X, Zap,
   type LucideIcon,
