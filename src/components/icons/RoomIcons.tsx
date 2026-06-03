@@ -21,7 +21,7 @@ export function BrainDumpIcon({ className }: Props) {
 }
 
 export function JournalIcon({ className }: Props) {
-  // Closed journal: spine, ruled lines, heart on cover, bookmark with "SE"
+  // Closed journal: spine, ruled lines, heart on cover, clean bookmark
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className ?? base} aria-hidden="true">
       {/* book body */}
@@ -32,21 +32,21 @@ export function JournalIcon({ className }: Props) {
       <path d="M9.5 7h6.5M9.5 9.5h6.5M9.5 12h3" opacity=".9" />
       {/* heart on cover */}
       <path d="M15.6 13.4c-.7-.9-2.1-.9-2.8 0-.5.6-.3 1.5.4 2.2l2.4 2.2 2.4-2.2c.7-.7.9-1.6.4-2.2-.7-.9-2.1-.9-2.8 0z" fill="currentColor" stroke="none" />
-      {/* bookmark with SE monogram */}
+      {/* bookmark tail */}
       <path d="M10.5 21.5v2.2l1.6-1 1.6 1v-2.2" fill="currentColor" stroke="currentColor" strokeWidth="1" />
-      <text x="12.1" y="23.1" textAnchor="middle" fontSize="1.6" fontWeight="700" fill="hsl(var(--background))" stroke="none" fontFamily="ui-sans-serif, system-ui">SE</text>
     </svg>
   );
 }
 
 export function FlowIcon({ className }: Props) {
-  // Breath / energy spiral
+  // Yin-yang style swirl — two interlocking currents
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className={className ?? base} aria-hidden="true">
-      <path d="M12 12m-1.5 0a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0" fill="currentColor" stroke="none" />
-      <path d="M12 12c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5-1.5 3.5-3.5 3.5-3.5-1.5-3.5-3.5" />
-      <path d="M12 12c0 2.5-2 4.5-4.5 4.5S3 14.5 3 12s2-4.5 4.5-4.5c1.5 0 3 .8 3.8 2" />
-      <path d="M21 5c-1 1.5-2 2-3.5 2M3 19c1-1.5 2-2 3.5-2" opacity=".6" />
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className ?? base} aria-hidden="true">
+      {/* outer ring */}
+      <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2a8 8 0 0 1 0 16 4 4 0 0 1 0-8 4 4 0 0 0 0-8z" />
+      {/* small dots — the seed of each current */}
+      <circle cx="12" cy="8" r="1.3" fill="hsl(var(--background))" />
+      <circle cx="12" cy="16" r="1.3" />
     </svg>
   );
 }
