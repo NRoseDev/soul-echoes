@@ -21,7 +21,7 @@ export function BrainDumpIcon({ className }: Props) {
 }
 
 export function JournalIcon({ className }: Props) {
-  // Closed journal: spine, ruled lines, heart on cover, clean bookmark
+  // Closed journal: spine, ruled lines, bold SE monogram on cover, heart + bookmark
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className ?? base} aria-hidden="true">
       {/* book body */}
@@ -29,9 +29,13 @@ export function JournalIcon({ className }: Props) {
       {/* spine */}
       <path d="M7.2 2.5v19" />
       {/* ruled lines */}
-      <path d="M9.5 7h6.5M9.5 9.5h6.5M9.5 12h3" opacity=".9" />
-      {/* heart on cover */}
-      <path d="M15.6 13.4c-.7-.9-2.1-.9-2.8 0-.5.6-.3 1.5.4 2.2l2.4 2.2 2.4-2.2c.7-.7.9-1.6.4-2.2-.7-.9-2.1-.9-2.8 0z" fill="currentColor" stroke="none" />
+      <path d="M9.5 6.5h6M9.5 8.5h6" opacity=".75" />
+      {/* SE monogram — large, bold, clearly readable */}
+      <text x="13" y="14.2" textAnchor="middle" fontSize="5.2" fontWeight="800"
+        fill="currentColor" stroke="none"
+        fontFamily="'Nunito', ui-sans-serif, system-ui" letterSpacing="-0.3">SE</text>
+      {/* small heart */}
+      <path d="M16.2 16.5c-.45-.55-1.35-.55-1.8 0-.32.4-.2.95.25 1.4l1.55 1.4 1.55-1.4c.45-.45.57-1 .25-1.4-.45-.55-1.35-.55-1.8 0z" fill="currentColor" stroke="none" />
       {/* bookmark tail */}
       <path d="M10.5 21.5v2.2l1.6-1 1.6 1v-2.2" fill="currentColor" stroke="currentColor" strokeWidth="1" />
     </svg>
@@ -99,22 +103,42 @@ export function ToolsIcon({ className }: Props) {
 }
 
 export function PortalIcon({ className }: Props) {
-  // Celestial gateway — gold ring with starburst center
+  // Spiraling vortex gateway — silver arms fading to gold tips, dark event horizon at center
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className ?? base} aria-hidden="true">
-      <circle cx="12" cy="12" r="10" stroke="#2dd4bf" strokeWidth="1.2" strokeOpacity="0.6" />
-      <circle cx="12" cy="12" r="8.5" stroke="#f59e0b" strokeWidth="2.2" />
-      <circle cx="12" cy="12" r="6.5" stroke="#2dd4bf" strokeWidth="0.8" strokeOpacity="0.7" />
-      <line x1="12" y1="6.8" x2="12" y2="9.2" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" />
-      <line x1="12" y1="14.8" x2="12" y2="17.2" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" />
-      <line x1="6.8" y1="12" x2="9.2" y2="12" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" />
-      <line x1="14.8" y1="12" x2="17.2" y2="12" stroke="#fbbf24" strokeWidth="1.8" strokeLinecap="round" />
-      <line x1="8.5" y1="8.5" x2="9.9" y2="9.9" stroke="#2dd4bf" strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="14.1" y1="14.1" x2="15.5" y2="15.5" stroke="#2dd4bf" strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="15.5" y1="8.5" x2="14.1" y2="9.9" stroke="#2dd4bf" strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="9.9" y1="14.1" x2="8.5" y2="15.5" stroke="#2dd4bf" strokeWidth="1.2" strokeLinecap="round" />
-      <circle cx="12" cy="12" r="1.8" fill="#fde68a" />
-      <circle cx="12" cy="12" r="0.9" fill="#ffffff" />
+      <defs>
+        <linearGradient id="portal-silver-gold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#cbd5e1" />
+          <stop offset="55%" stopColor="#e5e7eb" />
+          <stop offset="100%" stopColor="#f59e0b" />
+        </linearGradient>
+        <radialGradient id="portal-core" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#0a0a0a" />
+          <stop offset="100%" stopColor="#27272a" />
+        </radialGradient>
+      </defs>
+      {/* six spiral arms rotating around center */}
+      <g stroke="url(#portal-silver-gold)" strokeWidth="1.6" strokeLinecap="round" fill="none">
+        <path d="M12 12c0-3.5 2.5-6.5 6-7" />
+        <path d="M12 12c0 3.5-2.5 6.5-6 7" />
+        <g transform="rotate(60 12 12)">
+          <path d="M12 12c0-3.5 2.5-6.5 6-7" />
+          <path d="M12 12c0 3.5-2.5 6.5-6 7" />
+        </g>
+        <g transform="rotate(120 12 12)">
+          <path d="M12 12c0-3.5 2.5-6.5 6-7" />
+          <path d="M12 12c0 3.5-2.5 6.5-6 7" />
+        </g>
+      </g>
+      {/* glowing gold tips */}
+      <circle cx="18" cy="5" r="0.7" fill="#fbbf24" />
+      <circle cx="6" cy="19" r="0.7" fill="#fbbf24" />
+      <circle cx="19" cy="15" r="0.7" fill="#fbbf24" />
+      <circle cx="5" cy="9" r="0.7" fill="#fbbf24" />
+      <circle cx="15" cy="19" r="0.7" fill="#fbbf24" />
+      <circle cx="9" cy="5" r="0.7" fill="#fbbf24" />
+      {/* dark event horizon with silver rim */}
+      <circle cx="12" cy="12" r="3.2" fill="url(#portal-core)" stroke="#e5e7eb" strokeWidth="0.5" />
     </svg>
   );
 }
