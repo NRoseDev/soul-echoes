@@ -77,7 +77,7 @@ const ASL_FEELINGS = [
   sign("lonely", "🥀", "Lonely"),
   sign("jealous", "😒", "Jealous"),
   sign("embarrassed", "😳", "Embarrassed", ["jpg", "gif"]),
-  sign("depressed", "😔", "Depressed", ["jpg", "gif"]),
+  { id: "depressed", label: "Depressed", emoji: "😔", sources: [] as string[] },
   sign("calm", "😌", "Calm", ["jpg", "gif"]),
   sign("hope", "🌅", "Hopeful", ["jpg", "gif"]),
   sign("grateful", "🙏", "Grateful", ["jpg", "gif"]),

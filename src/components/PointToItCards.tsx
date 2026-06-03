@@ -15,7 +15,7 @@ const CATEGORIES: { title: string; cards: Card[] }[] = [
       { emoji: "😤", label: "Angry",          asl: `${S}/angry.gif` },
       { emoji: "🔥", label: "Anger",          asl: `${S}/anger.jpg` },
       { emoji: "😰", label: "Anxious",        asl: `${S}/anxious.gif` },
-      { emoji: "😔", label: "Depressed",      asl: `${S}/depressed.jpg` },
+      { emoji: "😔", label: "Depressed" },
       { emoji: "😶", label: "Numb" },
       { emoji: "💔", label: "Heartbroken",    asl: `${S}/hurt.jpg` },
       { emoji: "🤯", label: "Overwhelmed" },
