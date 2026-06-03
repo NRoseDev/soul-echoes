@@ -53,7 +53,7 @@ const ASL_COMMON_WORDS = [
   sign("pain", "😣", "Pain"),
   sign("breathe", "🌬️", "Flow", ["jpg", "gif"]),
   sign("good", "👌", "Good", ["jpg", "gif"]),
-  sign("how", "❓", "How", ["jpg", "gif"]),
+  { id: "how", label: "How", emoji: "❓", sources: [] as string[] },
   sign("what", "❔", "What", ["jpg", "gif"]),
   sign("when", "🕐", "When", ["jpg", "gif"]),
   sign("where", "📍", "Where", ["jpg", "gif"]),
