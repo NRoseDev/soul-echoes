@@ -21,7 +21,7 @@ export function BrainDumpIcon({ className }: Props) {
 }
 
 export function JournalIcon({ className }: Props) {
-  // Closed journal: spine, ruled lines, heart on cover, clean bookmark
+  // Closed journal: spine, ruled lines, bold SE monogram on cover, heart + bookmark
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className ?? base} aria-hidden="true">
       {/* book body */}
@@ -29,9 +29,13 @@ export function JournalIcon({ className }: Props) {
       {/* spine */}
       <path d="M7.2 2.5v19" />
       {/* ruled lines */}
-      <path d="M9.5 7h6.5M9.5 9.5h6.5M9.5 12h3" opacity=".9" />
-      {/* heart on cover */}
-      <path d="M15.6 13.4c-.7-.9-2.1-.9-2.8 0-.5.6-.3 1.5.4 2.2l2.4 2.2 2.4-2.2c.7-.7.9-1.6.4-2.2-.7-.9-2.1-.9-2.8 0z" fill="currentColor" stroke="none" />
+      <path d="M9.5 6.5h6M9.5 8.5h6" opacity=".75" />
+      {/* SE monogram — large, bold, clearly readable */}
+      <text x="13" y="14.2" textAnchor="middle" fontSize="5.2" fontWeight="800"
+        fill="currentColor" stroke="none"
+        fontFamily="'Nunito', ui-sans-serif, system-ui" letterSpacing="-0.3">SE</text>
+      {/* small heart */}
+      <path d="M16.2 16.5c-.45-.55-1.35-.55-1.8 0-.32.4-.2.95.25 1.4l1.55 1.4 1.55-1.4c.45-.45.57-1 .25-1.4-.45-.55-1.35-.55-1.8 0z" fill="currentColor" stroke="none" />
       {/* bookmark tail */}
       <path d="M10.5 21.5v2.2l1.6-1 1.6 1v-2.2" fill="currentColor" stroke="currentColor" strokeWidth="1" />
     </svg>
