@@ -319,11 +319,10 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
             </button>
           ))}
           {selectedSymbols.map((s) => (
-            <button key={s.emoji} onClick={() => toggleSymbol(s)}
+            <button key={s.name} onClick={() => toggleSymbol(s)}
               className="inline-flex items-center gap-1 text-sm px-2 py-1 rounded-full bg-muted hover:bg-muted/70"
               aria-label={`Remove ${s.name}`}
             >
-              <span aria-hidden="true">{s.emoji}</span>
               <span>{s.name}</span>
               <X className="h-3 w-3" />
             </button>
@@ -395,9 +394,10 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
             </p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
               {group.symbols.map((s) => {
-                const selected = selectedSymbols.some((x) => x.emoji === s.emoji);
+                const selected = selectedSymbols.some((x) => x.name === s.name);
+                const Icon = s.icon;
                 return (
-                  <button key={s.emoji} onClick={() => toggleSymbol(s)} disabled={disabled}
+                  <button key={s.name} onClick={() => toggleSymbol(s)} disabled={disabled}
                     className={`flex flex-col items-center gap-0.5 p-2 rounded-xl border transition-all focus:outline-none focus:ring-2 focus:ring-ring ${
                       selected
                         ? "bg-primary/15 border-primary ring-1 ring-primary scale-105"
@@ -406,7 +406,13 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
                     aria-label={`${s.name} — ${s.meaning}`} aria-pressed={selected}
                     title={s.meaning}
                   >
-                    <span className="text-2xl leading-none" aria-hidden="true">{s.emoji}</span>
+                    {Icon ? (
+                      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary" aria-hidden="true">
+                        <Icon className="h-5 w-5 stroke-[1.9]" />
+                      </span>
+                    ) : (
+                      <span className="text-2xl leading-none" aria-hidden="true">{s.emoji}</span>
+                    )}
                     <span className="text-[9px] font-medium text-foreground leading-tight text-center">{s.name}</span>
                     <span className="text-[8px] text-muted-foreground leading-tight text-center hidden sm:block">{s.meaning}</span>
                   </button>
