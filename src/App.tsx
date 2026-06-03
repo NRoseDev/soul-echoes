@@ -39,6 +39,7 @@ const App = () => (
               <Route path="/flow" element={<FlowRoom />} />
               <Route path="/shop" element={<AppLayout><PortalRoom /></AppLayout>} />
               <Route path="/portal" element={<Navigate to="/shop" replace />} />
+              <Route path="/community" element={<AppLayout><CommunityRoom /></AppLayout>} />
               <Route path="/:roomId/level/:levelNum" element={<LevelPage />} />
               {/* Fallback to Index for unknown routes */}
               <Route path="*" element={<Navigate to="/" replace />} />
