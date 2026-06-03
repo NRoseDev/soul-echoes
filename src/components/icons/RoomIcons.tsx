@@ -21,11 +21,20 @@ export function BrainDumpIcon({ className }: Props) {
 }
 
 export function JournalIcon({ className }: Props) {
-  // Open book with a sacred lotus blooming from its spine
+  // Closed journal: spine, ruled lines, heart on cover, bookmark with "SE"
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className={className ?? base} aria-hidden="true">
-      <path d="M3 6.5c2.5-1 5-1 9 0M21 6.5c-2.5-1-5-1-9 0M3 6.5v12c2.5-1 5-1 9 0M21 6.5v12c-2.5-1-5-1-9 0M12 6.5v12" />
-      <path d="M12 5c-.6-1.3-2-1.8-2.8-.6-.7 1 .2 2.2 1.4 2.6M12 5c.6-1.3 2-1.8 2.8-.6.7 1-.2 2.2-1.4 2.6" fill="currentColor" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className ?? base} aria-hidden="true">
+      {/* book body */}
+      <rect x="4" y="2.5" width="15" height="19" rx="1.4" />
+      {/* spine */}
+      <path d="M7.2 2.5v19" />
+      {/* ruled lines */}
+      <path d="M9.5 7h6.5M9.5 9.5h6.5M9.5 12h3" opacity=".9" />
+      {/* heart on cover */}
+      <path d="M15.6 13.4c-.7-.9-2.1-.9-2.8 0-.5.6-.3 1.5.4 2.2l2.4 2.2 2.4-2.2c.7-.7.9-1.6.4-2.2-.7-.9-2.1-.9-2.8 0z" fill="currentColor" stroke="none" />
+      {/* bookmark with SE monogram */}
+      <path d="M10.5 21.5v2.2l1.6-1 1.6 1v-2.2" fill="currentColor" stroke="currentColor" strokeWidth="1" />
+      <text x="12.1" y="23.1" textAnchor="middle" fontSize="1.6" fontWeight="700" fill="hsl(var(--background))" stroke="none" fontFamily="ui-sans-serif, system-ui">SE</text>
     </svg>
   );
 }
