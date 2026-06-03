@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { JOURNAL_SECTIONS } from "@/lib/journal";
+import { LevelPath } from "@/components/levels/LevelPath";
 
 export default function JournalRoom() {
   const navigate = useNavigate();
