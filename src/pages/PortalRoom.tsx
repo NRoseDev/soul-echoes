@@ -4,11 +4,10 @@ import {
   BookOpen, Gem, Droplet, Volume2, Headphones, Users, Star, Bookmark,
   BookmarkCheck, Bell, BellOff, ChevronDown, ChevronUp, Heart, Check,
   CreditCard, Sliders, Gift, Globe2, ArrowRight, ShieldCheck, Zap,
-  Wind, Sun, Flame, Music2, Sparkles, ShieldAlert, Phone, MessageSquare, ExternalLink,
+  Wind, Sun, Flame, Music2, ShieldAlert, Phone, MessageSquare, ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import HealingJourneys from "@/components/HealingJourneys";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 interface Product {
@@ -278,7 +277,6 @@ const PAYMENT_METHODS = [
 
 const SECTION_TABS = [
   { id: "products",       label: "Marketplace",          icon: Gem        },
-  { id: "journeys",       label: "Healing Journeys",     icon: Sparkles   },
   { id: "practitioners",  label: "Practitioner Connect", icon: Users      },
   { id: "crisis",         label: "Crisis Counselor",     icon: ShieldAlert },
   { id: "book",           label: "Book a Session",       icon: Star       },
@@ -784,11 +782,6 @@ export default function PortalRoom() {
               <p className="text-[11px] text-center text-muted-foreground/60 italic pt-2">
                 Soul Echoes is not a replacement for emergency services or licensed mental health care.
               </p>
-            </motion.div>
-          )}
-          {activeSection === "journeys" && (
-            <motion.div key="journeys" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full">
-              <HealingJourneys onBack={() => setActiveSection("practitioners")} />
             </motion.div>
           )}
 

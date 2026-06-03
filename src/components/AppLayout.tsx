@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Wind, MessageCircleOff, Moon, Sparkles, Flame, Check, Globe2 } from "lucide-react";
+import { Home, BookOpen, Wind, MessageCircleOff, Moon, Sparkles, Flame, Check, Globe2, Users } from "lucide-react";
 import FloatingHub from "@/components/FloatingHub";
 import { getPreferences, savePreferences, type InputMethod } from "@/lib/preferences";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { path: "/", label: "Home", icon: Home },
   { path: "/journal", label: "Journal", icon: BookOpen },
   { path: "/flow", label: "Flow", icon: Wind },
+  { path: "/community", label: "Community", icon: Users },
   { path: "/shop", label: "Portal", icon: Globe2 },
 ];
 
