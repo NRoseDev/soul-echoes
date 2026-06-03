@@ -25,28 +25,28 @@ type IndicatorState = "idle" | "suggest" | "important" | "distress";
 
 const ROOM_SUGGESTIONS: Record<string, { text: string; card: string; emoji: string }[]> = {
   "/": [
-    { text: "Would you like to breathe first?", card: "Take me to Breathe", emoji: "🌬️" },
+    { text: "Would you like to Flow first?", card: "Take me to Flow", emoji: "🌬️" },
     { text: "Ready to do some shadow work?", card: "Take me to Shadow Work", emoji: "🌑" },
     { text: "Something unspoken? I can help.", card: "Take me to Unspoken", emoji: "🌊" },
     { text: "Want to explore some wisdom today?", card: "Take me to Wisdom", emoji: "✨" },
   ],
-  "/breathe": [
+  "/flow": [
     { text: "Great work. Want to journal this feeling?", card: "Take me to Journal", emoji: "📓" },
     { text: "Ready to go deeper with shadow work?", card: "Take me to Shadow Work", emoji: "🌑" },
     { text: "Want support from a healer?", card: "Connect to a Healer", emoji: "💆" },
   ],
   "/shadow-work": [
-    { text: "Heavy work. Want to breathe through it?", card: "Take me to Breathe", emoji: "🌬️" },
+    { text: "Heavy work. Want to Flow through it?", card: "Take me to Flow", emoji: "🌬️" },
     { text: "Want to journal what's coming up?", card: "Take me to Journal", emoji: "📓" },
     { text: "Want support from a healer?", card: "Connect to a Healer", emoji: "💆" },
   ],
   "/journal": [
     { text: "Want to explore this deeper in shadow work?", card: "Take me to Shadow Work", emoji: "🌑" },
-    { text: "Need a breath before continuing?", card: "Take me to Breathe", emoji: "🌬️" },
+    { text: "Need to Flow before continuing?", card: "Take me to Flow", emoji: "🌬️" },
     { text: "Want healer support for what you wrote?", card: "Connect to a Healer", emoji: "💆" },
   ],
   "/unspoken": [
-    { text: "Want to breathe through what's unspoken?", card: "Take me to Breathe", emoji: "🌬️" },
+    { text: "Want to Flow through what's unspoken?", card: "Take me to Flow", emoji: "🌬️" },
     { text: "Ready to explore this in shadow work?", card: "Take me to Shadow Work", emoji: "🌑" },
     { text: "Want a healer to hold space for this?", card: "Connect to a Healer", emoji: "💆" },
   ],
@@ -55,8 +55,8 @@ const ROOM_SUGGESTIONS: Record<string, { text: string; card: string; emoji: stri
     { text: "Ready to explore your shadow with this insight?", card: "Take me to Shadow Work", emoji: "🌑" },
     { text: "Want to journal these insights?", card: "Take me to Journal", emoji: "📓" },
   ],
-  "/spiritual-tools": [
-    { text: "Want to ground yourself with breathwork?", card: "Take me to Breathe", emoji: "🌬️" },
+  "/tools": [
+    { text: "Want to ground yourself with Flow practices?", card: "Take me to Flow", emoji: "🌬️" },
     { text: "Ready to journal your spiritual practice?", card: "Take me to Journal", emoji: "📓" },
     { text: "Want to deepen this with a healer?", card: "Connect to a Healer", emoji: "💆" },
   ],
@@ -65,12 +65,12 @@ const ROOM_SUGGESTIONS: Record<string, { text: string; card: string; emoji: stri
 const DISTRESS_CARD = { text: "I'm here. You are safe. Do you need help?", card: "Get Crisis Support", emoji: "🆘" };
 
 const ROOM_MAP: Record<string, string> = {
-  "Take me to Breathe": "/breathe",
+  "Take me to Flow": "/flow",
   "Take me to Shadow Work": "/shadow-work",
   "Take me to Journal": "/journal",
   "Take me to Unspoken": "/unspoken",
   "Take me to Wisdom": "/wisdom",
-  "Take me to Spiritual Tools": "/spiritual-tools",
+  "Take me to Tools": "/tools",
   "Connect to a Healer": "/shop",
   "Get Crisis Support": "/shop",
 };

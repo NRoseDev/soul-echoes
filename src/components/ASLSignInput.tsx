@@ -29,7 +29,7 @@ const ASL_COMMON_WORDS = [
   { id: "understand", label: "Understand", emoji: "💡", img: `${LOCAL}/understand.gif` },
   { id: "friend", label: "Friend", emoji: "🤝", img: `${LOCAL}/friend.gif` },
   { id: "home", label: "Home", emoji: "🏠", img: `${LOCAL}/home.gif` },
-  { id: "breathe", label: "Breathe", emoji: "🌬️", img: `${LOCAL}/breathe.gif` },
+  { id: "breathe", label: "Flow", emoji: "🌬️", img: `${LOCAL}/breathe.gif` },
   { id: "wait", label: "Wait", emoji: "⏳", img: `${LOCAL}/wait.gif` },
   { id: "bathroom", label: "Bathroom", emoji: "🚽", img: `${LOCAL}/bathroom.gif` },
   { id: "i-dont-know", label: "I Don’t Know", emoji: "🤷", img: null },

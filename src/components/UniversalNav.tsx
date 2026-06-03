@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 const NAVIGATION_OPTIONS = [
   { id: "brain-dump", label: "Brain Dump", icon: "🧠", description: "Guidance center" },
   { id: "journal", label: "Journal", icon: "📓", description: "Logging center" },
-  { id: "breathe", label: "Breathe", icon: "🌬️", description: "Breathing exercises" },
+  { id: "breathe", label: "Flow", icon: "🌬️", description: "Breathing exercises" },
   { id: "unspoken", label: "Unspoken Chamber", icon: "🤐", description: "Silent space" },
   { id: "shadow-work", label: "Shadow Work", icon: "🌑", description: "Deep reflection" },
   { id: "wisdom", label: "Wisdom", icon: "✨", description: "Guidance & insights" },

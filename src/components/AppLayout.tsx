@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 const NAV_ITEMS = [
   { path: "/", label: "Home", icon: Home },
   { path: "/journal", label: "Journal", icon: BookOpen },
-  { path: "/breathe", label: "Breathe", icon: Wind },
+  { path: "/flow", label: "Flow", icon: Wind },
   { path: "/shop", label: "Portal", icon: Globe2 },
 ];
 

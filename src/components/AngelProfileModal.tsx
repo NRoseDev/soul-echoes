@@ -260,11 +260,11 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
             </div>
           )}
 
-          {/* Spiritual Tools */}
+          {/* Tools */}
           {spiritualTools && (
             <div className="space-y-2">
               <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: p.subtitleColor }}>
-                Spiritual Tools
+                Tools
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {[

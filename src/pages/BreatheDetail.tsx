@@ -908,14 +908,14 @@ function SectionContent({ id }: { id: SectionKey }) {
 
 /* ─── Main ─── */
 
-export default function BreatheDetail() {
+export default function FlowDetail() {
   const { section } = useParams<{ section: string }>();
   const navigate = useNavigate();
   const id = section as SectionKey;
   const title = sectionTitles[id];
   const { playing: ambientPlaying, start: startAmbient, stop: stopAmbient } = useAmbientSound();
 
-  if (!title) { navigate("/breathe", { replace: true }); return null; }
+  if (!title) { navigate("/flow", { replace: true }); return null; }
 
   const showPortal = ["meditation", "chakras", "sound-healing", "aura-cleansing"].includes(id);
   const showBook   = ["breathwork", "vagus-nerve", "cord-cutting"].includes(id);
@@ -930,7 +930,7 @@ export default function BreatheDetail() {
       className="flex-1 flex flex-col min-h-0 bg-gradient-to-br from-violet-950 via-slate-950 to-sky-950"
     >
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/breathe")} aria-label="Back">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/flow")} aria-label="Back">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="font-display text-xl font-bold text-foreground truncate flex-1">{title}</h1>

@@ -975,7 +975,7 @@ function SectionContent({ id, onOpenAngel }: { id: SectionKey; onOpenAngel: (a: 
               "Third Eye — Am I trusting my intuition? Or second-guessing, confused, or mentally overwhelmed?",
               "Crown — Am I connected to Source? Or feeling spiritually dry, disconnected, or alone?",
             ]} />
-            <p>Note which centers feel depleted. Give them attention through the corresponding practices in the Breathe room, Wisdom room, or the chakra section of this app.</p>
+            <p>Note which centers feel depleted. Give them attention through the corresponding practices in the Flow room, Wisdom room, or the chakra section of this app.</p>
           </Block>
 
           <Block title="Monthly Spiritual Review (30–60 Minutes, Once Per Month)">
@@ -1007,7 +1007,7 @@ export default function SpiritualToolsDetail() {
   const [selectedAngel, setSelectedAngel] = useState<ArchangelProfile | null>(null);
 
   if (!title) {
-    navigate("/spiritual-tools", { replace: true });
+    navigate("/tools", { replace: true });
     return null;
   }
 
@@ -1022,7 +1022,7 @@ export default function SpiritualToolsDetail() {
     >
       {/* Sticky Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/spiritual-tools")} aria-label="Back">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/tools")} aria-label="Back">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="font-display text-xl font-bold text-foreground truncate">{title}</h1>

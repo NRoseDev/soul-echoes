@@ -6,11 +6,11 @@ import {
 
 const rooms: Record<string, { title: string; description: string; icon: React.ElementType; colorClass: string }> = {
   "/journal": { title: "Journal", description: "Write freely. No rules, no judgment — just you and the page. Let your thoughts find their shape.", icon: BookOpen, colorClass: "text-healing-journal" },
-  "/breathe": { title: "Breathe", description: "Guided breathing exercises to calm your nervous system and reconnect with your body.", icon: Wind, colorClass: "text-healing-breathe" },
+  "/flow": { title: "Flow", description: "Guided breathing exercises to calm your nervous system and reconnect with your body.", icon: Wind, colorClass: "text-healing-breathe" },
   "/unspoken": { title: "Unspoken Chamber", description: "A space for the things you can't say out loud. Express through symbols, colors, and movement.", icon: VolumeX, colorClass: "text-healing-unspoken" },
   "/shadow-work": { title: "Shadow Work", description: "Gently explore the parts of yourself you've hidden. Growth lives in the shadows.", icon: Eclipse, colorClass: "text-healing-shadow" },
   "/wisdom": { title: "Wisdom", description: "Receive daily insights, affirmations, and ancient wisdom curated for your journey.", icon: Sparkles, colorClass: "text-healing-wisdom" },
-  "/spiritual-tools": { title: "Spiritual Tools", description: "Tarot pulls, oracle cards, moon phases, chakra guides, and more — all in one place.", icon: Compass, colorClass: "text-healing-tools" },
+  "/tools": { title: "Tools", description: "Tarot pulls, oracle cards, moon phases, chakra guides, and more — all in one place.", icon: Compass, colorClass: "text-healing-tools" },
   "/community": { title: "Community", description: "Connect with fellow seekers. Share, support, and grow together in a safe space.", icon: Users, colorClass: "text-healing-community" },
   "/practitioner": { title: "Practitioner Connect", description: "Find and connect with verified spiritual practitioners, healers, and therapists.", icon: Stethoscope, colorClass: "text-healing-practitioner" },
   "/crisis": { title: "Crisis Counselor", description: "You're not alone. Immediate support and resources are available for you right now.", icon: ShieldAlert, colorClass: "text-healing-crisis" },

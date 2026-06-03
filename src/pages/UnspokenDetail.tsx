@@ -55,7 +55,7 @@ const aslSigns = [
   { name: "Ground", category: "Healing Terms" },
   { name: "Hold", category: "Healing Terms" },
   { name: "Allow", category: "Healing Terms" },
-  { name: "Breathe", category: "Healing Terms" },
+  { name: "Flow", category: "Healing Terms" },
   { name: "Calm", category: "Healing Terms" },
   { name: "Open", category: "Healing Terms" },
   { name: "Soft", category: "Healing Terms" },

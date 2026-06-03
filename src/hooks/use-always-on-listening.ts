@@ -20,11 +20,11 @@ const DISTRESS_PHRASES = [
 const NAV_COMMANDS: [string[], string][] = [
   [["brain dump", "home", "go home", "main page", "start page"], "/"],
   [["journal", "go to journal", "open journal"], "/journal"],
-  [["breathe", "breathing", "go to breathe", "breathe room", "movement"], "/breathe"],
+  [["breathe", "breathing", "go to breathe", "breathe room", "movement"], "/flow"],
   [["unspoken", "unspoken chamber", "go to unspoken"], "/unspoken"],
   [["shadow", "shadow work", "go to shadow"], "/shadow-work"],
   [["wisdom", "go to wisdom", "wisdom room"], "/wisdom"],
-  [["spiritual", "spiritual tools", "tools", "go to tools"], "/spiritual-tools"],
+  [["spiritual", "spiritual tools", "tools", "go to tools"], "/tools"],
   [["community", "go to community"], "/community"],
   [["practitioner", "healer", "go to practitioner", "find a healer"], "/practitioner"],
   [["crisis", "crisis counselor", "go to crisis"], "/crisis"],
