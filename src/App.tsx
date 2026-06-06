@@ -13,6 +13,11 @@ import Auth from "./pages/Auth";
 import WisdomRoom from "./pages/WisdomRoom";
 import ToolsRoom from "./pages/ToolsRoom";
 import FlowRoom from "./pages/FlowRoom";
+import FlowDetail from "./pages/BreatheDetail";
+import WisdomDetail from "./pages/WisdomDetail";
+import SpiritualToolsDetail from "./pages/SpiritualToolsDetail";
+import UnspokenDetail from "./pages/UnspokenDetail";
+import ShadowWorkDetail from "./pages/ShadowWorkDetail";
 import LevelPage from "./pages/LevelPage";
 import PortalRoom from "./pages/PortalRoom";
 import CommunityRoom from "./pages/CommunityRoom";
@@ -29,21 +34,24 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/brain-dump" element={<BrainDump />} />
-              <Route path="/journal" element={<Journal />} />
-              <Route path="/voice-settings" element={<VoiceSettings />} />
-              <Route path="/wisdom" element={<WisdomRoom />} />
-              <Route path="/tools" element={<ToolsRoom />} />
-              <Route path="/flow" element={<FlowRoom />} />
+              <Route path="/" element={<AppLayout><BrainDump /></AppLayout>} />
+              <Route path="/brain-dump" element={<Navigate to="/" replace />} />
+              <Route path="/journal" element={<AppLayout><Journal /></AppLayout>} />
+              <Route path="/voice-settings" element={<AppLayout><VoiceSettings /></AppLayout>} />
+              <Route path="/wisdom" element={<AppLayout><WisdomRoom /></AppLayout>} />
+              <Route path="/wisdom/:section" element={<AppLayout><WisdomDetail /></AppLayout>} />
+              <Route path="/tools" element={<AppLayout><ToolsRoom /></AppLayout>} />
+              <Route path="/tools/:section" element={<AppLayout><SpiritualToolsDetail /></AppLayout>} />
+              <Route path="/flow" element={<AppLayout><FlowRoom /></AppLayout>} />
+              <Route path="/flow/:section" element={<AppLayout><FlowDetail /></AppLayout>} />
+              <Route path="/unspoken" element={<AppLayout><UnspokenDetail /></AppLayout>} />
+              <Route path="/shadow-work" element={<AppLayout><ShadowWorkDetail /></AppLayout>} />
               <Route path="/shop" element={<AppLayout><PortalRoom /></AppLayout>} />
               <Route path="/portal" element={<Navigate to="/shop" replace />} />
               <Route path="/community" element={<AppLayout><CommunityRoom /></AppLayout>} />
               <Route path="/:roomId/level/:levelNum" element={<LevelPage />} />
-              {/* Fallback to Index for unknown routes */}
               <Route path="*" element={<Navigate to="/" replace />} />
-
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
