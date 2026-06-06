@@ -1,7 +1,7 @@
 import { Volume2, Settings, Lock, CreditCard, Sparkles } from "lucide-react";
 import {
   BrainDumpIcon, JournalIcon, FlowIcon, UnspokenIcon,
-  ShadowIcon, WisdomIcon, ToolsIcon, PortalIcon,
+  ShadowIcon, WisdomIcon, ToolsIcon, PortalIcon, CommunityIcon,
 } from "@/components/icons/RoomIcons";
 
 import { NavLink } from "@/components/NavLink";
@@ -19,6 +19,7 @@ const healingRooms = [
   { title: "Shadow Work", url: "/shadow-work", icon: ShadowIcon, color: "text-red-600", free: false },
   { title: "Wisdom", url: "/wisdom", icon: WisdomIcon, color: "text-indigo-500", free: false },
   { title: "Tools", url: "/tools", icon: ToolsIcon, color: "text-yellow-400", free: false },
+  { title: "Community", url: "/community", icon: CommunityIcon, color: "text-violet-400", free: false },
   { title: "Portal", url: "/shop", icon: PortalIcon, color: "text-teal-400", free: true },
 ];
 

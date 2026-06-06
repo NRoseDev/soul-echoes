@@ -88,6 +88,14 @@ const SECTION_TABS = [
   { id: "guidelines", label: "Community Care",    icon: Shield },
 ] as const;
 
+const GUIDELINES = [
+  { title: "Confidentiality", desc: "What is shared in the circle stays in the circle. Respect the privacy and sacred stories of every seeker.", icon: Lock },
+  { title: "Witness, Don't Fix", desc: "We are here to hold space, not to solve. Offer your presence, empathy, and 'I feel' statements before any advice.", icon: Heart },
+  { title: "Content Notes", desc: "Use [CN] for heavy topics (trauma, loss, graphic detail) so others can choose when they are resourced enough to engage.", icon: Hash },
+  { title: "No Diagnosing", desc: "We are peers walking the same path, not practitioners. Speak from your own lived experience, not from a place of authority.", icon: Shield },
+  { title: "Crisis Routing", desc: "If you are in immediate danger or feeling unsafe, please visit the Portal → Crisis Counselor immediately. We are here to support, but we are not a crisis service.", icon: Activity, crisis: true },
+];
+
 export default function CommunityRoom() {
   const [activeSection, setActiveSection] = useState<SectionId>("circles");
   const [openCircle, setOpenCircle] = useState<CircleId | null>(null);
@@ -429,18 +437,25 @@ export default function CommunityRoom() {
                 </p>
               </div>
 
-              <div className="space-y-2">
-                {[
-                  { t: "Confidentiality first", d: "What's shared in the circles stays in the circles. Don't screenshot, repost, or out anyone." },
-                  { t: "Witness, don't fix", d: "Sometimes people need to be heard, not solved. Lead with empathy; only give advice when it's asked for." },
-                  { t: "Use content notes", d: "If your story includes trauma, self-harm, or graphic detail, name it at the top so others can choose." },
-                  { t: "No diagnosing or prescribing", d: "Share what's worked for you. Don't tell anyone else what they have or what to take." },
-                  { t: "Honor every body, mind & path", d: "All faiths, none, all bodies, all neurotypes, all identities. Disagreement is fine; contempt isn't." },
-                  { t: "Crisis goes to Crisis Counselor", d: "If you or someone is in danger, open the Portal → Crisis Counselor or call 988. We are peers, not professionals." },
-                ].map((g) => (
-                  <div key={g.t} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 space-y-1">
-                    <p className="text-sm font-semibold text-foreground">{g.t}</p>
-                    <p className="text-xs text-foreground/65 leading-relaxed">{g.d}</p>
+              <div className="space-y-3">
+                {GUIDELINES.map((g, i) => (
+                  <div key={i} className={`rounded-2xl border p-4 space-y-1.5 transition-all ${g.crisis ? 'bg-rose-500/10 border-rose-400/30 shadow-[0_0_15px_rgba(244,63,94,0.1)]' : 'bg-white/[0.04] border-white/10'}`}>
+                    <div className="flex items-center gap-2.5">
+                      <g.icon className={`h-4 w-4 ${g.crisis ? 'text-rose-300' : 'text-violet-300'}`} />
+                      <p className={`text-sm font-bold ${g.crisis ? 'text-rose-200' : 'text-foreground'}`}>{g.title}</p>
+                    </div>
+                    <p className="text-xs text-foreground/70 leading-relaxed pl-6.5">{g.desc}</p>
+                    {g.crisis && (
+                      <div className="pl-6.5 pt-1">
+                        <Button 
+                          variant="link" 
+                          className="p-0 h-auto text-rose-300 text-[11px] font-bold hover:text-rose-200 underline underline-offset-2"
+                          onClick={() => navigate("/shop")}
+                        >
+                          Go to Crisis Counselor →
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

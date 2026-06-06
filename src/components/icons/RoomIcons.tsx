@@ -167,3 +167,15 @@ export function PortalIcon({ className }: Props) {
     </svg>
   );
 }
+
+export function CommunityIcon({ className }: Props) {
+  // Three overlapping circles forming a central heart-like space — community unity
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className={className ?? base} aria-hidden="true">
+      <circle cx="12" cy="9" r="5" stroke="#f472b6" strokeOpacity="0.8" />
+      <circle cx="8.5" cy="15" r="5" stroke="#a78bfa" strokeOpacity="0.8" />
+      <circle cx="15.5" cy="15" r="5" stroke="#fbbf24" strokeOpacity="0.8" />
+      <circle cx="12" cy="13" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}

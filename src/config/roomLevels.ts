@@ -82,16 +82,6 @@ export const ROOM_LEVELS: Record<string, RoomLevelTrack> = {
       "Embodied States",
     ]),
   },
-  breathe: {
-    roomId: "breathe",
-    roomTitle: "Breathe",
-    routeBase: "/breathe",
-    levels: stubLevels("breathe", [
-      "Foundations of Breath",
-      "Nervous-System Regulation",
-      "Breathwork for Release",
-    ]),
-  },
   unspoken: {
     roomId: "unspoken",
     roomTitle: "Unspoken Chamber",
@@ -124,7 +114,7 @@ export const ROOM_LEVELS: Record<string, RoomLevelTrack> = {
   },
   tools: {
     roomId: "tools",
-    roomTitle: "Spiritual Tools",
+    roomTitle: "Tools",
     routeBase: "/tools",
     levels: stubLevels("tools", [
       "Foundational Tools",
