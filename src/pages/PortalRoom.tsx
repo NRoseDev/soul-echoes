@@ -512,8 +512,16 @@ function PractitionerCard({
 }
 
 /* ─── Main Page ──────────────────────────────────────────────────────────── */
-export default function PortalRoom() {
-  const [activeSection, setActiveSection] = useState<SectionId>("products");
+interface PortalRoomProps {
+  initialSection?: SectionId;
+}
+
+export default function PortalRoom({ initialSection = "products" }: PortalRoomProps) {
+  const [activeSection, setActiveSection] = useState<SectionId>(initialSection);
+
+  useEffect(() => {
+    setActiveSection(initialSection);
+  }, [initialSection]);
   const [productCategory, setProductCategory] = useState("all");
   const [savedItems, setSavedItems] = useState<SavedItem[]>(loadSaved);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);

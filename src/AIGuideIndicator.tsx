@@ -74,8 +74,8 @@ const ROOM_MAP: Record<string, string> = {
   "Take me to Wisdom": "/wisdom",
   "Take me to Tools": "/tools",
   "Take me to Community": "/community",
-  "Connect to a Healer": "/practitioner",
-  "Get Crisis Support": "/crisis",
+  "Connect to a Healer": "/practitioner-connect",
+  "Get Crisis Support": "/crisis-counselor",
 };
 
 interface AIGuideIndicatorProps {

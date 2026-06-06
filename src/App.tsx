@@ -47,7 +47,9 @@ const App = () => (
               <Route path="/flow/:section" element={<AppLayout><FlowDetail /></AppLayout>} />
               <Route path="/unspoken" element={<AppLayout><UnspokenDetail /></AppLayout>} />
               <Route path="/shadow-work" element={<AppLayout><ShadowWorkDetail /></AppLayout>} />
-              <Route path="/shop" element={<AppLayout><PortalRoom /></AppLayout>} />
+              <Route path="/shop" element={<AppLayout><PortalRoom initialSection="products" /></AppLayout>} />
+              <Route path="/practitioner-connect" element={<AppLayout><PortalRoom initialSection="practitioners" /></AppLayout>} />
+              <Route path="/crisis-counselor" element={<AppLayout><PortalRoom initialSection="crisis" /></AppLayout>} />
               <Route path="/portal" element={<Navigate to="/shop" replace />} />
               <Route path="/community" element={<AppLayout><CommunityRoom /></AppLayout>} />
               <Route path="/:roomId/level/:levelNum" element={<LevelPage />} />
