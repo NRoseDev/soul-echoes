@@ -19,7 +19,7 @@ const healingRooms = [
   { title: "Shadow Work", url: "/shadow-work", icon: ShadowIcon, color: "text-red-600", free: false },
   { title: "Wisdom", url: "/wisdom", icon: WisdomIcon, color: "text-indigo-500", free: false },
   { title: "Tools", url: "/tools", icon: ToolsIcon, color: "text-yellow-400", free: false },
-  { title: "Community", url: "/community", icon: CommunityIcon, color: "text-violet-400", free: false },
+  { title: "Community", url: "/community", icon: CommunityIcon, color: "text-violet-400", free: false, fill: true },
   { title: "Portal", url: "/shop", icon: PortalIcon, color: "text-teal-400", free: true },
 ];
 
@@ -68,7 +68,7 @@ export function AppSidebar() {
                         aria-current={isActive ? "page" : undefined}
                       >
                         <item.icon
-                          className={`h-5 w-5 shrink-0 ${isActive ? "text-sidebar-primary" : item.color}`}
+                          className={`h-5 w-5 shrink-0 ${isActive ? "text-sidebar-primary" : item.color} ${item.fill ? "p-0.5" : ""}`}
                         />
                         {!collapsed && (
                           <span className="text-sm flex-1">{item.title}</span>

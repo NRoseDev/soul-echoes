@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import HealingJourneys from "@/components/HealingJourneys";
-import communityIcon from "@/assets/community-icon.jpg.asset.json";
+import communityIcon from "@/assets/community-icon.png";
 
-type CircleId = "physical" | "mental" | "spiritual";
+type CircleId = "physical" | "mental" | "spiritual" | "energy";
 type SectionId = "circles" | "stories" | "journeys" | "guidelines";
 
 interface Circle {
@@ -46,7 +46,7 @@ const CIRCLES: Circle[] = [
     desc: "Chronic illness, pain, disability, recovery, nervous system, sleep, energy, food, movement.",
     icon: Activity,
     hue: "rose",
-    topics: ["Chronic Pain", "Fatigue", "Sleep", "Disability", "Recovery", "Nervous System", "Food & Body", "Movement"],
+    topics: ["Chronic Pain", "Fatigue", "Sleep", "Disability", "Recovery", "Nervous System", "Food & Body", "Movement", "Gut Health", "Hormonal Balance", "Stress Response"],
   },
   {
     id: "mental",
@@ -55,7 +55,7 @@ const CIRCLES: Circle[] = [
     desc: "Anxiety, depression, trauma, grief, neurodivergence, relationships, identity, burnout, inner child.",
     icon: Brain,
     hue: "violet",
-    topics: ["Anxiety", "Depression", "Trauma & PTSD", "Grief", "Neurodivergent", "Relationships", "Inner Child", "Burnout"],
+    topics: ["Anxiety", "Depression", "Trauma & PTSD", "Grief", "Neurodivergent", "Relationships", "Identity", "Burnout", "Inner Child", "Self-Worth", "Emotional Regulation"],
   },
   {
     id: "spiritual",
@@ -64,7 +64,16 @@ const CIRCLES: Circle[] = [
     desc: "Awakening, dark night, faith shifts, ancestral healing, mysticism, prayer, signs, ceremony.",
     icon: Flower2,
     hue: "amber",
-    topics: ["Awakening", "Dark Night", "Faith Shift", "Ancestors", "Prayer", "Signs", "Mysticism", "Ceremony"],
+    topics: ["Awakening", "Dark Night", "Faith Shift", "Ancestors", "Prayer", "Signs", "Mysticism", "Ceremony", "Ritual", "Synchronicity", "Higher Self"],
+  },
+  {
+    id: "energy",
+    label: "Energy & Spirit",
+    tagline: "Beyond the veil, within the flow",
+    desc: "Chakras, aura, reiki, intuition, psychic abilities, mediumship, manifestation, cosmic connection, sacred geometry.",
+    icon: Sparkles,
+    hue: "emerald",
+    topics: ["Chakras", "Aura", "Reiki", "Intuition", "Psychic", "Mediumship", "Manifestation", "Cosmic", "Sacred Geometry", "Energetic Boundaries", "Grounding"],
   },
 ];
 
@@ -81,6 +90,7 @@ const HUE_STYLES = {
   rose:   { text: "text-rose-300",   bg: "bg-rose-500/15",   border: "border-rose-400/40",   glow: "shadow-[0_0_24px_rgba(244,114,182,0.35)]", chip: "bg-rose-500/15 text-rose-200 border-rose-400/30" },
   violet: { text: "text-violet-300", bg: "bg-violet-500/15", border: "border-violet-400/40", glow: "shadow-[0_0_24px_rgba(167,139,250,0.35)]", chip: "bg-violet-500/15 text-violet-200 border-violet-400/30" },
   amber:  { text: "text-amber-300",  bg: "bg-amber-500/15",  border: "border-amber-400/40", glow: "shadow-[0_0_24px_rgba(251,191,36,0.35)]",  chip: "bg-amber-500/15 text-amber-200 border-amber-400/30" },
+  emerald: { text: "text-emerald-300", bg: "bg-emerald-500/15", border: "border-emerald-400/40", glow: "shadow-[0_0_24px_rgba(52,211,153,0.35)]", chip: "bg-emerald-500/15 text-emerald-200 border-emerald-400/30" },
 } as const;
 
 const SECTION_TABS = [
