@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart, Brain, Sparkles, MessageCircle, Users, Plus, Send,
   Activity, Flower2, Shield, Search, Hash, ArrowRight,
+  Lock,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -97,6 +99,7 @@ const GUIDELINES = [
 ];
 
 export default function CommunityRoom() {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<SectionId>("circles");
   const [openCircle, setOpenCircle] = useState<CircleId | null>(null);
   const [storyFilter, setStoryFilter] = useState<CircleId | "all">("all");
