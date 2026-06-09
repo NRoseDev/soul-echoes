@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import HealingJourneys from "@/components/HealingJourneys";
 import communityIcon from "@/assets/community-icon.png";
 
-type CircleId = "physical" | "mental" | "spiritual" | "energy";
+type CircleId = "physical" | "mental" | "emotional" | "energy";
 type SectionId = "circles" | "stories" | "journeys" | "guidelines";
 
 interface Circle {
@@ -50,21 +50,21 @@ const CIRCLES: Circle[] = [
   },
   {
     id: "mental",
-    label: "Mental & Emotional",
-    tagline: "Minds that won't quiet, hearts that hold too much",
-    desc: "Anxiety, depression, trauma, grief, neurodivergence, relationships, identity, burnout, inner child.",
+    label: "Mental Healing",
+    tagline: "Minds that won't quiet",
+    desc: "Neurodivergence, cognitive patterns, focus, clarity, learning, belief systems, mental health, psychology.",
     icon: Brain,
     hue: "violet",
-    topics: ["Anxiety", "Depression", "Trauma & PTSD", "Grief", "Neurodivergent", "Relationships", "Identity", "Burnout", "Inner Child", "Self-Worth", "Emotional Regulation"],
+    topics: ["Neurodivergent", "Cognitive Patterns", "Focus", "Clarity", "Learning", "Belief Systems", "Mental Health", "Psychology", "ADHD", "Autism", "OCD"],
   },
   {
-    id: "spiritual",
-    label: "Spiritual Awakening",
-    tagline: "Souls returning home",
-    desc: "Awakening, dark night, faith shifts, ancestral healing, mysticism, prayer, signs, ceremony.",
-    icon: Flower2,
+    id: "emotional",
+    label: "Emotional Healing",
+    tagline: "Hearts that hold too much",
+    desc: "Anxiety, depression, trauma, grief, relationships, identity, burnout, inner child, self-worth, emotional regulation.",
+    icon: Heart,
     hue: "amber",
-    topics: ["Awakening", "Dark Night", "Faith Shift", "Ancestors", "Prayer", "Signs", "Mysticism", "Ceremony", "Ritual", "Synchronicity", "Higher Self"],
+    topics: ["Anxiety", "Depression", "Trauma & PTSD", "Grief", "Relationships", "Identity", "Burnout", "Inner Child", "Self-Worth", "Emotional Regulation", "Attachment Styles"],
   },
   {
     id: "energy",
@@ -79,11 +79,11 @@ const CIRCLES: Circle[] = [
 
 const SEED_STORIES: Story[] = [
   { id: "s1", circle: "physical", author: "Maya R.", initial: "M", title: "Fibromyalgia flare — anyone else feeling the weather shift?", body: "Five days in. Trying gentle yin, magnesium, and warm baths. What's helping you right now?", hearts: 24, replies: 7, tag: "Chronic Pain", timeAgo: "2h" },
-  { id: "s2", circle: "mental", author: "James O.", initial: "J", title: "I made it through a panic attack without leaving the room.", body: "Six months ago I would've run. Today I breathed, counted, and stayed. Small win — but it's mine.", hearts: 58, replies: 14, tag: "Anxiety", timeAgo: "5h" },
-  { id: "s3", circle: "spiritual", author: "Sadé M.", initial: "S", title: "Dark night of the soul — month 4. Still here.", body: "Everything I believed has cracked open. It's terrifying. But I keep showing up. Anyone walked this path before?", hearts: 41, replies: 19, tag: "Dark Night", timeAgo: "8h" },
+  { id: "s2", circle: "emotional", author: "James O.", initial: "J", title: "I made it through a panic attack without leaving the room.", body: "Six months ago I would've run. Today I breathed, counted, and stayed. Small win — but it's mine.", hearts: 58, replies: 14, tag: "Anxiety", timeAgo: "5h" },
+  { id: "s3", circle: "energy", author: "Sadé M.", initial: "S", title: "Dark night of the soul — month 4. Still here.", body: "Everything I believed has cracked open. It's terrifying. But I keep showing up. Anyone walked this path before?", hearts: 41, replies: 19, tag: "Dark Night", timeAgo: "8h" },
   { id: "s4", circle: "physical", author: "Lena V.", initial: "L", title: "Newly diagnosed with EDS. Looking for others who get it.", body: "Just got the diagnosis after years of being told it's anxiety. Both relieved and overwhelmed.", hearts: 32, replies: 11, tag: "Disability", timeAgo: "1d" },
-  { id: "s5", circle: "mental", author: "Kwame A.", initial: "K", title: "Therapist said grief isn't linear. I'm learning what that means.", body: "Lost my dad last spring. Some days I'm functional, some I can't get out of bed. Both are okay, apparently.", hearts: 67, replies: 22, tag: "Grief", timeAgo: "1d" },
-  { id: "s6", circle: "spiritual", author: "Rosa E.", initial: "R", title: "Started praying for my ancestors. Something shifted.", body: "I lit a candle, called their names, and asked for guidance. The weight I've carried for years felt lighter.", hearts: 53, replies: 16, tag: "Ancestors", timeAgo: "2d" },
+  { id: "s5", circle: "emotional", author: "Kwame A.", initial: "K", title: "Therapist said grief isn't linear. I'm learning what that means.", body: "Lost my dad last spring. Some days I'm functional, some I can't get out of bed. Both are okay, apparently.", hearts: 67, replies: 22, tag: "Grief", timeAgo: "1d" },
+  { id: "s6", circle: "energy", author: "Rosa E.", initial: "R", title: "Started praying for my ancestors. Something shifted.", body: "I lit a candle, called their names, and asked for guidance. The weight I've carried for years felt lighter.", hearts: 53, replies: 16, tag: "Ancestors", timeAgo: "2d" },
 ];
 
 const HUE_STYLES = {
@@ -228,10 +228,10 @@ export default function CommunityRoom() {
               <div className="rounded-2xl bg-gradient-to-r from-rose-500/10 via-violet-500/10 to-amber-500/10 border border-white/10 p-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-violet-300" />
-                  <p className="text-sm font-semibold text-foreground">Three circles of healing</p>
+                  <p className="text-sm font-semibold text-foreground">Four circles of healing</p>
                 </div>
                 <p className="text-xs text-foreground/70 leading-relaxed">
-                  Healing is never just one thing. Choose the circle that calls to you — body, mind, or spirit — and meet others walking the same road.
+                  Healing is never just one thing. Choose the circle that calls to you — body, mind, heart, or spirit — and meet others walking the same road.
                 </p>
               </div>
 
