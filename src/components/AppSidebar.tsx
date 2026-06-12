@@ -68,7 +68,7 @@ export function AppSidebar() {
                         aria-current={isActive ? "page" : undefined}
                       >
                         <item.icon
-                          className={`h-5 w-5 shrink-0 ${isActive ? "text-sidebar-primary" : item.color} ${item.fill ? "p-0.5" : ""}`}
+                          className={`h-5 w-5 shrink-0 ${isActive ? "text-sidebar-primary" : item.color}`}
                         />
                         {!collapsed && (
                           <span className="text-sm flex-1">{item.title}</span>
