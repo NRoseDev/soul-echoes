@@ -19,7 +19,7 @@ const sections = [
   { id: "essential-oils", title: "Essential Oils & Plant Medicine", description: "Sacred plant allies for protection, healing, and spiritual work — always Source-centered.", icon: Droplet, colorClass: "text-emerald-400" },
   { id: "numerology-angel-numbers", title: "Numerology & Angel Numbers", description: "Life Path numbers, soul urge, and the meaning behind repeating angel numbers.", icon: Hash, colorClass: "text-rose-300" },
   { id: "nature-signs", title: "Nature Signs & Synchronicities", description: "Nature speaks the language of the divine — learn to read its messages and signs.", icon: Leaf, colorClass: "text-lime-400" },
-  { id: "energy-clearing", title: "Energy Clearing", description: "Remove energetic blocks, limiting beliefs, and inherited trauma patterns.", icon: Zap, colorClass: "text-indigo-400" },
+  { id: "energy-clearing", title: "Energy Clearing", description: "Clear blocks, toxic ties, or lingering residue in your space using sacred botanical elements like White Sage and Palo Santo wood.", icon: Zap, colorClass: "text-indigo-400" },
   { id: "soul-ties", title: "Soul Ties", description: "Deep emotional/spiritual connections between people — healthy and unhealthy bonds explained.", icon: Heart, colorClass: "text-pink-400" },
   
   // Placeholders (11)
