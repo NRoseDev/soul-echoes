@@ -463,6 +463,7 @@ function SectionContent({ id, onOpenAngel }: { id: SectionKey; onOpenAngel: (a: 
               "Seasonally — quarterly as spiritual maintenance",
             ]} />
           </Block>
+          <BotanicalSmudgingSection />
         </div>
       );
 
