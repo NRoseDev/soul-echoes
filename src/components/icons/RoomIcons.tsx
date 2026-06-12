@@ -172,6 +172,13 @@ import communityIconPng from "@/assets/community-icon.png";
 
 export function CommunityIcon({ className }: Props) {
   return (
-    <img src={communityIconPng} alt="Community" className={className ?? base} aria-hidden="true" />
+    <div className={`overflow-hidden rounded-full ${className ?? base}`}>
+      <img
+        src={communityIconPng}
+        alt="Community"
+        className="w-full h-full object-cover"
+        aria-hidden="true"
+      />
+    </div>
   );
 }
