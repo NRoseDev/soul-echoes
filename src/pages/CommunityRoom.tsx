@@ -21,7 +21,7 @@ interface Circle {
   tagline: string;
   desc: string;
   icon: React.ElementType;
-  hue: "rose" | "violet" | "amber";
+  hue: "rose" | "violet" | "amber" | "emerald";
   topics: string[];
 }
 
@@ -181,7 +181,7 @@ export default function CommunityRoom() {
       <div className="px-4 pt-5 pb-3 shrink-0">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl overflow-hidden bg-white/[0.06] border border-white/15 p-1 flex items-center justify-center shadow-[0_0_24px_rgba(167,139,250,0.4)]">
-            <img src={communityIcon.url} alt="Community" className="w-full h-full object-contain" loading="eager" decoding="async" />
+            <img src={communityIcon} alt="Community" className="w-full h-full object-contain" loading="eager" decoding="async" />
           </div>
           <div>
             <h1 className="font-display text-2xl font-bold bg-gradient-to-r from-rose-300 via-violet-300 to-amber-300 bg-clip-text text-transparent leading-tight">
