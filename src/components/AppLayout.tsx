@@ -103,14 +103,31 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
         <FloatingHub inputMethod={inputMethod} />
         
-        {/* Streamlined, high-utility Bottom Navigation Bar */}
-        <nav className="shrink-0 flex items-center justify-around px-2 py-2 border-t border-white/10" style={{ background: "hsl(260, 40%, 5%)" }} aria-label="Main navigation" >
+        {/* Premium Bottom Navigation Bar */}
+        <nav className="shrink-0 flex items-center justify-around px-2 py-2.5 border-t border-white/10 bg-background/60 backdrop-blur-md" aria-label="Main navigation">
           {NAV_ITEMS.map((item) => {
             const active = location.pathname === item.path;
             return (
-              <button key={item.path} onClick={() => navigate(item.path)} className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-colors ${active ? "text-purple-400" : "text-white/50 hover:text-white/80"}`} aria-label={item.label} aria-current={active ? "page" : undefined} >
-                <item.icon size={20} strokeWidth={active ? 2.5 : 1.5} />
-                <span className="text-[10px] font-medium">{item.label}</span>
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={`relative flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all duration-200 ${
+                  active
+                    ? "text-amber-400"
+                    : "text-white/40 hover:text-white/80"
+                }`}
+                aria-label={item.label}
+                aria-current={active ? "page" : undefined}
+              >
+                <item.icon
+                  size={22}
+                  strokeWidth={active ? 2.5 : 1.5}
+                  className={active ? "drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]" : ""}
+                />
+                <span className="text-[10px] font-semibold tracking-wide">{item.label}</span>
+                {active && (
+                  <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-1 w-6 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+                )}
               </button>
             );
           })}
