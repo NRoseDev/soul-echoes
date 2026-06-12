@@ -1,11 +1,124 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, HeartHandshake } from "lucide-react";
+import { ArrowLeft, HeartHandshake, Flame, Leaf, Wind, SprayCan, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { ARCHANGELS, type ArchangelProfile } from "@/data/angelData";
 import { ANGEL_EXTRAS } from "@/data/angelExtras";
 import AngelProfileModal from "@/components/AngelProfileModal";
+
+type BotanicalTool = {
+  name: string;
+  subtitle: string;
+  description: string;
+  howToUse: string;
+  Icon: React.ComponentType<{ className?: string }>;
+};
+
+const BOTANICAL_TOOLS: BotanicalTool[] = [
+  {
+    name: "White Sage Sticks",
+    subtitle: "Smudge Stick for Deep Cleansing",
+    description:
+      "Bundled, dried leaves of Salvia apiana used for traditional energetic purification. Ideal for clearing heavy, stagnant, or negative energy from a room, object, or aura.",
+    howToUse:
+      "Light the tip until it catches a flame, gently blow it out so it smudges/smokes, and wave the smoke into the corners of your room or around your body. Rest it safely in an abalone shell or ceramic dish when finished.",
+    Icon: Leaf,
+  },
+  {
+    name: "Palo Santo Sticks",
+    subtitle: "Holy Wood for Positive Vibes",
+    description:
+      "Natural aromatic wood pieces cut from the Bursera graveolens tree. Emits a sweet, citrusy, and pine-like aroma when burned. Used to invite in peace, positive energy, and good fortune.",
+    howToUse:
+      "Hold the stick at a 45-degree angle and light the tip. Let it burn for 30 seconds to a minute, then blow it out. Move through your space allowing the fragrant smoke to settle, blowing gently on the embers if the smoke thins.",
+    Icon: Flame,
+  },
+  {
+    name: "Sweetgrass Braids",
+    subtitle: "Sacred Grass for Blessing & Harmony",
+    description:
+      "Long, braided strands of sweet-smelling grass traditionally burned after clearing to invite in good spirits and harmony.",
+    howToUse:
+      "Light the very end of the braid, blow out the flame, and let the sweet, vanilla-like smoke fill the space. Keep a heat-safe dish underneath to catch any falling embers.",
+    Icon: Wind,
+  },
+  {
+    name: "Copal Resin",
+    subtitle: "Sacred Resin for Protection & Uplifting",
+    description:
+      "A bright, pine-scented natural tree resin native to Mexico and Central America, used to clear heavy spirits and elevate focus.",
+    howToUse:
+      "Place a charcoal disc inside a heat-resistant burner and light it. Once the charcoal turns gray with ash, place a few small pieces of copal resin directly on top to release a rich, dense cleansing smoke.",
+    Icon: Sparkles,
+  },
+];
+
+const SMOKELESS_TOOL: BotanicalTool = {
+  name: "Smokeless Smudge Sprays",
+  subtitle: "Liquid Mist for Clear Spaces",
+  description:
+    "Alcohol or water-based sprays infused with pure white sage and palo santo essential oils, often charged with quartz crystals. Perfect for apartments, offices, or smoke-sensitive areas.",
+  howToUse:
+    "Shake well and spray 2-3 times into the air toward the corners of the room, or lightly mist your personal aura to instantly refresh the energy without any smoke.",
+  Icon: SprayCan,
+};
+
+function BotanicalSmudgingSection() {
+  const [smokeless, setSmokeless] = useState(false);
+  const tools = smokeless ? [SMOKELESS_TOOL] : BOTANICAL_TOOLS;
+
+  return (
+    <div className="bg-muted/60 rounded-2xl p-4 border border-border/60 space-y-3">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h2 className="font-display text-base font-bold text-foreground">Botanical Smudging & Cleansing</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Plant-based tools for clearing and consecrating space, body, and objects.
+          </p>
+        </div>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+          <span>Show Smokeless Alternatives</span>
+          <Switch checked={smokeless} onCheckedChange={setSmokeless} />
+        </label>
+      </div>
+
+      <Accordion type="multiple" className="space-y-2">
+        {tools.map((tool) => {
+          const { Icon } = tool;
+          return (
+            <AccordionItem
+              key={tool.name}
+              value={tool.name}
+              className="border border-border/40 rounded-xl px-3 bg-background/40"
+            >
+              <AccordionTrigger className="py-3 hover:no-underline">
+                <div className="flex items-center gap-3 text-left">
+                  <span className="flex-shrink-0 h-9 w-9 rounded-full bg-primary/15 flex items-center justify-center">
+                    <Icon className="h-4 w-4 text-primary" />
+                  </span>
+                  <div>
+                    <p className="font-semibold text-foreground text-sm leading-tight">{tool.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{tool.subtitle}</p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3 space-y-2 text-sm text-muted-foreground leading-relaxed">
+                <p>{tool.description}</p>
+                <div className="rounded-lg border border-border/40 bg-muted/40 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">How to Use</p>
+                  <p className="text-xs">{tool.howToUse}</p>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
+    </div>
+  );
+}
 
 type SectionKey =
   | "source-tools-vs-source"
