@@ -21,7 +21,7 @@ interface Circle {
   tagline: string;
   desc: string;
   icon: React.ElementType;
-  hue: "rose" | "violet" | "amber";
+  hue: "rose" | "violet" | "amber" | "emerald";
   topics: string[];
 }
 
