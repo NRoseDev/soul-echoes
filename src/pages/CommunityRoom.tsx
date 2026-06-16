@@ -180,8 +180,8 @@ export default function CommunityRoom() {
       {/* Header */}
       <div className="px-4 pt-5 pb-3 shrink-0">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl overflow-hidden bg-white/[0.06] border border-white/15 p-1 flex items-center justify-center shadow-[0_0_24px_rgba(167,139,250,0.4)]">
-            <img src={communityIcon} alt="Community" className="w-full h-full object-contain" loading="eager" decoding="async" />
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-white/[0.06] border border-white/15 shadow-[0_0_24px_rgba(167,139,250,0.4)]">
+            <img src={communityIcon} alt="Community" className="w-full h-full object-cover" loading="eager" decoding="async" />
           </div>
           <div>
             <h1 className="font-display text-2xl font-bold bg-gradient-to-r from-rose-300 via-violet-300 to-amber-300 bg-clip-text text-transparent leading-tight">
@@ -228,7 +228,7 @@ export default function CommunityRoom() {
               <div className="rounded-2xl bg-gradient-to-r from-rose-500/10 via-violet-500/10 to-amber-500/10 border border-white/10 p-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-violet-300" />
-                  <p className="text-sm font-semibold text-foreground">Three circles of healing</p>
+                  <p className="text-sm font-semibold text-foreground">Four circles of healing</p>
                 </div>
                 <p className="text-xs text-foreground/70 leading-relaxed">
                   Healing is never just one thing. Choose the circle that calls to you — body, mind, or spirit — and meet others walking the same road.
