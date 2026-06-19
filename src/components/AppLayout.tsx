@@ -2,18 +2,19 @@ import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Wind, MessageCircleOff, Moon, Sparkles, Flame, Check, Globe2, Users } from "lucide-react";
+import { Home, Check } from "lucide-react";
 import FloatingHub from "@/components/FloatingHub";
 import { getPreferences, savePreferences, type InputMethod } from "@/lib/preferences";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { JournalIcon, FlowIcon, CommunityIcon, PortalIcon } from "@/components/icons/RoomIcons";
 
 // Clean, streamlined navigation structure for a clear user flow
 const NAV_ITEMS = [
   { path: "/", label: "Home", icon: Home },
-  { path: "/journal", label: "Journal", icon: BookOpen },
-  { path: "/flow", label: "Flow", icon: Wind },
-  { path: "/community", label: "Community", icon: Users },
-  { path: "/shop", label: "Portal", icon: Globe2 },
+  { path: "/journal", label: "Journal", icon: JournalIcon },
+  { path: "/flow", label: "Flow", icon: FlowIcon },
+  { path: "/community", label: "Community", icon: CommunityIcon },
+  { path: "/shop", label: "Portal", icon: PortalIcon },
 ];
 
 const COMM_MODES: { id: InputMethod; label: string; emoji: string; desc: string; detail?: string }[] = [
