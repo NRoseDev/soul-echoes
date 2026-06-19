@@ -2,18 +2,19 @@ import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Wind, MessageCircleOff, Moon, Sparkles, Flame, Check, Globe2, Users } from "lucide-react";
+import { Home, Check } from "lucide-react";
 import FloatingHub from "@/components/FloatingHub";
 import { getPreferences, savePreferences, type InputMethod } from "@/lib/preferences";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { JournalIcon, FlowIcon, CommunityIcon, PortalIcon } from "@/components/icons/RoomIcons";
 
 // Clean, streamlined navigation structure for a clear user flow
 const NAV_ITEMS = [
   { path: "/", label: "Home", icon: Home },
-  { path: "/journal", label: "Journal", icon: BookOpen },
-  { path: "/flow", label: "Flow", icon: Wind },
-  { path: "/community", label: "Community", icon: Users },
-  { path: "/shop", label: "Portal", icon: Globe2 },
+  { path: "/journal", label: "Journal", icon: JournalIcon },
+  { path: "/flow", label: "Flow", icon: FlowIcon },
+  { path: "/community", label: "Community", icon: CommunityIcon },
+  { path: "/shop", label: "Portal", icon: PortalIcon },
 ];
 
 const COMM_MODES: { id: InputMethod; label: string; emoji: string; desc: string; detail?: string }[] = [
@@ -119,11 +120,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 aria-label={item.label}
                 aria-current={active ? "page" : undefined}
               >
-                <item.icon
-                  size={22}
-                  strokeWidth={active ? 2.5 : 1.5}
-                  className={active ? "drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]" : ""}
-                />
+                <span className={`flex items-center justify-center w-[22px] h-[22px] ${active ? "drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]" : ""}`}>
+                  <item.icon
+                    size={22}
+                    strokeWidth={active ? 2.5 : 1.5}
+                    className="w-full h-full"
+                  />
+                </span>
                 <span className="text-[10px] font-semibold tracking-wide">{item.label}</span>
                 {active && (
                   <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-1 w-6 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
