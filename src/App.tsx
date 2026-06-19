@@ -21,6 +21,8 @@ import ShadowWorkDetail from "./pages/ShadowWorkDetail";
 import LevelPage from "./pages/LevelPage";
 import PortalRoom from "./pages/PortalRoom";
 import CommunityRoom from "./pages/CommunityRoom";
+import Pricing from "./pages/Pricing";
+import Settings from "./pages/Settings";
 import { AppLayout } from "@/components/AppLayout";
 
 const queryClient = new QueryClient();
