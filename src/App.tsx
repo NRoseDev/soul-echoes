@@ -54,6 +54,8 @@ const App = () => (
               <Route path="/crisis-counselor" element={<AppLayout><PortalRoom initialSection="crisis" /></AppLayout>} />
               <Route path="/portal" element={<Navigate to="/shop" replace />} />
               <Route path="/community" element={<AppLayout><CommunityRoom /></AppLayout>} />
+              <Route path="/pricing" element={<AppLayout><Pricing /></AppLayout>} />
+              <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
               <Route path="/:roomId/level/:levelNum" element={<LevelPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
