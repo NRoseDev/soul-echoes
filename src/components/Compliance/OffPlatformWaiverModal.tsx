@@ -1,5 +1,4 @@
 import React, { useRef, useState } from "react";
-import SignatureCanvas from "react-signature-canvas";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -14,13 +13,18 @@ interface OffPlatformWaiverModalProps {
   onRejected: () => void;
 }
 
+/**
+ * Mandatory Off-Platform User Waiver
+ * Freezes navigation and deploys digital contract when user exits Soul Echoes
+ * to work with a practitioner under external fees
+ */
 export const OffPlatformWaiverModal: React.FC<OffPlatformWaiverModalProps> = ({
   isOpen,
   practitionerName,
   onSigned,
   onRejected,
 }) => {
-  const sigRef = useRef<SignatureCanvas>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [acknowledgments, setAcknowledgments] = useState({
     leavingSafeSpace: false,
     releasingPlatform: false,
@@ -28,6 +32,7 @@ export const OffPlatformWaiverModal: React.FC<OffPlatformWaiverModalProps> = ({
     privateAgreement: false,
   });
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
+  const [isSigning, setIsSigning] = useState(false);
   const manager = new LiabilityWaiverManager();
 
   if (!isOpen) return null;
@@ -38,56 +43,73 @@ export const OffPlatformWaiverModal: React.FC<OffPlatformWaiverModalProps> = ({
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const element = e.currentTarget;
     const isAtBottom =
-      element.scrollHeight - element.scrollTop === element.clientHeight;
+      element.scrollHeight - element.scrollTop <= element.clientHeight + 10;
     setScrolledToBottom(isAtBottom);
   };
 
   const handleSign = async () => {
-    if (!sigRef.current) return;
+    if (!allAcknowledged) {
+      alert("You must acknowledge all statements to sign the waiver.");
+      return;
+    }
 
-    const signatureData = sigRef.current.toDataURL("image/png");
-    const waiver = await manager.initiateWaiver(
-      "", // Will be user ID from context
-      "", // Will be practitioner ID
-      practitionerName
-    );
+    setIsSigning(true);
+    try {
+      const waiver = await manager.initiateWaiver(
+        "", // Will be user ID from context
+        "", // Will be practitioner ID
+        practitionerName
+      );
 
-    const signedWaiver = await manager.signWaiver(
-      waiver,
-      signatureData,
-      "0.0.0.0", // Will get actual IP
-      navigator.userAgent,
-      acknowledgments
-    );
+      // Generate signature (in production, use digital signature pad)
+      const signatureData = `signature-${Date.now()}`;
 
-    onSigned(signedWaiver);
+      const signedWaiver = await manager.signWaiver(
+        waiver,
+        signatureData,
+        "0.0.0.0", // Will get actual IP
+        navigator.userAgent,
+        acknowledgments
+      );
+
+      onSigned(signedWaiver);
+    } catch (error) {
+      alert("Error signing waiver. Please try again.");
+      console.error(error);
+    } finally {
+      setIsSigning(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-3xl max-h-[90vh] flex flex-col bg-white rounded-lg shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm overflow-y-auto">
+      <div className="w-full max-w-3xl bg-white rounded-lg shadow-2xl my-8">
         {/* Header */}
-        <div className="border-b border-slate-200 bg-gradient-to-r from-rose-50 to-orange-50 p-6">
-          <h2 className="text-2xl font-bold text-rose-900">⚠️ Important: Off-Platform Services Waiver</h2>
+        <div className="border-b border-slate-200 bg-gradient-to-r from-rose-50 to-orange-50 p-6 sticky top-0">
+          <h2 className="text-2xl font-bold text-rose-900 flex items-center gap-2">
+            <AlertTriangle className="h-6 w-6" />
+            Off-Platform Services Liability Release
+          </h2>
           <p className="mt-2 text-sm text-rose-700">
-            By continuing, you are leaving Soul Echoes and entering a private agreement.
+            You are leaving Soul Echoes. Please read and sign this waiver.
           </p>
         </div>
 
-        {/* Waiver Text */}
+        {/* Scrollable Waiver Text */}
         <div
-          className="flex-1 overflow-y-auto p-6 bg-slate-50 font-mono text-sm"
+          className="max-h-96 overflow-y-auto p-6 bg-slate-50 font-mono text-sm border-b border-slate-200"
           onScroll={handleScroll}
         >
           <pre className="whitespace-pre-wrap text-slate-700">{waiverText}</pre>
         </div>
 
         {/* Acknowledgments */}
-        <div className="border-t border-slate-200 bg-white p-6 space-y-4">
+        <div className="border-b border-slate-200 bg-white p-6 space-y-4">
           <Alert className="border-amber-300 bg-amber-50">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertDescription className="text-amber-900">
-              You must acknowledge all statements below to proceed.
+            <AlertDescription className="text-amber-900 text-sm">
+              <strong>You must confirm all statements below to proceed.</strong> This is a legally
+              binding release of liability.
             </AlertDescription>
           </Alert>
 
@@ -104,8 +126,9 @@ export const OffPlatformWaiverModal: React.FC<OffPlatformWaiverModalProps> = ({
                 }
                 className="mt-1"
               />
-              <label htmlFor="leaving" className="text-sm text-slate-700 cursor-pointer">
-                ✓ I acknowledge I am leaving the Soul Echoes safe space and platform protections
+              <label htmlFor="leaving" className="text-sm text-slate-700 cursor-pointer leading-relaxed">
+                <strong>✓ I acknowledge</strong> I am leaving the Soul Echoes safe space and
+                platform protections, including pricing oversight and dispute resolution.
               </label>
             </div>
 
@@ -121,8 +144,10 @@ export const OffPlatformWaiverModal: React.FC<OffPlatformWaiverModalProps> = ({
                 }
                 className="mt-1"
               />
-              <label htmlFor="private" className="text-sm text-slate-700 cursor-pointer">
-                ✓ I am entering a separate, private agreement with {practitionerName}
+              <label htmlFor="private" className="text-sm text-slate-700 cursor-pointer leading-relaxed">
+                <strong>✓ I confirm</strong> I am entering a separate, private agreement with{" "}
+                <strong>{practitionerName}</strong> outside the Soul Echoes ecosystem. Soul Echoes
+                will not monitor, oversee, or regulate this private arrangement.
               </label>
             </div>
 
@@ -138,8 +163,11 @@ export const OffPlatformWaiverModal: React.FC<OffPlatformWaiverModalProps> = ({
                 }
                 className="mt-1"
               />
-              <label htmlFor="release" className="text-sm text-slate-700 cursor-pointer">
-                ✓ I fully release Soul Echoes and Rise Up Healing from ALL liability
+              <label htmlFor="release" className="text-sm text-slate-700 cursor-pointer leading-relaxed">
+                <strong>✓ I fully release</strong> Soul Echoes, the Rise Up Healing 501(c)(3)
+                nonprofit, and all platform personnel from <strong>ALL liability</strong>
+                —financial, physical, emotional, psychological, legal, and otherwise—arising from
+                my private engagement with this practitioner.
               </label>
             </div>
 
@@ -155,55 +183,40 @@ export const OffPlatformWaiverModal: React.FC<OffPlatformWaiverModalProps> = ({
                 }
                 className="mt-1"
               />
-              <label htmlFor="liability" className="text-sm text-slate-700 cursor-pointer">
-                ✓ I assume full responsibility for my own safety and outcomes
+              <label htmlFor="liability" className="text-sm text-slate-700 cursor-pointer leading-relaxed">
+                <strong>✓ I assume full responsibility</strong> for my own safety, wellbeing,
+                vetting the practitioner, negotiating terms, and seeking legal recourse
+                separately if disputes arise. Soul Echoes will not intervene.
               </label>
             </div>
           </div>
         </div>
 
-        {/* Signature Pad */}
-        <div className="border-t border-slate-200 bg-white p-6 space-y-3">
-          <label className="block text-sm font-semibold text-slate-900">
-            Digital Signature *
-          </label>
-          <div className="border-2 border-dashed border-slate-300 rounded-lg bg-slate-50">
-            <SignatureCanvas
-              ref={sigRef}
-              canvasProps={{
-                className: "w-full h-32 rounded-lg",
-              }}
-              backgroundColor="rgb(248, 250, 252)"
-              penColor="rgb(15, 23, 42)"
-            />
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => sigRef.current?.clear()}
-            className="text-xs"
-          >
-            Clear Signature
-          </Button>
-        </div>
-
         {/* Actions */}
-        <div className="border-t border-slate-200 bg-slate-50 p-6 flex gap-3">
+        <div className="bg-slate-50 p-6 flex flex-col sm:flex-row gap-3">
           <Button
             variant="outline"
             onClick={onRejected}
             className="flex-1"
+            disabled={isSigning}
           >
-            I Do Not Agree - Return to Platform
+            I Do Not Agree - Return to Soul Echoes
           </Button>
           <Button
             onClick={handleSign}
-            disabled={!allAcknowledged || !scrolledToBottom}
-            className="flex-1 bg-gradient-to-r from-rose-500 to-orange-500 text-white hover:from-rose-600 hover:to-orange-600"
+            disabled={!allAcknowledged || !scrolledToBottom || isSigning}
+            className="flex-1 bg-gradient-to-r from-rose-500 to-orange-500 text-white hover:from-rose-600 hover:to-orange-600 disabled:opacity-50"
           >
-            I Understand & Sign Waiver
+            {isSigning ? "Signing..." : "I Understand & Agree - Sign Waiver"}
           </Button>
         </div>
+
+        {/* Scroll reminder */}
+        {!scrolledToBottom && (
+          <div className="bg-amber-100 border-t border-amber-200 px-6 py-3 text-center text-sm text-amber-900">
+            ⬇️ Please scroll to the bottom and read the entire waiver before signing.
+          </div>
+        )}
       </div>
     </div>
   );
