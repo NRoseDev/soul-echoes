@@ -49,8 +49,10 @@ const App = () => (
               <Route path="/tools/:section" element={<AppLayout><SpiritualToolsDetail /></AppLayout>} />
               <Route path="/flow" element={<AppLayout><FlowRoom /></AppLayout>} />
               <Route path="/flow/:section" element={<AppLayout><FlowDetail /></AppLayout>} />
-              <Route path="/unspoken" element={<AppLayout><UnspokenDetail /></AppLayout>} />
-              <Route path="/shadow-work" element={<AppLayout><ShadowWorkDetail /></AppLayout>} />
+              <Route path="/unspoken" element={<AppLayout><UnspokenRoom /></AppLayout>} />
+              <Route path="/unspoken/:moduleId" element={<AppLayout><UnspokenDetail /></AppLayout>} />
+              <Route path="/shadow-work" element={<AppLayout><ShadowWorkRoom /></AppLayout>} />
+              <Route path="/shadow-work/:moduleId" element={<AppLayout><ShadowWorkDetail /></AppLayout>} />
               <Route path="/shop" element={<AppLayout><PortalRoom initialSection="products" /></AppLayout>} />
               <Route path="/practitioner-connect" element={<AppLayout><PortalRoom initialSection="practitioners" /></AppLayout>} />
               <Route path="/crisis-counselor" element={<AppLayout><PortalRoom initialSection="crisis" /></AppLayout>} />
