@@ -5,6 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RoomProvider } from "@/contexts/RoomContext";
+import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
+import { ComplianceProvider } from "@/contexts/ComplianceContext";
+import { CrisisProvider } from "@/contexts/CrisisContext";
 import Index from "./pages/Index";
 import BrainDump from "./pages/BrainDump";
 import Journal from "./pages/Journal";
@@ -32,40 +35,182 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <RoomProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={<AppLayout><BrainDump /></AppLayout>} />
-              <Route path="/brain-dump" element={<Navigate to="/" replace />} />
-              <Route path="/journal" element={<AppLayout><Journal /></AppLayout>} />
-              <Route path="/voice-settings" element={<AppLayout><VoiceSettings /></AppLayout>} />
-              <Route path="/wisdom" element={<AppLayout><WisdomRoom /></AppLayout>} />
-              <Route path="/wisdom/:section" element={<AppLayout><WisdomDetail /></AppLayout>} />
-              <Route path="/tools" element={<AppLayout><ToolsRoom /></AppLayout>} />
-              <Route path="/tools/:section" element={<AppLayout><SpiritualToolsDetail /></AppLayout>} />
-              <Route path="/flow" element={<AppLayout><FlowRoom /></AppLayout>} />
-              <Route path="/flow/:section" element={<AppLayout><FlowDetail /></AppLayout>} />
-              <Route path="/unspoken" element={<AppLayout><UnspokenRoom /></AppLayout>} />
-              <Route path="/unspoken/:moduleId" element={<AppLayout><UnspokenDetail /></AppLayout>} />
-              <Route path="/shadow-work" element={<AppLayout><ShadowWorkRoom /></AppLayout>} />
-              <Route path="/shadow-work/:moduleId" element={<AppLayout><ShadowWorkDetail /></AppLayout>} />
-              <Route path="/shop" element={<AppLayout><PortalRoom initialSection="products" /></AppLayout>} />
-              <Route path="/practitioner-connect" element={<AppLayout><PortalRoom initialSection="practitioners" /></AppLayout>} />
-              <Route path="/crisis-counselor" element={<AppLayout><PortalRoom initialSection="crisis" /></AppLayout>} />
-              <Route path="/portal" element={<Navigate to="/shop" replace />} />
-              <Route path="/community" element={<AppLayout><CommunityRoom /></AppLayout>} />
-              <Route path="/pricing" element={<AppLayout><Pricing /></AppLayout>} />
-              <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
-              <Route path="/:roomId/level/:levelNum" element={<LevelPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </RoomProvider>
+      <AccessibilityProvider>
+        <ComplianceProvider>
+          <CrisisProvider>
+            <RoomProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/auth" element={<Auth />} />
+                    <Route
+                      path="/"
+                      element={
+                        <AppLayout>
+                          <BrainDump />
+                        </AppLayout>
+                      }
+                    />
+                    <Route path="/brain-dump" element={<Navigate to="/" replace />} />
+                    <Route
+                      path="/journal"
+                      element={
+                        <AppLayout>
+                          <Journal />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/voice-settings"
+                      element={
+                        <AppLayout>
+                          <VoiceSettings />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/wisdom"
+                      element={
+                        <AppLayout>
+                          <WisdomRoom />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/wisdom/:section"
+                      element={
+                        <AppLayout>
+                          <WisdomDetail />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/tools"
+                      element={
+                        <AppLayout>
+                          <ToolsRoom />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/tools/:section"
+                      element={
+                        <AppLayout>
+                          <SpiritualToolsDetail />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/flow"
+                      element={
+                        <AppLayout>
+                          <FlowRoom />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/flow/:section"
+                      element={
+                        <AppLayout>
+                          <FlowDetail />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/unspoken"
+                      element={
+                        <AppLayout>
+                          <UnspokenRoom />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/unspoken/:moduleId"
+                      element={
+                        <AppLayout>
+                          <UnspokenDetail />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/shadow-work"
+                      element={
+                        <AppLayout>
+                          <ShadowWorkRoom />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/shadow-work/:moduleId"
+                      element={
+                        <AppLayout>
+                          <ShadowWorkDetail />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/shop"
+                      element={
+                        <AppLayout>
+                          <PortalRoom initialSection="products" />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/practitioner-connect"
+                      element={
+                        <AppLayout>
+                          <PortalRoom initialSection="practitioners" />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/crisis-counselor"
+                      element={
+                        <AppLayout>
+                          <PortalRoom initialSection="crisis" />
+                        </AppLayout>
+                      }
+                    />
+                    <Route path="/portal" element={<Navigate to="/shop" replace />} />
+                    <Route
+                      path="/community"
+                      element={
+                        <AppLayout>
+                          <CommunityRoom />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/pricing"
+                      element={
+                        <AppLayout>
+                          <Pricing />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/settings"
+                      element={
+                        <AppLayout>
+                          <Settings />
+                        </AppLayout>
+                      }
+                    />
+                    <Route
+                      path="/:roomId/level/:levelNum"
+                      element={<LevelPage />}
+                    />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </BrowserRouter>
+              </TooltipProvider>
+            </RoomProvider>
+          </CrisisProvider>
+        </ComplianceProvider>
+      </AccessibilityProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
