@@ -16,7 +16,9 @@ import FlowRoom from "./pages/FlowRoom";
 import FlowDetail from "./pages/BreatheDetail";
 import WisdomDetail from "./pages/WisdomDetail";
 import SpiritualToolsDetail from "./pages/SpiritualToolsDetail";
+import UnspokenRoom from "./pages/UnspokenRoom";
 import UnspokenDetail from "./pages/UnspokenDetail";
+import ShadowWorkRoom from "./pages/ShadowWorkRoom";
 import ShadowWorkDetail from "./pages/ShadowWorkDetail";
 import LevelPage from "./pages/LevelPage";
 import PortalRoom from "./pages/PortalRoom";
@@ -47,8 +49,10 @@ const App = () => (
               <Route path="/tools/:section" element={<AppLayout><SpiritualToolsDetail /></AppLayout>} />
               <Route path="/flow" element={<AppLayout><FlowRoom /></AppLayout>} />
               <Route path="/flow/:section" element={<AppLayout><FlowDetail /></AppLayout>} />
-              <Route path="/unspoken" element={<AppLayout><UnspokenDetail /></AppLayout>} />
-              <Route path="/shadow-work" element={<AppLayout><ShadowWorkDetail /></AppLayout>} />
+              <Route path="/unspoken" element={<AppLayout><UnspokenRoom /></AppLayout>} />
+              <Route path="/unspoken/:moduleId" element={<AppLayout><UnspokenDetail /></AppLayout>} />
+              <Route path="/shadow-work" element={<AppLayout><ShadowWorkRoom /></AppLayout>} />
+              <Route path="/shadow-work/:moduleId" element={<AppLayout><ShadowWorkDetail /></AppLayout>} />
               <Route path="/shop" element={<AppLayout><PortalRoom initialSection="products" /></AppLayout>} />
               <Route path="/practitioner-connect" element={<AppLayout><PortalRoom initialSection="practitioners" /></AppLayout>} />
               <Route path="/crisis-counselor" element={<AppLayout><PortalRoom initialSection="crisis" /></AppLayout>} />
