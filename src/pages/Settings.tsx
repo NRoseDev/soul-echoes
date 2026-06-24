@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Settings as SettingsIcon, Check, Search } from "lucide-react";
+import { Settings as SettingsIcon, Check, Search, Type, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getPreferences, savePreferences, WORLD_LANGUAGES, COMMUNICATION_METHODS } from "@/lib/preferences";
+import { getPreferences, savePreferences, WORLD_LANGUAGES, COMMUNICATION_METHODS, type DyslexiaFont } from "@/lib/preferences";
+import { applyAccessibility } from "@/lib/accessibility";
 import { useToast } from "@/hooks/use-toast";
+
+const FONT_OPTIONS: { id: DyslexiaFont; label: string; sample: string; description: string }[] = [
+  { id: "opendyslexic", label: "OpenDyslexic", sample: "Aa Bb Cc", description: "Weighted bottoms anchor each letter — designed for dyslexia." },
+  { id: "legible", label: "Verdana / Comic Sans", sample: "Aa Bb Cc", description: "High-legibility fonts with generous letter spacing." },
+  { id: "default", label: "System Default", sample: "Aa Bb Cc", description: "The app's sleek default typography." },
+];
 
 export default function SettingsPage() {
   const [prefs, setPrefs] = useState(getPreferences);
@@ -16,8 +23,21 @@ export default function SettingsPage() {
     l.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  const updateFont = (font: DyslexiaFont) => {
+    setPrefs((p) => ({ ...p, dyslexiaFont: font }));
+    savePreferences({ dyslexiaFont: font });
+    applyAccessibility({ dyslexiaFont: font });
+  };
+
+  const toggleCalm = (value: boolean) => {
+    setPrefs((p) => ({ ...p, calmTones: value }));
+    savePreferences({ calmTones: value });
+    applyAccessibility({ calmTones: value });
+  };
+
   const handleSave = () => {
     savePreferences(prefs);
+    applyAccessibility();
     setSaved(true);
     toast({ title: "Settings saved", description: "Your preferences have been updated." });
     setTimeout(() => setSaved(false), 2000);

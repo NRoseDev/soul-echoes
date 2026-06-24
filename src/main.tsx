@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { applyAccessibility } from "./lib/accessibility";
 
 const runPreviewCacheReset = async () => {
   const host = window.location.hostname;
@@ -38,5 +39,6 @@ const runPreviewCacheReset = async () => {
 };
 
 void runPreviewCacheReset();
+applyAccessibility();
 
 createRoot(document.getElementById("root")!).render(<App />);
