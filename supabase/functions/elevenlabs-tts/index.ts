@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,28 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    // --- Auth check ---
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // No auth required — voice previews work for everyone
 
     // --- Input validation ---
     const body = await req.json();
@@ -66,7 +45,9 @@ serve(async (req) => {
       });
     }
 
-    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
+    const rawKey = Deno.env.get("ELEVENLABS_API_KEY") || "";
+    // Strip any non-ASCII characters that break ByteString headers
+    const ELEVENLABS_API_KEY = rawKey.replace(/[^\x00-\x7F]/g, "").trim();
     if (!ELEVENLABS_API_KEY) {
       console.error("ELEVENLABS_API_KEY is not configured");
       return new Response(JSON.stringify({ error: "Service configuration error" }), {
@@ -75,14 +56,15 @@ serve(async (req) => {
       });
     }
 
+    const headers = new Headers();
+    headers.set("Content-Type", "application/json");
+    headers.set("xi-api-key", ELEVENLABS_API_KEY);
+
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`,
       {
         method: "POST",
-        headers: {
-          "xi-api-key": ELEVENLABS_API_KEY,
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           text: text.trim(),
           model_id: "eleven_multilingual_v2",
