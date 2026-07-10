@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 import { announceGuide } from "@/components/AIGuideAnnouncer";
-import ListeningIndicator from "@/components/ListeningIndicator";
+import { SpirioEngine } from "./SpirioEchoesEngine"; // Pull in your new Spirio component
 
 /**
  * AlwaysOnVoice — renders inside the router context.
@@ -10,6 +10,7 @@ import ListeningIndicator from "@/components/ListeningIndicator";
  * - Navigation commands
  * - Distress phrase detection
  * - Screen-aware announcements
+ * - Integrated Spirio Dynamic Text & Visual Milestone Flows
  */
 
 // Custom event for distress trigger (DistressSignal component listens for this)
@@ -38,6 +39,10 @@ export default function AlwaysOnVoice() {
   const location = useLocation();
   const lastAnnouncedPath = useRef("");
 
+  // Target context references (Using hardcoded placeholders for session alignment)
+  const currentUserId = "global-user"; 
+  const currentCharacterId = "active-soul-companion";
+
   const { isListening } = useAlwaysOnListening({
     onNavigate: (path) => {
       if (location.pathname !== path) {
@@ -49,9 +54,28 @@ export default function AlwaysOnVoice() {
     onDistress: () => {
       triggerDistressSignal();
     },
-    onTranscript: (transcript) => {
-      // Future: pass to active screen's handler via context or custom event
-      window.dispatchEvent(new CustomEvent("soul-echoes-voice-input", { detail: { transcript } }));
+    onTranscript: async (transcript) => {
+      if (!transcript || !transcript.trim()) return;
+
+      // 1. Process voice transcript through the new integrated Spirio pipeline
+      try {
+        const spirioResult = await SpirioEngine.handleConversationFlow(
+          currentUserId,
+          currentCharacterId,
+          transcript
+        );
+
+        // 2. Dispatch event downstream so visual screens can immediately use the resulting text/media
+        window.dispatchEvent(new CustomEvent("soul-echoes-voice-input", { 
+          detail: { 
+            transcript,
+            reply: spirioResult.reply,
+            milestone: spirioResult.milestone
+          } 
+        }));
+      } catch (error) {
+        console.error("Spirio flow pipeline intercept failed:", error);
+      }
     },
   });
 
