@@ -69,7 +69,7 @@ export default function HealingResources() {
               </a>
             </Button>
             <Button variant="secondary" asChild>
-              <a href="/breathe" className="inline-flex items-center gap-2">
+              <a href="/flow" className="inline-flex items-center gap-2">
                 Try a practice <ArrowRight className="h-4 w-4" />
               </a>
             </Button>

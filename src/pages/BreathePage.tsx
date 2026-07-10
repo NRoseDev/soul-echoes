@@ -15,14 +15,14 @@ const sections = [
   { id: "connect-healer", title: "Connect to a Healer", description: "Book a one-on-one session with a verified spiritual practitioner.", icon: Users, colorClass: "text-healing-practitioner" },
 ];
 
-export default function BreathePage() {
+export default function FlowPage() {
   const navigate = useNavigate();
 
   return (
     <div className="flex-1 overflow-y-auto p-4 pb-24" style={{ background: "radial-gradient(ellipse at 20% 20%, hsl(210,90%,5%) 0%, hsl(210,80%,12%) 45%, hsl(210,40%,28%) 100%)" }}>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-        <h1 className="font-display text-3xl font-bold text-foreground mb-2 text-center">Breathe</h1>
-        <p className="text-muted-foreground text-center mb-6">Guided breathing, meditation, and energy healing tools in nine focused sections.</p>
+        <h1 className="font-display text-3xl font-bold text-foreground mb-2 text-center">Flow</h1>
+        <p className="text-muted-foreground text-center mb-6">Somatic practices, breathwork, meditation, and energy healing in nine focused sections.</p>
       </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
@@ -37,10 +37,10 @@ export default function BreathePage() {
             >
               <Card
                 className="cursor-pointer hover:border-primary/40 transition-colors bg-card/80 backdrop-blur-sm"
-                onClick={() => navigate(`/breathe/${s.id}`)}
+                onClick={() => navigate(`/flow/${s.id}`)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => e.key === "Enter" && navigate(`/breathe/${s.id}`)}
+                onKeyDown={(e) => e.key === "Enter" && navigate(`/flow/${s.id}`)}
               >
                 <CardHeader className="flex flex-row items-start gap-3 p-4">
                   <div className={`flex-shrink-0 h-10 w-10 rounded-full bg-muted flex items-center justify-center ${s.colorClass}`}>

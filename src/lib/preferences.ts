@@ -1,6 +1,7 @@
 const STORAGE_KEY = "soul-echoes-preferences";
 
 export type InputMethod = "speak" | "sign" | "point" | "type" | "connect";
+export type DyslexiaFont = "default" | "opendyslexic" | "legible";
 
 export interface UserPreferences {
   onboardingComplete: boolean;
@@ -10,6 +11,8 @@ export interface UserPreferences {
   communicationMethods: string[];
   autoReadEnabled: boolean;
   inputMethod: InputMethod;
+  dyslexiaFont: DyslexiaFont;
+  calmTones: boolean;
 }
 
 const defaults: UserPreferences = {
@@ -20,6 +23,8 @@ const defaults: UserPreferences = {
   communicationMethods: ["speak", "type", "sign", "pictures", "colors", "braille", "aac", "eyetrack"],
   autoReadEnabled: true,
   inputMethod: "type",
+  dyslexiaFont: "default",
+  calmTones: false,
 };
 
 export function getPreferences(): UserPreferences {

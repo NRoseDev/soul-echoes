@@ -1,7 +1,124 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowLeft, HeartHandshake } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, HeartHandshake, Flame, Leaf, Wind, SprayCan, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { ARCHANGELS, type ArchangelProfile } from "@/data/angelData";
+import { ANGEL_EXTRAS } from "@/data/angelExtras";
+import AngelProfileModal from "@/components/AngelProfileModal";
+
+type BotanicalTool = {
+  name: string;
+  subtitle: string;
+  description: string;
+  howToUse: string;
+  Icon: React.ComponentType<{ className?: string }>;
+};
+
+const BOTANICAL_TOOLS: BotanicalTool[] = [
+  {
+    name: "White Sage Sticks",
+    subtitle: "Smudge Stick for Deep Cleansing",
+    description:
+      "Bundled, dried leaves of Salvia apiana used for traditional energetic purification. Ideal for clearing heavy, stagnant, or negative energy from a room, object, or aura.",
+    howToUse:
+      "Light the tip until it catches a flame, gently blow it out so it smudges/smokes, and wave the smoke into the corners of your room or around your body. Rest it safely in an abalone shell or ceramic dish when finished.",
+    Icon: Leaf,
+  },
+  {
+    name: "Palo Santo Sticks",
+    subtitle: "Holy Wood for Positive Vibes",
+    description:
+      "Natural aromatic wood pieces cut from the Bursera graveolens tree. Emits a sweet, citrusy, and pine-like aroma when burned. Used to invite in peace, positive energy, and good fortune.",
+    howToUse:
+      "Hold the stick at a 45-degree angle and light the tip. Let it burn for 30 seconds to a minute, then blow it out. Move through your space allowing the fragrant smoke to settle, blowing gently on the embers if the smoke thins.",
+    Icon: Flame,
+  },
+  {
+    name: "Sweetgrass Braids",
+    subtitle: "Sacred Grass for Blessing & Harmony",
+    description:
+      "Long, braided strands of sweet-smelling grass traditionally burned after clearing to invite in good spirits and harmony.",
+    howToUse:
+      "Light the very end of the braid, blow out the flame, and let the sweet, vanilla-like smoke fill the space. Keep a heat-safe dish underneath to catch any falling embers.",
+    Icon: Wind,
+  },
+  {
+    name: "Copal Resin",
+    subtitle: "Sacred Resin for Protection & Uplifting",
+    description:
+      "A bright, pine-scented natural tree resin native to Mexico and Central America, used to clear heavy spirits and elevate focus.",
+    howToUse:
+      "Place a charcoal disc inside a heat-resistant burner and light it. Once the charcoal turns gray with ash, place a few small pieces of copal resin directly on top to release a rich, dense cleansing smoke.",
+    Icon: Sparkles,
+  },
+];
+
+const SMOKELESS_TOOL: BotanicalTool = {
+  name: "Smokeless Smudge Sprays",
+  subtitle: "Liquid Mist for Clear Spaces",
+  description:
+    "Alcohol or water-based sprays infused with pure white sage and palo santo essential oils, often charged with quartz crystals. Perfect for apartments, offices, or smoke-sensitive areas.",
+  howToUse:
+    "Shake well and spray 2-3 times into the air toward the corners of the room, or lightly mist your personal aura to instantly refresh the energy without any smoke.",
+  Icon: SprayCan,
+};
+
+function BotanicalSmudgingSection() {
+  const [smokeless, setSmokeless] = useState(false);
+  const tools = smokeless ? [SMOKELESS_TOOL] : BOTANICAL_TOOLS;
+
+  return (
+    <div className="bg-muted/60 rounded-2xl p-4 border border-border/60 space-y-3">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h2 className="font-display text-base font-bold text-foreground">Botanical Smudging & Cleansing</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Plant-based tools for clearing and consecrating space, body, and objects.
+          </p>
+        </div>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+          <span>Show Smokeless Alternatives</span>
+          <Switch checked={smokeless} onCheckedChange={setSmokeless} />
+        </label>
+      </div>
+
+      <Accordion type="multiple" className="space-y-2">
+        {tools.map((tool) => {
+          const { Icon } = tool;
+          return (
+            <AccordionItem
+              key={tool.name}
+              value={tool.name}
+              className="border border-border/40 rounded-xl px-3 bg-background/40"
+            >
+              <AccordionTrigger className="py-3 hover:no-underline">
+                <div className="flex items-center gap-3 text-left">
+                  <span className="flex-shrink-0 h-9 w-9 rounded-full bg-primary/15 flex items-center justify-center">
+                    <Icon className="h-4 w-4 text-primary" />
+                  </span>
+                  <div>
+                    <p className="font-semibold text-foreground text-sm leading-tight">{tool.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{tool.subtitle}</p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pb-3 space-y-2 text-sm text-muted-foreground leading-relaxed">
+                <p>{tool.description}</p>
+                <div className="rounded-lg border border-border/40 bg-muted/40 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">How to Use</p>
+                  <p className="text-xs">{tool.howToUse}</p>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
+    </div>
+  );
+}
 
 type SectionKey =
   | "source-tools-vs-source"
@@ -9,7 +126,7 @@ type SectionKey =
   | "lightworker-persecution-clearing"
   | "angels-and-archangels"
   | "bloodline-healing"
-  | "archangel-michael-shield"
+  
   | "energy-clearing"
   | "crystals-how-to-use"
   | "essential-oils-how-to-use"
@@ -18,7 +135,7 @@ type SectionKey =
   | "numerology-in-practice"
   | "nature-signs-synchronicities"
   | "animal-messengers"
-  | "healing-scripture-by-emotion"
+  
   | "generational-patterns-breaking-cycles"
   | "prayer-templates"
   | "intercessor-connection"
@@ -33,7 +150,7 @@ const sectionTitles: Record<SectionKey, string> = {
   "lightworker-persecution-clearing": "Lightworker Persecution Clearing",
   "angels-and-archangels": "Angels and Archangels",
   "bloodline-healing": "Bloodline Healing",
-  "archangel-michael-shield": "Archangel Michael Shield and Protection",
+  
   "energy-clearing": "Energy Clearing",
   "crystals-how-to-use": "Crystals and Stones — How to Use",
   "essential-oils-how-to-use": "Essential Oils and Plant Medicine",
@@ -42,7 +159,7 @@ const sectionTitles: Record<SectionKey, string> = {
   "numerology-in-practice": "Numerology in Practice",
   "nature-signs-synchronicities": "Nature Signs and Synchronicities",
   "animal-messengers": "Animal Messengers",
-  "healing-scripture-by-emotion": "Healing Scripture by Emotion",
+  
   "generational-patterns-breaking-cycles": "Generational Patterns and Breaking Cycles",
   "prayer-templates": "Prayer Templates",
   "intercessor-connection": "Intercessor Connection",
@@ -90,17 +207,7 @@ function Step({ number, title, desc }: { number: number; title: string; desc: st
   );
 }
 
-function ScriptureCard({ reference, text, emotion }: { reference: string; text: string; emotion?: string }) {
-  return (
-    <div className="border border-border/40 rounded-xl p-3 space-y-1">
-      {emotion && <p className="text-xs font-bold text-primary uppercase tracking-wide">{emotion}</p>}
-      <p className="text-sm text-foreground leading-relaxed italic">"{text}"</p>
-      <p className="text-xs text-muted-foreground font-semibold">— {reference}</p>
-    </div>
-  );
-}
-
-function SectionContent({ id }: { id: SectionKey }) {
+function SectionContent({ id, onOpenAngel }: { id: SectionKey; onOpenAngel: (a: ArchangelProfile) => void }) {
   switch (id) {
 
     case "source-tools-vs-source":
@@ -222,30 +329,38 @@ function SectionContent({ id }: { id: SectionKey }) {
           <Block title="Understanding Angelic Ministry">
             <p>Angels are created spiritual beings assigned to serve the purposes of Source and to minister to those who will inherit salvation (Hebrews 1:14). They are not to be worshipped or petitioned independently — but they are real, active, and available as ministers of divine will. You do not command angels directly. You align with Source, and Source dispatches the angelic realm.</p>
           </Block>
-          <Block title="The 11 Archangels — Their Names, Assignments, and Frequencies">
-            <div className="space-y-3">
-              {[
-                { name: "Michael", meaning: "Who is like God", assignment: "Protection, spiritual warfare, justice, strength, and cutting of spiritual bonds. The commander of the angelic army. Call on Michael when you need protection, courage in battle, or help breaking spiritual chains.", color: "Royal Blue / Gold" },
-                { name: "Gabriel", meaning: "Strength of God", assignment: "Divine communication, revelation, announcements, and creative conception. Gabriel carries messages of destiny and new beginnings. Present at births, callings, and prophetic unfolding.", color: "White / Silver" },
-                { name: "Raphael", meaning: "God heals", assignment: "Physical, emotional, and spiritual healing. The physician of heaven. Raphael is present in hospital rooms, at the bedsides of the sick, and wherever healing is being sought.", color: "Emerald Green" },
-                { name: "Uriel", meaning: "Fire of God / Light of God", assignment: "Wisdom, illumination, intellectual clarity, and aligning with divine truth. Uriel brings light into confusion and helps interpret prophetic revelation.", color: "Red / Gold" },
-                { name: "Ariel", meaning: "Lioness of God", assignment: "Nature, animals, the earth, and elemental healing. Ariel oversees the natural world and can be invited into work involving earth healing, animal communication, and grounding.", color: "Pale Pink / Iridescent" },
-                { name: "Chamuel", meaning: "He who sees God / One who seeks God", assignment: "Love, compassion, peace, and finding what is lost — including lost relationships, lost purpose, and lost peace. Chamuel works to restore the heart.", color: "Pale Green / Pink" },
-                { name: "Haniel", meaning: "Grace of God", assignment: "Grace, intuition, the moon cycle, feminine energy, and spiritual vision. Haniel helps develop and refine clairvoyance and intuitive gifts.", color: "Moonstone / Silver Blue" },
-                { name: "Jophiel", meaning: "Beauty of God", assignment: "Beauty, creativity, wisdom, and slowing down long enough to perceive the sacred. Jophiel combats mental clutter and helps artists, teachers, and creators align with divine beauty.", color: "Yellow / Gold" },
-                { name: "Raguel", meaning: "Friend of God", assignment: "Justice, harmony, order, and right relationships. Raguel resolves disputes, restores fairness, and brings clarity where there has been injustice or relational chaos.", color: "Light Blue / Aqua" },
-                { name: "Raziel", meaning: "Secrets of God", assignment: "Divine mysteries, esoteric wisdom, the akashic records, and understanding the hidden dimensions of reality. Raziel helps those being initiated into deeper spiritual understanding.", color: "Rainbow / Iridescent" },
-                { name: "Zadkiel", meaning: "Righteousness of God", assignment: "Forgiveness, mercy, freedom from guilt, and transformation. Zadkiel oversees the violet flame of transmutation — the divine fire that transforms darkness into light.", color: "Violet / Indigo" },
-              ].map((a) => (
-                <div key={a.name} className="border border-border/40 rounded-xl p-3 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <p className="font-semibold text-foreground text-sm">{a.name}</p>
-                    <span className="text-xs text-muted-foreground italic">{a.color}</span>
-                  </div>
-                  <p className="text-xs opacity-70">Meaning: {a.meaning}</p>
-                  <p className="text-xs">{a.assignment}</p>
-                </div>
-              ))}
+          <Block title="The 15 Archangels — Tap a Card to Open Their Portal">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {ARCHANGELS.map((a) => {
+                const extras = ANGEL_EXTRAS[a.name];
+                return (
+                  <button
+                    key={a.name}
+                    onClick={() => onOpenAngel(a)}
+                    className="text-left rounded-2xl p-3 border transition-all hover:scale-[1.02] active:scale-[0.99]"
+                    style={{
+                      background: a.palette.atmosphere + "cc",
+                      borderColor: a.palette.accentMid + "55",
+                    }}
+                    aria-label={`Open ${a.name} angel profile`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src="/images/Wings.jpg"
+                        alt=""
+                        aria-hidden="true"
+                        className="h-5 w-5 object-contain shrink-0"
+                      />
+                      <p className="font-display font-bold text-base" style={{ color: a.palette.nameColor }}>
+                        {a.name}
+                      </p>
+                    </div>
+                    <p className="text-xs text-white/70 mt-1">
+                      {extras?.shortDescription ?? a.assignment}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
           </Block>
           <Block title="How to Work with Angels Correctly">
@@ -294,46 +409,6 @@ function SectionContent({ id }: { id: SectionKey }) {
           </Block>
           <Block title="This Work May Need Support">
             <p>Deep bloodline healing is most effective with a mature intercessor, spiritual director, or healing minister present. If this prayer surfaces grief, rage, or overwhelm you are not ready to hold alone — stop and reach out.</p>
-          </Block>
-        </div>
-      );
-
-    case "archangel-michael-shield":
-      return (
-        <div className="space-y-4">
-          <Block title="Who is Michael?">
-            <p>Michael — meaning 'Who is like God?' — is the archangel of protection, divine justice, and spiritual warfare. He is referenced in Daniel 10 and 12, Jude 1:9, and Revelation 12 as the commander of the heavenly armies. His assignment is specifically to stand against the adversary and to protect those under Source's covering.</p>
-            <p>Working with Michael does not mean calling on Michael independently. It means praying to Source — aligning yourself with divine protection, inviting Source to deploy Michael's assignment in your situation.</p>
-          </Block>
-          <Block title="Michael's Covering — What He Protects Against">
-            <List items={[
-              "Direct spiritual attack and targeted assignments against your person or calling",
-              "Nighttime attack — oppression during sleep, spiritual interference in dreams",
-              "Fear, specifically the spirit of fear as an oppressive spiritual force",
-              "False accusation and spiritual slander",
-              "Witchcraft prayers and curses sent through human vessels",
-              "Territorial spirits over geographic areas you are called to serve",
-            ]} />
-          </Block>
-          <Block title="The Michael Shield — A Daily Practice">
-            <div className="space-y-2">
-              {[
-                { step: 1, title: "Ground in Source", desc: "Begin in prayer, not in ritual. Centre your identity in Source — 'I belong to you. I am covered by your blood. I stand in your authority.'" },
-                { step: 2, title: "Invoke the Shield", desc: "Pray: 'Father, I ask you to deploy Archangel Michael and his angelic company to stand at every entrance of my life, my home, my body, my mind, and my calling. Let no assignment of darkness pass through without first encountering your fire.'" },
-                { step: 3, title: "Visualize the Covering", desc: "Many practitioners find it helpful to visualize a shield of brilliant light — royal blue and gold — surrounding them entirely. This is not the imagination creating protection. It is the imagination engaging with what is spiritually real." },
-                { step: 4, title: "Declare the Perimeter", desc: "'No weapon formed against me shall prosper. Every tongue that rises against me in judgment I condemn. This is the heritage of the servants of the Lord (Isaiah 54:17).'" },
-                { step: 5, title: "Release the Outcome", desc: "After invoking the shield, release control. Trust that Source and Michael's company are holding what you have committed. Do not return to fear — that reopens what you just closed." },
-              ].map((s) => <Step key={s.step} number={s.step} title={s.title} desc={s.desc} />)}
-            </div>
-          </Block>
-          <Block title="When to Invoke Michael's Protection">
-            <List items={[
-              "Before sleep, especially during seasons of nighttime oppression",
-              "Before entering spiritually charged environments or doing deep healing work",
-              "When you sense spiritual attack, unusual fear, or targeted disruption",
-              "When traveling or entering new territories",
-              "When covering your family, home, or ministry space",
-            ]} />
           </Block>
         </div>
       );
@@ -388,6 +463,7 @@ function SectionContent({ id }: { id: SectionKey }) {
               "Seasonally — quarterly as spiritual maintenance",
             ]} />
           </Block>
+          <BotanicalSmudgingSection />
         </div>
       );
 
@@ -715,65 +791,6 @@ function SectionContent({ id }: { id: SectionKey }) {
         </div>
       );
 
-    case "healing-scripture-by-emotion":
-      return (
-        <div className="space-y-4">
-          <Block title="The Word as Living Medicine">
-            <p>Hebrews 4:12 describes the Word of God as living, active, and sharper than any double-edged sword — able to divide soul and spirit, to judge the thoughts and attitudes of the heart. Scripture is not just text. It is living spiritual frequency that directly affects your spirit, soul, and body when received with faith.</p>
-            <p>Find what you are feeling below and let these words meet you there.</p>
-          </Block>
-          <div className="space-y-5">
-            {[
-              { emotion: "Fear", verses: [
-                { ref: "Isaiah 41:10", text: "Do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you; I will uphold you with my righteous right hand." },
-                { ref: "2 Timothy 1:7", text: "For the Spirit God gave us does not make us timid, but gives us power, love and self-discipline." },
-                { ref: "Psalm 27:1", text: "The Lord is my light and my salvation — whom shall I fear? The Lord is the stronghold of my life — of whom shall I be afraid?" },
-              ]},
-              { emotion: "Grief and Loss", verses: [
-                { ref: "Psalm 34:18", text: "The Lord is close to the brokenhearted and saves those who are crushed in spirit." },
-                { ref: "Revelation 21:4", text: "He will wipe every tear from their eyes. There will be no more death or mourning or crying or pain." },
-                { ref: "Matthew 5:4", text: "Blessed are those who mourn, for they will be comforted." },
-              ]},
-              { emotion: "Anxiety and Overwhelm", verses: [
-                { ref: "Philippians 4:6-7", text: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and minds." },
-                { ref: "1 Peter 5:7", text: "Cast all your anxiety on him because he cares for you." },
-                { ref: "Matthew 11:28", text: "Come to me, all you who are weary and burdened, and I will give you rest." },
-              ]},
-              { emotion: "Shame and Condemnation", verses: [
-                { ref: "Romans 8:1", text: "Therefore, there is now no condemnation for those who are in Christ Jesus." },
-                { ref: "Isaiah 54:4", text: "Do not be afraid; you will not be put to shame. Do not fear disgrace; you will not be humiliated." },
-                { ref: "Psalm 103:12", text: "As far as the east is from the west, so far has he removed our transgressions from us." },
-              ]},
-              { emotion: "Loneliness", verses: [
-                { ref: "Deuteronomy 31:6", text: "Be strong and courageous. Do not be afraid or terrified, for the Lord your God goes with you; he will never leave you nor forsake you." },
-                { ref: "Psalm 139:7-10", text: "Where can I go from your Spirit? Where can I flee from your presence? If I go up to the heavens, you are there; if I make my bed in the depths, you are there." },
-                { ref: "John 14:18", text: "I will not leave you as orphans; I will come to you." },
-              ]},
-              { emotion: "Anger and Injustice", verses: [
-                { ref: "Psalm 37:8-9", text: "Refrain from anger and turn from wrath; do not fret — it leads only to evil. For those who are evil will be destroyed, but those who hope in the Lord will inherit the land." },
-                { ref: "Romans 12:19", text: "Do not take revenge, my dear friends, but leave room for God's wrath, for it is written: 'It is mine to avenge; I will repay,' says the Lord." },
-                { ref: "Psalm 46:1", text: "God is our refuge and strength, an ever-present help in trouble." },
-              ]},
-              { emotion: "Depression and Hopelessness", verses: [
-                { ref: "Psalm 42:11", text: "Why, my soul, are you downcast? Why so disturbed within me? Put your hope in God, for I will yet praise him, my Savior and my God." },
-                { ref: "Isaiah 40:31", text: "Those who hope in the Lord will renew their strength. They will soar on wings like eagles; they will run and not grow weary, they will walk and not be faint." },
-                { ref: "Lamentations 3:22-23", text: "Because of the Lord's great love we are not consumed, for his compassions never fail. They are new every morning; great is your faithfulness." },
-              ]},
-              { emotion: "Unworthiness and Rejection", verses: [
-                { ref: "Ephesians 1:4-5", text: "He chose us in him before the creation of the world to be holy and blameless in his sight. In love he predestined us for adoption to sonship through Jesus Christ." },
-                { ref: "Romans 8:38-39", text: "Neither death nor life, neither angels nor demons, neither the present nor the future, nor any powers, neither height nor depth, nor anything else in all creation, will be able to separate us from the love of God." },
-                { ref: "Jeremiah 31:3", text: "I have loved you with an everlasting love; I have drawn you with unfailing kindness." },
-              ]},
-            ].map((group) => (
-              <div key={group.emotion} className="space-y-2">
-                <h3 className="font-display text-sm font-bold text-primary uppercase tracking-wide">{group.emotion}</h3>
-                {group.verses.map((v) => <ScriptureCard key={v.ref} reference={v.ref} text={v.text} />)}
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-
     case "generational-patterns-breaking-cycles":
       return (
         <div className="space-y-4">
@@ -1072,7 +1089,7 @@ function SectionContent({ id }: { id: SectionKey }) {
               "Third Eye — Am I trusting my intuition? Or second-guessing, confused, or mentally overwhelmed?",
               "Crown — Am I connected to Source? Or feeling spiritually dry, disconnected, or alone?",
             ]} />
-            <p>Note which centers feel depleted. Give them attention through the corresponding practices in the Breathe room, Wisdom room, or the chakra section of this app.</p>
+            <p>Note which centers feel depleted. Give them attention through the corresponding practices in the Flow room, Wisdom room, or the chakra section of this app.</p>
           </Block>
 
           <Block title="Monthly Spiritual Review (30–60 Minutes, Once Per Month)">
@@ -1101,13 +1118,15 @@ export default function SpiritualToolsDetail() {
   const id = section as SectionKey;
   const title = sectionTitles[id];
   const isDeepWork = deepWorkSections.includes(id);
+  const [selectedAngel, setSelectedAngel] = useState<ArchangelProfile | null>(null);
 
   if (!title) {
-    navigate("/spiritual-tools", { replace: true });
+    navigate("/tools", { replace: true });
     return null;
   }
 
   return (
+    <>
     <motion.div
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
@@ -1117,7 +1136,7 @@ export default function SpiritualToolsDetail() {
     >
       {/* Sticky Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/spiritual-tools")} aria-label="Back">
+        <Button variant="ghost" size="icon" onClick={() => navigate("/tools")} aria-label="Back">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="font-display text-xl font-bold text-foreground truncate">{title}</h1>
@@ -1140,7 +1159,7 @@ export default function SpiritualToolsDetail() {
           </div>
         )}
 
-        <SectionContent id={id} />
+        <SectionContent id={id} onOpenAngel={setSelectedAngel} />
 
         {/* Bottom intercessor CTA */}
         <div className="mt-8 bg-card/80 border border-border rounded-3xl p-5 space-y-3">
@@ -1166,5 +1185,15 @@ export default function SpiritualToolsDetail() {
         </div>
       </div>
     </motion.div>
+
+    <AnimatePresence>
+      {selectedAngel && (
+        <AngelProfileModal
+          angel={selectedAngel}
+          onClose={() => setSelectedAngel(null)}
+        />
+      )}
+    </AnimatePresence>
+    </>
   );
 }

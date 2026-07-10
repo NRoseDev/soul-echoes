@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Settings as SettingsIcon, Check, Search } from "lucide-react";
+import { Settings as SettingsIcon, Check, Search, Type, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getPreferences, savePreferences, WORLD_LANGUAGES, COMMUNICATION_METHODS } from "@/lib/preferences";
+import { getPreferences, savePreferences, WORLD_LANGUAGES, COMMUNICATION_METHODS, type DyslexiaFont } from "@/lib/preferences";
+import { applyAccessibility } from "@/lib/accessibility";
 import { useToast } from "@/hooks/use-toast";
+
+const FONT_OPTIONS: { id: DyslexiaFont; label: string; sample: string; description: string }[] = [
+  { id: "opendyslexic", label: "OpenDyslexic", sample: "Aa Bb Cc", description: "Weighted bottoms anchor each letter — designed for dyslexia." },
+  { id: "legible", label: "Verdana / Comic Sans", sample: "Aa Bb Cc", description: "High-legibility fonts with generous letter spacing." },
+  { id: "default", label: "System Default", sample: "Aa Bb Cc", description: "The app's sleek default typography." },
+];
 
 export default function SettingsPage() {
   const [prefs, setPrefs] = useState(getPreferences);
@@ -16,8 +23,21 @@ export default function SettingsPage() {
     l.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  const updateFont = (font: DyslexiaFont) => {
+    setPrefs((p) => ({ ...p, dyslexiaFont: font }));
+    savePreferences({ dyslexiaFont: font });
+    applyAccessibility({ dyslexiaFont: font });
+  };
+
+  const toggleCalm = (value: boolean) => {
+    setPrefs((p) => ({ ...p, calmTones: value }));
+    savePreferences({ calmTones: value });
+    applyAccessibility({ calmTones: value });
+  };
+
   const handleSave = () => {
     savePreferences(prefs);
+    applyAccessibility();
     setSaved(true);
     toast({ title: "Settings saved", description: "Your preferences have been updated." });
     setTimeout(() => setSaved(false), 2000);
@@ -95,6 +115,83 @@ export default function SettingsPage() {
           </Button>
         </div>
       </section>
+
+      {/* Dyslexia & Visual Comfort */}
+      <section className="space-y-4">
+        <div>
+          <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
+            <Type className="h-5 w-5 text-primary" /> Dyslexia & Reading Comfort
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Choose a font that's easier on your eyes. Changes apply instantly across every page.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {FONT_OPTIONS.map((opt) => {
+            const active = prefs.dyslexiaFont === opt.id;
+            const fontFamily =
+              opt.id === "opendyslexic"
+                ? "'OpenDyslexic', 'Comic Sans MS', Verdana, sans-serif"
+                : opt.id === "legible"
+                ? "Verdana, 'Comic Sans MS', sans-serif"
+                : "var(--font-body)";
+            return (
+              <button
+                key={opt.id}
+                onClick={() => updateFont(opt.id)}
+                className={`text-left p-4 rounded-xl border-2 transition-all ${
+                  active
+                    ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                    : "border-border bg-card hover:border-primary/50"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-foreground">{opt.label}</span>
+                  {active && <Check className="h-4 w-4 text-primary" />}
+                </div>
+                <div
+                  className="text-xl text-foreground mb-2"
+                  style={{ fontFamily, letterSpacing: opt.id !== "default" ? "0.03em" : undefined }}
+                >
+                  {opt.sample}
+                </div>
+                <p className="text-xs text-muted-foreground leading-snug">{opt.description}</p>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="rounded-xl border-2 border-border bg-card p-4 flex items-start gap-4">
+          <div className="rounded-lg bg-primary/10 p-2.5">
+            <Sun className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="font-semibold text-foreground">Calm Tones</h3>
+              <button
+                role="switch"
+                aria-checked={prefs.calmTones}
+                onClick={() => toggleCalm(!prefs.calmTones)}
+                className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
+                  prefs.calmTones ? "bg-primary" : "bg-muted"
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-background shadow-lg transition-transform ${
+                    prefs.calmTones ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+              Switches harsh dark contrast to a soft cream background with charcoal text —
+              gentler on the eyes and reduces visual vibration.
+            </p>
+          </div>
+        </div>
+      </section>
+
+
 
       <Button onClick={handleSave} size="lg" className="w-full rounded-2xl text-base">
         {saved ? <><Check className="h-4 w-4 mr-2" /> Saved!</> : "Save Settings"}

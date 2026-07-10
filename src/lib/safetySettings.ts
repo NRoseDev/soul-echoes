@@ -1,6 +1,6 @@
 const SAFETY_KEY = "soul-echoes-safety";
 
-export type AngelType = "michael" | "faith";
+export type AngelType = "michael" | "ariel" | "jeremial";
 export type AccessMethod = "pin" | "codeword" | "symbol" | "colorseq" | "sign" | "pattern";
 
 export interface SafetySettings {
@@ -41,15 +41,6 @@ export const MICHAEL_SITUATIONS = [
   { code: "333", color: "🟡", label: "I am being hurt right now", emoji: "💔" },
   { code: "444", color: "🟣", label: "I need police immediately", emoji: "🚨" },
   { code: "555", color: "⚫", label: "Trafficking situation", emoji: "🆘" },
-];
-
-// Faith situations (inner crisis)
-export const FAITH_SITUATIONS = [
-  { code: "111", color: "🔴", label: "I want to end my life", emoji: "🕊️" },
-  { code: "222", color: "🟠", label: "I am having a mental breakdown", emoji: "🌊" },
-  { code: "333", color: "🟡", label: "I am unsafe but not immediate physical danger", emoji: "⚠️" },
-  { code: "444", color: "🟣", label: "I need medical help", emoji: "🏥" },
-  { code: "555", color: "⚪", label: "Please check on me", emoji: "💛" },
 ];
 
 // Symbols for symbol-based access method

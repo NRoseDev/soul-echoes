@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Loader2, Mic, MicOff, Volume2, VolumeX, ArrowRight, ArrowLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -15,6 +15,11 @@ import { getPreferences, COMMUNICATION_METHODS } from "@/lib/preferences";
 import ListeningIndicator from "@/components/ListeningIndicator";
 import ASLSignInput from "@/components/ASLSignInput";
 import { useNavigate } from "react-router-dom";
+import {
+  detectEmotion,
+  formatEmotionSignal,
+  type EmotionSignal,
+} from "@/lib/emotionDetector";
 
 const WELCOME_MESSAGE: ChatMessage = {
   role: "assistant",
@@ -73,53 +78,53 @@ const EMOTION_KEYWORDS: [string[], string][] = [
 
 const EXERCISE_SUGGESTION: Record<string, { text: string; path: string; buttonLabel: string }> = {
   pain: {
-    text: "Box Breathing for 4 minutes in the Breathe room may help soften this pain and release the tension your body is holding.",
-    path: "/breathe/breathwork",
+    text: "Box Breathing for 4 minutes in the Flow room may help soften this pain and release the tension your body is holding.",
+    path: "/flow/breathwork",
     buttonLabel: "Start Box Breathing",
   },
   sadness: {
-    text: "Body Scan Meditation in the Breathe room can locate where sadness sits in your body and give it permission to move.",
-    path: "/breathe/meditation",
+    text: "Body Scan Meditation in the Flow room can locate where sadness sits in your body and give it permission to move.",
+    path: "/flow/meditation",
     buttonLabel: "Start Body Scan",
   },
   loneliness: {
-    text: "Heart Coherence Breathing in the Breathe room can soften the ache of loneliness and remind your body that connection lives within you too.",
-    path: "/breathe/breathwork",
+    text: "Heart Coherence Breathing in the Flow room can soften the ache of loneliness and remind your body that connection lives within you too.",
+    path: "/flow/breathwork",
     buttonLabel: "Start Heart Coherence",
   },
   anger: {
-    text: "Box Breathing for 4 minutes in the Breathe room can interrupt the tension anger builds in your body and give your nervous system relief.",
-    path: "/breathe/breathwork",
+    text: "Box Breathing for 4 minutes in the Flow room can interrupt the tension anger builds in your body and give your nervous system relief.",
+    path: "/flow/breathwork",
     buttonLabel: "Start Box Breathing",
   },
   fear: {
-    text: "4-7-8 Breathing in the Breathe room is designed to activate your body's safety response and calm a racing, anxious heart.",
-    path: "/breathe/breathwork",
+    text: "4-7-8 Breathing in the Flow room is designed to activate your body's safety response and calm a racing, anxious heart.",
+    path: "/flow/breathwork",
     buttonLabel: "Start 4-7-8 Breathing",
   },
   confusion: {
-    text: "Breath Focus Meditation in the Breathe room can quiet the mental noise and let the next right answer surface from within.",
-    path: "/breathe/meditation",
+    text: "Breath Focus Meditation in the Flow room can quiet the mental noise and let the next right answer surface from within.",
+    path: "/flow/meditation",
     buttonLabel: "Start Breath Focus",
   },
   shame: {
-    text: "Heart Coherence Breathing in the Breathe room can soften the self-criticism and bring warmth and gentleness back into your chest.",
-    path: "/breathe/breathwork",
+    text: "Heart Coherence Breathing in the Flow room can soften the self-criticism and bring warmth and gentleness back into your chest.",
+    path: "/flow/breathwork",
     buttonLabel: "Start Heart Coherence",
   },
   peace: {
-    text: "Grounding Breath in the Breathe room can deepen and anchor the calm you already feel into your body and nervous system.",
-    path: "/breathe/breathwork",
+    text: "Grounding Breath in the Flow room can deepen and anchor the calm you already feel into your body and nervous system.",
+    path: "/flow/breathwork",
     buttonLabel: "Start Grounding Breath",
   },
   joy: {
-    text: "Heart Coherence Breathing in the Breathe room can anchor this joy in your heart and help your body remember this feeling.",
-    path: "/breathe/breathwork",
+    text: "Heart Coherence Breathing in the Flow room can anchor this joy in your heart and help your body remember this feeling.",
+    path: "/flow/breathwork",
     buttonLabel: "Start Heart Coherence",
   },
   default: {
-    text: "Box Breathing for 4 minutes in the Breathe room can help you ground into your body and find a moment of stillness.",
-    path: "/breathe/breathwork",
+    text: "Box Breathing for 4 minutes in the Flow room can help you ground into your body and find a moment of stillness.",
+    path: "/flow/breathwork",
     buttonLabel: "Start Box Breathing",
   },
 };
@@ -136,70 +141,70 @@ interface Pathway {
 
 const HEALING_PATHWAYS: Record<string, Pathway[]> = {
   pain: [
-    { room: "Breathe", emoji: "🌬️", path: "/breathe/breathwork", exercise: "Body Scan or Box Breathing", why: "Physical tension in the body often stores pain. Breathwork can soften and release it." },
+    { room: "Flow", emoji: "🌬️", path: "/flow/breathwork", exercise: "Body Scan or Box Breathing", why: "Physical tension in the body often stores pain. Breathwork can soften and release it." },
     { room: "Unspoken", emoji: "🤫", path: "/unspoken", exercise: "Healing Conversation", why: "Sometimes pain lives in what we haven't been able to say. A healing conversation can release it." },
     { room: "Shadow Work", emoji: "🌑", path: "/shadow-work", exercise: "Emotional Root Exploration", why: "Exploring the emotional root or trauma bond connected to your pain can reveal what truly needs healing." },
-    { room: "Spiritual Tools", emoji: "✨", path: "/spiritual-tools", exercise: "Cord Cutting or Energy Clearing", why: "If this pain feels like it belongs to someone else, cord cutting or energy clearing may help release it." },
+    { room: "Tools", emoji: "✨", path: "/tools", exercise: "Cord Cutting or Energy Clearing", why: "If this pain feels like it belongs to someone else, cord cutting or energy clearing may help release it." },
     { room: "Portal", emoji: "🌀", path: "/shop", exercise: "Connect to a Healer", why: "For deeper support, connect with a verified healer who specializes in what you are carrying." },
   ],
   sadness: [
     { room: "Wisdom", emoji: "📖", path: "/wisdom", exercise: "Daily Insight", why: "Wisdom and gentle truth can hold you in sadness without rushing you through it." },
     { room: "Journal", emoji: "📓", path: "/journal", exercise: "Free Write", why: "Writing to yourself in grief is one of the most honest and healing things you can do." },
     { room: "Shadow Work", emoji: "🌑", path: "/shadow-work", exercise: "Grief Exploration", why: "Sadness often carries older grief beneath it. Shadow work brings it into the light gently." },
-    { room: "Breathe", emoji: "🌬️", path: "/breathe/meditation", exercise: "Body Scan Meditation", why: "A body scan can locate where sadness lives in your body and give it permission to move." },
-    { room: "Spiritual Tools", emoji: "✨", path: "/spiritual-tools", exercise: "Aura Cleansing", why: "Emotional heaviness can linger in your energy field. Cleansing may help lift some of the weight." },
+    { room: "Flow", emoji: "🌬️", path: "/flow/meditation", exercise: "Body Scan Meditation", why: "A body scan can locate where sadness lives in your body and give it permission to move." },
+    { room: "Tools", emoji: "✨", path: "/tools", exercise: "Aura Cleansing", why: "Emotional heaviness can linger in your energy field. Cleansing may help lift some of the weight." },
   ],
   anger: [
-    { room: "Breathe", emoji: "🌬️", path: "/breathe/breathwork", exercise: "Box Breathing", why: "Anger lives in the body as tension. Four minutes of box breathing can interrupt the fire." },
+    { room: "Flow", emoji: "🌬️", path: "/flow/breathwork", exercise: "Box Breathing", why: "Anger lives in the body as tension. Four minutes of box breathing can interrupt the fire." },
     { room: "Shadow Work", emoji: "🌑", path: "/shadow-work", exercise: "Anger Root Exploration", why: "Anger often protects a wound. Shadow work can help you find what is underneath it." },
     { room: "Journal", emoji: "📓", path: "/journal", exercise: "Uncensored Write", why: "Writing your rage uncensored — then closing the page — safely discharges what needs to move." },
-    { room: "Spiritual Tools", emoji: "✨", path: "/spiritual-tools", exercise: "Cord Cutting", why: "If your anger is tied to a person, cord cutting can help you release without needing their apology." },
+    { room: "Tools", emoji: "✨", path: "/tools", exercise: "Cord Cutting", why: "If your anger is tied to a person, cord cutting can help you release without needing their apology." },
     { room: "Unspoken", emoji: "🤫", path: "/unspoken", exercise: "Healing Conversation", why: "Sometimes anger just needs to be witnessed without judgment. The Unspoken chamber holds that space." },
   ],
   fear: [
-    { room: "Breathe", emoji: "🌬️", path: "/breathe/breathwork", exercise: "Vagus Nerve Activation", why: "Vagus nerve activation through breath signals safety to your body and calms the fight-or-flight response." },
+    { room: "Flow", emoji: "🌬️", path: "/flow/breathwork", exercise: "Vagus Nerve Activation", why: "Vagus nerve activation through breath signals safety to your body and calms the fight-or-flight response." },
     { room: "Shadow Work", emoji: "🌑", path: "/shadow-work", exercise: "Explore the Root", why: "Most fear has a root. Shadow work can help you trace it back and release its grip." },
     { room: "Unspoken", emoji: "🤫", path: "/unspoken", exercise: "Give Fear a Voice", why: "Fear loses power when it is named and witnessed. Speak what scares you in a safe space." },
-    { room: "Spiritual Tools", emoji: "✨", path: "/spiritual-tools", exercise: "Protection Prayer", why: "A protection prayer wraps you in spiritual safety and reminds you that you are not alone." },
+    { room: "Tools", emoji: "✨", path: "/tools", exercise: "Protection Prayer", why: "A protection prayer wraps you in spiritual safety and reminds you that you are not alone." },
     { room: "Portal", emoji: "🌀", path: "/shop", exercise: "Trauma-Informed Healer", why: "If fear is persistent or rooted in trauma, a trauma-informed healer can walk through it with you safely." },
   ],
   loneliness: [
     { room: "Brain Dump", emoji: "💭", path: "/brain-dump", exercise: "Speak What Feels Unseen", why: "Sometimes the first step out of loneliness is letting the unseen parts of you be heard." },
     { room: "Unspoken", emoji: "🤫", path: "/unspoken", exercise: "Healing Conversation", why: "A healing conversation can fill the silence with understanding and reconnect you to feeling known." },
     { room: "Journal", emoji: "📓", path: "/journal", exercise: "Write with Self-Love", why: "Writing to yourself with the tenderness of a dear friend reminds you that you are never truly alone with you." },
-    { room: "Spiritual Tools", emoji: "✨", path: "/spiritual-tools", exercise: "Prayer & Angels", why: "Prayer and connection to angels open you to the unseen presence that has always surrounded you." },
+    { room: "Tools", emoji: "✨", path: "/tools", exercise: "Prayer & Angels", why: "Prayer and connection to angels open you to the unseen presence that has always surrounded you." },
     { room: "Portal", emoji: "🌀", path: "/shop", exercise: "Intercessor Connection", why: "An intercessor can hold space and pray with you, offering the human and spiritual connection your soul is seeking." },
   ],
   confusion: [
     { room: "Wisdom", emoji: "📖", path: "/wisdom", exercise: "Guided Reflection", why: "Wisdom offers clarity when your mind cannot find the thread on its own." },
     { room: "Journal", emoji: "📓", path: "/journal", exercise: "Clarity Write", why: "Writing without direction often reveals the direction. Let your hand lead." },
-    { room: "Breathe", emoji: "🌬️", path: "/breathe/meditation", exercise: "Breath Focus Meditation", why: "Slowing your breath can quiet the mental noise and let the next right step surface." },
+    { room: "Flow", emoji: "🌬️", path: "/flow/meditation", exercise: "Breath Focus Meditation", why: "Slowing your breath can quiet the mental noise and let the next right step surface." },
     { room: "Shadow Work", emoji: "🌑", path: "/shadow-work", exercise: "Inner Conflict Exploration", why: "Confusion is often two parts of you wanting different things. Shadow work can mediate that." },
-    { room: "Spiritual Tools", emoji: "✨", path: "/spiritual-tools", exercise: "Chakra Alignment", why: "Energetic confusion may respond to chakra work, especially the third eye and crown chakras." },
+    { room: "Tools", emoji: "✨", path: "/tools", exercise: "Chakra Alignment", why: "Energetic confusion may respond to chakra work, especially the third eye and crown chakras." },
   ],
   shame: [
     { room: "Journal", emoji: "📓", path: "/journal", exercise: "Compassionate Letter", why: "Writing to yourself with the compassion you would show a friend is one of the fastest paths through shame." },
     { room: "Shadow Work", emoji: "🌑", path: "/shadow-work", exercise: "Inner Critic Work", why: "Shame thrives in the dark. Shadow work brings your inner critic into the light where it loses power." },
-    { room: "Spiritual Tools", emoji: "✨", path: "/spiritual-tools", exercise: "Aura and Cord Clearing", why: "Shame often comes from others. Energy clearing separates what is yours from what was placed on you." },
+    { room: "Tools", emoji: "✨", path: "/tools", exercise: "Aura and Cord Clearing", why: "Shame often comes from others. Energy clearing separates what is yours from what was placed on you." },
     { room: "Unspoken", emoji: "🤫", path: "/unspoken", exercise: "Witnessed Healing", why: "Being witnessed without judgment is one of the most powerful antidotes to shame." },
     { room: "Wisdom", emoji: "📖", path: "/wisdom", exercise: "Gentle Truth", why: "The Wisdom room can remind you of who you truly are beyond what shame says about you." },
   ],
   peace: [
-    { room: "Breathe", emoji: "🌬️", path: "/breathe/breathwork", exercise: "Grounding Breath", why: "Grounding breath can deepen and anchor the calm you already feel into your nervous system." },
+    { room: "Flow", emoji: "🌬️", path: "/flow/breathwork", exercise: "Grounding Breath", why: "Grounding breath can deepen and anchor the calm you already feel into your nervous system." },
     { room: "Journal", emoji: "📓", path: "/journal", exercise: "Gratitude Write", why: "Writing what you are grateful for in this moment can amplify and extend the peace." },
     { room: "Wisdom", emoji: "📖", path: "/wisdom", exercise: "Reflective Insight", why: "The Wisdom room can add meaning and depth to what you are already experiencing." },
-    { room: "Spiritual Tools", emoji: "✨", path: "/spiritual-tools", exercise: "Sound Healing", why: "Sound healing can help you integrate this peace at a cellular and energetic level." },
+    { room: "Tools", emoji: "✨", path: "/tools", exercise: "Sound Healing", why: "Sound healing can help you integrate this peace at a cellular and energetic level." },
     { room: "Shadow Work", emoji: "🌑", path: "/shadow-work", exercise: "Integration Work", why: "Peace is a good time to gently revisit what you have been carrying — your nervous system is resourced." },
   ],
   joy: [
     { room: "Journal", emoji: "📓", path: "/journal", exercise: "Joy Capture", why: "Writing joy down is how you keep it. It becomes something you can return to on harder days." },
-    { room: "Breathe", emoji: "🌬️", path: "/breathe/breathwork", exercise: "Heart Coherence", why: "Heart coherence breathing anchors joy in your heart and nervous system so it lasts longer." },
+    { room: "Flow", emoji: "🌬️", path: "/flow/breathwork", exercise: "Heart Coherence", why: "Heart coherence breathing anchors joy in your heart and nervous system so it lasts longer." },
     { room: "Wisdom", emoji: "📖", path: "/wisdom", exercise: "Celebration Reflection", why: "The Wisdom room celebrates what feels good and invites even more light into your day." },
-    { room: "Spiritual Tools", emoji: "✨", path: "/spiritual-tools", exercise: "Chakra Activation", why: "Activating your upper chakras during joy amplifies your spiritual connection and alignment." },
+    { room: "Tools", emoji: "✨", path: "/tools", exercise: "Chakra Activation", why: "Activating your upper chakras during joy amplifies your spiritual connection and alignment." },
     { room: "Portal", emoji: "🌀", path: "/shop", exercise: "Share the Gift", why: "Joy multiplies when shared. The Portal connects you to others who are on this healing path." },
   ],
   default: [
-    { room: "Breathe", emoji: "🌬️", path: "/breathe/breathwork", exercise: "Box Breathing", why: "When you are not sure where to start, breathwork gives your nervous system a safe place to land." },
+    { room: "Flow", emoji: "🌬️", path: "/flow/breathwork", exercise: "Box Breathing", why: "When you are not sure where to start, breathwork gives your nervous system a safe place to land." },
     { room: "Wisdom", emoji: "📖", path: "/wisdom", exercise: "Guided Reflection", why: "The Wisdom room meets you wherever you are with insight and gentle truth." },
     { room: "Journal", emoji: "📓", path: "/journal", exercise: "Free Write", why: "Writing without direction is how the direction often finds you." },
     { room: "Shadow Work", emoji: "🌑", path: "/shadow-work", exercise: "Inner Exploration", why: "Whatever you are feeling, Shadow Work can help you look at it without turning away." },
@@ -426,61 +431,94 @@ export default function BrainDump() {
   const prefs = getPreferences();
   const [autoRead, setAutoRead] = useState(prefs.autoReadEnabled);
 
+  // NEW: Track the current emotion for the AI to use
+  const [currentEmotion, setCurrentEmotion] = useState<EmotionSignal | null>(null);
+
   const activeMethods = COMMUNICATION_METHODS.map((m) => m.id);
   const [activeTab, setActiveTab] = useState(activeMethods[0]);
   const [analysis, setAnalysis] = useState<ResponseAnalysis | null>(null);
   const [showCardScreen, setShowCardScreen] = useState(false);
   const [cardInfo, setCardInfo] = useState<{ emoji: string; label: string; category: string } | null>(null);
 
-  const send = useCallback(async (text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed || isLoading) return;
+  const send = useCallback(
+    async (text: string, inputType: "text" | "voice" | "card" = "text") => {
+      const trimmed = text.trim();
+      if (!trimmed || isLoading) return;
 
-    const userMsg: ChatMessage = { role: "user", content: trimmed };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
-    const newAnalysis = buildResponseAnalysis(trimmed);
-    setAnalysis(newAnalysis);
-    const parsed = parseCardMessage(trimmed);
-    if (parsed) {
-      setCardInfo(parsed);
-      setShowCardScreen(true);
-    }
-    setIsLoading(true);
+      // STEP 1: Detect emotion from the user input
+      const emotionSignal = detectEmotion(trimmed, inputType);
+      setCurrentEmotion(emotionSignal);
 
-    let assistantSoFar = "";
+      // Log emotion detection for debugging
+      if (emotionSignal) {
+        console.log(`[EMOTION DETECTED] ${formatEmotionSignal(emotionSignal)}`);
+      }
 
-    const upsertAssistant = (chunk: string) => {
-      assistantSoFar += chunk;
-      setMessages((prev) => {
-        const last = prev[prev.length - 1];
-        if (last?.role === "assistant" && prev.length > 1 && prev[prev.length - 2]?.role === "user") {
-          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
-        }
-        return [...prev, { role: "assistant", content: assistantSoFar }];
+      // STEP 2: Create user message with emotion metadata
+      const userMsg: ChatMessage = {
+        role: "user",
+        content: trimmed,
+        emotion: emotionSignal?.emotion,
+        intensity: emotionSignal?.intensity,
+        inputType,
+      };
+
+      setMessages((prev) => [...prev, userMsg]);
+      setInput("");
+
+      // Update local analysis for UI immediate feedback
+      const newAnalysis = buildResponseAnalysis(trimmed);
+      setAnalysis(newAnalysis);
+
+      const parsed = parseCardMessage(trimmed);
+      if (parsed) {
+        setCardInfo(parsed);
+        setShowCardScreen(true);
+      }
+      setIsLoading(true);
+
+      let assistantSoFar = "";
+
+      const upsertAssistant = (chunk: string) => {
+        assistantSoFar += chunk;
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last?.role === "assistant" && prev.length > 1 && prev[prev.length - 2]?.role === "user") {
+            return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+          }
+          return [...prev, { role: "assistant", content: assistantSoFar }];
+        });
+      };
+
+      // STEP 3: Send to backend with emotion context
+      // We clean the messages to only include role and content for backend compatibility
+      const cleanMessages = [...messages, userMsg]
+        .filter((m) => m !== WELCOME_MESSAGE)
+        .map(({ role, content }) => ({ role, content }));
+
+      await streamChat({
+        messages: cleanMessages,
+        emotion: emotionSignal?.emotion, // Pass the detected emotion to the backend
+        onDelta: upsertAssistant,
+        onDone: () => {
+          setIsLoading(false);
+          if (autoRead) ttsSpeak(stripMarkdown(assistantSoFar));
+        },
+        onError: (err) => {
+          setIsLoading(false);
+          toast({ title: "Connection interrupted", description: err, variant: "destructive" });
+        },
       });
-    };
 
-    await streamChat({
-      messages: [...messages, userMsg].filter((m) => m !== WELCOME_MESSAGE),
-      onDelta: upsertAssistant,
-      onDone: () => {
-        setIsLoading(false);
-        if (autoRead) ttsSpeak(stripMarkdown(assistantSoFar));
-      },
-      onError: (err) => {
-        setIsLoading(false);
-        toast({ title: "Connection interrupted", description: err, variant: "destructive" });
-      },
-    });
-
-    textareaRef.current?.focus();
-  }, [isLoading, messages, autoRead, ttsSpeak, toast]);
+      textareaRef.current?.focus();
+    },
+    [isLoading, messages, autoRead, ttsSpeak, toast]
+  );
 
   const speech = useSpeechRecognition({
     onResult: (transcript) => {
       setIsListening(false);
-      send(transcript);
+      send(transcript, "voice");
     },
     continuous: false,
   });
@@ -511,7 +549,7 @@ export default function BrainDump() {
   }, [messages]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input, "text"); }
   };
 
   const replayMessage = (text: string) => { ttsStop(); ttsSpeak(stripMarkdown(text)); };
@@ -524,7 +562,7 @@ export default function BrainDump() {
       case "eyetrack":
         return (
           <div className="px-4 py-3">
-            <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex gap-2 items-end max-w-3xl mx-auto">
+            <form onSubmit={(e) => { e.preventDefault(); send(input, "text"); }} className="flex gap-2 items-end max-w-3xl mx-auto">
               <Textarea
                 ref={textareaRef}
                 value={input}
@@ -568,14 +606,14 @@ export default function BrainDump() {
         );
 
       case "sign":
-        return <ASLSignInput onSend={send} disabled={isLoading} />;
+        return <ASLSignInput onSend={(text) => send(text, "text")} disabled={isLoading} />;
 
       case "point":
       case "pictures":
-        return <PointToItCards onSend={send} disabled={isLoading} />;
+        return <PointToItCards onSend={(text) => send(text, "card")} disabled={isLoading} />;
 
       case "colors":
-        return <ColorSymbolCanvas onSend={send} disabled={isLoading} />;
+        return <ColorSymbolCanvas onSend={(text) => send(text, "text")} disabled={isLoading} />;
 
       case "connect":
       case "device":
@@ -604,6 +642,11 @@ export default function BrainDump() {
           {messages.map((msg, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === "user" ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-card text-card-foreground border border-border rounded-bl-sm"}`}>
+                {msg.role === "user" && msg.emotion && (
+                  <div className="text-[10px] uppercase tracking-wider opacity-60 mb-1">
+                    {msg.emotion} detected
+                  </div>
+                )}
                 {msg.role === "assistant" ? (
                   <div className="space-y-2">
                     <div className="prose prose-sm prose-invert max-w-none prose-p:my-1 prose-headings:font-display">

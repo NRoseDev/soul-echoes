@@ -2,20 +2,19 @@ import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Wind, MessageCircleOff, Moon, Sparkles, Flame, Check, Globe2 } from "lucide-react";
+import { Home, Check } from "lucide-react";
 import FloatingHub from "@/components/FloatingHub";
 import { getPreferences, savePreferences, type InputMethod } from "@/lib/preferences";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { JournalIcon, FlowIcon, CommunityIcon, PortalIcon } from "@/components/icons/RoomIcons";
 
+// Clean, streamlined navigation structure for a clear user flow
 const NAV_ITEMS = [
   { path: "/", label: "Home", icon: Home },
-  { path: "/journal", label: "Journal", icon: BookOpen },
-  { path: "/breathe", label: "Breathe", icon: Wind },
-  { path: "/unspoken", label: "Unspoken", icon: MessageCircleOff },
-  { path: "/shadow-work", label: "Shadow", icon: Moon },
-  { path: "/wisdom", label: "Wisdom", icon: Sparkles },
-  { path: "/shop", label: "Portal", icon: Globe2 },
-  { path: "/spiritual-tools", label: "Tools", icon: Flame },
+  { path: "/journal", label: "Journal", icon: JournalIcon },
+  { path: "/flow", label: "Flow", icon: FlowIcon },
+  { path: "/community", label: "Community", icon: CommunityIcon },
+  { path: "/shop", label: "Portal", icon: PortalIcon },
 ];
 
 const COMM_MODES: { id: InputMethod; label: string; emoji: string; desc: string; detail?: string }[] = [
@@ -23,13 +22,7 @@ const COMM_MODES: { id: InputMethod; label: string; emoji: string; desc: string;
   { id: "sign", label: "Sign", emoji: "🤟", desc: "Sign language with camera" },
   { id: "point", label: "Point", emoji: "👆", desc: "Tap pictures & cards" },
   { id: "type", label: "Type", emoji: "⌨️", desc: "Keyboard & text" },
-  {
-    id: "connect",
-    label: "Connect Device",
-    emoji: "🔌",
-    desc: "Braille display, AAC, eye gaze, switch",
-    detail: "Connect via USB, Bluetooth, or 3.5mm audio port",
-  },
+  { id: "connect", label: "Connect Device", emoji: "🔌", desc: "Braille display, AAC, eye gaze, switch", detail: "Connect via USB, Bluetooth, or 3.5mm audio port" },
 ];
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -58,11 +51,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="ml-auto">
                 <Sheet>
                   <SheetTrigger asChild>
-                    <button
-                      aria-label="Switch communication method"
-                      title="Switch how you communicate"
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-card text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all"
-                    >
+                    <button aria-label="Switch communication method" title="Switch how you communicate" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-card text-sm text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all" >
                       <span className="text-base">{COMM_MODES.find((m) => m.id === inputMethod)?.emoji ?? "🔌"}</span>
                       <span className="hidden sm:inline text-xs font-medium">{COMM_MODES.find((m) => m.id === inputMethod)?.label ?? "Communicate"}</span>
                     </button>
@@ -78,14 +67,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                       {COMM_MODES.map((mode) => {
                         const active = inputMethod === mode.id;
                         return (
-                          <button
-                            key={mode.id}
-                            onClick={() => switchMode(mode.id)}
-                            role="radio"
-                            aria-checked={active}
-                            aria-label={`${mode.label} — ${mode.desc}${active ? " (currently selected)" : ""}`}
-                            className={`flex items-center gap-4 px-4 py-4 rounded-2xl border-2 text-left transition-all ${active ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"}`}
-                          >
+                          <button key={mode.id} onClick={() => switchMode(mode.id)} role="radio" aria-checked={active} aria-label={`${mode.label} — ${mode.desc}${active ? " (currently selected)" : ""}`} className={`flex items-center gap-4 px-4 py-4 rounded-2xl border-2 text-left transition-all ${active ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"}`} >
                             <span className="text-3xl">{mode.emoji}</span>
                             <div className="flex-1 min-w-0">
                               <p className="text-base font-semibold text-foreground">{mode.label}</p>
@@ -97,7 +79,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         );
                       })}
                     </div>
-                    {/* External device detail */}
+
                     <div className="mt-4 rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
                       <p className="text-sm font-semibold text-foreground">External device connections</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-muted-foreground">
@@ -121,24 +103,34 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         <FloatingHub inputMethod={inputMethod} />
-        {/* Bottom Navigation Bar */}
-        <nav
-          className="shrink-0 flex items-center justify-around px-2 py-2 border-t border-white/10"
-          style={{ background: "hsl(260, 40%, 5%)" }}
-          aria-label="Main navigation"
-        >
+        
+        {/* Premium Bottom Navigation Bar */}
+        <nav className="shrink-0 flex items-center justify-around px-2 py-2.5 border-t border-white/10 bg-background/60 backdrop-blur-md" aria-label="Main navigation">
           {NAV_ITEMS.map((item) => {
             const active = location.pathname === item.path;
             return (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-colors ${active ? "text-purple-400" : "text-white/50 hover:text-white/80"}`}
+                className={`relative flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all duration-200 ${
+                  active
+                    ? "text-amber-400"
+                    : "text-white/40 hover:text-white/80"
+                }`}
                 aria-label={item.label}
                 aria-current={active ? "page" : undefined}
               >
-                <item.icon size={20} strokeWidth={active ? 2.5 : 1.5} />
-                <span className="text-[10px] font-medium">{item.label}</span>
+                <span className={`flex items-center justify-center w-[22px] h-[22px] ${active ? "drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]" : ""}`}>
+                  <item.icon
+                    size={22}
+                    strokeWidth={active ? 2.5 : 1.5}
+                    className="w-full h-full"
+                  />
+                </span>
+                <span className="text-[10px] font-semibold tracking-wide">{item.label}</span>
+                {active && (
+                  <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-1 w-6 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+                )}
               </button>
             );
           })}

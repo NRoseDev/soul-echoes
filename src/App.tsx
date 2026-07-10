@@ -1,96 +1,73 @@
-import { useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AppLayout } from "@/components/AppLayout";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { RoomProvider } from "@/contexts/RoomContext";
+import Index from "./pages/Index";
 import BrainDump from "./pages/BrainDump";
-import HealingRoom from "./pages/HealingRoom";
-import HealingResources from "./pages/HealingResources";
-import BreathePage from "./pages/BreathePage";
-import BreatheDetail from "./pages/BreatheDetail";
-import NotFound from "./pages/NotFound";
-import Onboarding from "./pages/Onboarding";
+import Journal from "./pages/Journal";
 import VoiceSettings from "./pages/VoiceSettings";
-import Settings from "./pages/Settings";
-import PractitionerSignup from "./pages/PractitionerSignup";
-import Pricing from "./pages/Pricing";
-import JournalRoom from "./pages/JournalRoom";
-import JournalSection from "./pages/JournalSection";
+import Auth from "./pages/Auth";
+import WisdomRoom from "./pages/WisdomRoom";
+import ToolsRoom from "./pages/ToolsRoom";
+import FlowRoom from "./pages/FlowRoom";
+import FlowDetail from "./pages/BreatheDetail";
+import WisdomDetail from "./pages/WisdomDetail";
+import SpiritualToolsDetail from "./pages/SpiritualToolsDetail";
 import UnspokenRoom from "./pages/UnspokenRoom";
 import UnspokenDetail from "./pages/UnspokenDetail";
 import ShadowWorkRoom from "./pages/ShadowWorkRoom";
 import ShadowWorkDetail from "./pages/ShadowWorkDetail";
-import WisdomRoom from "./pages/WisdomRoom";
-import WisdomDetail from "./pages/WisdomDetail";
+import LevelPage from "./pages/LevelPage";
 import PortalRoom from "./pages/PortalRoom";
-import Auth from "./pages/Auth";
-import SpiritualToolsRoom from "./pages/SpiritualToolsRoom";
-import SpiritualToolsDetail from "./pages/SpiritualToolsDetail";
-import DistressSignal from "./components/DistressSignal";
-import AIGuideAnnouncer from "./components/AIGuideAnnouncer";
-import AlwaysOnVoice from "./components/AlwaysOnVoice";
-import { getPreferences } from "./lib/preferences";
-import ASLImages from "./pages/ASLImages"; // <-- Added import
+import CommunityRoom from "./pages/CommunityRoom";
+import Pricing from "./pages/Pricing";
+import Settings from "./pages/Settings";
+import { AppLayout } from "@/components/AppLayout";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  const [showOnboarding, setShowOnboarding] = useState(
-    () => !getPreferences().onboardingComplete
-  );
-
-  if (showOnboarding) {
-    return (
-      <TooltipProvider>
-        <Onboarding onComplete={() => setShowOnboarding(false)} />
-      </TooltipProvider>
-    );
-  }
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AIGuideAnnouncer />
-          <AlwaysOnVoice />
-          <AppLayout>
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <RoomProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
             <Routes>
-              <Route path="/" element={<BrainDump />} />
-              <Route path="/journal" element={<JournalRoom />} />
-              <Route path="/journal/:section" element={<JournalSection />} />
-              <Route path="/breathe" element={<BreathePage />} />
-              <Route path="/breathe/:section" element={<BreatheDetail />} />
-              <Route path="/unspoken" element={<UnspokenRoom />} />
-              <Route path="/unspoken/:section" element={<UnspokenDetail />} />
-              <Route path="/shadow-work" element={<ShadowWorkRoom />} />
-              <Route path="/shadow-work/:module" element={<ShadowWorkDetail />} />
-              <Route path="/wisdom" element={<WisdomRoom />} />
-              <Route path="/wisdom/:section" element={<WisdomDetail />} />
-              <Route path="/shop" element={<PortalRoom />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/spiritual-tools" element={<SpiritualToolsRoom />} />
-              <Route path="/spiritual-tools/:section" element={<SpiritualToolsDetail />} />
-              <Route path="/community" element={<HealingRoom />} />
-              <Route path="/practitioner" element={<HealingRoom />} />
-              <Route path="/practitioner/signup" element={<PractitionerSignup />} />
-              <Route path="/resources" element={<HealingResources />} />
-              <Route path="/crisis" element={<HealingRoom />} />
-              <Route path="/voice-settings" element={<VoiceSettings />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/asl-images" element={<ASLImages />} /> {/* <-- Added route */}
-              <Route path="*" element={<NotFound />} />
+              <Route path="/" element={<AppLayout><BrainDump /></AppLayout>} />
+              <Route path="/brain-dump" element={<Navigate to="/" replace />} />
+              <Route path="/journal" element={<AppLayout><Journal /></AppLayout>} />
+              <Route path="/voice-settings" element={<AppLayout><VoiceSettings /></AppLayout>} />
+              <Route path="/wisdom" element={<AppLayout><WisdomRoom /></AppLayout>} />
+              <Route path="/wisdom/:section" element={<AppLayout><WisdomDetail /></AppLayout>} />
+              <Route path="/tools" element={<AppLayout><ToolsRoom /></AppLayout>} />
+              <Route path="/tools/:section" element={<AppLayout><SpiritualToolsDetail /></AppLayout>} />
+              <Route path="/flow" element={<AppLayout><FlowRoom /></AppLayout>} />
+              <Route path="/flow/:section" element={<AppLayout><FlowDetail /></AppLayout>} />
+              <Route path="/unspoken" element={<AppLayout><UnspokenRoom /></AppLayout>} />
+              <Route path="/unspoken/:moduleId" element={<AppLayout><UnspokenDetail /></AppLayout>} />
+              <Route path="/shadow-work" element={<AppLayout><ShadowWorkRoom /></AppLayout>} />
+              <Route path="/shadow-work/:moduleId" element={<AppLayout><ShadowWorkDetail /></AppLayout>} />
+              <Route path="/shop" element={<AppLayout><PortalRoom initialSection="products" /></AppLayout>} />
+              <Route path="/practitioner-connect" element={<AppLayout><PortalRoom initialSection="practitioners" /></AppLayout>} />
+              <Route path="/crisis-counselor" element={<AppLayout><PortalRoom initialSection="crisis" /></AppLayout>} />
+              <Route path="/portal" element={<Navigate to="/shop" replace />} />
+              <Route path="/community" element={<AppLayout><CommunityRoom /></AppLayout>} />
+              <Route path="/pricing" element={<AppLayout><Pricing /></AppLayout>} />
+              <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
+              <Route path="/:roomId/level/:levelNum" element={<LevelPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </AppLayout>
-          <DistressSignal />
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
-};
+          </BrowserRouter>
+        </TooltipProvider>
+      </RoomProvider>
+    </AuthProvider>
+  </QueryClientProvider>
+);
 
 export default App;

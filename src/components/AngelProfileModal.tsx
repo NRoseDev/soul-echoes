@@ -1,0 +1,297 @@
+import { motion } from "framer-motion";
+import { X, Play, Pause } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import type { ArchangelProfile } from "@/data/angelData";
+import { ANGEL_DETAILS } from "@/data/angelData";
+import { ANGEL_EXTRAS } from "@/data/angelExtras";
+import { chakraColorMap } from "@/data/chakraData";
+
+interface Props {
+  angel: ArchangelProfile;
+  onClose: () => void;
+}
+
+export default function AngelProfileModal({ angel, onClose }: Props) {
+  const p = angel.palette;
+  const chakra = chakraColorMap[angel.chakra];
+  const details = ANGEL_DETAILS[angel.name];
+  const ancestralConnections = details?.ancestralConnections;
+  const spiritualTools = details?.spiritualTools;
+
+  // Parse Hz from strings like "741 Hz — Clearing & Protection"
+  const frequencyHz = (() => {
+    const m = angel.frequency.match(/(\d+(?:\.\d+)?)\s*Hz/i);
+    return m ? parseFloat(m[1]) : null;
+  })();
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<{ ctx: AudioContext; osc: OscillatorNode; gain: GainNode } | null>(null);
+
+  const stopTone = () => {
+    if (audioRef.current) {
+      try {
+        audioRef.current.gain.gain.linearRampToValueAtTime(
+          0,
+          audioRef.current.ctx.currentTime + 0.15,
+        );
+        audioRef.current.osc.stop(audioRef.current.ctx.currentTime + 0.2);
+        audioRef.current.ctx.close();
+      } catch {
+        // no-op
+      }
+      audioRef.current = null;
+    }
+    setIsPlaying(false);
+  };
+
+  const startTone = () => {
+    if (!frequencyHz) return;
+    stopTone();
+    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new Ctx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.value = frequencyHz;
+    gain.gain.value = 0;
+
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 0.4);
+
+    audioRef.current = { ctx, osc, gain };
+    setIsPlaying(true);
+  };
+
+  useEffect(() => () => stopTone(), []);
+
+  const handleChakraNavigation = () => {
+    if (onClose) onClose();
+    window.location.hash = `#/wisdom?chakra=${encodeURIComponent(angel.chakra.toLowerCase())}`;
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  };
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex flex-col overflow-y-auto"
+      style={{ background: "rgba(0,0,0,0.96)" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 z-10 h-10 w-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+        aria-label="Close angel profile"
+      >
+        <X className="h-5 w-5" />
+      </button>
+
+      <motion.div
+        className="flex flex-col items-center px-5 pb-16 pt-6"
+        initial={{ y: 24, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.1, duration: 0.35 }}
+      >
+        {/* Angel portrait */}
+        <div className="w-full max-w-xs rounded-xl overflow-hidden border" style={{ borderColor: p.accentMid + "55" }}>
+          <img
+            src={`/images/Angel${angel.name === "Jeremiel" ? "Jermial" : angel.name}.png`}
+            alt={`${angel.name} archangel portrait`}
+            className="w-full h-auto object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+            }}
+          />
+        </div>
+
+        {/* Name */}
+        <h1
+          className="font-display text-3xl font-bold mt-3 tracking-widest"
+          style={{ color: p.nameColor }}
+        >
+          {angel.name}
+        </h1>
+        <p className="text-sm italic mt-1 text-white/55">"{angel.meaning}"</p>
+
+        {/* Badges */}
+        <div className="flex flex-wrap gap-2 mt-4 justify-center">
+          <span
+            className="px-3 py-1 rounded-full text-xs font-semibold border"
+            style={{ borderColor: p.accentMid + "88", color: p.accentMid }}
+          >
+            {angel.energyColor}
+          </span>
+
+          {frequencyHz ? (
+            <button
+              type="button"
+              onClick={isPlaying ? stopTone : startTone}
+              aria-pressed={isPlaying}
+              aria-label={`${isPlaying ? "Stop" : "Play"} ${frequencyHz} Hz healing tone`}
+              className="px-3 py-1 rounded-full text-xs font-semibold border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition-colors flex items-center gap-1.5"
+              style={
+                isPlaying
+                  ? { borderColor: p.accentMid + "aa", color: p.accentMid, background: p.accentMid + "15" }
+                  : undefined
+              }
+            >
+              {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+              {angel.frequency}
+            </button>
+          ) : (
+            <span className="px-3 py-1 rounded-full text-xs font-semibold border border-white/20 text-white/60">
+              {angel.frequency}
+            </span>
+          )}
+        </div>
+
+        {/* Chakra association (Actionable Button Layout) */}
+        <button
+          type="button"
+          onClick={handleChakraNavigation}
+          className="w-full max-w-sm mt-4 rounded-2xl p-3 flex items-center gap-3 border text-left transition-all duration-200 active:scale-[0.99] hover:bg-white/5 group"
+          style={{ background: chakra.colors[0] + "18", borderColor: chakra.colors[0] + "44" }}
+        >
+          <div className="h-8 w-8 rounded-full shrink-0" style={{ background: `linear-gradient(135deg, ${chakra.colors[0]}, ${chakra.colors[1]})` }} />
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: chakra.colors[0] }}>
+                {chakra.name} Chakra
+              </p>
+              <span className="text-[10px] uppercase font-bold tracking-wider opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: p.accentMid }}>
+                Visit Wisdom ➔
+              </span>
+            </div>
+            <p className="text-xs text-white/50 mt-0.5 capitalize">
+              {chakra.gifts.join(" · ")}
+            </p>
+          </div>
+        </button>
+
+        <div className="w-full max-w-sm mt-2 border-t border-white/10 pt-5 space-y-5">
+          {/* Healing Gifts */}
+          <div className="space-y-2">
+            <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: p.subtitleColor }}>
+              Healing Gifts
+            </h2>
+            <ul className="space-y-2">
+              {angel.healingGifts.map((gift, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-white/75 leading-snug">
+                  <span className="mt-0.5 shrink-0" style={{ color: p.accentMid }}>✦</span>
+                  {gift}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* When to Call */}
+          <div className="space-y-2">
+            <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: p.subtitleColor }}>
+              When to Call
+            </h2>
+            <ul className="space-y-2">
+              {angel.whenToCall.map((when, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-white/75 leading-snug">
+                  <span className="mt-0.5 shrink-0">🪽</span>
+                  {when}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Symbols */}
+          {ANGEL_EXTRAS[angel.name]?.symbols && (
+            <div className="space-y-2">
+              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: p.subtitleColor }}>
+                Symbols
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {ANGEL_EXTRAS[angel.name].symbols.map((s, i) => (
+                  <span
+                    key={i}
+                    className="px-3 py-1 rounded-full text-xs border"
+                    style={{ borderColor: p.accentMid + "55", color: p.accentLight }}
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Prayer to Invoke */}
+          {ANGEL_EXTRAS[angel.name]?.prayer && (
+            <div className="space-y-2">
+              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: p.subtitleColor }}>
+                Prayer to Invoke
+              </h2>
+              <div
+                className="rounded-2xl p-4 border"
+                style={{ background: p.atmosphere + "cc", borderColor: p.accentMid + "55" }}
+              >
+                <p className="text-sm italic leading-relaxed text-white/85">
+                  {ANGEL_EXTRAS[angel.name].prayer}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Ancestral Connections */}
+          {ancestralConnections && ancestralConnections.length > 0 && (
+            <div className="space-y-2">
+              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: p.subtitleColor }}>
+                Ancestral Connections
+              </h2>
+              <ul className="space-y-2">
+                {ancestralConnections.map((line, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-sm text-white/80 leading-snug rounded-xl p-3 border"
+                    style={{ background: p.atmosphere + "99", borderColor: p.accentMid + "33" }}
+                  >
+                    <span className="mt-0.5 shrink-0" style={{ color: p.accentMid }}>☥</span>
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Tools */}
+          {spiritualTools && (
+            <div className="space-y-2">
+              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: p.subtitleColor }}>
+                Tools
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {[
+                  { label: "Crystal", value: spiritualTools.crystal, icon: "✦" },
+                  { label: "Association", value: spiritualTools.association, icon: "✶" },
+                  { label: "Halo", value: spiritualTools.halo, icon: "◎" },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-xl p-3 border flex flex-col gap-1"
+                    style={{ background: p.atmosphere + "cc", borderColor: p.accentMid + "55" }}
+                  >
+                    <div
+                      className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest"
+                      style={{ color: p.accentMid }}
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.label}</span>
+                    </div>
+                    <p className="text-sm text-white/85 leading-snug">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}

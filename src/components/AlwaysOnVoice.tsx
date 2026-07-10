@@ -20,11 +20,11 @@ function triggerDistressSignal() {
 const SCREEN_ANNOUNCEMENTS: Record<string, string> = {
   "/": "You're in Brain Dump. Speak freely or type your thoughts.",
   "/journal": "Journal room. Write or speak what's on your heart.",
-  "/breathe": "Breathe and Movement room. Say a practice name or tap to explore.",
+  "/flow": "Flow and Movement room. Say a practice name or tap to explore.",
   "/unspoken": "Unspoken Chamber. Express what words cannot.",
   "/shadow-work": "Shadow Work room. Explore your deeper self safely.",
   "/wisdom": "Wisdom room. Receive guidance and insight.",
-  "/spiritual-tools": "Spiritual Tools. Access rituals, prayers, and healing aids.",
+  "/tools": "Tools. Access rituals, prayers, and healing aids.",
   "/community": "Community space. You are not alone.",
   "/practitioner": "Practitioner Connect. Find a healer or teacher.",
   "/crisis": "Crisis Counselor. Immediate support is available.",

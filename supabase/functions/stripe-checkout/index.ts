@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,7 +8,21 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Price mapping — these will be created on first use
+// Hardcoded allowed redirect bases — do NOT trust the request Origin header.
+const ALLOWED_REDIRECT_ORIGINS = [
+  "https://soul-echoes-for-all.lovable.app",
+  "https://id-preview--4ec12b64-4410-45eb-a733-9b97005a18d5.lovable.app",
+  "http://localhost:5173",
+  "http://localhost:8080",
+];
+const DEFAULT_REDIRECT_ORIGIN = "https://soul-echoes-for-all.lovable.app";
+
+function resolveRedirectOrigin(req: Request): string {
+  const origin = req.headers.get("origin");
+  if (origin && ALLOWED_REDIRECT_ORIGINS.includes(origin)) return origin;
+  return DEFAULT_REDIRECT_ORIGIN;
+}
+
 const PRICE_MAP: Record<string, { amount: number; name: string }> = {
   individual_seed: { amount: 100, name: "Soul Echoes — Seed ($1/mo)" },
   individual_bloom: { amount: 300, name: "Soul Echoes — Bloom ($3/mo)" },
@@ -27,6 +42,29 @@ serve(async (req) => {
   }
 
   try {
+    // --- AUTH: require a valid JWT ---
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+    if (userErr || !userData?.user?.id) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const user = userData.user;
+
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) {
       return new Response(
@@ -40,7 +78,6 @@ serve(async (req) => {
     const body = await req.json();
     const { priceId, energyExchange, donationAmount } = body;
 
-    // Validate input
     if (!priceId || typeof priceId !== "string" || !PRICE_MAP[priceId]) {
       return new Response(
         JSON.stringify({ error: "Invalid plan selected" }),
@@ -49,7 +86,7 @@ serve(async (req) => {
     }
 
     const donation = typeof donationAmount === "number" && donationAmount > 0
-      ? Math.min(Math.round(donationAmount * 100), 1100) // cap at $11
+      ? Math.min(Math.round(donationAmount * 100), 1100)
       : 0;
 
     const tier = PRICE_MAP[priceId];
@@ -85,14 +122,16 @@ serve(async (req) => {
       });
     }
 
-    const origin = req.headers.get("origin") || "https://soul-echoes-for-all.lovable.app";
+    const origin = resolveRedirectOrigin(req);
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: lineItems,
+      customer_email: user.email ?? undefined,
       success_url: `${origin}/pricing?success=true`,
       cancel_url: `${origin}/pricing?canceled=true`,
       metadata: {
+        user_id: user.id,
         priceId,
         energyExchange: energyExchange ? "true" : "false",
         donationAmount: String(donation),
