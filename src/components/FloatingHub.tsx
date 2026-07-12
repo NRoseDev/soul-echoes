@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { X, Heart, Users, Sparkles } from "lucide-react";
+import { X, Heart, Users, Sparkles, Compass } from "lucide-react";
 import ASLSignInput from "@/components/ASLSignInput";
 import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { SanctuaryTour, hasSeenTour } from "@/components/SanctuaryTour";
 
 // Safe static asset paths that do not crash the bundler
 const aiNavigatorIcon = "/Icon-AI%20navigator.png";
