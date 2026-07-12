@@ -431,6 +431,8 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
           </div>
         </DialogContent>
       </Dialog>
+
+      <SanctuaryTour open={tourOpen} onOpenChange={setTourOpen} />
     </div>
   );
 }
