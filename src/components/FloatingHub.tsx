@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { X, Heart, Users, Sparkles } from "lucide-react";
+import { X, Heart, Users, Sparkles, Compass } from "lucide-react";
 import ASLSignInput from "@/components/ASLSignInput";
 import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { SanctuaryTour, hasSeenTour } from "@/components/SanctuaryTour";
 
 // Safe static asset paths that do not crash the bundler
 const aiNavigatorIcon = "/Icon-AI%20navigator.png";
@@ -93,6 +94,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
   const [hubOpen, setHubOpen] = useState(false);
   const [activePanel, setActivePanel] = useState<"ai" | "asl" | null>(null);
   const [intercessorOpen, setIntercessorOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const [indicatorState, setIndicatorState] = useState<IndicatorState>("idle");
   const [currentSuggestion, setCurrentSuggestion] = useState<{ text: string; card: string; emoji: string } | null>(null);
   const suggestionIndexRef = useRef(0);
@@ -106,6 +108,13 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
     u.pitch = 1.1;
     window.speechSynthesis.speak(u);
   }, []);
+  useEffect(() => {
+    if (!hasSeenTour()) {
+      const t = setTimeout(() => setTourOpen(true), 1200);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
 
   useEffect(() => {
     suggestionIndexRef.current = 0;
@@ -266,6 +275,18 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
             className="flex flex-col items-end gap-2"
           >
             <button
+              onClick={() => {
+                setHubOpen(false);
+                setActivePanel(null);
+                setTourOpen(true);
+              }}
+              aria-label="Master Sanctuary Tour"
+              title="Master Sanctuary Tour"
+              className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 border-amber-300/50 bg-gradient-to-br from-amber-400/30 to-rose-400/20 hover:scale-110 active:scale-95 transition-all"
+            >
+              <Compass className="h-5 w-5 text-amber-100" />
+            </button>
+            <button
               onClick={openASL}
               aria-label="ASL cards and camera"
               title="ASL sign cards and camera"
@@ -410,6 +431,8 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
           </div>
         </DialogContent>
       </Dialog>
+
+      <SanctuaryTour open={tourOpen} onOpenChange={setTourOpen} />
     </div>
   );
 }
