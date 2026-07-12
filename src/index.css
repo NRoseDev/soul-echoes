@@ -179,3 +179,24 @@ html.calm-tones body {
   background: linear-gradient(135deg, hsl(40, 50%, 94%), hsl(35, 45%, 92%), hsl(45, 50%, 95%)) !important;
   color: hsl(var(--foreground));
 }
+
+/* Sanctuary Tour — highlighted sidebar/nav item pulse-flash */
+@keyframes tour-pulse-flash {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(45 95% 65% / 0.65),
+                0 0 0 0 hsl(280 70% 65% / 0);
+    background-color: hsl(45 95% 65% / 0.18);
+  }
+  50% {
+    box-shadow: 0 0 0 8px hsl(45 95% 65% / 0),
+                0 0 22px 4px hsl(280 70% 65% / 0.55);
+    background-color: hsl(45 95% 65% / 0.32);
+  }
+}
+.tour-pulse {
+  position: relative;
+  border-radius: 0.6rem;
+  animation: tour-pulse-flash 1.6s ease-in-out infinite;
+  outline: 1.5px solid hsl(45 95% 70% / 0.7);
+  outline-offset: 1px;
+}
