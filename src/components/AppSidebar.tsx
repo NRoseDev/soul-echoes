@@ -1,8 +1,10 @@
+import { useEffect, useState } from "react";
 import { Volume2, Settings, Lock, CreditCard, Sparkles } from "lucide-react";
 import {
   BrainDumpIcon, JournalIcon, FlowIcon, UnspokenIcon,
   ShadowIcon, WisdomIcon, ToolsIcon, PortalIcon, CommunityIcon,
 } from "@/components/icons/RoomIcons";
+import { TOUR_HIGHLIGHT_EVENT } from "@/components/SanctuaryTour";
 
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -27,6 +29,16 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const [highlightPath, setHighlightPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    const onHighlight = (e: Event) => {
+      const detail = (e as CustomEvent<{ path: string | null }>).detail;
+      setHighlightPath(detail?.path ?? null);
+    };
+    window.addEventListener(TOUR_HIGHLIGHT_EVENT, onHighlight);
+    return () => window.removeEventListener(TOUR_HIGHLIGHT_EVENT, onHighlight);
+  }, []);
 
   return (
     <Sidebar collapsible="icon">
@@ -56,13 +68,14 @@ export function AppSidebar() {
             <SidebarMenu>
               {healingRooms.map((item) => {
                 const isActive = location.pathname === item.url;
+                const isTourHighlighted = highlightPath === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <NavLink
                         to={item.url}
                         end
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent ${isTourHighlighted ? "tour-pulse" : ""}`}
                         activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
                         aria-label={item.title}
                         aria-current={isActive ? "page" : undefined}
@@ -98,7 +111,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <NavLink to="/pricing" aria-label="Pricing" className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
+              <NavLink to="/pricing" aria-label="Pricing" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent ${highlightPath === "/pricing" ? "tour-pulse" : ""}`} activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
                 <CreditCard className={`h-5 w-5 shrink-0 ${location.pathname === "/pricing" ? "text-sidebar-primary" : "text-muted-foreground"}`} />
                 {!collapsed && <span className="text-sm">Pricing</span>}
               </NavLink>

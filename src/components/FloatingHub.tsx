@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { X, Heart, Users, Sparkles, Compass } from "lucide-react";
+import { X, Heart, Users, Sparkles } from "lucide-react";
+import { TreeOfLifeTourIcon } from "@/components/icons/TreeOfLifeTourIcon";
 import ASLSignInput from "@/components/ASLSignInput";
 import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 import { toast } from "sonner";
@@ -282,9 +283,9 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               }}
               aria-label="Master Sanctuary Tour"
               title="Master Sanctuary Tour"
-              className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 border-amber-300/50 bg-gradient-to-br from-amber-400/30 to-rose-400/20 hover:scale-110 active:scale-95 transition-all"
+              className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 border-amber-300/50 bg-gradient-to-br from-amber-400/25 to-rose-400/15 hover:scale-110 active:scale-95 transition-all shadow-[0_0_16px_hsl(45_95%_65%/0.45)]"
             >
-              <Compass className="h-5 w-5 text-amber-100" />
+              <TreeOfLifeTourIcon className="h-8 w-8" title="Take a Tour" />
             </button>
             <button
               onClick={openASL}
