@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -21,6 +21,8 @@ import {
   ArrowRight,
   Check,
   ExternalLink,
+  Play,
+  Pause,
 } from "lucide-react";
 
 export interface SanctuaryTourProps {
@@ -34,6 +36,8 @@ type TourStep = {
   subtitle: string;
   icon: React.ComponentType<{ className?: string }>;
   accent: string;
+  /** Sidebar path to pulse-flash while this step is active. */
+  highlightPath?: string;
   body: React.ReactNode;
   cta?: { label: string; path?: string; url?: string };
 };
@@ -45,17 +49,19 @@ const STEPS: TourStep[] = [
     subtitle: "Step 1 of 8",
     icon: Brain,
     accent: "from-amber-400/30 to-rose-400/20",
+    highlightPath: "/",
     body: (
       <>
         <p>
           The Brain Dump is your home base. Our trauma-informed{" "}
           <strong>Soul Echo AI</strong> listens to streaming thoughts, spoken
-          audio, or nonverbal shapes and colors drawn on the expression canvas.
+          audio, or nonverbal shapes and colors drawn on the expression
+          canvas.
         </p>
         <p>
           You never have to worry about how to "prompt" or format anything —
-          the AI interprets your choices with deep empathy and meets you where
-          you are.
+          the AI interprets your choices with deep empathy and meets you
+          where you are.
         </p>
       </>
     ),
@@ -94,6 +100,7 @@ const STEPS: TourStep[] = [
     subtitle: "Step 3 of 8",
     icon: Wind,
     accent: "from-sky-400/30 to-indigo-400/20",
+    highlightPath: "/flow",
     body: (
       <>
         <p>
@@ -125,10 +132,10 @@ const STEPS: TourStep[] = [
     body: (
       <>
         <p>
-          If an emotional crisis occurs, the system routes you instantly. Our
-          secured backend logs <strong>distress_signals</strong> through a
-          strict validation layer and dispatches immediate access to{" "}
-          <strong>Intercessors on Call</strong> and human dispatchers to
+          If an emotional crisis occurs, the system routes you instantly.
+          Our secured backend logs <strong>distress_signals</strong>{" "}
+          through a strict validation layer and dispatches immediate access
+          to <strong>Intercessors on Call</strong> and human dispatchers to
           protect you in real time.
         </p>
         <p className="text-xs text-muted-foreground">
@@ -149,12 +156,10 @@ const STEPS: TourStep[] = [
         <p>
           Verified holistic health specialists can securely log in to
           cross-sync metrics, review permitted client logs, and publish
-          custom mindfulness soundscapes and resource cards straight into the
-          ecosystem.
+          custom mindfulness soundscapes and resource cards straight into
+          the ecosystem.
         </p>
-        <p>
-          You choose which healer to connect with — and what they can see.
-        </p>
+        <p>You choose which healer to connect with — and what they can see.</p>
       </>
     ),
     cta: { label: "Practitioner Portal", path: "/practitioner-connect" },
@@ -165,6 +170,7 @@ const STEPS: TourStep[] = [
     subtitle: "Step 6 of 8",
     icon: Crown,
     accent: "from-amber-400/30 to-yellow-400/20",
+    highlightPath: "/pricing",
     body: (
       <>
         <ul className="grid gap-2 text-sm">
@@ -173,8 +179,8 @@ const STEPS: TourStep[] = [
             and free</em>.
           </li>
           <li>
-            🌱 <strong>Individual Free Tier</strong> — 33-day full trial. After
-            that, regular rooms limit to 1 use per space every 11 days.
+            🌱 <strong>Individual Free Tier</strong> — 33-day full trial.
+            After that, regular rooms limit to 1 use per space every 11 days.
           </li>
           <li>
             🌊 <strong>$1 – $7 paid tracks</strong> — remove room-entry
@@ -195,16 +201,38 @@ const STEPS: TourStep[] = [
     subtitle: "Step 7 of 8",
     icon: Users,
     accent: "from-violet-400/30 to-fuchsia-400/20",
+    highlightPath: "/community",
     body: (
       <>
         <p>
-          The healing libraries grow continuously as we bring on more
-          healers. The <strong>Community</strong> tab in your bottom
-          navigation is the dedicated feedback zone — users and practitioners
-          submit active suggestions for new features, rooms, or healing
-          tracks.
+          The <strong>Community</strong> tab is where you find stories,
+          support, and deep communal connection alongside others walking the
+          exact same path. It's organized into <strong>4 distinct healing
+          circles</strong>:
         </p>
-        <p>Your voice shapes what gets built next.</p>
+        <ul className="grid gap-2 text-sm">
+          <li>
+            🌿 <strong>Physical</strong> — for bodies that ache and bodies
+            that remember.
+          </li>
+          <li>
+            💭 <strong>Mental & Emotional</strong> — for minds that
+            won't quiet.
+          </li>
+          <li>
+            🌅 <strong>Spiritual Awakening</strong> — for souls returning
+            home.
+          </li>
+          <li>
+            ✨ <strong>Energy & Spirit</strong> — for those journeying
+            beyond the veil.
+          </li>
+        </ul>
+        <p>
+          The healing libraries grow continuously as we bring on more
+          healers, and this is also the dedicated feedback zone — your voice
+          shapes what gets built next.
+        </p>
       </>
     ),
     cta: { label: "Visit Community", path: "/community" },
@@ -258,21 +286,70 @@ const STEPS: TourStep[] = [
 ];
 
 const TOUR_SEEN_KEY = "soul-echoes-tour-completed";
+const AUTOPLAY_MS = 9500;
+
+/** Broadcast which sidebar path (if any) should pulse-flash right now. */
+export const TOUR_HIGHLIGHT_EVENT = "sanctuary-tour-highlight";
+
+function emitHighlight(path: string | null) {
+  window.dispatchEvent(
+    new CustomEvent(TOUR_HIGHLIGHT_EVENT, { detail: { path } }),
+  );
+}
 
 export function SanctuaryTour({ open, onOpenChange }: SanctuaryTourProps) {
   const navigate = useNavigate();
   const [stepIndex, setStepIndex] = useState(0);
+  const [autoplay, setAutoplay] = useState(true);
+  const timerRef = useRef<number | null>(null);
 
+  // Reset on open / clear highlight on close.
   useEffect(() => {
-    if (open) setStepIndex(0);
+    if (open) {
+      setStepIndex(0);
+      setAutoplay(true);
+    } else {
+      emitHighlight(null);
+    }
   }, [open]);
 
   const step = STEPS[stepIndex];
   const isLast = stepIndex === STEPS.length - 1;
   const Icon = step.icon;
 
+  // Broadcast current highlight target whenever the active step changes.
+  useEffect(() => {
+    if (!open) return;
+    emitHighlight(step.highlightPath ?? null);
+  }, [open, step.highlightPath]);
+
+  // Auto-advance while playing.
+  useEffect(() => {
+    if (timerRef.current) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (!open || !autoplay || isLast) return;
+    timerRef.current = window.setTimeout(() => {
+      setStepIndex((i) => Math.min(STEPS.length - 1, i + 1));
+    }, AUTOPLAY_MS);
+    return () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+    };
+  }, [open, autoplay, stepIndex, isLast]);
+
+  const goPrev = () => {
+    setAutoplay(false);
+    setStepIndex((i) => Math.max(0, i - 1));
+  };
+  const goNext = () => {
+    setAutoplay(false);
+    setStepIndex((i) => Math.min(STEPS.length - 1, i + 1));
+  };
+
   const finish = () => {
     try { localStorage.setItem(TOUR_SEEN_KEY, "true"); } catch {}
+    emitHighlight(null);
     onOpenChange(false);
   };
 
@@ -293,6 +370,18 @@ export function SanctuaryTour({ open, onOpenChange }: SanctuaryTourProps) {
                   {step.title}
                 </DialogTitle>
               </div>
+              <button
+                onClick={() => setAutoplay((p) => !p)}
+                aria-label={autoplay ? "Pause auto-play" : "Resume auto-play"}
+                title={autoplay ? "Pause auto-play" : "Resume auto-play"}
+                className="h-8 w-8 rounded-full bg-background/60 hover:bg-background/80 backdrop-blur flex items-center justify-center ring-1 ring-border transition-colors"
+              >
+                {autoplay ? (
+                  <Pause className="h-3.5 w-3.5" />
+                ) : (
+                  <Play className="h-3.5 w-3.5" />
+                )}
+              </button>
             </div>
             <DialogDescription className="sr-only">
               Master Sanctuary Tour — {step.title}
@@ -301,12 +390,28 @@ export function SanctuaryTour({ open, onOpenChange }: SanctuaryTourProps) {
           {/* progress */}
           <div className="mt-4 flex gap-1">
             {STEPS.map((s, i) => (
-              <div
+              <button
                 key={s.id}
+                onClick={() => { setAutoplay(false); setStepIndex(i); }}
+                aria-label={`Jump to ${s.title}`}
                 className={`h-1 flex-1 rounded-full transition-all ${
-                  i <= stepIndex ? "bg-foreground/70" : "bg-foreground/15"
+                  i < stepIndex
+                    ? "bg-foreground/70"
+                    : i === stepIndex
+                      ? "bg-foreground/90"
+                      : "bg-foreground/15 hover:bg-foreground/30"
                 }`}
-              />
+              >
+                {i === stepIndex && autoplay && !isLast && (
+                  <motion.span
+                    key={`${s.id}-fill`}
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: AUTOPLAY_MS / 1000, ease: "linear" }}
+                    className="block h-full bg-amber-300 rounded-full origin-left"
+                  />
+                )}
+              </button>
             ))}
           </div>
         </div>
@@ -326,6 +431,8 @@ export function SanctuaryTour({ open, onOpenChange }: SanctuaryTourProps) {
                 <button
                   onClick={() => {
                     if (step.cta?.path) {
+                      setAutoplay(false);
+                      emitHighlight(null);
                       onOpenChange(false);
                       navigate(step.cta.path);
                     } else if (step.cta?.url) {
@@ -344,7 +451,7 @@ export function SanctuaryTour({ open, onOpenChange }: SanctuaryTourProps) {
 
         <div className="px-6 py-4 border-t border-border flex items-center justify-between gap-2 bg-background/60">
           <button
-            onClick={() => setStepIndex((i) => Math.max(0, i - 1))}
+            onClick={goPrev}
             disabled={stepIndex === 0}
             className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground transition-colors"
           >
@@ -365,7 +472,7 @@ export function SanctuaryTour({ open, onOpenChange }: SanctuaryTourProps) {
             </button>
           ) : (
             <button
-              onClick={() => setStepIndex((i) => Math.min(STEPS.length - 1, i + 1))}
+              onClick={goNext}
               className="inline-flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
             >
               Next <ArrowRight className="h-4 w-4" />
