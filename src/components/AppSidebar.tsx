@@ -68,13 +68,14 @@ export function AppSidebar() {
             <SidebarMenu>
               {healingRooms.map((item) => {
                 const isActive = location.pathname === item.url;
+                const isTourHighlighted = highlightPath === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <NavLink
                         to={item.url}
                         end
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent ${isTourHighlighted ? "tour-pulse" : ""}`}
                         activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
                         aria-label={item.title}
                         aria-current={isActive ? "page" : undefined}
