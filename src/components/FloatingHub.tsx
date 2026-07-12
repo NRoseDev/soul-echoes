@@ -94,6 +94,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
   const [hubOpen, setHubOpen] = useState(false);
   const [activePanel, setActivePanel] = useState<"ai" | "asl" | null>(null);
   const [intercessorOpen, setIntercessorOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const [indicatorState, setIndicatorState] = useState<IndicatorState>("idle");
   const [currentSuggestion, setCurrentSuggestion] = useState<{ text: string; card: string; emoji: string } | null>(null);
   const suggestionIndexRef = useRef(0);
