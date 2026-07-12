@@ -1,8 +1,10 @@
+import { useEffect, useState } from "react";
 import { Volume2, Settings, Lock, CreditCard, Sparkles } from "lucide-react";
 import {
   BrainDumpIcon, JournalIcon, FlowIcon, UnspokenIcon,
   ShadowIcon, WisdomIcon, ToolsIcon, PortalIcon, CommunityIcon,
 } from "@/components/icons/RoomIcons";
+import { TOUR_HIGHLIGHT_EVENT } from "@/components/SanctuaryTour";
 
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
