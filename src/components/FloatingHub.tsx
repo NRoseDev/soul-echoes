@@ -108,6 +108,13 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
     u.pitch = 1.1;
     window.speechSynthesis.speak(u);
   }, []);
+  useEffect(() => {
+    if (!hasSeenTour()) {
+      const t = setTimeout(() => setTourOpen(true), 1200);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
 
   useEffect(() => {
     suggestionIndexRef.current = 0;
