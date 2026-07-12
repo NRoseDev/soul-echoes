@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -23,7 +23,12 @@ import {
   ExternalLink,
   Play,
   Pause,
+  Languages,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
+import { getPreferences, WORLD_LANGUAGES } from "@/lib/preferences";
+import { useTTS } from "@/hooks/use-tts";
 
 export interface SanctuaryTourProps {
   open: boolean;
@@ -36,13 +41,32 @@ type TourStep = {
   subtitle: string;
   icon: React.ComponentType<{ className?: string }>;
   accent: string;
-  /** Sidebar path to pulse-flash while this step is active. */
   highlightPath?: string;
+  narration: string;
   body: React.ReactNode;
   cta?: { label: string; path?: string; url?: string };
 };
 
-const STEPS: TourStep[] = [
+const CORE_INPUTS = [
+  { icon: "🗣️", label: "Speak It", desc: "Voice input & audio" },
+  { icon: "🤟", label: "Sign It", desc: "ASL & sign language" },
+  { icon: "👆", label: "Point It", desc: "Tap pictures & cards" },
+  { icon: "⌨️", label: "Type It", desc: "Keyboard & text" },
+  { icon: "🔌", label: "Connect Device", desc: "AAC, eye-gaze, Braille" },
+];
+
+const RESTING_STEP: TourStep = {
+  id: "activation-gate",
+  title: "Your Fluid Activation Gate",
+  subtitle: "Step 0 — Begin when you're ready",
+  icon: Languages,
+  accent: "from-amber-300/25 to-emerald-300/20",
+  narration:
+    "Welcome to your sanctuary. Your abilities and comfort change as you heal. You are never locked in. You can switch between speaking, typing, pointing, or signing at any single point, inside any room, on the fly. When you are ready, tap Begin Tour.",
+  body: null, // rendered dynamically below
+};
+
+const REMAINING_STEPS: TourStep[] = [
   {
     id: "brain-dump",
     title: "The Brain Dump & AI Advocate",
@@ -50,18 +74,18 @@ const STEPS: TourStep[] = [
     icon: Brain,
     accent: "from-amber-400/30 to-rose-400/20",
     highlightPath: "/",
+    narration:
+      "The Brain Dump is your home base. Our trauma-informed Soul Echo AI listens to streaming thoughts, spoken audio, or nonverbal shapes and colors on the expression canvas. You never have to worry about prompting.",
     body: (
       <>
         <p>
           The Brain Dump is your home base. Our trauma-informed{" "}
           <strong>Soul Echo AI</strong> listens to streaming thoughts, spoken
-          audio, or nonverbal shapes and colors drawn on the expression
-          canvas.
+          audio, or nonverbal shapes and colors drawn on the expression canvas.
         </p>
         <p>
-          You never have to worry about how to "prompt" or format anything —
-          the AI interprets your choices with deep empathy and meets you
-          where you are.
+          You never have to worry about how to "prompt" or format anything — the
+          AI interprets your choices with deep empathy and meets you where you are.
         </p>
       </>
     ),
@@ -73,20 +97,17 @@ const STEPS: TourStep[] = [
     subtitle: "Step 2 of 8",
     icon: Hand,
     accent: "from-teal-400/30 to-sky-400/20",
+    narration:
+      "Switch between five input methods on the fly, inside any room, any time: Speak It, Sign It, Point It, Type It, or Connect Device.",
     body: (
       <>
-        <p>
-          Switch between five input methods on the fly, inside any room,
-          any time:
-        </p>
+        <p>Switch between five input methods on the fly, inside any room, any time:</p>
         <ul className="grid grid-cols-1 gap-1.5 text-sm">
           <li>🗣️ <strong>Speak It</strong> — voice input & audio output</li>
           <li>🤟 <strong>Sign It</strong> — sign language with camera</li>
           <li>👆 <strong>Point It</strong> — tap pictures & cards</li>
           <li>⌨️ <strong>Type It</strong> — keyboard & text</li>
-          <li>🔌 <strong>Connect Device</strong> — AAC hardware, eye-gaze
-            trackers, Braille displays, or switches via Bluetooth, USB, or
-            the 3.5mm audio port</li>
+          <li>🔌 <strong>Connect Device</strong> — AAC hardware, eye-gaze, Braille, or switches</li>
         </ul>
         <p className="text-xs text-muted-foreground">
           Tap the communication chip at the top-right of any page to switch.
@@ -96,28 +117,28 @@ const STEPS: TourStep[] = [
   },
   {
     id: "rooms",
-    title: "Inside the Healing Rooms — the Flow Tour",
+    title: "Inside the 9 Healing Rooms",
     subtitle: "Step 3 of 8",
     icon: Wind,
     accent: "from-sky-400/30 to-indigo-400/20",
     highlightPath: "/flow",
+    narration:
+      "Every room goes deep. The Breathe room alone unpacks all 13 chakras — including Earth Star as Chakra Zero — plus breathwork, vagus nerve stimulation, and Solfeggio frequencies. Journal, Wisdom, Unspoken Chamber, Shadow Work, Spiritual Tools, Community, Practitioner Connect, and Crisis Counselor all go just as deep.",
     body: (
       <>
         <p>
-          Every room goes deep. The <strong>Flow</strong> space alone holds{" "}
-          <strong>8 scrollable section cards</strong> that unpack:
+          You have <strong>9 healing rooms</strong>. The <strong>Breathe</strong>{" "}
+          room alone unpacks:
         </p>
         <ul className="grid grid-cols-1 gap-1 text-sm">
-          <li>• Meditation styles for every temperament</li>
-          <li>• All <strong>13 chakras</strong> — including{" "}
-            <strong>Earth Star as Chakra 0</strong></li>
+          <li>• All <strong>13 chakras</strong> — including <strong>Earth Star as Chakra 0</strong></li>
           <li>• Breathwork techniques for grounding & release</li>
           <li>• Vagus nerve stimulation practices</li>
           <li>• Solfeggio frequencies & sound healing</li>
         </ul>
-        <p>
-          Journal, Wisdom, Unspoken Chamber, Shadow Work, and Tools all go
-          just as deep.
+        <p className="text-xs text-muted-foreground">
+          Journal, Wisdom, Unspoken Chamber, Shadow Work, Spiritual Tools,
+          Community, Practitioner Connect, and Crisis Counselor all go just as deep.
         </p>
       </>
     ),
@@ -129,14 +150,16 @@ const STEPS: TourStep[] = [
     subtitle: "Step 4 of 8",
     icon: ShieldAlert,
     accent: "from-rose-400/30 to-red-400/20",
+    narration:
+      "If an emotional crisis occurs, our secured backend logs distress signals through a strict validation layer and dispatches immediate access to Intercessors on Call and human dispatchers to protect you in real time.",
     body: (
       <>
         <p>
-          If an emotional crisis occurs, the system routes you instantly.
-          Our secured backend logs <strong>distress_signals</strong>{" "}
-          through a strict validation layer and dispatches immediate access
-          to <strong>Intercessors on Call</strong> and human dispatchers to
-          protect you in real time.
+          If an emotional crisis occurs, the system routes you instantly. Our
+          secured backend logs <strong>distress_signals</strong> through a strict
+          validation layer and dispatches immediate access to{" "}
+          <strong>Intercessors on Call</strong> and human dispatchers to protect
+          you in real time.
         </p>
         <p className="text-xs text-muted-foreground">
           The SOS beacon lives in the floating hub — always one tap away.
@@ -151,13 +174,14 @@ const STEPS: TourStep[] = [
     subtitle: "Step 5 of 8",
     icon: Stethoscope,
     accent: "from-emerald-400/30 to-teal-400/20",
+    narration:
+      "Verified holistic health specialists can securely log in to cross-sync metrics, review permitted client logs, and publish custom mindfulness soundscapes into the ecosystem. You choose which healer connects, and what they can see.",
     body: (
       <>
         <p>
-          Verified holistic health specialists can securely log in to
-          cross-sync metrics, review permitted client logs, and publish
-          custom mindfulness soundscapes and resource cards straight into
-          the ecosystem.
+          Verified holistic health specialists can securely log in to cross-sync
+          metrics, review permitted client logs, and publish custom mindfulness
+          soundscapes and resource cards straight into the ecosystem.
         </p>
         <p>You choose which healer to connect with — and what they can see.</p>
       </>
@@ -171,25 +195,15 @@ const STEPS: TourStep[] = [
     icon: Crown,
     accent: "from-amber-400/30 to-yellow-400/20",
     highlightPath: "/pricing",
+    narration:
+      "Brain Dump is always completely unlimited and free. The Individual Free Tier gives a 33-day full trial. Paid tracks from one to seven dollars remove room-entry restrictions. The nine dollar Ultimate Tier opens exclusive beta testing rooms first.",
     body: (
       <>
         <ul className="grid gap-2 text-sm">
-          <li>
-            💛 <strong>Brain Dump</strong> — always <em>completely unlimited
-            and free</em>.
-          </li>
-          <li>
-            🌱 <strong>Individual Free Tier</strong> — 33-day full trial.
-            After that, regular rooms limit to 1 use per space every 11 days.
-          </li>
-          <li>
-            🌊 <strong>$1 – $7 paid tracks</strong> — remove room-entry
-            restrictions across the sanctuary.
-          </li>
-          <li>
-            👑 <strong>$9 Ultimate Tier</strong> — opens exclusive beta
-            testing rooms first.
-          </li>
+          <li>💛 <strong>Brain Dump</strong> — always <em>completely unlimited and free</em>.</li>
+          <li>🌱 <strong>Individual Free Tier</strong> — 33-day full trial, then 1 use per space every 11 days.</li>
+          <li>🌊 <strong>$1 – $7 paid tracks</strong> — remove room-entry restrictions.</li>
+          <li>👑 <strong>$9 Ultimate Tier</strong> — opens exclusive beta rooms first.</li>
         </ul>
       </>
     ),
@@ -202,36 +216,22 @@ const STEPS: TourStep[] = [
     icon: Users,
     accent: "from-violet-400/30 to-fuchsia-400/20",
     highlightPath: "/community",
+    narration:
+      "The Community tab is where you connect over shared stories. It is organized into four active healing circles: Physical, Mental and Emotional, Spiritual Awakening, and Energy and Spirit. This is also our dedicated feedback zone — your voice shapes what gets built next.",
     body: (
       <>
         <p>
-          The <strong>Community</strong> tab is where you find stories,
-          support, and deep communal connection alongside others walking the
-          exact same path. It's organized into <strong>4 distinct healing
-          circles</strong>:
+          The <strong>Community</strong> tab connects you with others walking the
+          same path. It is organized into <strong>4 active healing circles</strong>:
         </p>
         <ul className="grid gap-2 text-sm">
-          <li>
-            🌿 <strong>Physical</strong> — for bodies that ache and bodies
-            that remember.
-          </li>
-          <li>
-            💭 <strong>Mental & Emotional</strong> — for minds that
-            won't quiet.
-          </li>
-          <li>
-            🌅 <strong>Spiritual Awakening</strong> — for souls returning
-            home.
-          </li>
-          <li>
-            ✨ <strong>Energy & Spirit</strong> — for those journeying
-            beyond the veil.
-          </li>
+          <li>🌿 <strong>Physical</strong> — for bodies that ache and remember.</li>
+          <li>💭 <strong>Mental & Emotional</strong> — for minds that won't quiet.</li>
+          <li>🌅 <strong>Spiritual Awakening</strong> — for souls returning home.</li>
+          <li>✨ <strong>Energy & Spirit</strong> — for those journeying beyond the veil.</li>
         </ul>
-        <p>
-          The healing libraries grow continuously as we bring on more
-          healers, and this is also the dedicated feedback zone — your voice
-          shapes what gets built next.
+        <p className="text-xs text-muted-foreground">
+          Libraries grow as we bring on more healers. Your feedback shapes what gets built next.
         </p>
       </>
     ),
@@ -243,6 +243,8 @@ const STEPS: TourStep[] = [
     subtitle: "Step 8 of 8",
     icon: Sparkles,
     accent: "from-fuchsia-400/30 to-purple-400/20",
+    narration:
+      "Explore the creator's wider digital network: Aurora, the ultimate smart creator selling and incubation platform, and Size Me Up, universal cross-retailer fit filtering for every body.",
     body: (
       <>
         <p>Explore the creator's wider digital network:</p>
@@ -285,10 +287,11 @@ const STEPS: TourStep[] = [
   },
 ];
 
+const ALL_STEPS: TourStep[] = [RESTING_STEP, ...REMAINING_STEPS];
+
 const TOUR_SEEN_KEY = "soul-echoes-tour-completed";
 const AUTOPLAY_MS = 9500;
 
-/** Broadcast which sidebar path (if any) should pulse-flash right now. */
 export const TOUR_HIGHLIGHT_EVENT = "sanctuary-tour-highlight";
 
 function emitHighlight(path: string | null) {
@@ -297,24 +300,50 @@ function emitHighlight(path: string | null) {
   );
 }
 
+function findLangName(code: string | null | undefined) {
+  if (!code) return null;
+  return WORLD_LANGUAGES.find((l) => l.code === code)?.name ?? code;
+}
+
 export function SanctuaryTour({ open, onOpenChange }: SanctuaryTourProps) {
   const navigate = useNavigate();
   const [stepIndex, setStepIndex] = useState(0);
-  const [autoplay, setAutoplay] = useState(true);
+  const [autoplay, setAutoplay] = useState(false); // stays off on Step 0
+  const [audioEnabled, setAudioEnabled] = useState(false);
   const timerRef = useRef<number | null>(null);
+  const tts = useTTS();
+
+  const prefs = useMemo(() => getPreferences(), [open]);
+
+  // Determine which mode fits the user's accessibility profile.
+  // If they chose Sign It / Connect Device / ASL as primary input, keep it visual-only.
+  const isVisualOnly = useMemo(() => {
+    const im = prefs.inputMethod;
+    if (im === "sign" || im === "connect") return true;
+    if (prefs.signLanguageEnabled && !prefs.communicationMethods.includes("speak")) return true;
+    return false;
+  }, [prefs]);
+
+  const hasSpokenProfile = useMemo(() => {
+    return !isVisualOnly && (prefs.communicationMethods.includes("speak") || prefs.autoReadEnabled);
+  }, [prefs, isVisualOnly]);
 
   // Reset on open / clear highlight on close.
   useEffect(() => {
     if (open) {
       setStepIndex(0);
-      setAutoplay(true);
+      setAutoplay(false);
+      setAudioEnabled(hasSpokenProfile);
     } else {
       emitHighlight(null);
+      tts.stop();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const step = STEPS[stepIndex];
-  const isLast = stepIndex === STEPS.length - 1;
+  const step = ALL_STEPS[stepIndex];
+  const isLast = stepIndex === ALL_STEPS.length - 1;
+  const isGate = stepIndex === 0;
   const Icon = step.icon;
 
   // Broadcast current highlight target whenever the active step changes.
@@ -323,35 +352,56 @@ export function SanctuaryTour({ open, onOpenChange }: SanctuaryTourProps) {
     emitHighlight(step.highlightPath ?? null);
   }, [open, step.highlightPath]);
 
-  // Auto-advance while playing.
+  // Narrate current step via TTS (only if audio is enabled AND not visual-only mode).
+  useEffect(() => {
+    if (!open) return;
+    tts.stop();
+    if (isGate) return; // silent on the resting gate
+    if (audioEnabled && !isVisualOnly && step.narration) {
+      // Small delay so the transition settles first.
+      const t = window.setTimeout(() => tts.speak(step.narration), 350);
+      return () => window.clearTimeout(t);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, stepIndex, audioEnabled, isVisualOnly]);
+
+  // Auto-advance while playing (never on Step 0).
   useEffect(() => {
     if (timerRef.current) {
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-    if (!open || !autoplay || isLast) return;
+    if (!open || !autoplay || isLast || isGate) return;
     timerRef.current = window.setTimeout(() => {
-      setStepIndex((i) => Math.min(STEPS.length - 1, i + 1));
+      setStepIndex((i) => Math.min(ALL_STEPS.length - 1, i + 1));
     }, AUTOPLAY_MS);
     return () => {
       if (timerRef.current) window.clearTimeout(timerRef.current);
     };
-  }, [open, autoplay, stepIndex, isLast]);
+  }, [open, autoplay, stepIndex, isLast, isGate]);
 
   const goPrev = () => {
     setAutoplay(false);
     setStepIndex((i) => Math.max(0, i - 1));
   };
   const goNext = () => {
-    setAutoplay(false);
-    setStepIndex((i) => Math.min(STEPS.length - 1, i + 1));
+    setStepIndex((i) => Math.min(ALL_STEPS.length - 1, i + 1));
+  };
+
+  const beginTour = () => {
+    setAutoplay(true);
+    setStepIndex(1);
   };
 
   const finish = () => {
     try { localStorage.setItem(TOUR_SEEN_KEY, "true"); } catch {}
     emitHighlight(null);
+    tts.stop();
     onOpenChange(false);
   };
+
+  const primaryLang = findLangName(prefs.primaryLanguage);
+  const secondaryLang = findLangName(prefs.secondaryLanguage);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -370,18 +420,30 @@ export function SanctuaryTour({ open, onOpenChange }: SanctuaryTourProps) {
                   {step.title}
                 </DialogTitle>
               </div>
-              <button
-                onClick={() => setAutoplay((p) => !p)}
-                aria-label={autoplay ? "Pause auto-play" : "Resume auto-play"}
-                title={autoplay ? "Pause auto-play" : "Resume auto-play"}
-                className="h-8 w-8 rounded-full bg-background/60 hover:bg-background/80 backdrop-blur flex items-center justify-center ring-1 ring-border transition-colors"
-              >
-                {autoplay ? (
-                  <Pause className="h-3.5 w-3.5" />
-                ) : (
-                  <Play className="h-3.5 w-3.5" />
-                )}
-              </button>
+              {/* Audio toggle — hidden on visual-only profiles and on the silent gate */}
+              {!isVisualOnly && !isGate && (
+                <button
+                  onClick={() => {
+                    if (audioEnabled) tts.stop();
+                    setAudioEnabled((p) => !p);
+                  }}
+                  aria-label={audioEnabled ? "Mute narration" : "Enable narration"}
+                  title={audioEnabled ? "Mute narration" : "Enable narration"}
+                  className="h-8 w-8 rounded-full bg-background/60 hover:bg-background/80 backdrop-blur flex items-center justify-center ring-1 ring-border transition-colors"
+                >
+                  {audioEnabled ? <Volume2 className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+                </button>
+              )}
+              {!isGate && (
+                <button
+                  onClick={() => setAutoplay((p) => !p)}
+                  aria-label={autoplay ? "Pause auto-play" : "Resume auto-play"}
+                  title={autoplay ? "Pause auto-play" : "Resume auto-play"}
+                  className="h-8 w-8 rounded-full bg-background/60 hover:bg-background/80 backdrop-blur flex items-center justify-center ring-1 ring-border transition-colors"
+                >
+                  {autoplay ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                </button>
+              )}
             </div>
             <DialogDescription className="sr-only">
               Master Sanctuary Tour — {step.title}
@@ -389,7 +451,7 @@ export function SanctuaryTour({ open, onOpenChange }: SanctuaryTourProps) {
           </DialogHeader>
           {/* progress */}
           <div className="mt-4 flex gap-1">
-            {STEPS.map((s, i) => (
+            {ALL_STEPS.map((s, i) => (
               <button
                 key={s.id}
                 onClick={() => { setAutoplay(false); setStepIndex(i); }}
@@ -402,7 +464,7 @@ export function SanctuaryTour({ open, onOpenChange }: SanctuaryTourProps) {
                       : "bg-foreground/15 hover:bg-foreground/30"
                 }`}
               >
-                {i === stepIndex && autoplay && !isLast && (
+                {i === stepIndex && autoplay && !isLast && !isGate && (
                   <motion.span
                     key={`${s.id}-fill`}
                     initial={{ scaleX: 0 }}
@@ -424,26 +486,97 @@ export function SanctuaryTour({ open, onOpenChange }: SanctuaryTourProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2 }}
-              className="space-y-3 text-sm leading-relaxed text-foreground/90"
+              className="space-y-4 text-sm leading-relaxed text-foreground/90"
             >
-              {step.body}
-              {step.cta && (step.cta.path || step.cta.url) && (
-                <button
-                  onClick={() => {
-                    if (step.cta?.path) {
-                      setAutoplay(false);
-                      emitHighlight(null);
-                      onOpenChange(false);
-                      navigate(step.cta.path);
-                    } else if (step.cta?.url) {
-                      window.open(step.cta.url, "_blank", "noopener,noreferrer");
-                    }
-                  }}
-                  className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-primary/40 bg-primary/10 hover:bg-primary/20 transition-all text-sm font-medium"
-                >
-                  {step.cta.label}
-                  <ArrowRight className="h-4 w-4" />
-                </button>
+              {isGate ? (
+                <div className="space-y-4">
+                  {/* Foundational language tracks */}
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-2">
+                      Your foundational tracks
+                    </p>
+                    <div className="grid grid-cols-1 gap-1.5 text-sm">
+                      <div className="flex items-center justify-between rounded-lg border border-border bg-card/60 px-3 py-2">
+                        <span className="text-muted-foreground">Primary Language</span>
+                        <span className="font-medium">{primaryLang ?? "English"}</span>
+                      </div>
+                      <div className="flex items-center justify-between rounded-lg border border-border bg-card/60 px-3 py-2">
+                        <span className="text-muted-foreground">Secondary Language</span>
+                        <span className="font-medium">{secondaryLang ?? "—"}</span>
+                      </div>
+                      <div className="flex items-center justify-between rounded-lg border border-border bg-card/60 px-3 py-2">
+                        <span className="text-muted-foreground">ASL / Sign Language</span>
+                        <span className="font-medium">
+                          {prefs.signLanguageEnabled ? "On" : "Off"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Core input toggles */}
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-2">
+                      Your 5 core inputs — switch any time
+                    </p>
+                    <div className="grid grid-cols-1 gap-1.5">
+                      {CORE_INPUTS.map((c) => (
+                        <div
+                          key={c.label}
+                          className="flex items-center gap-3 rounded-lg border border-border bg-card/60 px-3 py-2"
+                        >
+                          <span className="text-xl leading-none">{c.icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium">{c.label}</p>
+                            <p className="text-xs text-muted-foreground">{c.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Freedom disclosure */}
+                  <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-4">
+                    <p className="text-base leading-relaxed font-medium text-foreground">
+                      Your abilities and comfort change as you heal.
+                      <br />
+                      You are <strong>never locked in.</strong>
+                    </p>
+                    <p className="text-sm leading-relaxed text-foreground/80 mt-2">
+                      You can switch between speaking, typing, pointing, or signing
+                      at any single point, inside any room, on the fly.
+                    </p>
+                  </div>
+
+                  {isVisualOnly && (
+                    <p className="text-xs text-muted-foreground italic">
+                      Visual mode detected — the tour will guide you with high-contrast
+                      captions and pulsing sidebar highlights. No audio will play.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <>
+                  {step.body}
+                  {step.cta && (step.cta.path || step.cta.url) && (
+                    <button
+                      onClick={() => {
+                        if (step.cta?.path) {
+                          setAutoplay(false);
+                          emitHighlight(null);
+                          tts.stop();
+                          onOpenChange(false);
+                          navigate(step.cta.path);
+                        } else if (step.cta?.url) {
+                          window.open(step.cta.url, "_blank", "noopener,noreferrer");
+                        }
+                      }}
+                      className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-primary/40 bg-primary/10 hover:bg-primary/20 transition-all text-sm font-medium"
+                    >
+                      {step.cta.label}
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  )}
+                </>
               )}
             </motion.div>
           </AnimatePresence>
@@ -463,7 +596,14 @@ export function SanctuaryTour({ open, onOpenChange }: SanctuaryTourProps) {
           >
             Skip tour
           </button>
-          {isLast ? (
+          {isGate ? (
+            <button
+              onClick={beginTour}
+              className="inline-flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+            >
+              Begin Tour <ArrowRight className="h-4 w-4" />
+            </button>
+          ) : isLast ? (
             <button
               onClick={finish}
               className="inline-flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
