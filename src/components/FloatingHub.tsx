@@ -275,6 +275,18 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
             className="flex flex-col items-end gap-2"
           >
             <button
+              onClick={() => {
+                setHubOpen(false);
+                setActivePanel(null);
+                setTourOpen(true);
+              }}
+              aria-label="Master Sanctuary Tour"
+              title="Master Sanctuary Tour"
+              className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 border-amber-300/50 bg-gradient-to-br from-amber-400/30 to-rose-400/20 hover:scale-110 active:scale-95 transition-all"
+            >
+              <Compass className="h-5 w-5 text-amber-100" />
+            </button>
+            <button
               onClick={openASL}
               aria-label="ASL cards and camera"
               title="ASL sign cards and camera"
