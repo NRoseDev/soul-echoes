@@ -29,6 +29,16 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const [highlightPath, setHighlightPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    const onHighlight = (e: Event) => {
+      const detail = (e as CustomEvent<{ path: string | null }>).detail;
+      setHighlightPath(detail?.path ?? null);
+    };
+    window.addEventListener(TOUR_HIGHLIGHT_EVENT, onHighlight);
+    return () => window.removeEventListener(TOUR_HIGHLIGHT_EVENT, onHighlight);
+  }, []);
 
   return (
     <Sidebar collapsible="icon">
