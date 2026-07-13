@@ -279,9 +279,7 @@ const SECTION_TABS = [
 type SectionId = typeof SECTION_TABS[number]["id"];
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
-function memberPrice(base: number) {
-  return (base * 0.67).toFixed(2);
-}
+const PLATFORM_DISCOUNT_RATE = 0.33;
 
 function loadSaved(): SavedItem[] {
   try { return JSON.parse(localStorage.getItem(SAVED_KEY) || "[]"); } catch { return []; }
@@ -293,134 +291,243 @@ function persistSaved(items: SavedItem[]) {
 /* ─── Sub-components ─────────────────────────────────────────────────────── */
 function ImpactBanner() {
   return (
-    <div className="mx-4 mt-4 mb-1 rounded-2xl bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-400/30 px-4 py-3 flex flex-col sm:flex-row items-center gap-3">
+    <div
+      className="mx-4 mt-4 mb-1 rounded-2xl bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-400/30 px-4 py-3 flex flex-col sm:flex-row items-center gap-3"
+      role="note"
+      aria-label="Community impact and member benefit"
+    >
       <div className="flex items-center gap-2 shrink-0">
-        <Heart className="h-5 w-5 text-rose-400" />
+        <Heart className="h-5 w-5 text-rose-400" aria-hidden="true" />
         <span className="text-sm font-semibold text-foreground/90">3% of every sale</span>
         <span className="text-sm text-muted-foreground">supports</span>
         <span className="text-sm font-semibold text-teal-300">Rise Up Healing</span>
       </div>
-      <div className="hidden sm:block w-px h-5 bg-white/10" />
+      <div className="hidden sm:block w-px h-5 bg-white/10" aria-hidden="true" />
       <div className="flex items-center gap-2">
-        <Check className="h-4 w-4 text-teal-400 shrink-0" />
+        <Check className="h-4 w-4 text-teal-400 shrink-0" aria-hidden="true" />
         <span className="text-sm text-foreground/80">
-          You receive a <span className="font-bold text-teal-300">33% member discount</span> on all products
+          Every bundle includes an <span className="font-bold text-teal-300">automatic member discount</span> — applied at checkout.
         </span>
       </div>
     </div>
   );
 }
 
-/* ─── Product Card ───────────────────────────────────────────────────────── */
-function ProductCard({
-  product, savedIds, onToggleSave, onAddToSession,
+/* ─── Bundle Card ────────────────────────────────────────────────────────── */
+function BundleCard({
+  bundle, savedIds, onToggleSave, onCheckout,
 }: {
-  product: Product;
+  bundle: Bundle;
   savedIds: Set<string>;
   onToggleSave: (id: string, title: string) => void;
-  onAddToSession: (title: string) => void;
+  onCheckout: (bundle: Bundle) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const [slideVal, setSlideVal] = useState(
-    () => Math.round((product.minPrice + product.maxPrice) / 2)
-  );
-  const isSaved = savedIds.has(product.id);
-  const Icon = product.icon;
-  const memberDiscount = Number(memberPrice(product.basePrice));
+  const isSaved = savedIds.has(bundle.id);
+  const Icon = bundle.icon;
+  const itemCount = bundle.items.length;
+  const summaryId = `bundle-${bundle.id}-summary`;
+  const contentsId = `bundle-${bundle.id}-contents`;
 
   return (
-    <motion.div
+    <motion.article
       layout
       className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden"
+      aria-labelledby={summaryId}
     >
-      {/* Header row */}
-      <button
-        onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-3 p-4 text-left hover:bg-white/[0.03] transition-colors"
-        aria-expanded={expanded}
-      >
-        <div className={`shrink-0 w-10 h-10 rounded-xl ${product.accentBg} flex items-center justify-center`}>
-          <Icon className={`h-5 w-5 ${product.accentColor}`} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground leading-tight">{product.title}</p>
-          <p className="text-xs text-teal-300 mt-0.5">
-            From <span className="font-bold">${product.minPrice}</span>
-            {" "}· Member price <span className="font-bold">${memberDiscount}</span>
-            <span className="text-muted-foreground ml-1">(was ${product.basePrice})</span>
-          </p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
+      <div className="p-4 space-y-3">
+        <div className="flex items-start gap-3">
+          <div
+            className={`shrink-0 w-11 h-11 rounded-xl ${bundle.accentBg} flex items-center justify-center`}
+            aria-hidden="true"
+          >
+            <Icon className={`h-5 w-5 ${bundle.accentColor}`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3
+              id={summaryId}
+              className="text-sm font-semibold text-foreground leading-tight"
+            >
+              {bundle.title}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              <Package className="inline h-3 w-3 mr-1 -mt-0.5" aria-hidden="true" />
+              <span>{itemCount}-item bundle · by {bundle.sellerName}</span>
+            </p>
+          </div>
           <button
-            onClick={(e) => { e.stopPropagation(); onToggleSave(product.id, product.title); }}
-            aria-label={isSaved ? "Remove from saved" : "Save for later"}
-            className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+            type="button"
+            onClick={() => onToggleSave(bundle.id, bundle.title)}
+            aria-label={isSaved ? `Remove ${bundle.title} from saved` : `Save ${bundle.title} for later`}
+            aria-pressed={isSaved}
+            className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-teal-400 transition-colors"
           >
             {isSaved
-              ? <BookmarkCheck className="h-4 w-4 text-teal-400" />
-              : <Bookmark className="h-4 w-4 text-muted-foreground" />}
+              ? <BookmarkCheck className="h-4 w-4 text-teal-400" aria-hidden="true" />
+              : <Bookmark className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
           </button>
-          {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </div>
-      </button>
 
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22 }}
-            className="overflow-hidden"
+        <p className="text-sm text-muted-foreground leading-relaxed">{bundle.desc}</p>
+
+        <div>
+          <p className="text-[11px] uppercase tracking-wide font-semibold text-teal-300/80 mb-1.5">
+            What's included
+          </p>
+          <ul id={contentsId} className="space-y-1" aria-label={`${bundle.title} contents`}>
+            {bundle.items.map((item, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs text-foreground/80">
+                <Check className="h-3 w-3 text-teal-400 mt-0.5 shrink-0" aria-hidden="true" />
+                <span>
+                  <span className="font-medium text-foreground/90">{item.title}</span>
+                  <span className="text-muted-foreground"> · {item.kind}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-[11px] text-muted-foreground/70 mt-2 italic">
+            Sold as a complete bundle — individual items are not available separately.
+          </p>
+        </div>
+
+        <Button
+          type="button"
+          size="lg"
+          onClick={() => onCheckout(bundle)}
+          aria-label={`Buy the ${bundle.title} bundle — ${itemCount} items — proceed to secure checkout`}
+          aria-describedby={contentsId}
+          className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0 text-sm font-semibold focus-visible:ring-2 focus-visible:ring-teal-300"
+        >
+          Buy Bundle <ArrowRight className="h-4 w-4 ml-2" aria-hidden="true" />
+        </Button>
+      </div>
+    </motion.article>
+  );
+}
+
+/* ─── Bundle Checkout Modal ──────────────────────────────────────────────── */
+function BundleCheckoutModal({
+  bundle, onClose, onConfirmed,
+}: {
+  bundle: Bundle;
+  onClose: () => void;
+  onConfirmed: (msg: string) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const userCharge = Math.round(bundle.sellerAskingPrice * (1 - PLATFORM_DISCOUNT_RATE) * 100) / 100;
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { error: fnError } = await supabase.functions.invoke("bundle-purchase", {
+        body: {
+          bundleId: bundle.id,
+          bundleTitle: bundle.title,
+          sellerId: bundle.sellerName,
+          sellerAskingPrice: bundle.sellerAskingPrice,
+        },
+      });
+      if (fnError) throw fnError;
+      onConfirmed(`Purchased "${bundle.title}" — enjoy your bundle`);
+      onClose();
+    } catch (e) {
+      console.error(e);
+      setError("Checkout could not complete. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="checkout-title"
+      aria-describedby="checkout-desc"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md rounded-3xl bg-neutral-900 border border-white/10 p-5 space-y-4 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 id="checkout-title" className="font-display text-lg font-bold text-foreground">
+              Confirm Bundle Purchase
+            </h2>
+            <p id="checkout-desc" className="text-xs text-muted-foreground mt-0.5">
+              {bundle.items.length} items · by {bundle.sellerName}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close checkout"
+            className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-teal-400"
           >
-            <div className="px-4 pb-4 space-y-4 border-t border-white/[0.06]">
-              <p className="text-sm text-muted-foreground pt-3 leading-relaxed">{product.desc}</p>
+            <X className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          </button>
+        </div>
 
-              {/* Sliding scale */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <p className="text-xs font-medium text-foreground/70 uppercase tracking-wide flex items-center gap-1.5">
-                    <Sliders className="h-3 w-3" /> Pay What You Can
-                  </p>
-                  <span className="text-base font-bold text-teal-300">${slideVal}</span>
-                </div>
-                <Slider
-                  value={[slideVal]}
-                  onValueChange={([v]) => setSlideVal(v)}
-                  min={product.minPrice}
-                  max={product.maxPrice}
-                  step={1}
-                  aria-label="Choose your price"
-                />
-                <div className="flex justify-between text-[11px] text-muted-foreground">
-                  <span>Min ${product.minPrice}</span>
-                  <span className="text-teal-400/80">Suggested ${memberDiscount}</span>
-                  <span>Max ${product.maxPrice}</span>
-                </div>
-              </div>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <p className="text-sm font-semibold text-foreground mb-2">{bundle.title}</p>
+          <ul className="space-y-1 text-xs text-foreground/80" aria-label="Bundle contents at checkout">
+            {bundle.items.map((item, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <Check className="h-3 w-3 text-teal-400 mt-0.5 shrink-0" aria-hidden="true" />
+                <span>{item.title}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  onClick={() => onAddToSession(product.title)}
-                  className="flex-1 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0 text-sm"
-                >
-                  Add to Cart — ${slideVal}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => onToggleSave(product.id, product.title)}
-                  className="rounded-xl border-white/20 text-xs"
-                >
-                  {isSaved ? "Saved" : "Save"}
-                </Button>
-              </div>
-            </div>
-          </motion.div>
+        <div
+          className="rounded-2xl border border-teal-400/30 bg-teal-500/10 p-4"
+          role="group"
+          aria-label="Pricing summary"
+        >
+          <div className="flex items-baseline justify-between">
+            <span className="text-sm text-foreground/80">You pay today</span>
+            <span
+              className="text-3xl font-bold text-teal-300"
+              aria-live="polite"
+              aria-label={`Total: ${userCharge.toFixed(2)} US dollars`}
+            >
+              ${userCharge.toFixed(2)}
+            </span>
+          </div>
+          <p className="text-[11px] text-teal-200/80 mt-1">
+            Automatic member discount already applied.
+          </p>
+        </div>
+
+        {error && (
+          <p role="alert" className="text-xs text-rose-300 text-center">{error}</p>
         )}
-      </AnimatePresence>
-    </motion.div>
+
+        <Button
+          type="button"
+          size="lg"
+          disabled={loading}
+          onClick={handleConfirm}
+          aria-label={`Confirm purchase of ${bundle.title} for ${userCharge.toFixed(2)} US dollars`}
+          className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0 text-base font-semibold focus-visible:ring-2 focus-visible:ring-teal-300"
+        >
+          {loading
+            ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" /> Processing…</>)
+            : (<>Confirm & Pay <ArrowRight className="h-4 w-4 ml-2" aria-hidden="true" /></>)}
+        </Button>
+
+        <p className="text-[11px] text-center text-muted-foreground/70">
+          Secure checkout · 3% of every bundle supports Rise Up Healing
+        </p>
+      </motion.div>
+    </div>
   );
 }
 
