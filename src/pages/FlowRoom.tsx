@@ -20,7 +20,7 @@ export default function FlowRoom() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 pb-24" style={{ background: "radial-gradient(ellipse at 20% 20%, hsl(210,90%,5%) 0%, hsl(210,80%,12%) 45%, hsl(210,40%,28%) 100%)" }}>
+    <div className="flex-1 overflow-y-auto p-4 pb-32" style={{ background: "radial-gradient(ellipse at 20% 20%, hsl(210,90%,5%) 0%, hsl(210,80%,12%) 45%, hsl(210,40%,28%) 100%)" }}>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <h1 className="font-display text-3xl font-bold text-foreground mb-2 text-center">Flow</h1>
         <p className="text-muted-foreground text-center mb-6">Body, energy, and movement practices. Learn how to activate, move, and embody your healing through breathwork, meditation, sound, and somatic practices.</p>
