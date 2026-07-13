@@ -125,6 +125,7 @@ function broadcastHighlight(path: string | null | undefined) {
 export function SanctuaryTour({ open, onOpenChange }: Props) {
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
   const navigate = useNavigate();
   const timerRef = useRef<number | null>(null);
 
@@ -141,38 +142,61 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
     return () => broadcastHighlight(null);
   }, [open, step]);
 
-  // Speak the current step aloud for blind users
+  // Speak the current step aloud for blind users, gate Next until onend
   useEffect(() => {
     if (!open) return;
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      setSpeaking(false);
+      return;
+    }
+    let cancelled = false;
     try {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(`${step.title}. ${step.body}`);
       u.rate = 0.95;
       u.pitch = 1.0;
-      window.speechSynthesis.speak(u);
-    } catch { /* ignore */ }
-    return () => {
-      try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
-    };
+      setSpeaking(true);
+      u.onend = () => { if (!cancelled) setSpeaking(false); };
+      u.onerror = () => { if (!cancelled) setSpeaking(false); };
+      // Small delay lets cancel() settle in Chrome before speak()
+      const kick = window.setTimeout(() => {
+        if (!cancelled) window.speechSynthesis.speak(u);
+      }, 60);
+      return () => {
+        cancelled = true;
+        window.clearTimeout(kick);
+        try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
+        setSpeaking(false);
+      };
+    } catch {
+      setSpeaking(false);
+    }
   }, [open, step]);
 
-  // Auto-play
+  // Auto-play — only advance once the narration has fully finished
   useEffect(() => {
     if (!open || !playing) return;
+    if (speaking) return; // wait for onend
+    if (index + 1 >= total) return;
     timerRef.current = window.setTimeout(() => {
       setIndex((i) => (i + 1 < total ? i + 1 : i));
-    }, 8500);
+    }, 900);
     return () => {
       if (timerRef.current) window.clearTimeout(timerRef.current);
     };
-  }, [open, playing, index, total]);
+  }, [open, playing, speaking, index, total]);
 
-  // Reset when closed
+  // Auto-start narration + auto-play when opened so screen-reader / hands-free
+  // users don't need an extra manual Play click.
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      setIndex(0);
+      setPlaying(true);
+    } else {
       setPlaying(false);
+      setSpeaking(false);
       if (timerRef.current) window.clearTimeout(timerRef.current);
+      try { window.speechSynthesis?.cancel(); } catch { /* ignore */ }
     }
   }, [open]);
 
@@ -232,20 +256,24 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
           {step.highlightPath && (
             <button
               onClick={visitCurrent}
-              className="text-xs font-medium text-primary hover:underline"
+              disabled={speaking}
+              aria-disabled={speaking}
+              className="text-xs font-medium text-primary hover:underline disabled:opacity-40 disabled:no-underline disabled:cursor-not-allowed"
             >
-              Take me there →
+              {speaking ? "Speaking… please wait" : "Take me there →"}
             </button>
           )}
 
           {/* Progress dots */}
-          <div className="flex flex-wrap gap-1 pt-1">
+          <div className="flex flex-wrap gap-1 pt-1" aria-live="polite">
             {STEPS.map((_, i) => (
               <button
                 key={i}
-                onClick={() => setIndex(i)}
+                onClick={() => !speaking && setIndex(i)}
+                disabled={speaking}
                 aria-label={`Go to step ${i + 1}`}
-                className={`h-1.5 rounded-full transition-all ${
+                aria-disabled={speaking}
+                className={`h-1.5 rounded-full transition-all disabled:cursor-not-allowed ${
                   i === index
                     ? "w-6 bg-primary"
                     : "w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/60"
@@ -257,8 +285,8 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
 
         {/* Footer controls */}
         <div className="flex items-center justify-between border-t border-border/60 px-4 py-3 bg-muted/20">
-          <span className="text-[11px] text-muted-foreground font-medium">
-            Step {index + 1} of {total}
+          <span className="text-[11px] text-muted-foreground font-medium" aria-live="polite">
+            Step {index + 1} of {total}{speaking ? " · speaking" : ""}
           </span>
           <div className="flex items-center gap-1.5">
             <button
@@ -270,7 +298,7 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
             </button>
             <button
               onClick={() => setIndex((i) => Math.max(0, i - 1))}
-              disabled={index === 0}
+              disabled={index === 0 || speaking}
               aria-label="Previous step"
               className="h-8 w-8 rounded-lg border border-border hover:bg-muted flex items-center justify-center text-foreground/80 disabled:opacity-40 disabled:cursor-not-allowed"
             >
@@ -279,14 +307,18 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
             {index < total - 1 ? (
               <button
                 onClick={() => setIndex((i) => i + 1)}
-                className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1"
+                disabled={speaking}
+                aria-disabled={speaking}
+                aria-label={speaking ? "Please wait — narration is still speaking" : "Next step"}
+                className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next <ChevronRight className="h-3.5 w-3.5" />
+                {speaking ? "Wait…" : <>Next <ChevronRight className="h-3.5 w-3.5" /></>}
               </button>
             ) : (
               <button
                 onClick={close}
-                className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90"
+                disabled={speaking}
+                className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 disabled:opacity-50"
               >
                 Finish
               </button>
