@@ -79,7 +79,7 @@ export default function ShadowWorkRoom() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 pb-24" style={{ background: "radial-gradient(ellipse at 20% 20%, hsl(48,80%,5%) 0%, hsl(48,90%,12%) 45%, hsl(48,60%,25%) 100%)" }}>
+    <div className="flex-1 overflow-y-auto p-4 pb-32" style={{ background: "radial-gradient(ellipse at 20% 20%, hsl(48,80%,5%) 0%, hsl(48,90%,12%) 45%, hsl(48,60%,25%) 100%)" }}>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <h1 className="font-display text-3xl font-bold text-foreground mb-2 text-center">Shadow Work</h1>
         <p className="text-muted-foreground text-center mb-6">

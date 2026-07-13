@@ -40,7 +40,7 @@ export default function ToolsRoom() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 pb-24" style={{ background: "radial-gradient(ellipse at 20% 20%, hsl(25,80%,5%) 0%, hsl(25,90%,14%) 45%, hsl(25,60%,26%) 100%)" }}>
+    <div className="flex-1 overflow-y-auto p-4 pb-32" style={{ background: "radial-gradient(ellipse at 20% 20%, hsl(25,80%,5%) 0%, hsl(25,90%,14%) 45%, hsl(25,60%,26%) 100%)" }}>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <h1 className="font-display text-3xl font-bold text-foreground mb-2 text-center">Tools</h1>
         <p className="text-muted-foreground text-center mb-6">Practical tools and aids for healing (22 total). Learn the WHY in Wisdom, then apply it here. The AI can also send you directly to a tool when you need immediate help.</p>

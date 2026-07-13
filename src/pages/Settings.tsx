@@ -44,7 +44,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-2xl mx-auto space-y-8">
+    <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-32 max-w-2xl mx-auto space-y-8 w-full">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-3">
           <SettingsIcon className="h-7 w-7 text-primary" /> Settings
