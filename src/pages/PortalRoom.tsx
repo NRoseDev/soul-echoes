@@ -719,42 +719,52 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
             <motion.div key="products" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-4">
 
               {/* Category filter */}
-              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                {PRODUCT_CATEGORIES.map((cat) => {
-                  const active = productCategory === cat.id;
+              <div
+                className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none"
+                role="tablist"
+                aria-label="Filter bundles by category"
+              >
+                {BUNDLE_CATEGORIES.map((cat) => {
+                  const active = bundleCategory === cat.id;
                   const Icon = cat.icon;
                   return (
                     <button
                       key={cat.id}
-                      onClick={() => setProductCategory(cat.id)}
-                      className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs transition-all ${
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => setBundleCategory(cat.id)}
+                      className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs transition-all focus-visible:ring-2 focus-visible:ring-teal-400 ${
                         active
                           ? "bg-teal-500/20 border-teal-400/50 text-teal-300"
                           : "bg-white/[0.03] border-white/10 text-muted-foreground hover:border-teal-400/20"
                       }`}
                     >
-                      <Icon className="h-3 w-3" />
+                      <Icon className="h-3 w-3" aria-hidden="true" />
                       {cat.label}
                     </button>
                   );
                 })}
               </div>
 
-              <p className="text-xs text-muted-foreground/60">
-                All prices shown are your <span className="text-teal-300 font-medium">33% member price</span>. Sliding scale — pay what you can.
+              <p className="text-xs text-muted-foreground/70">
+                Every listing is a curated <span className="text-teal-300 font-medium">complete bundle</span>. Individual songs, tracks or items are not sold separately. Your discount is applied automatically at checkout.
               </p>
 
-              <div className="space-y-2">
-                {filteredProducts.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
+              <section
+                aria-label={`${filteredBundles.length} healing bundles available`}
+                className="space-y-3"
+              >
+                {filteredBundles.map((bundle) => (
+                  <BundleCard
+                    key={bundle.id}
+                    bundle={bundle}
                     savedIds={savedIds}
                     onToggleSave={(id, title) => toggleSave(id, title, "product")}
-                    onAddToSession={(title) => { showToast(`"${title}" added to cart`); }}
+                    onCheckout={(b) => setCheckoutBundle(b)}
                   />
                 ))}
-              </div>
+              </section>
             </motion.div>
           )}
 
