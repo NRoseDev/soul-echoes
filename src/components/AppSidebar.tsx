@@ -4,7 +4,8 @@ import {
   BrainDumpIcon, JournalIcon, FlowIcon, UnspokenIcon,
   ShadowIcon, WisdomIcon, ToolsIcon, PortalIcon, CommunityIcon,
 } from "@/components/icons/RoomIcons";
-import { TOUR_HIGHLIGHT_EVENT } from "@/components/SanctuaryTour";
+import { TOUR_HIGHLIGHT_EVENT, TOUR_OPEN_EVENT } from "@/components/SanctuaryTour";
+import { TreeOfLifeTourIcon } from "@/components/icons/TreeOfLifeTourIcon";
 
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
