@@ -572,7 +572,7 @@ function PractitionerCard({
               ? <BookmarkCheck className="h-4 w-4 text-teal-400" />
               : <Bookmark className="h-4 w-4 text-muted-foreground" />}
           </button>
-          {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          <span className="text-xs text-muted-foreground" aria-hidden="true">{expanded ? "▲" : "▼"}</span>
         </div>
       </button>
 
