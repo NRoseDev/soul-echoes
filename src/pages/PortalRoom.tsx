@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen, Gem, Droplet, Volume2, Headphones, Users, Star, Bookmark,
-  BookmarkCheck, Bell, BellOff, ChevronDown, ChevronUp, Heart, Check,
+  BookmarkCheck, Bell, BellOff, Heart, Check, X,
   CreditCard, Sliders, Gift, Globe2, ArrowRight, ShieldCheck, Zap,
   Wind, Sun, Flame, Music2, ShieldAlert, Phone, MessageSquare, ExternalLink,
+  Package, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
+import { supabase } from "@/integrations/supabase/client";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 interface Product {
