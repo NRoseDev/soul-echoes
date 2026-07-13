@@ -21,6 +21,7 @@ const JOURNAL_SECTIONS = [
     description: "Guided gratitude prompts for a kinder view",
     prompt: "What are you grateful for today, no matter how small?",
   },
+];
   {
     id: "dream-journal",
     title: "Dream Journal",
