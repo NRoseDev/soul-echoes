@@ -2,25 +2,31 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen, Gem, Droplet, Volume2, Headphones, Users, Star, Bookmark,
-  BookmarkCheck, Bell, BellOff, ChevronDown, ChevronUp, Heart, Check,
+  BookmarkCheck, Bell, BellOff, Heart, Check, X,
   CreditCard, Sliders, Gift, Globe2, ArrowRight, ShieldCheck, Zap,
   Wind, Sun, Flame, Music2, ShieldAlert, Phone, MessageSquare, ExternalLink,
+  Package, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
+import { supabase } from "@/integrations/supabase/client";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
-interface Product {
+interface BundleItem {
+  title: string;
+  kind: string; // e.g. "meditation", "track", "ebook"
+}
+
+interface Bundle {
   id: string;
   title: string;
   desc: string;
-  category: "books" | "crystals" | "oils" | "sound" | "meditations";
+  category: "audio" | "meditations" | "reading" | "physical";
   icon: React.ElementType;
   accentColor: string;
   accentBg: string;
-  basePrice: number;   // retail / suggested price
-  minPrice: number;    // sliding scale floor
-  maxPrice: number;    // sliding scale ceiling
+  sellerName: string;
+  sellerAskingPrice: number; // full seller asking price (USD)
+  items: BundleItem[];
 }
 
 interface Practitioner {
@@ -43,148 +49,136 @@ interface SavedItem {
 /* ─── Constants ──────────────────────────────────────────────────────────── */
 const SAVED_KEY = "soul-echoes-portal-saved";
 
-const PRODUCT_CATEGORIES = [
-  { id: "all",         label: "All",              icon: Globe2     },
-  { id: "books",       label: "Books",            icon: BookOpen   },
-  { id: "crystals",    label: "Crystals",         icon: Gem        },
-  { id: "oils",        label: "Essential Oils",   icon: Droplet    },
-  { id: "sound",       label: "Sound Therapy",    icon: Volume2    },
-  { id: "meditations", label: "Meditations",      icon: Headphones },
+const BUNDLE_CATEGORIES = [
+  { id: "all",         label: "All Bundles",     icon: Globe2     },
+  { id: "meditations", label: "Meditation Packs", icon: Headphones },
+  { id: "audio",       label: "Sound & Music",    icon: Music2     },
+  { id: "reading",     label: "Reading Packs",    icon: BookOpen   },
+  { id: "physical",    label: "Physical Kits",    icon: Gem        },
 ] as const;
 
-const PRODUCTS: Product[] = [
-  /* ── Books ── */
+/**
+ * Bundles group multiple items so nothing is ever sold one-by-one.
+ * `sellerAskingPrice` is the FULL asking price the seller receives.
+ * The UI hides pricing math — the 33% discount is applied at checkout only.
+ */
+const BUNDLES: Bundle[] = [
   {
-    id: "body-keeps-score",
-    title: "The Body Keeps the Score",
-    desc: "Bessel van der Kolk's landmark guide to how trauma reshapes the body and mind, and the path toward healing.",
-    category: "books", icon: BookOpen,
-    accentColor: "text-amber-400", accentBg: "bg-amber-500/15",
-    basePrice: 18.99, minPrice: 1, maxPrice: 25,
-  },
-  {
-    id: "you-can-heal",
-    title: "You Can Heal Your Life",
-    desc: "Louise Hay on understanding the mental causes behind physical illness and building a life of self-love.",
-    category: "books", icon: BookOpen,
-    accentColor: "text-amber-400", accentBg: "bg-amber-500/15",
-    basePrice: 14.99, minPrice: 1, maxPrice: 20,
-  },
-  {
-    id: "power-of-now",
-    title: "The Power of Now",
-    desc: "Eckhart Tolle's guide to ending the tyranny of the thinking mind and finding peace in pure presence.",
-    category: "books", icon: BookOpen,
-    accentColor: "text-amber-400", accentBg: "bg-amber-500/15",
-    basePrice: 16.99, minPrice: 1, maxPrice: 22,
-  },
-  {
-    id: "waking-tiger",
-    title: "Waking the Tiger",
-    desc: "Peter Levine on the body's innate capacity to heal trauma through somatic experiencing.",
-    category: "books", icon: BookOpen,
-    accentColor: "text-amber-400", accentBg: "bg-amber-500/15",
-    basePrice: 15.99, minPrice: 1, maxPrice: 21,
-  },
-  /* ── Crystals ── */
-  {
-    id: "rose-quartz-set",
-    title: "Rose Quartz Heart Set",
-    desc: "Ethically sourced rose quartz tumbles + heart palm stone. Promotes self-love, emotional healing, and calm.",
-    category: "crystals", icon: Gem,
-    accentColor: "text-rose-400", accentBg: "bg-rose-500/15",
-    basePrice: 24.00, minPrice: 8, maxPrice: 35,
-  },
-  {
-    id: "amethyst-cluster",
-    title: "Amethyst Cluster",
-    desc: "Natural amethyst cluster for stress relief, intuition, and peaceful sleep. Comes with care guide.",
-    category: "crystals", icon: Gem,
-    accentColor: "text-purple-400", accentBg: "bg-purple-500/15",
-    basePrice: 32.00, minPrice: 10, maxPrice: 45,
-  },
-  {
-    id: "black-tourmaline",
-    title: "Black Tourmaline Protection Set",
-    desc: "Raw black tourmaline + selenite wand for energetic protection and grounding. Ethically sourced.",
-    category: "crystals", icon: Gem,
-    accentColor: "text-slate-400", accentBg: "bg-slate-500/15",
-    basePrice: 28.00, minPrice: 9, maxPrice: 40,
-  },
-  /* ── Essential Oils ── */
-  {
-    id: "trauma-release-blend",
-    title: "Trauma Release Blend",
-    desc: "Lavender, frankincense, and bergamot — a grounding blend crafted for nervous system regulation.",
-    category: "oils", icon: Droplet,
-    accentColor: "text-violet-400", accentBg: "bg-violet-500/15",
-    basePrice: 22.00, minPrice: 7, maxPrice: 32,
-  },
-  {
-    id: "heart-opening-blend",
-    title: "Heart Opening Blend",
-    desc: "Rose absolute, ylang ylang, and sandalwood to support grief, heartbreak, and emotional release.",
-    category: "oils", icon: Droplet,
-    accentColor: "text-pink-400", accentBg: "bg-pink-500/15",
-    basePrice: 26.00, minPrice: 8, maxPrice: 36,
-  },
-  {
-    id: "grounding-blend",
-    title: "Grounding & Clarity Blend",
-    desc: "Vetiver, cedarwood, and patchouli. Anchors anxiety and brings presence to an overwhelmed mind.",
-    category: "oils", icon: Droplet,
-    accentColor: "text-emerald-400", accentBg: "bg-emerald-500/15",
-    basePrice: 19.00, minPrice: 6, maxPrice: 28,
-  },
-  /* ── Sound Therapy ── */
-  {
-    id: "singing-bowl-set",
-    title: "7-Chakra Singing Bowl Set",
-    desc: "Hand-hammered Tibetan bowls tuned to each chakra frequency. Includes mallet and cushions.",
-    category: "sound", icon: Music2,
-    accentColor: "text-teal-400", accentBg: "bg-teal-500/15",
-    basePrice: 89.00, minPrice: 30, maxPrice: 120,
-  },
-  {
-    id: "tuning-fork-set",
-    title: "Solfeggio Tuning Fork Set",
-    desc: "Six precision tuning forks at 396, 417, 528, 639, 741, 852 Hz. Activator mallet included.",
-    category: "sound", icon: Volume2,
-    accentColor: "text-teal-400", accentBg: "bg-teal-500/15",
-    basePrice: 64.00, minPrice: 20, maxPrice: 85,
-  },
-  {
-    id: "binaural-beats-pack",
-    title: "Binaural Beats Healing Pack",
-    desc: "12-track digital collection: theta waves for trauma processing, delta for deep sleep, alpha for calm.",
-    category: "sound", icon: Headphones,
-    accentColor: "text-sky-400", accentBg: "bg-sky-500/15",
-    basePrice: 18.00, minPrice: 1, maxPrice: 25,
-  },
-  /* ── Meditations ── */
-  {
-    id: "somatic-series",
-    title: "Somatic Healing Meditation Series",
-    desc: "10-session guided series for releasing stored trauma from the body. Includes breathwork and body scans.",
+    id: "somatic-release-collection",
+    title: "Somatic Release Collection",
+    desc: "A complete guided journey for releasing stored trauma from the body — breathwork, body scans and grounding rituals bundled together.",
     category: "meditations", icon: Headphones,
     accentColor: "text-sky-400", accentBg: "bg-sky-500/15",
-    basePrice: 35.00, minPrice: 1, maxPrice: 50,
+    sellerName: "Maya R.",
+    sellerAskingPrice: 48,
+    items: [
+      { title: "10-Session Somatic Series", kind: "meditation pack" },
+      { title: "Nervous System Reset Breathwork", kind: "breathwork" },
+      { title: "Body Scan Companion Audio", kind: "audio" },
+    ],
   },
   {
-    id: "inner-child-meditations",
-    title: "Inner Child Healing Meditations",
-    desc: "8 guided sessions to reconnect with, comfort, and reparent your inner child. Safe and gentle.",
+    id: "inner-child-sanctuary",
+    title: "Inner Child Sanctuary Bundle",
+    desc: "Reparent, comfort and reconnect with the child within. A tender, trauma-informed collection.",
     category: "meditations", icon: Headphones,
     accentColor: "text-pink-400", accentBg: "bg-pink-500/15",
-    basePrice: 28.00, minPrice: 1, maxPrice: 40,
+    sellerName: "Sadé M.",
+    sellerAskingPrice: 42,
+    items: [
+      { title: "8 Guided Inner-Child Meditations", kind: "meditation pack" },
+      { title: "Reparenting Journal Prompts (PDF)", kind: "workbook" },
+      { title: "Bedtime Comfort Audio", kind: "audio" },
+    ],
   },
   {
-    id: "grief-meditations",
-    title: "Grief & Loss Meditation Pack",
-    desc: "6 meditations for moving through grief without bypassing it. Written with trauma-informed care.",
+    id: "grief-passage-pack",
+    title: "Grief Passage Pack",
+    desc: "A gentle companion for moving through loss without bypassing it. Six meditations plus written reflections.",
     category: "meditations", icon: Headphones,
     accentColor: "text-indigo-400", accentBg: "bg-indigo-500/15",
-    basePrice: 24.00, minPrice: 1, maxPrice: 35,
+    sellerName: "James O.",
+    sellerAskingPrice: 36,
+    items: [
+      { title: "6 Grief Meditations", kind: "meditation pack" },
+      { title: "Written Reflections eBook", kind: "ebook" },
+      { title: "Candle Ritual Guide", kind: "guide" },
+    ],
+  },
+  {
+    id: "solfeggio-sound-collection",
+    title: "Solfeggio Sound Collection",
+    desc: "A full spectrum of healing frequencies. Every solfeggio tone bundled together — never sold as single tracks.",
+    category: "audio", icon: Music2,
+    accentColor: "text-teal-400", accentBg: "bg-teal-500/15",
+    sellerName: "Kwame A.",
+    sellerAskingPrice: 54,
+    items: [
+      { title: "396 Hz — Release", kind: "track" },
+      { title: "417 Hz — Change", kind: "track" },
+      { title: "528 Hz — Repair", kind: "track" },
+      { title: "639 Hz — Connection", kind: "track" },
+      { title: "741 Hz — Expression", kind: "track" },
+      { title: "852 Hz — Intuition", kind: "track" },
+    ],
+  },
+  {
+    id: "binaural-deep-rest",
+    title: "Binaural Deep Rest Bundle",
+    desc: "12 binaural sessions across theta, delta and alpha — bundled for trauma processing, deep sleep and calm.",
+    category: "audio", icon: Volume2,
+    accentColor: "text-sky-400", accentBg: "bg-sky-500/15",
+    sellerName: "Lena V.",
+    sellerAskingPrice: 30,
+    items: [
+      { title: "4 Theta Sessions", kind: "audio" },
+      { title: "4 Delta Sessions", kind: "audio" },
+      { title: "4 Alpha Sessions", kind: "audio" },
+    ],
+  },
+  {
+    id: "trauma-informed-library",
+    title: "Trauma-Informed Reading Library",
+    desc: "The foundational reading pack. Four landmark books bundled together for a full self-guided study.",
+    category: "reading", icon: BookOpen,
+    accentColor: "text-amber-400", accentBg: "bg-amber-500/15",
+    sellerName: "Soul Echoes Editors",
+    sellerAskingPrice: 66,
+    items: [
+      { title: "The Body Keeps the Score", kind: "book" },
+      { title: "Waking the Tiger", kind: "book" },
+      { title: "The Power of Now", kind: "book" },
+      { title: "You Can Heal Your Life", kind: "book" },
+    ],
+  },
+  {
+    id: "grounding-crystal-kit",
+    title: "Grounding Crystal Kit",
+    desc: "A curated set of ethically sourced crystals for protection, calm and heart-opening — shipped as one kit.",
+    category: "physical", icon: Gem,
+    accentColor: "text-rose-400", accentBg: "bg-rose-500/15",
+    sellerName: "Rosa E.",
+    sellerAskingPrice: 78,
+    items: [
+      { title: "Rose Quartz Heart Set", kind: "crystal" },
+      { title: "Amethyst Cluster", kind: "crystal" },
+      { title: "Black Tourmaline + Selenite", kind: "crystal" },
+      { title: "Printed Care Guide", kind: "guide" },
+    ],
+  },
+  {
+    id: "essential-oils-trio",
+    title: "Nervous System Essential Oils Trio",
+    desc: "Three signature blends — grounding, heart-opening and trauma release — shipped together as one healing trio.",
+    category: "physical", icon: Droplet,
+    accentColor: "text-violet-400", accentBg: "bg-violet-500/15",
+    sellerName: "Faith W.",
+    sellerAskingPrice: 60,
+    items: [
+      { title: "Trauma Release Blend", kind: "oil" },
+      { title: "Heart Opening Blend", kind: "oil" },
+      { title: "Grounding & Clarity Blend", kind: "oil" },
+    ],
   },
 ];
 
@@ -285,9 +279,7 @@ const SECTION_TABS = [
 type SectionId = typeof SECTION_TABS[number]["id"];
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
-function memberPrice(base: number) {
-  return (base * 0.67).toFixed(2);
-}
+const PLATFORM_DISCOUNT_RATE = 0.33;
 
 function loadSaved(): SavedItem[] {
   try { return JSON.parse(localStorage.getItem(SAVED_KEY) || "[]"); } catch { return []; }
@@ -299,134 +291,243 @@ function persistSaved(items: SavedItem[]) {
 /* ─── Sub-components ─────────────────────────────────────────────────────── */
 function ImpactBanner() {
   return (
-    <div className="mx-4 mt-4 mb-1 rounded-2xl bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-400/30 px-4 py-3 flex flex-col sm:flex-row items-center gap-3">
+    <div
+      className="mx-4 mt-4 mb-1 rounded-2xl bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-400/30 px-4 py-3 flex flex-col sm:flex-row items-center gap-3"
+      role="note"
+      aria-label="Community impact and member benefit"
+    >
       <div className="flex items-center gap-2 shrink-0">
-        <Heart className="h-5 w-5 text-rose-400" />
+        <Heart className="h-5 w-5 text-rose-400" aria-hidden="true" />
         <span className="text-sm font-semibold text-foreground/90">3% of every sale</span>
         <span className="text-sm text-muted-foreground">supports</span>
         <span className="text-sm font-semibold text-teal-300">Rise Up Healing</span>
       </div>
-      <div className="hidden sm:block w-px h-5 bg-white/10" />
+      <div className="hidden sm:block w-px h-5 bg-white/10" aria-hidden="true" />
       <div className="flex items-center gap-2">
-        <Check className="h-4 w-4 text-teal-400 shrink-0" />
+        <Check className="h-4 w-4 text-teal-400 shrink-0" aria-hidden="true" />
         <span className="text-sm text-foreground/80">
-          You receive a <span className="font-bold text-teal-300">33% member discount</span> on all products
+          Every bundle includes an <span className="font-bold text-teal-300">automatic member discount</span> — applied at checkout.
         </span>
       </div>
     </div>
   );
 }
 
-/* ─── Product Card ───────────────────────────────────────────────────────── */
-function ProductCard({
-  product, savedIds, onToggleSave, onAddToSession,
+/* ─── Bundle Card ────────────────────────────────────────────────────────── */
+function BundleCard({
+  bundle, savedIds, onToggleSave, onCheckout,
 }: {
-  product: Product;
+  bundle: Bundle;
   savedIds: Set<string>;
   onToggleSave: (id: string, title: string) => void;
-  onAddToSession: (title: string) => void;
+  onCheckout: (bundle: Bundle) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const [slideVal, setSlideVal] = useState(
-    () => Math.round((product.minPrice + product.maxPrice) / 2)
-  );
-  const isSaved = savedIds.has(product.id);
-  const Icon = product.icon;
-  const memberDiscount = Number(memberPrice(product.basePrice));
+  const isSaved = savedIds.has(bundle.id);
+  const Icon = bundle.icon;
+  const itemCount = bundle.items.length;
+  const summaryId = `bundle-${bundle.id}-summary`;
+  const contentsId = `bundle-${bundle.id}-contents`;
 
   return (
-    <motion.div
+    <motion.article
       layout
       className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden"
+      aria-labelledby={summaryId}
     >
-      {/* Header row */}
-      <button
-        onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-3 p-4 text-left hover:bg-white/[0.03] transition-colors"
-        aria-expanded={expanded}
-      >
-        <div className={`shrink-0 w-10 h-10 rounded-xl ${product.accentBg} flex items-center justify-center`}>
-          <Icon className={`h-5 w-5 ${product.accentColor}`} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground leading-tight">{product.title}</p>
-          <p className="text-xs text-teal-300 mt-0.5">
-            From <span className="font-bold">${product.minPrice}</span>
-            {" "}· Member price <span className="font-bold">${memberDiscount}</span>
-            <span className="text-muted-foreground ml-1">(was ${product.basePrice})</span>
-          </p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
+      <div className="p-4 space-y-3">
+        <div className="flex items-start gap-3">
+          <div
+            className={`shrink-0 w-11 h-11 rounded-xl ${bundle.accentBg} flex items-center justify-center`}
+            aria-hidden="true"
+          >
+            <Icon className={`h-5 w-5 ${bundle.accentColor}`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3
+              id={summaryId}
+              className="text-sm font-semibold text-foreground leading-tight"
+            >
+              {bundle.title}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              <Package className="inline h-3 w-3 mr-1 -mt-0.5" aria-hidden="true" />
+              <span>{itemCount}-item bundle · by {bundle.sellerName}</span>
+            </p>
+          </div>
           <button
-            onClick={(e) => { e.stopPropagation(); onToggleSave(product.id, product.title); }}
-            aria-label={isSaved ? "Remove from saved" : "Save for later"}
-            className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
+            type="button"
+            onClick={() => onToggleSave(bundle.id, bundle.title)}
+            aria-label={isSaved ? `Remove ${bundle.title} from saved` : `Save ${bundle.title} for later`}
+            aria-pressed={isSaved}
+            className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-teal-400 transition-colors"
           >
             {isSaved
-              ? <BookmarkCheck className="h-4 w-4 text-teal-400" />
-              : <Bookmark className="h-4 w-4 text-muted-foreground" />}
+              ? <BookmarkCheck className="h-4 w-4 text-teal-400" aria-hidden="true" />
+              : <Bookmark className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
           </button>
-          {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
         </div>
-      </button>
 
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22 }}
-            className="overflow-hidden"
+        <p className="text-sm text-muted-foreground leading-relaxed">{bundle.desc}</p>
+
+        <div>
+          <p className="text-[11px] uppercase tracking-wide font-semibold text-teal-300/80 mb-1.5">
+            What's included
+          </p>
+          <ul id={contentsId} className="space-y-1" aria-label={`${bundle.title} contents`}>
+            {bundle.items.map((item, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs text-foreground/80">
+                <Check className="h-3 w-3 text-teal-400 mt-0.5 shrink-0" aria-hidden="true" />
+                <span>
+                  <span className="font-medium text-foreground/90">{item.title}</span>
+                  <span className="text-muted-foreground"> · {item.kind}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-[11px] text-muted-foreground/70 mt-2 italic">
+            Sold as a complete bundle — individual items are not available separately.
+          </p>
+        </div>
+
+        <Button
+          type="button"
+          size="lg"
+          onClick={() => onCheckout(bundle)}
+          aria-label={`Buy the ${bundle.title} bundle — ${itemCount} items — proceed to secure checkout`}
+          aria-describedby={contentsId}
+          className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0 text-sm font-semibold focus-visible:ring-2 focus-visible:ring-teal-300"
+        >
+          Buy Bundle <ArrowRight className="h-4 w-4 ml-2" aria-hidden="true" />
+        </Button>
+      </div>
+    </motion.article>
+  );
+}
+
+/* ─── Bundle Checkout Modal ──────────────────────────────────────────────── */
+function BundleCheckoutModal({
+  bundle, onClose, onConfirmed,
+}: {
+  bundle: Bundle;
+  onClose: () => void;
+  onConfirmed: (msg: string) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const userCharge = Math.round(bundle.sellerAskingPrice * (1 - PLATFORM_DISCOUNT_RATE) * 100) / 100;
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { error: fnError } = await supabase.functions.invoke("bundle-purchase", {
+        body: {
+          bundleId: bundle.id,
+          bundleTitle: bundle.title,
+          sellerId: bundle.sellerName,
+          sellerAskingPrice: bundle.sellerAskingPrice,
+        },
+      });
+      if (fnError) throw fnError;
+      onConfirmed(`Purchased "${bundle.title}" — enjoy your bundle`);
+      onClose();
+    } catch (e) {
+      console.error(e);
+      setError("Checkout could not complete. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="checkout-title"
+      aria-describedby="checkout-desc"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md rounded-3xl bg-neutral-900 border border-white/10 p-5 space-y-4 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 id="checkout-title" className="font-display text-lg font-bold text-foreground">
+              Confirm Bundle Purchase
+            </h2>
+            <p id="checkout-desc" className="text-xs text-muted-foreground mt-0.5">
+              {bundle.items.length} items · by {bundle.sellerName}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close checkout"
+            className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-teal-400"
           >
-            <div className="px-4 pb-4 space-y-4 border-t border-white/[0.06]">
-              <p className="text-sm text-muted-foreground pt-3 leading-relaxed">{product.desc}</p>
+            <X className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          </button>
+        </div>
 
-              {/* Sliding scale */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <p className="text-xs font-medium text-foreground/70 uppercase tracking-wide flex items-center gap-1.5">
-                    <Sliders className="h-3 w-3" /> Pay What You Can
-                  </p>
-                  <span className="text-base font-bold text-teal-300">${slideVal}</span>
-                </div>
-                <Slider
-                  value={[slideVal]}
-                  onValueChange={([v]) => setSlideVal(v)}
-                  min={product.minPrice}
-                  max={product.maxPrice}
-                  step={1}
-                  aria-label="Choose your price"
-                />
-                <div className="flex justify-between text-[11px] text-muted-foreground">
-                  <span>Min ${product.minPrice}</span>
-                  <span className="text-teal-400/80">Suggested ${memberDiscount}</span>
-                  <span>Max ${product.maxPrice}</span>
-                </div>
-              </div>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <p className="text-sm font-semibold text-foreground mb-2">{bundle.title}</p>
+          <ul className="space-y-1 text-xs text-foreground/80" aria-label="Bundle contents at checkout">
+            {bundle.items.map((item, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <Check className="h-3 w-3 text-teal-400 mt-0.5 shrink-0" aria-hidden="true" />
+                <span>{item.title}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  onClick={() => onAddToSession(product.title)}
-                  className="flex-1 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0 text-sm"
-                >
-                  Add to Cart — ${slideVal}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => onToggleSave(product.id, product.title)}
-                  className="rounded-xl border-white/20 text-xs"
-                >
-                  {isSaved ? "Saved" : "Save"}
-                </Button>
-              </div>
-            </div>
-          </motion.div>
+        <div
+          className="rounded-2xl border border-teal-400/30 bg-teal-500/10 p-4"
+          role="group"
+          aria-label="Pricing summary"
+        >
+          <div className="flex items-baseline justify-between">
+            <span className="text-sm text-foreground/80">You pay today</span>
+            <span
+              className="text-3xl font-bold text-teal-300"
+              aria-live="polite"
+              aria-label={`Total: ${userCharge.toFixed(2)} US dollars`}
+            >
+              ${userCharge.toFixed(2)}
+            </span>
+          </div>
+          <p className="text-[11px] text-teal-200/80 mt-1">
+            Automatic member discount already applied.
+          </p>
+        </div>
+
+        {error && (
+          <p role="alert" className="text-xs text-rose-300 text-center">{error}</p>
         )}
-      </AnimatePresence>
-    </motion.div>
+
+        <Button
+          type="button"
+          size="lg"
+          disabled={loading}
+          onClick={handleConfirm}
+          aria-label={`Confirm purchase of ${bundle.title} for ${userCharge.toFixed(2)} US dollars`}
+          className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0 text-base font-semibold focus-visible:ring-2 focus-visible:ring-teal-300"
+        >
+          {loading
+            ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" /> Processing…</>)
+            : (<>Confirm & Pay <ArrowRight className="h-4 w-4 ml-2" aria-hidden="true" /></>)}
+        </Button>
+
+        <p className="text-[11px] text-center text-muted-foreground/70">
+          Secure checkout · 3% of every bundle supports Rise Up Healing
+        </p>
+      </motion.div>
+    </div>
   );
 }
 
@@ -471,7 +572,7 @@ function PractitionerCard({
               ? <BookmarkCheck className="h-4 w-4 text-teal-400" />
               : <Bookmark className="h-4 w-4 text-muted-foreground" />}
           </button>
-          {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          <span className="text-xs text-muted-foreground" aria-hidden="true">{expanded ? "▲" : "▼"}</span>
         </div>
       </button>
 
@@ -522,11 +623,12 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
   useEffect(() => {
     setActiveSection(initialSection);
   }, [initialSection]);
-  const [productCategory, setProductCategory] = useState("all");
+  const [bundleCategory, setBundleCategory] = useState<string>("all");
   const [savedItems, setSavedItems] = useState<SavedItem[]>(loadSaved);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const [bookedFor, setBookedFor] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [checkoutBundle, setCheckoutBundle] = useState<Bundle | null>(null);
 
   const savedIds = new Set(savedItems.map((s) => s.id));
 
@@ -555,8 +657,8 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
     );
   };
 
-  const filteredProducts =
-    productCategory === "all" ? PRODUCTS : PRODUCTS.filter((p) => p.category === productCategory);
+  const filteredBundles =
+    bundleCategory === "all" ? BUNDLES : BUNDLES.filter((b) => b.category === bundleCategory);
 
   return (
     <div
@@ -617,42 +719,52 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
             <motion.div key="products" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-4">
 
               {/* Category filter */}
-              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                {PRODUCT_CATEGORIES.map((cat) => {
-                  const active = productCategory === cat.id;
+              <div
+                className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none"
+                role="tablist"
+                aria-label="Filter bundles by category"
+              >
+                {BUNDLE_CATEGORIES.map((cat) => {
+                  const active = bundleCategory === cat.id;
                   const Icon = cat.icon;
                   return (
                     <button
                       key={cat.id}
-                      onClick={() => setProductCategory(cat.id)}
-                      className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs transition-all ${
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => setBundleCategory(cat.id)}
+                      className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs transition-all focus-visible:ring-2 focus-visible:ring-teal-400 ${
                         active
                           ? "bg-teal-500/20 border-teal-400/50 text-teal-300"
                           : "bg-white/[0.03] border-white/10 text-muted-foreground hover:border-teal-400/20"
                       }`}
                     >
-                      <Icon className="h-3 w-3" />
+                      <Icon className="h-3 w-3" aria-hidden="true" />
                       {cat.label}
                     </button>
                   );
                 })}
               </div>
 
-              <p className="text-xs text-muted-foreground/60">
-                All prices shown are your <span className="text-teal-300 font-medium">33% member price</span>. Sliding scale — pay what you can.
+              <p className="text-xs text-muted-foreground/70">
+                Every listing is a curated <span className="text-teal-300 font-medium">complete bundle</span>. Individual songs, tracks or items are not sold separately. Your discount is applied automatically at checkout.
               </p>
 
-              <div className="space-y-2">
-                {filteredProducts.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
+              <section
+                aria-label={`${filteredBundles.length} healing bundles available`}
+                className="space-y-3"
+              >
+                {filteredBundles.map((bundle) => (
+                  <BundleCard
+                    key={bundle.id}
+                    bundle={bundle}
                     savedIds={savedIds}
                     onToggleSave={(id, title) => toggleSave(id, title, "product")}
-                    onAddToSession={(title) => { showToast(`"${title}" added to cart`); }}
+                    onCheckout={(b) => setCheckoutBundle(b)}
                   />
                 ))}
-              </div>
+              </section>
             </motion.div>
           )}
 
@@ -922,13 +1034,26 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
         </AnimatePresence>
       </div>
 
+      {/* ── Bundle Checkout Modal ── */}
+      <AnimatePresence>
+        {checkoutBundle && (
+          <BundleCheckoutModal
+            bundle={checkoutBundle}
+            onClose={() => setCheckoutBundle(null)}
+            onConfirmed={(msg) => showToast(msg)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* ── Toast ── */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">{toast ?? ""}</div>
       <AnimatePresence>
         {toast && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
+            role="status"
             className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-teal-600/90 backdrop-blur-sm text-white text-sm font-medium shadow-lg max-w-[90vw] text-center"
           >
             {toast}

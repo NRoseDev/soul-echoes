@@ -1,1 +1,4 @@
 project_id = "rlkciuplxkczmtgaijdk"
+
+[functions.bundle-purchase]
+verify_jwt = false
