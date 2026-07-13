@@ -4,10 +4,12 @@ interface Props {
 }
 
 /**
- * Custom "Take a Tour" badge: a Tree of Life inside a soft glowing organic
- * circle, with a friendly hand pointing to it.
+ * "AI Tour & System Guide" badge.
+ * A minimalist glowing Tree of Life silhouette enclosed inside an open
+ * compass / tracking ring, styled in iridescent purple + gold to match the
+ * sanctuary aesthetic. Rendered at the same fidelity as the room icons.
  */
-export function TreeOfLifeTourIcon({ className, title = "Take a Tour" }: Props) {
+export function TreeOfLifeTourIcon({ className, title = "AI Tour & System Guide" }: Props) {
   return (
     <svg
       viewBox="0 0 64 64"
@@ -15,98 +17,73 @@ export function TreeOfLifeTourIcon({ className, title = "Take a Tour" }: Props) 
       role="img"
       aria-label={title}
       xmlns="http://www.w3.org/2000/svg"
+      fill="none"
     >
       <title>{title}</title>
       <defs>
-        <radialGradient id="tolGlow" cx="50%" cy="50%" r="55%">
-          <stop offset="0%" stopColor="hsl(45 95% 78%)" stopOpacity="0.95" />
-          <stop offset="60%" stopColor="hsl(28 85% 60%)" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="hsl(20 60% 35%)" stopOpacity="0" />
+        <radialGradient id="tourHalo" cx="50%" cy="50%" r="55%">
+          <stop offset="0%" stopColor="hsl(280 90% 78%)" stopOpacity="0.55" />
+          <stop offset="70%" stopColor="hsl(45 95% 65%)" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="hsl(280 60% 20%)" stopOpacity="0" />
         </radialGradient>
-        <linearGradient id="tolLeaf" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="hsl(150 55% 55%)" />
-          <stop offset="100%" stopColor="hsl(165 45% 38%)" />
+        <linearGradient id="tourRing" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="hsl(45 95% 72%)" />
+          <stop offset="45%" stopColor="hsl(300 85% 72%)" />
+          <stop offset="100%" stopColor="hsl(265 90% 65%)" />
         </linearGradient>
-        <linearGradient id="tolTrunk" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="hsl(28 55% 55%)" />
-          <stop offset="100%" stopColor="hsl(24 45% 32%)" />
-        </linearGradient>
-        <linearGradient id="tolSkin" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="hsl(28 78% 78%)" />
-          <stop offset="100%" stopColor="hsl(20 60% 55%)" />
+        <linearGradient id="tourTree" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="hsl(45 100% 78%)" />
+          <stop offset="55%" stopColor="hsl(300 85% 72%)" />
+          <stop offset="100%" stopColor="hsl(260 90% 62%)" />
         </linearGradient>
       </defs>
 
-      {/* Soft glowing organic halo */}
-      <circle cx="28" cy="28" r="24" fill="url(#tolGlow)" />
+      {/* Soft iridescent halo */}
+      <circle cx="32" cy="32" r="28" fill="url(#tourHalo)" />
+
+      {/* Open compass / tracking ring — dashed to feel like a navigation reticle */}
       <circle
-        cx="28"
-        cy="28"
-        r="21"
-        fill="hsl(35 60% 12% / 0.55)"
-        stroke="hsl(45 90% 75% / 0.75)"
-        strokeWidth="1.2"
-      />
-
-      {/* Tree of Life */}
-      {/* Foliage cluster */}
-      <g>
-        <circle cx="28" cy="20" r="7.5" fill="url(#tolLeaf)" />
-        <circle cx="20.5" cy="24" r="5.5" fill="url(#tolLeaf)" opacity="0.9" />
-        <circle cx="35.5" cy="24" r="5.5" fill="url(#tolLeaf)" opacity="0.9" />
-        <circle cx="24" cy="16" r="4" fill="url(#tolLeaf)" opacity="0.85" />
-        <circle cx="32" cy="16" r="4" fill="url(#tolLeaf)" opacity="0.85" />
-      </g>
-      {/* Trunk with branching roots */}
-      <path
-        d="M28 22 C 28 28, 26 32, 26 38 C 26 40, 24 41, 22 42 M28 22 C 28 28, 30 32, 30 38 C 30 40, 32 41, 34 42 M28 22 L28 42"
-        stroke="url(#tolTrunk)"
-        strokeWidth="2.2"
+        cx="32"
+        cy="32"
+        r="24"
+        stroke="url(#tourRing)"
+        strokeWidth="2"
+        strokeDasharray="3 4"
         strokeLinecap="round"
-        fill="none"
+        opacity="0.95"
       />
-      {/* Tiny fruit dots */}
-      <circle cx="24" cy="20" r="0.9" fill="hsl(45 95% 70%)" />
-      <circle cx="32" cy="22" r="0.9" fill="hsl(45 95% 70%)" />
-      <circle cx="28" cy="17" r="0.9" fill="hsl(45 95% 70%)" />
+      {/* Cardinal tick marks */}
+      <g stroke="url(#tourRing)" strokeWidth="2" strokeLinecap="round">
+        <line x1="32" y1="4" x2="32" y2="10" />
+        <line x1="32" y1="54" x2="32" y2="60" />
+        <line x1="4" y1="32" x2="10" y2="32" />
+        <line x1="54" y1="32" x2="60" y2="32" />
+      </g>
 
-      {/* Friendly pointing hand, bottom-right */}
-      <g transform="translate(38 34) rotate(-18)">
-        {/* palm */}
-        <rect
-          x="0"
-          y="4"
-          width="14"
-          height="12"
-          rx="4"
-          fill="url(#tolSkin)"
-          stroke="hsl(20 55% 30%)"
-          strokeWidth="0.8"
-        />
-        {/* pointing index finger */}
-        <rect
-          x="-9"
-          y="7"
-          width="11"
-          height="4"
-          rx="2"
-          fill="url(#tolSkin)"
-          stroke="hsl(20 55% 30%)"
-          strokeWidth="0.8"
-        />
-        {/* thumb */}
-        <rect
-          x="2"
-          y="1"
-          width="4"
-          height="6"
-          rx="2"
-          fill="url(#tolSkin)"
-          stroke="hsl(20 55% 30%)"
-          strokeWidth="0.8"
-        />
-        {/* fingernail hint */}
-        <circle cx="-8" cy="9" r="0.9" fill="hsl(40 90% 88%)" />
+      {/* Minimalist Tree of Life silhouette */}
+      <g stroke="url(#tourTree)" strokeWidth="1.75" strokeLinecap="round" fill="none">
+        {/* Trunk */}
+        <path d="M32 44 L32 26" />
+        {/* Roots */}
+        <path d="M32 44 C 30 46, 26 47, 22 48" />
+        <path d="M32 44 C 34 46, 38 47, 42 48" />
+        <path d="M32 44 L28 49" />
+        <path d="M32 44 L36 49" />
+        {/* Branches */}
+        <path d="M32 30 C 28 28, 24 25, 22 21" />
+        <path d="M32 30 C 36 28, 40 25, 42 21" />
+        <path d="M32 26 C 30 22, 28 20, 26 18" />
+        <path d="M32 26 C 34 22, 36 20, 38 18" />
+        <path d="M32 26 L32 17" />
+      </g>
+
+      {/* Canopy glow dots — subtle "leaves of light" */}
+      <g fill="hsl(45 100% 82%)">
+        <circle cx="32" cy="16" r="1.6" />
+        <circle cx="25" cy="18" r="1.2" />
+        <circle cx="39" cy="18" r="1.2" />
+        <circle cx="21" cy="21" r="1" />
+        <circle cx="43" cy="21" r="1" />
       </g>
     </svg>
   );
