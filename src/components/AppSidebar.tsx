@@ -4,7 +4,8 @@ import {
   BrainDumpIcon, JournalIcon, FlowIcon, UnspokenIcon,
   ShadowIcon, WisdomIcon, ToolsIcon, PortalIcon, CommunityIcon,
 } from "@/components/icons/RoomIcons";
-import { TOUR_HIGHLIGHT_EVENT } from "@/components/SanctuaryTour";
+import { TOUR_HIGHLIGHT_EVENT, TOUR_OPEN_EVENT } from "@/components/SanctuaryTour";
+import { TreeOfLifeTourIcon } from "@/components/icons/TreeOfLifeTourIcon";
 
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -100,6 +101,25 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 space-y-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent(TOUR_OPEN_EVENT))}
+                aria-label="AI Tour and System Guide"
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-sidebar-accent border border-primary/30 bg-gradient-to-r from-amber-400/10 via-fuchsia-500/10 to-violet-500/15 hover:from-amber-400/20 hover:via-fuchsia-500/20 hover:to-violet-500/25 shadow-[0_0_18px_hsl(280_70%_60%/0.18)]"
+              >
+                <TreeOfLifeTourIcon className="h-6 w-6 shrink-0" />
+                {!collapsed && (
+                  <span className="text-sm font-semibold bg-gradient-to-r from-amber-300 via-fuchsia-300 to-violet-300 bg-clip-text text-transparent">
+                    AI Tour & System Guide
+                  </span>
+                )}
+              </button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>

@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { X, Heart, Users, Sparkles } from "lucide-react";
-import { TreeOfLifeTourIcon } from "@/components/icons/TreeOfLifeTourIcon";
+
 import ASLSignInput from "@/components/ASLSignInput";
 import { useAlwaysOnListening } from "@/hooks/use-always-on-listening";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { SanctuaryTour, hasSeenTour } from "@/components/SanctuaryTour";
+import { SanctuaryTour, hasSeenTour, TOUR_OPEN_EVENT } from "@/components/SanctuaryTour";
 
 // Safe static asset paths that do not crash the bundler
 const aiNavigatorIcon = "/Icon-AI%20navigator.png";
@@ -114,6 +114,12 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
       const t = setTimeout(() => setTourOpen(true), 1200);
       return () => clearTimeout(t);
     }
+  }, []);
+
+  useEffect(() => {
+    const openHandler = () => setTourOpen(true);
+    window.addEventListener(TOUR_OPEN_EVENT, openHandler);
+    return () => window.removeEventListener(TOUR_OPEN_EVENT, openHandler);
   }, []);
 
 
@@ -275,18 +281,6 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
             transition={{ duration: 0.18 }}
             className="flex flex-col items-end gap-2"
           >
-            <button
-              onClick={() => {
-                setHubOpen(false);
-                setActivePanel(null);
-                setTourOpen(true);
-              }}
-              aria-label="Master Sanctuary Tour"
-              title="Master Sanctuary Tour"
-              className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 border-amber-300/50 bg-gradient-to-br from-amber-400/25 to-rose-400/15 hover:scale-110 active:scale-95 transition-all shadow-[0_0_16px_hsl(45_95%_65%/0.45)]"
-            >
-              <TreeOfLifeTourIcon className="h-8 w-8" title="Take a Tour" />
-            </button>
             <button
               onClick={openASL}
               aria-label="ASL cards and camera"
