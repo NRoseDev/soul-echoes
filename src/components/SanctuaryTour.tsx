@@ -256,20 +256,24 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
           {step.highlightPath && (
             <button
               onClick={visitCurrent}
-              className="text-xs font-medium text-primary hover:underline"
+              disabled={speaking}
+              aria-disabled={speaking}
+              className="text-xs font-medium text-primary hover:underline disabled:opacity-40 disabled:no-underline disabled:cursor-not-allowed"
             >
-              Take me there →
+              {speaking ? "Speaking… please wait" : "Take me there →"}
             </button>
           )}
 
           {/* Progress dots */}
-          <div className="flex flex-wrap gap-1 pt-1">
+          <div className="flex flex-wrap gap-1 pt-1" aria-live="polite">
             {STEPS.map((_, i) => (
               <button
                 key={i}
-                onClick={() => setIndex(i)}
+                onClick={() => !speaking && setIndex(i)}
+                disabled={speaking}
                 aria-label={`Go to step ${i + 1}`}
-                className={`h-1.5 rounded-full transition-all ${
+                aria-disabled={speaking}
+                className={`h-1.5 rounded-full transition-all disabled:cursor-not-allowed ${
                   i === index
                     ? "w-6 bg-primary"
                     : "w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/60"
@@ -281,8 +285,8 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
 
         {/* Footer controls */}
         <div className="flex items-center justify-between border-t border-border/60 px-4 py-3 bg-muted/20">
-          <span className="text-[11px] text-muted-foreground font-medium">
-            Step {index + 1} of {total}
+          <span className="text-[11px] text-muted-foreground font-medium" aria-live="polite">
+            Step {index + 1} of {total}{speaking ? " · speaking" : ""}
           </span>
           <div className="flex items-center gap-1.5">
             <button
@@ -294,7 +298,7 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
             </button>
             <button
               onClick={() => setIndex((i) => Math.max(0, i - 1))}
-              disabled={index === 0}
+              disabled={index === 0 || speaking}
               aria-label="Previous step"
               className="h-8 w-8 rounded-lg border border-border hover:bg-muted flex items-center justify-center text-foreground/80 disabled:opacity-40 disabled:cursor-not-allowed"
             >
@@ -303,14 +307,18 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
             {index < total - 1 ? (
               <button
                 onClick={() => setIndex((i) => i + 1)}
-                className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1"
+                disabled={speaking}
+                aria-disabled={speaking}
+                aria-label={speaking ? "Please wait — narration is still speaking" : "Next step"}
+                className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next <ChevronRight className="h-3.5 w-3.5" />
+                {speaking ? "Wait…" : <>Next <ChevronRight className="h-3.5 w-3.5" /></>}
               </button>
             ) : (
               <button
                 onClick={close}
-                className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90"
+                disabled={speaking}
+                className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 disabled:opacity-50"
               >
                 Finish
               </button>
