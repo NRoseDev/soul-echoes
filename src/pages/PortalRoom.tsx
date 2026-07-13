@@ -1034,13 +1034,26 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
         </AnimatePresence>
       </div>
 
+      {/* ── Bundle Checkout Modal ── */}
+      <AnimatePresence>
+        {checkoutBundle && (
+          <BundleCheckoutModal
+            bundle={checkoutBundle}
+            onClose={() => setCheckoutBundle(null)}
+            onConfirmed={(msg) => showToast(msg)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* ── Toast ── */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">{toast ?? ""}</div>
       <AnimatePresence>
         {toast && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
+            role="status"
             className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-teal-600/90 backdrop-blur-sm text-white text-sm font-medium shadow-lg max-w-[90vw] text-center"
           >
             {toast}
