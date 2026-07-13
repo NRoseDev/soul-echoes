@@ -116,6 +116,12 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
     }
   }, []);
 
+  useEffect(() => {
+    const openHandler = () => setTourOpen(true);
+    window.addEventListener(TOUR_OPEN_EVENT, openHandler);
+    return () => window.removeEventListener(TOUR_OPEN_EVENT, openHandler);
+  }, []);
+
 
   useEffect(() => {
     suggestionIndexRef.current = 0;
