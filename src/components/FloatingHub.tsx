@@ -307,8 +307,8 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
 
             <button
               onClick={openSOS}
-              aria-label="SOS — angel safety beacon"
-              title="SOS — connect to intercessor or healer"
+              aria-label="Angel Connection & Danger SOS Codes"
+              title="Angel Connection & Danger SOS Codes"
               className="h-11 w-11 rounded-full flex items-center justify-center bg-black/60 backdrop-blur-sm border-2 border-blue-300/60 shadow-[0_0_18px_rgba(147,197,253,0.55)] hover:scale-110 active:scale-95 transition-all overflow-hidden"
             >
               <img src={sosIcon} alt="SOS" loading="eager" decoding="async" className="w-full h-full object-cover rounded-full" />
@@ -320,8 +320,8 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
                 setActivePanel(null);
                 setIntercessorOpen(true);
               }}
-              aria-label="Intercessors and prayer"
-              title="Intercessors and prayer"
+              aria-label="Connect to an Intercessor or Healer"
+              title="Connect to an Intercessor or Healer"
               className="h-11 w-11 rounded-full flex items-center justify-center backdrop-blur-sm border-2 transition-all hover:scale-110 active:scale-95 overflow-hidden bg-white/10 border-white/20"
             >
               <img src={prayerIcon} alt="Prayer" loading="eager" decoding="async" className="w-full h-full object-cover rounded-full" />

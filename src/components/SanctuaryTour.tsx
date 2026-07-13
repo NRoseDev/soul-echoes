@@ -86,9 +86,9 @@ const STEPS: Step[] = [
     highlightPath: "/community",
   },
   {
-    title: "Portal 🌀",
+    title: "Portal 🌀 — five doors in one room",
     body:
-      "The creator shop and healer portal. Practitioner soundscapes, resources, and cross-links to Aurora and Size Me Up live here.",
+      "The Portal has five clearly labeled sections. One: Marketplace — thematic digital bundles with an automatic 33% member discount applied at checkout. Two: Practitioner Connect — find a vetted healer or teacher. Three: Crisis Counselor — immediate emergency support, hotlines, and grounding help right now. Four: Book a Session — schedule one-on-one time with a practitioner. Five: Wait and Save — a wish-list vault where you place items you want and keep them until you have the money. Every section is labeled for screen readers so you can navigate hands-free.",
     highlightPath: "/shop",
   },
   {
@@ -139,6 +139,22 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
     }
     broadcastHighlight(step.highlightPath);
     return () => broadcastHighlight(null);
+  }, [open, step]);
+
+  // Speak the current step aloud for blind users
+  useEffect(() => {
+    if (!open) return;
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(`${step.title}. ${step.body}`);
+      u.rate = 0.95;
+      u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
+    } catch { /* ignore */ }
+    return () => {
+      try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
+    };
   }, [open, step]);
 
   // Auto-play
