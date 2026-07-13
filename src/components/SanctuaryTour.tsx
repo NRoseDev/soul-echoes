@@ -141,6 +141,22 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
     return () => broadcastHighlight(null);
   }, [open, step]);
 
+  // Speak the current step aloud for blind users
+  useEffect(() => {
+    if (!open) return;
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(`${step.title}. ${step.body}`);
+      u.rate = 0.95;
+      u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
+    } catch { /* ignore */ }
+    return () => {
+      try { window.speechSynthesis.cancel(); } catch { /* ignore */ }
+    };
+  }, [open, step]);
+
   // Auto-play
   useEffect(() => {
     if (!open || !playing) return;
