@@ -113,7 +113,7 @@ export function AppSidebar() {
                 <TreeOfLifeTourIcon className="h-6 w-6 shrink-0" />
                 {!collapsed && (
                   <span className="text-sm font-semibold bg-gradient-to-r from-amber-300 via-fuchsia-300 to-violet-300 bg-clip-text text-transparent">
-                    AI Tour & System Guide
+                    AI Tour
                   </span>
                 )}
               </button>
