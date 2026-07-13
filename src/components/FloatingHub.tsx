@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { SanctuaryTour, hasSeenTour } from "@/components/SanctuaryTour";
+import { SanctuaryTour, hasSeenTour, TOUR_OPEN_EVENT } from "@/components/SanctuaryTour";
 
 // Safe static asset paths that do not crash the bundler
 const aiNavigatorIcon = "/Icon-AI%20navigator.png";
