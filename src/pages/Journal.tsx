@@ -157,7 +157,7 @@ export default function Journal() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <AnimatePresence mode="wait">
         {!selectedSection ? (
           // Journal Menu
@@ -166,7 +166,7 @@ export default function Journal() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="min-h-screen p-6 space-y-6"
+            className="p-6 pb-32 space-y-6"
           >
             <div className="max-w-4xl mx-auto space-y-6">
               {/* Header */}
