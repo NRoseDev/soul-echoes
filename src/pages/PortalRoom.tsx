@@ -11,17 +11,22 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
-interface Product {
+interface BundleItem {
+  title: string;
+  kind: string; // e.g. "meditation", "track", "ebook"
+}
+
+interface Bundle {
   id: string;
   title: string;
   desc: string;
-  category: "books" | "crystals" | "oils" | "sound" | "meditations";
+  category: "audio" | "meditations" | "reading" | "physical";
   icon: React.ElementType;
   accentColor: string;
   accentBg: string;
-  basePrice: number;   // retail / suggested price
-  minPrice: number;    // sliding scale floor
-  maxPrice: number;    // sliding scale ceiling
+  sellerName: string;
+  sellerAskingPrice: number; // full seller asking price (USD)
+  items: BundleItem[];
 }
 
 interface Practitioner {
@@ -44,148 +49,136 @@ interface SavedItem {
 /* ─── Constants ──────────────────────────────────────────────────────────── */
 const SAVED_KEY = "soul-echoes-portal-saved";
 
-const PRODUCT_CATEGORIES = [
-  { id: "all",         label: "All",              icon: Globe2     },
-  { id: "books",       label: "Books",            icon: BookOpen   },
-  { id: "crystals",    label: "Crystals",         icon: Gem        },
-  { id: "oils",        label: "Essential Oils",   icon: Droplet    },
-  { id: "sound",       label: "Sound Therapy",    icon: Volume2    },
-  { id: "meditations", label: "Meditations",      icon: Headphones },
+const BUNDLE_CATEGORIES = [
+  { id: "all",         label: "All Bundles",     icon: Globe2     },
+  { id: "meditations", label: "Meditation Packs", icon: Headphones },
+  { id: "audio",       label: "Sound & Music",    icon: Music2     },
+  { id: "reading",     label: "Reading Packs",    icon: BookOpen   },
+  { id: "physical",    label: "Physical Kits",    icon: Gem        },
 ] as const;
 
-const PRODUCTS: Product[] = [
-  /* ── Books ── */
+/**
+ * Bundles group multiple items so nothing is ever sold one-by-one.
+ * `sellerAskingPrice` is the FULL asking price the seller receives.
+ * The UI hides pricing math — the 33% discount is applied at checkout only.
+ */
+const BUNDLES: Bundle[] = [
   {
-    id: "body-keeps-score",
-    title: "The Body Keeps the Score",
-    desc: "Bessel van der Kolk's landmark guide to how trauma reshapes the body and mind, and the path toward healing.",
-    category: "books", icon: BookOpen,
-    accentColor: "text-amber-400", accentBg: "bg-amber-500/15",
-    basePrice: 18.99, minPrice: 1, maxPrice: 25,
-  },
-  {
-    id: "you-can-heal",
-    title: "You Can Heal Your Life",
-    desc: "Louise Hay on understanding the mental causes behind physical illness and building a life of self-love.",
-    category: "books", icon: BookOpen,
-    accentColor: "text-amber-400", accentBg: "bg-amber-500/15",
-    basePrice: 14.99, minPrice: 1, maxPrice: 20,
-  },
-  {
-    id: "power-of-now",
-    title: "The Power of Now",
-    desc: "Eckhart Tolle's guide to ending the tyranny of the thinking mind and finding peace in pure presence.",
-    category: "books", icon: BookOpen,
-    accentColor: "text-amber-400", accentBg: "bg-amber-500/15",
-    basePrice: 16.99, minPrice: 1, maxPrice: 22,
-  },
-  {
-    id: "waking-tiger",
-    title: "Waking the Tiger",
-    desc: "Peter Levine on the body's innate capacity to heal trauma through somatic experiencing.",
-    category: "books", icon: BookOpen,
-    accentColor: "text-amber-400", accentBg: "bg-amber-500/15",
-    basePrice: 15.99, minPrice: 1, maxPrice: 21,
-  },
-  /* ── Crystals ── */
-  {
-    id: "rose-quartz-set",
-    title: "Rose Quartz Heart Set",
-    desc: "Ethically sourced rose quartz tumbles + heart palm stone. Promotes self-love, emotional healing, and calm.",
-    category: "crystals", icon: Gem,
-    accentColor: "text-rose-400", accentBg: "bg-rose-500/15",
-    basePrice: 24.00, minPrice: 8, maxPrice: 35,
-  },
-  {
-    id: "amethyst-cluster",
-    title: "Amethyst Cluster",
-    desc: "Natural amethyst cluster for stress relief, intuition, and peaceful sleep. Comes with care guide.",
-    category: "crystals", icon: Gem,
-    accentColor: "text-purple-400", accentBg: "bg-purple-500/15",
-    basePrice: 32.00, minPrice: 10, maxPrice: 45,
-  },
-  {
-    id: "black-tourmaline",
-    title: "Black Tourmaline Protection Set",
-    desc: "Raw black tourmaline + selenite wand for energetic protection and grounding. Ethically sourced.",
-    category: "crystals", icon: Gem,
-    accentColor: "text-slate-400", accentBg: "bg-slate-500/15",
-    basePrice: 28.00, minPrice: 9, maxPrice: 40,
-  },
-  /* ── Essential Oils ── */
-  {
-    id: "trauma-release-blend",
-    title: "Trauma Release Blend",
-    desc: "Lavender, frankincense, and bergamot — a grounding blend crafted for nervous system regulation.",
-    category: "oils", icon: Droplet,
-    accentColor: "text-violet-400", accentBg: "bg-violet-500/15",
-    basePrice: 22.00, minPrice: 7, maxPrice: 32,
-  },
-  {
-    id: "heart-opening-blend",
-    title: "Heart Opening Blend",
-    desc: "Rose absolute, ylang ylang, and sandalwood to support grief, heartbreak, and emotional release.",
-    category: "oils", icon: Droplet,
-    accentColor: "text-pink-400", accentBg: "bg-pink-500/15",
-    basePrice: 26.00, minPrice: 8, maxPrice: 36,
-  },
-  {
-    id: "grounding-blend",
-    title: "Grounding & Clarity Blend",
-    desc: "Vetiver, cedarwood, and patchouli. Anchors anxiety and brings presence to an overwhelmed mind.",
-    category: "oils", icon: Droplet,
-    accentColor: "text-emerald-400", accentBg: "bg-emerald-500/15",
-    basePrice: 19.00, minPrice: 6, maxPrice: 28,
-  },
-  /* ── Sound Therapy ── */
-  {
-    id: "singing-bowl-set",
-    title: "7-Chakra Singing Bowl Set",
-    desc: "Hand-hammered Tibetan bowls tuned to each chakra frequency. Includes mallet and cushions.",
-    category: "sound", icon: Music2,
-    accentColor: "text-teal-400", accentBg: "bg-teal-500/15",
-    basePrice: 89.00, minPrice: 30, maxPrice: 120,
-  },
-  {
-    id: "tuning-fork-set",
-    title: "Solfeggio Tuning Fork Set",
-    desc: "Six precision tuning forks at 396, 417, 528, 639, 741, 852 Hz. Activator mallet included.",
-    category: "sound", icon: Volume2,
-    accentColor: "text-teal-400", accentBg: "bg-teal-500/15",
-    basePrice: 64.00, minPrice: 20, maxPrice: 85,
-  },
-  {
-    id: "binaural-beats-pack",
-    title: "Binaural Beats Healing Pack",
-    desc: "12-track digital collection: theta waves for trauma processing, delta for deep sleep, alpha for calm.",
-    category: "sound", icon: Headphones,
-    accentColor: "text-sky-400", accentBg: "bg-sky-500/15",
-    basePrice: 18.00, minPrice: 1, maxPrice: 25,
-  },
-  /* ── Meditations ── */
-  {
-    id: "somatic-series",
-    title: "Somatic Healing Meditation Series",
-    desc: "10-session guided series for releasing stored trauma from the body. Includes breathwork and body scans.",
+    id: "somatic-release-collection",
+    title: "Somatic Release Collection",
+    desc: "A complete guided journey for releasing stored trauma from the body — breathwork, body scans and grounding rituals bundled together.",
     category: "meditations", icon: Headphones,
     accentColor: "text-sky-400", accentBg: "bg-sky-500/15",
-    basePrice: 35.00, minPrice: 1, maxPrice: 50,
+    sellerName: "Maya R.",
+    sellerAskingPrice: 48,
+    items: [
+      { title: "10-Session Somatic Series", kind: "meditation pack" },
+      { title: "Nervous System Reset Breathwork", kind: "breathwork" },
+      { title: "Body Scan Companion Audio", kind: "audio" },
+    ],
   },
   {
-    id: "inner-child-meditations",
-    title: "Inner Child Healing Meditations",
-    desc: "8 guided sessions to reconnect with, comfort, and reparent your inner child. Safe and gentle.",
+    id: "inner-child-sanctuary",
+    title: "Inner Child Sanctuary Bundle",
+    desc: "Reparent, comfort and reconnect with the child within. A tender, trauma-informed collection.",
     category: "meditations", icon: Headphones,
     accentColor: "text-pink-400", accentBg: "bg-pink-500/15",
-    basePrice: 28.00, minPrice: 1, maxPrice: 40,
+    sellerName: "Sadé M.",
+    sellerAskingPrice: 42,
+    items: [
+      { title: "8 Guided Inner-Child Meditations", kind: "meditation pack" },
+      { title: "Reparenting Journal Prompts (PDF)", kind: "workbook" },
+      { title: "Bedtime Comfort Audio", kind: "audio" },
+    ],
   },
   {
-    id: "grief-meditations",
-    title: "Grief & Loss Meditation Pack",
-    desc: "6 meditations for moving through grief without bypassing it. Written with trauma-informed care.",
+    id: "grief-passage-pack",
+    title: "Grief Passage Pack",
+    desc: "A gentle companion for moving through loss without bypassing it. Six meditations plus written reflections.",
     category: "meditations", icon: Headphones,
     accentColor: "text-indigo-400", accentBg: "bg-indigo-500/15",
-    basePrice: 24.00, minPrice: 1, maxPrice: 35,
+    sellerName: "James O.",
+    sellerAskingPrice: 36,
+    items: [
+      { title: "6 Grief Meditations", kind: "meditation pack" },
+      { title: "Written Reflections eBook", kind: "ebook" },
+      { title: "Candle Ritual Guide", kind: "guide" },
+    ],
+  },
+  {
+    id: "solfeggio-sound-collection",
+    title: "Solfeggio Sound Collection",
+    desc: "A full spectrum of healing frequencies. Every solfeggio tone bundled together — never sold as single tracks.",
+    category: "audio", icon: Music2,
+    accentColor: "text-teal-400", accentBg: "bg-teal-500/15",
+    sellerName: "Kwame A.",
+    sellerAskingPrice: 54,
+    items: [
+      { title: "396 Hz — Release", kind: "track" },
+      { title: "417 Hz — Change", kind: "track" },
+      { title: "528 Hz — Repair", kind: "track" },
+      { title: "639 Hz — Connection", kind: "track" },
+      { title: "741 Hz — Expression", kind: "track" },
+      { title: "852 Hz — Intuition", kind: "track" },
+    ],
+  },
+  {
+    id: "binaural-deep-rest",
+    title: "Binaural Deep Rest Bundle",
+    desc: "12 binaural sessions across theta, delta and alpha — bundled for trauma processing, deep sleep and calm.",
+    category: "audio", icon: Volume2,
+    accentColor: "text-sky-400", accentBg: "bg-sky-500/15",
+    sellerName: "Lena V.",
+    sellerAskingPrice: 30,
+    items: [
+      { title: "4 Theta Sessions", kind: "audio" },
+      { title: "4 Delta Sessions", kind: "audio" },
+      { title: "4 Alpha Sessions", kind: "audio" },
+    ],
+  },
+  {
+    id: "trauma-informed-library",
+    title: "Trauma-Informed Reading Library",
+    desc: "The foundational reading pack. Four landmark books bundled together for a full self-guided study.",
+    category: "reading", icon: BookOpen,
+    accentColor: "text-amber-400", accentBg: "bg-amber-500/15",
+    sellerName: "Soul Echoes Editors",
+    sellerAskingPrice: 66,
+    items: [
+      { title: "The Body Keeps the Score", kind: "book" },
+      { title: "Waking the Tiger", kind: "book" },
+      { title: "The Power of Now", kind: "book" },
+      { title: "You Can Heal Your Life", kind: "book" },
+    ],
+  },
+  {
+    id: "grounding-crystal-kit",
+    title: "Grounding Crystal Kit",
+    desc: "A curated set of ethically sourced crystals for protection, calm and heart-opening — shipped as one kit.",
+    category: "physical", icon: Gem,
+    accentColor: "text-rose-400", accentBg: "bg-rose-500/15",
+    sellerName: "Rosa E.",
+    sellerAskingPrice: 78,
+    items: [
+      { title: "Rose Quartz Heart Set", kind: "crystal" },
+      { title: "Amethyst Cluster", kind: "crystal" },
+      { title: "Black Tourmaline + Selenite", kind: "crystal" },
+      { title: "Printed Care Guide", kind: "guide" },
+    ],
+  },
+  {
+    id: "essential-oils-trio",
+    title: "Nervous System Essential Oils Trio",
+    desc: "Three signature blends — grounding, heart-opening and trauma release — shipped together as one healing trio.",
+    category: "physical", icon: Droplet,
+    accentColor: "text-violet-400", accentBg: "bg-violet-500/15",
+    sellerName: "Faith W.",
+    sellerAskingPrice: 60,
+    items: [
+      { title: "Trauma Release Blend", kind: "oil" },
+      { title: "Heart Opening Blend", kind: "oil" },
+      { title: "Grounding & Clarity Blend", kind: "oil" },
+    ],
   },
 ];
 
