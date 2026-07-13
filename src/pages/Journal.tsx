@@ -106,12 +106,30 @@ const PulseIcon = ({ className }: GlowIconProps) => (
   </GlowWrap>
 );
 
-// Lotus — Healer Session Journal (violet-pink)
+// Meditating figure inside lotus petals — Healer Session Journal (teal)
 const LotusIcon = ({ className }: GlowIconProps) => (
-  <GlowWrap color="#D580FF" className={className}>
-    <path d="M32 50 C 22 42, 18 32, 24 24 C 28 20, 32 18, 32 18 C 32 18, 36 20, 40 24 C 46 32, 42 42, 32 50 Z" />
-    <path d="M32 50 C 16 44, 12 32, 18 22 C 22 16, 30 16, 32 26 C 34 16, 42 16, 46 22 C 52 32, 48 44, 32 50 Z" opacity="0.85" />
+  <GlowWrap color="#20C4C4" className={className}>
+    {/* center tall petal */}
+    <path d="M32 6 C 28 16, 28 24, 32 30 C 36 24, 36 16, 32 6 Z" />
+    {/* inner side petals */}
+    <path d="M14 20 C 18 28, 24 32, 30 32 C 28 26, 22 22, 14 20 Z" />
+    <path d="M50 20 C 46 28, 40 32, 34 32 C 36 26, 42 22, 50 20 Z" />
+    {/* outer side petals */}
+    <path d="M4 30 C 10 38, 20 40, 30 38 C 26 32, 16 28, 4 30 Z" />
+    <path d="M60 30 C 54 38, 44 40, 34 38 C 38 32, 48 28, 60 30 Z" />
+    {/* base bowl */}
+    <path d="M10 44 C 18 54, 46 54, 54 44" />
+    {/* meditating figure: head */}
+    <circle cx="32" cy="30" r="3.4" />
+    {/* torso */}
+    <path d="M32 34 C 29 38, 29 42, 32 44 C 35 42, 35 38, 32 34 Z" />
+    {/* arms resting on knees */}
+    <path d="M25 44 C 22 42, 21 43, 22 46" />
+    <path d="M39 44 C 42 42, 43 43, 42 46" />
+    {/* crossed legs */}
+    <path d="M20 48 C 26 46, 38 46, 44 48 C 40 50, 24 50, 20 48 Z" />
   </GlowWrap>
+
 );
 
 const JOURNAL_SECTIONS = [
