@@ -623,11 +623,12 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
   useEffect(() => {
     setActiveSection(initialSection);
   }, [initialSection]);
-  const [productCategory, setProductCategory] = useState("all");
+  const [bundleCategory, setBundleCategory] = useState<string>("all");
   const [savedItems, setSavedItems] = useState<SavedItem[]>(loadSaved);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const [bookedFor, setBookedFor] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [checkoutBundle, setCheckoutBundle] = useState<Bundle | null>(null);
 
   const savedIds = new Set(savedItems.map((s) => s.id));
 
@@ -656,8 +657,8 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
     );
   };
 
-  const filteredProducts =
-    productCategory === "all" ? PRODUCTS : PRODUCTS.filter((p) => p.category === productCategory);
+  const filteredBundles =
+    bundleCategory === "all" ? BUNDLES : BUNDLES.filter((b) => b.category === bundleCategory);
 
   return (
     <div
