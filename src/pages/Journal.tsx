@@ -89,6 +89,31 @@ const FlowerIcon = ({ className }: GlowIconProps) => (
   </GlowWrap>
 );
 
+// Envelope — Letters Never Sent (rose)
+const EnvelopeIcon = ({ className }: GlowIconProps) => (
+  <GlowWrap color="#FF5CAA" className={className}>
+    <rect x="8" y="20" width="48" height="30" rx="2" />
+    <polyline points="8,20 32,36 56,20" />
+    <line x1="8" y1="50" x2="24" y2="38" />
+    <line x1="56" y1="50" x2="40" y2="38" />
+  </GlowWrap>
+);
+
+// Pulse wave — Health Journal (turquoise)
+const PulseIcon = ({ className }: GlowIconProps) => (
+  <GlowWrap color="#00E5CC" className={className}>
+    <path d="M6 34 L16 34 L20 20 L30 48 L38 34 L46 34 L50 24 L58 44" />
+  </GlowWrap>
+);
+
+// Lotus — Healer Session Journal (violet-pink)
+const LotusIcon = ({ className }: GlowIconProps) => (
+  <GlowWrap color="#D580FF" className={className}>
+    <path d="M32 50 C 22 42, 18 32, 24 24 C 28 20, 32 18, 32 18 C 32 18, 36 20, 40 24 C 46 32, 42 42, 32 50 Z" />
+    <path d="M32 50 C 16 44, 12 32, 18 22 C 22 16, 30 16, 32 26 C 34 16, 42 16, 46 22 C 52 32, 48 44, 32 50 Z" opacity="0.85" />
+  </GlowWrap>
+);
+
 const JOURNAL_SECTIONS = [
   {
     id: "daily-check-in",
@@ -131,6 +156,27 @@ const JOURNAL_SECTIONS = [
     icon: FlowerIcon,
     description: "Set intention and notice what you are calling in",
     prompt: "What are you calling into your life? Speak it into existence.",
+  },
+  {
+    id: "letters-never-sent",
+    title: "Letters Never Sent",
+    icon: EnvelopeIcon,
+    description: "Write what you need to say without sending it",
+    prompt: "Who is this letter for? Say everything you wish you could say out loud.",
+  },
+  {
+    id: "health-journal",
+    title: "Health Journal",
+    icon: PulseIcon,
+    description: "Track body signals, symptoms, and wellness patterns",
+    prompt: "How is your body feeling today? Note any symptoms, energy shifts, or wins.",
+  },
+  {
+    id: "healer-session-journal",
+    title: "Healer Session Journal",
+    icon: LotusIcon,
+    description: "Record insights and aftercare from healing sessions",
+    prompt: "What came up during your session? What guidance are you carrying forward?",
   },
 ];
 
