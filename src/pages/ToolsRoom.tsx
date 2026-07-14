@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Diamond, Droplet, Hash, Leaf, Zap, Heart, Volume2, CheckSquare, Smile, Wind, Brain, Sparkles
+  Diamond, Droplet, Hash, Leaf, Zap, Heart, Volume2, CheckSquare, Smile, Wind, Brain
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { LevelPath } from "@/components/levels/LevelPath";
