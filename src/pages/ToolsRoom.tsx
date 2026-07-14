@@ -42,8 +42,6 @@ export default function ToolsRoom() {
 
         {sections.map((s, i) => {
           const Icon = s.icon;
-          const isPlaceholder = s.id.startsWith("placeholder");
-          
           return (
             <motion.div
               key={s.id}
@@ -52,11 +50,11 @@ export default function ToolsRoom() {
               transition={{ duration: 0.3, delay: i * 0.04 }}
             >
               <Card
-                className={`${!isPlaceholder ? "cursor-pointer hover:border-primary/40" : "opacity-50"} transition-colors bg-card/80 backdrop-blur-sm`}
-                onClick={() => !isPlaceholder && navigate(`/tools/${s.id}`)}
-                role={!isPlaceholder ? "button" : undefined}
-                tabIndex={!isPlaceholder ? 0 : -1}
-                onKeyDown={(e) => !isPlaceholder && e.key === "Enter" && navigate(`/tools/${s.id}`)}
+                className="cursor-pointer hover:border-primary/40 transition-colors bg-card/80 backdrop-blur-sm"
+                onClick={() => navigate(`/tools/${s.id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && navigate(`/tools/${s.id}`)}
               >
                 <CardHeader className="flex flex-row items-start gap-3 p-4">
                   <div className={`flex-shrink-0 h-10 w-10 rounded-full bg-muted flex items-center justify-center ${s.colorClass}`}>
