@@ -34,16 +34,6 @@ const sections = [
   { id: "healing-scripture-by-emotion", title: "Healing Scripture by Emotion", description: "Scripture organized by what you are feeling right now — for fear, grief, anger, shame, loneliness, anxiety, and depression.", icon: BookOpen, colorClass: "text-amber-300" },
   
   // Placeholders (10 more to reach 33)
-  { id: "placeholder-1", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-2", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-3", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-4", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-5", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-6", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-7", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-8", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-9", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-10", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
 ];
 
 export default function WisdomRoom() {
