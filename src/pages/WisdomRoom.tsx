@@ -8,18 +8,27 @@ import {
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { LevelPath } from "@/components/levels/LevelPath";
+import cosmicsSectionCover from "@/assets/cosmics/section-cover.jpg";
+import imgBirthOfStars from "@/assets/cosmics/birth-of-stars.jpg";
+import imgGalacticSpirals from "@/assets/cosmics/galactic-spirals.jpg";
+import imgNebulaHearts from "@/assets/cosmics/nebula-hearts.jpg";
+import imgPillarsOfCreation from "@/assets/cosmics/pillars-of-creation.jpg";
+import imgSupernovaRebirth from "@/assets/cosmics/supernova-rebirth.jpg";
+import imgBlackHoleMystery from "@/assets/cosmics/black-hole-mystery.jpg";
+import imgAuroraFrequencies from "@/assets/cosmics/aurora-frequencies.jpg";
+import imgSolarFlares from "@/assets/cosmics/solar-flares.jpg";
 
-type CosmicCard = { id: string; title: string; description: string };
+type CosmicCard = { id: string; title: string; description: string; image?: string };
 
 const cosmicCards: CosmicCard[] = [
-  { id: "birth-of-stars", title: "Birth of Stars", description: "Stellar nurseries where light is born from cosmic dust — a mirror of your own becoming." },
-  { id: "galactic-spirals", title: "Galactic Spirals", description: "Sacred spiral geometry written across a hundred billion suns." },
-  { id: "nebula-hearts", title: "Nebula Hearts", description: "Luminous clouds of creation — the womb of the universe made visible." },
-  { id: "pillars-of-creation", title: "Pillars of Creation", description: "Towering columns of gas and stardust — the temple of stellar genesis." },
-  { id: "supernova-rebirth", title: "Supernova Rebirth", description: "Death that seeds new worlds. The cosmic law of transformation." },
-  { id: "black-hole-mystery", title: "Black Hole Mystery", description: "Thresholds of the unknown where space, time, and self dissolve." },
-  { id: "aurora-frequencies", title: "Aurora Frequencies", description: "The Earth singing in color as solar wind meets our atmosphere." },
-  { id: "solar-flares", title: "Solar Flares", description: "The sun's living pulse — how solar activity shifts the human field." },
+  { id: "birth-of-stars", title: "Birth of Stars", description: "Stellar nurseries where light is born from cosmic dust — a mirror of your own becoming.", image: imgBirthOfStars },
+  { id: "galactic-spirals", title: "Galactic Spirals", description: "Sacred spiral geometry written across a hundred billion suns.", image: imgGalacticSpirals },
+  { id: "nebula-hearts", title: "Nebula Hearts", description: "Luminous clouds of creation — the womb of the universe made visible.", image: imgNebulaHearts },
+  { id: "pillars-of-creation", title: "Pillars of Creation", description: "Towering columns of gas and stardust — the temple of stellar genesis.", image: imgPillarsOfCreation },
+  { id: "supernova-rebirth", title: "Supernova Rebirth", description: "Death that seeds new worlds. The cosmic law of transformation.", image: imgSupernovaRebirth },
+  { id: "black-hole-mystery", title: "Black Hole Mystery", description: "Thresholds of the unknown where space, time, and self dissolve.", image: imgBlackHoleMystery },
+  { id: "aurora-frequencies", title: "Aurora Frequencies", description: "The Earth singing in color as solar wind meets our atmosphere.", image: imgAuroraFrequencies },
+  { id: "solar-flares", title: "Solar Flares", description: "The sun's living pulse — how solar activity shifts the human field.", image: imgSolarFlares },
   { id: "lunar-phases", title: "Lunar Phases", description: "New, waxing, full, and waning — the moon's rhythm inside your body." },
   { id: "planetary-alignments", title: "Planetary Alignments", description: "When the planets meet, the collective heart re-tunes." },
   { id: "cosmic-microwave", title: "Cosmic Microwave Background", description: "The oldest light in the universe — the whisper of the first moment." },
@@ -98,6 +107,27 @@ export default function WisdomRoom() {
           boxShadow: "inset 0 0 60px hsl(270 80% 30% / 0.25)",
         }}
       >
+        {/* Section cover banner */}
+        <div className="relative w-full aspect-[16/7] overflow-hidden border-b border-violet-400/10">
+          <img
+            src={cosmicsSectionCover}
+            alt="Cosmics — ethereal galaxies, nebulae, and celestial light"
+            loading="lazy"
+            width={1280}
+            height={800}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(180deg, hsl(240 60% 4% / 0.15) 0%, hsl(240 60% 4% / 0.55) 70%, hsl(240 60% 4% / 0.9) 100%)",
+            }}
+          />
+          <span className="absolute top-3 right-3 text-[10px] uppercase tracking-widest text-violet-100/90 border border-violet-300/40 rounded-full px-2 py-1 bg-slate-950/40 backdrop-blur-sm">
+            Pillar
+          </span>
+        </div>
         <div className="p-6 sm:p-8 border-b border-violet-400/10">
           <div className="flex items-center gap-3 mb-3">
             <div className="h-11 w-11 rounded-full flex items-center justify-center bg-violet-500/15 text-violet-300 ring-1 ring-violet-400/30">
@@ -111,9 +141,6 @@ export default function WisdomRoom() {
                 23 cosmic healing photography teachings — the sky as scripture
               </p>
             </div>
-            <span className="ml-auto text-[10px] uppercase tracking-widest text-violet-300/70 border border-violet-400/30 rounded-full px-2 py-1">
-              Pillar
-            </span>
           </div>
           <p className="text-sm sm:text-base text-foreground/80 leading-relaxed max-w-3xl">
             The Cosmics pillar holds our specialized cosmic healing imagery — each card pairs a celestial photograph
@@ -133,17 +160,43 @@ export default function WisdomRoom() {
               <Card className="overflow-hidden bg-slate-950/60 border-violet-400/15 hover:border-violet-300/40 transition-colors backdrop-blur-sm">
                 {/* Visual display slot — ready for cosmic photography */}
                 <div
-                  className="relative aspect-[16/10] w-full flex items-center justify-center border-b border-violet-400/10"
-                  style={{
-                    background:
-                      "radial-gradient(ellipse at 30% 30%, hsl(270 80% 25% / 0.55) 0%, hsl(240 70% 10% / 0.9) 60%, hsl(230 60% 4%) 100%)",
-                  }}
-                  aria-label={`${card.title} image slot`}
+                  className="relative aspect-[16/10] w-full flex items-center justify-center border-b border-violet-400/10 overflow-hidden"
+                  style={
+                    card.image
+                      ? undefined
+                      : {
+                          background:
+                            "radial-gradient(ellipse at 30% 30%, hsl(270 80% 25% / 0.55) 0%, hsl(240 70% 10% / 0.9) 60%, hsl(230 60% 4%) 100%)",
+                        }
+                  }
+                  aria-label={`${card.title} image`}
                 >
-                  <ImageIcon className="h-7 w-7 text-violet-300/40" aria-hidden="true" />
-                  <span className="absolute bottom-2 right-2 text-[10px] uppercase tracking-widest text-violet-200/40">
-                    Image slot
-                  </span>
+                  {card.image ? (
+                    <>
+                      <img
+                        src={card.image}
+                        alt={card.title}
+                        loading="lazy"
+                        width={1024}
+                        height={640}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          background:
+                            "linear-gradient(180deg, hsl(240 60% 4% / 0) 55%, hsl(240 60% 4% / 0.55) 100%)",
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <ImageIcon className="h-7 w-7 text-violet-300/40" aria-hidden="true" />
+                      <span className="absolute bottom-2 right-2 text-[10px] uppercase tracking-widest text-violet-200/40">
+                        Image slot
+                      </span>
+                    </>
+                  )}
                 </div>
                 <CardHeader className="p-4">
                   <CardTitle className="text-base font-bold text-foreground">{card.title}</CardTitle>
