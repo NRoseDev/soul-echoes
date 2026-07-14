@@ -22,18 +22,6 @@ const sections = [
   { id: "energy-clearing", title: "Energy Clearing", description: "Clear blocks, toxic ties, or lingering residue in your space using sacred botanical elements like White Sage and Palo Santo wood.", icon: Zap, colorClass: "text-indigo-400" },
   { id: "soul-ties", title: "Soul Ties", description: "Deep emotional/spiritual connections between people — healthy and unhealthy bonds explained.", icon: Heart, colorClass: "text-pink-400" },
   
-  // Placeholders (11)
-  { id: "placeholder-1", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-2", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-3", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-4", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-5", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-6", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-7", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-8", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-9", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-10", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-11", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
 ];
 
 export default function ToolsRoom() {
