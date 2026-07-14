@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Diamond, Droplet, Hash, Leaf, Zap, Heart, Volume2, CheckSquare, Smile, Wind, Brain, Sparkles
+  Diamond, Droplet, Hash, Leaf, Zap, Heart, Volume2, CheckSquare, Smile, Wind, Brain
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { LevelPath } from "@/components/levels/LevelPath";
@@ -22,18 +22,6 @@ const sections = [
   { id: "energy-clearing", title: "Energy Clearing", description: "Clear blocks, toxic ties, or lingering residue in your space using sacred botanical elements like White Sage and Palo Santo wood.", icon: Zap, colorClass: "text-indigo-400" },
   { id: "soul-ties", title: "Soul Ties", description: "Deep emotional/spiritual connections between people — healthy and unhealthy bonds explained.", icon: Heart, colorClass: "text-pink-400" },
   
-  // Placeholders (11)
-  { id: "placeholder-1", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-2", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-3", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-4", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-5", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-6", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-7", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-8", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-9", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-10", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-11", title: "[Coming Soon]", description: "More tools and aids will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
 ];
 
 export default function ToolsRoom() {
@@ -54,8 +42,6 @@ export default function ToolsRoom() {
 
         {sections.map((s, i) => {
           const Icon = s.icon;
-          const isPlaceholder = s.id.startsWith("placeholder");
-          
           return (
             <motion.div
               key={s.id}
@@ -64,11 +50,11 @@ export default function ToolsRoom() {
               transition={{ duration: 0.3, delay: i * 0.04 }}
             >
               <Card
-                className={`${!isPlaceholder ? "cursor-pointer hover:border-primary/40" : "opacity-50"} transition-colors bg-card/80 backdrop-blur-sm`}
-                onClick={() => !isPlaceholder && navigate(`/tools/${s.id}`)}
-                role={!isPlaceholder ? "button" : undefined}
-                tabIndex={!isPlaceholder ? 0 : -1}
-                onKeyDown={(e) => !isPlaceholder && e.key === "Enter" && navigate(`/tools/${s.id}`)}
+                className="cursor-pointer hover:border-primary/40 transition-colors bg-card/80 backdrop-blur-sm"
+                onClick={() => navigate(`/tools/${s.id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && navigate(`/tools/${s.id}`)}
               >
                 <CardHeader className="flex flex-row items-start gap-3 p-4">
                   <div className={`flex-shrink-0 h-10 w-10 rounded-full bg-muted flex items-center justify-center ${s.colorClass}`}>

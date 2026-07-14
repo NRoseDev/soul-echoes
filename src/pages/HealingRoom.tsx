@@ -37,7 +37,7 @@ export default function HealingRoom() {
         </div>
         <h1 className="font-display text-3xl font-bold text-foreground">{room.title}</h1>
         <p className="text-muted-foreground text-lg leading-relaxed">{room.description}</p>
-        <p className="text-sm text-muted-foreground/60 italic">This healing room is coming soon ✨</p>
+        <p className="text-sm text-muted-foreground/60 italic">Step in when you're ready ✨</p>
       </motion.div>
     </div>
   );

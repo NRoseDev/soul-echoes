@@ -622,14 +622,14 @@ export default function BrainDump() {
             <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
               🔌 Connect your AAC device, eye gaze tracker, or external communication equipment via Bluetooth or USB.
             </p>
-            <p className="text-xs text-muted-foreground/60 italic">Device pairing coming soon.</p>
+            <p className="text-xs text-muted-foreground/60 italic">Pair via your device's Bluetooth or USB settings, then return here.</p>
           </div>
         );
 
       default:
         return (
           <div className="px-4 py-4 text-center text-sm text-muted-foreground">
-            This input method is coming soon.
+            Select an input method above to begin.
           </div>
         );
     }
