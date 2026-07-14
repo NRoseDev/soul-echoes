@@ -107,6 +107,27 @@ export default function WisdomRoom() {
           boxShadow: "inset 0 0 60px hsl(270 80% 30% / 0.25)",
         }}
       >
+        {/* Section cover banner */}
+        <div className="relative w-full aspect-[16/7] overflow-hidden border-b border-violet-400/10">
+          <img
+            src={cosmicsSectionCover}
+            alt="Cosmics — ethereal galaxies, nebulae, and celestial light"
+            loading="lazy"
+            width={1280}
+            height={800}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(180deg, hsl(240 60% 4% / 0.15) 0%, hsl(240 60% 4% / 0.55) 70%, hsl(240 60% 4% / 0.9) 100%)",
+            }}
+          />
+          <span className="absolute top-3 right-3 text-[10px] uppercase tracking-widest text-violet-100/90 border border-violet-300/40 rounded-full px-2 py-1 bg-slate-950/40 backdrop-blur-sm">
+            Pillar
+          </span>
+        </div>
         <div className="p-6 sm:p-8 border-b border-violet-400/10">
           <div className="flex items-center gap-3 mb-3">
             <div className="h-11 w-11 rounded-full flex items-center justify-center bg-violet-500/15 text-violet-300 ring-1 ring-violet-400/30">
@@ -120,9 +141,6 @@ export default function WisdomRoom() {
                 23 cosmic healing photography teachings — the sky as scripture
               </p>
             </div>
-            <span className="ml-auto text-[10px] uppercase tracking-widest text-violet-300/70 border border-violet-400/30 rounded-full px-2 py-1">
-              Pillar
-            </span>
           </div>
           <p className="text-sm sm:text-base text-foreground/80 leading-relaxed max-w-3xl">
             The Cosmics pillar holds our specialized cosmic healing imagery — each card pairs a celestial photograph
