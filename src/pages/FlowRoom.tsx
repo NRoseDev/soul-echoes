@@ -137,36 +137,36 @@ function AuraIcon({ className }: IconProps) {
 function CordCuttingIcon({ className }: IconProps) {
   return (
     <GlowWrap color="#FF1A1A">
-      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
-        {/* LEFT SIDE: Open Scissor Handles / Finger Loops */}
-        <circle cx="12" cy="20" r="5" fill="#1e1b4b" fillOpacity="0.4" />
-        <circle cx="12" cy="44" r="5" fill="#1e1b4b" fillOpacity="0.4" />
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        {/* TOP: Distinct Intertwined Knot Loop Structure */}
+        {/* Horizontal left cord entering the knot */}
+        <path d="M6 18 L24 18" strokeWidth={3} />
+        {/* Horizontal right cord exiting the knot */}
+        <path d="M40 18 L58 18" strokeWidth={3} />
         
-        {/* SCISSOR BLADES: Crossing and pivoting at coordinates (24, 32) */}
-        {/* Top Handle moving through the pivot, cutting down toward center-right */}
-        <path d="M16 23 L24 32 L36 38" />
-        {/* Bottom Handle moving through the pivot, cutting up toward center-right */}
-        <path d="M16 41 L24 32 L36 26" />
-        
-        {/* Blade Back Edges to give the scissor blades realistic visual thickness */}
-        <path d="M15 21 L24 32 L36 28" />
-        <path d="M15 43 L24 32 L36 36" />
-        
-        {/* Pivot center screw right where the blades meet */}
-        <circle cx="24" cy="32" r="1.5" fill="currentColor" />
+        {/* Interlocking loop segments creating the clear physical knot */}
+        <path d="M24 18 C24 12, 34 12, 34 18 C34 24, 24 24, 24 18 Z" strokeWidth={3} fill="#1e1b4b" fillOpacity="0.3" />
+        <path d="M30 18 C30 14, 40 14, 40 18 C40 22, 30 22, 30 18" strokeWidth={3} />
 
-        {/* RIGHT SIDE: Elongated Braided Cord with center knot structure being sliced */}
-        {/* The active knot sitting right between the open scissor blades */}
-        <path d="M34 32 C38 24, 40 40, 44 32" strokeWidth={2.5} />
-        <path d="M36 30 C38 28, 42 36, 44 34" strokeWidth={1.5} className="opacity-80" />
+        {/* BOTTOM: Bold Open Scissors rising vertically directly beneath the knot */}
+        {/* Left finger loop handle */}
+        <circle cx="22" cy="50" r="6" strokeWidth={3} fill="#1e1b4b" fillOpacity="0.2" />
+        {/* Right finger loop handle */}
+        <circle cx="42" cy="50" r="6" strokeWidth={3} fill="#1e1b4b" fillOpacity="0.2" />
         
-        {/* Braided segments looping and dynamically extending entirely off to the right side */}
-        <path d="M44 32 C48 24, 52 38, 58 28 C60 25, 61 24, 63 26" strokeDasharray="3 1.5" />
-        <path d="M44 32 C46 36, 50 26, 54 36 C57 41, 60 38, 63 40" strokeDasharray="3 1.5" />
-        
-        {/* Small energy release dots around the cut junction */}
-        <circle cx="39" cy="23" r="0.8" fill="currentColor" stroke="none" />
-        <circle cx="42" cy="41" r="0.8" fill="currentColor" stroke="none" />
+        {/* Left scissor arm handle shank up to pivot point */}
+        <path d="M24 44 L32 36" strokeWidth={3.5} />
+        {/* Right scissor arm handle shank up to pivot point */}
+        <path d="M40 44 L32 36" strokeWidth={3.5} />
+
+        {/* Open Scissor Blades pointing upward, framing the bottom of the knot loop */}
+        {/* Left blade extending up and out to the left */}
+        <path d="M32 36 L20 23 L24 23 Z" fill="currentColor" strokeWidth={1} />
+        {/* Right blade extending up and out to the right */}
+        <path d="M32 36 L44 23 L40 23 Z" fill="currentColor" strokeWidth={1} />
+
+        {/* Center pivot point screw */}
+        <circle cx="32" cy="36" r="1.5" fill="#fef08a" stroke="none" />
       </svg>
     </GlowWrap>
   );
