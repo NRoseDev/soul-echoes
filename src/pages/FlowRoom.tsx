@@ -138,22 +138,28 @@ function CordCuttingIcon({ className }: IconProps) {
   return (
     <GlowWrap color="#FF1A1A">
       <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth={SW} strokeLinecap="round" strokeLinejoin="round" className={className}>
-        {/* elongated braided cord stretching across the card */}
+        {/* elongated braided cord stretching across the card, passing through the cut point */}
         <path d="M2 34 C8 30 14 38 20 34 C26 30 32 38 38 34 C44 30 50 38 56 34 C58 33 60 32 62 34" />
-        <path d="M2 36 C8 32 14 40 20 36 C26 32 32 40 38 36 C44 32 50 40 56 36 C58 35 60 34 62 36" />
-        <path d="M4 38 C10 34 16 42 22 38 C28 34 34 42 40 38 C46 34 52 42 58 38" />
+        <path d="M2 37 C8 33 14 41 20 37 C26 33 32 41 38 37 C44 33 50 41 56 37 C58 36 60 35 62 37" />
+        <path d="M4 40 C10 36 16 44 22 40 C28 36 34 44 40 40 C46 36 52 44 58 40" />
         {/* knots along the cord */}
-        <circle cx="20" cy="35" r="2.2" />
-        <circle cx="38" cy="35" r="2.2" />
-        <circle cx="56" cy="35" r="2.2" />
-        {/* scissor handles / finger loops */}
-        <circle cx="18" cy="16" r="5.5" />
-        <circle cx="18" cy="48" r="5.5" />
-        {/* scissor blades crossing at the cord */}
-        <path d="M22 20 L48 34 L22 44" />
-        <path d="M22 44 L48 34 L22 20" />
-        {/* pivot screw */}
-        <circle cx="34" cy="34" r="1.4" fill="currentColor" />
+        <circle cx="20" cy="35.5" r="2.2" />
+        <circle cx="38" cy="35.5" r="2.2" />
+        <circle cx="56" cy="35.5" r="2.2" />
+        {/* open scissor handles / finger loops (left side) */}
+        <circle cx="15" cy="18" r="5.5" />
+        <circle cx="15" cy="52" r="5.5" />
+        {/* scissor blades crossing at the center of the cord */}
+        {/* top blade: from top handle through pivot to lower-right tip */}
+        <path d="M19 20 L34 36 L54 46" />
+        {/* bottom blade: from bottom handle through pivot to upper-right tip */}
+        <path d="M19 50 L34 34 L54 24" />
+        {/* blade back edges to give the blades visible thickness */}
+        <path d="M19 18 L34 34 L54 22" />
+        <path d="M19 52 L34 36 L54 48" />
+        {/* pivot screw at the cut point */}
+        <circle cx="34" cy="35" r="1.6" fill="currentColor" />
+        <circle cx="34" cy="35" r="1.6" />
       </svg>
     </GlowWrap>
   );
