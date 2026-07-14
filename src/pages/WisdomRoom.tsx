@@ -4,9 +4,40 @@ import {
   Sun, Layers, Brain, Activity, Music2, Map, GitBranch, Wind,
   Volume2, Zap, Gift, MessageSquare, Hand, Leaf, Droplet,
   Diamond, Flower2, Moon, Star, Hexagon, Sparkles, Hash, BookOpen,
+  Orbit, Image as ImageIcon,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { LevelPath } from "@/components/levels/LevelPath";
+
+type CosmicCard = { id: string; title: string; description: string };
+
+const cosmicCards: CosmicCard[] = [
+  { id: "birth-of-stars", title: "Birth of Stars", description: "Stellar nurseries where light is born from cosmic dust — a mirror of your own becoming." },
+  { id: "galactic-spirals", title: "Galactic Spirals", description: "Sacred spiral geometry written across a hundred billion suns." },
+  { id: "nebula-hearts", title: "Nebula Hearts", description: "Luminous clouds of creation — the womb of the universe made visible." },
+  { id: "pillars-of-creation", title: "Pillars of Creation", description: "Towering columns of gas and stardust — the temple of stellar genesis." },
+  { id: "supernova-rebirth", title: "Supernova Rebirth", description: "Death that seeds new worlds. The cosmic law of transformation." },
+  { id: "black-hole-mystery", title: "Black Hole Mystery", description: "Thresholds of the unknown where space, time, and self dissolve." },
+  { id: "aurora-frequencies", title: "Aurora Frequencies", description: "The Earth singing in color as solar wind meets our atmosphere." },
+  { id: "solar-flares", title: "Solar Flares", description: "The sun's living pulse — how solar activity shifts the human field." },
+  { id: "lunar-phases", title: "Lunar Phases", description: "New, waxing, full, and waning — the moon's rhythm inside your body." },
+  { id: "planetary-alignments", title: "Planetary Alignments", description: "When the planets meet, the collective heart re-tunes." },
+  { id: "cosmic-microwave", title: "Cosmic Microwave Background", description: "The oldest light in the universe — the whisper of the first moment." },
+  { id: "quantum-field", title: "Quantum Field", description: "The invisible web of potential from which all matter emerges." },
+  { id: "sacred-cosmology", title: "Sacred Cosmology", description: "How ancient traditions mapped the heavens onto the soul." },
+  { id: "zodiac-constellations", title: "Zodiac Constellations", description: "The twelve celestial gates and the archetypes they carry." },
+  { id: "starseed-origins", title: "Starseed Origins", description: "Souls remembering their home among the stars — Pleiades, Sirius, Arcturus, Andromeda." },
+  { id: "milky-way-portal", title: "Milky Way Portal", description: "Our galactic home — a river of light we drift within." },
+  { id: "planetary-guardians", title: "Planetary Guardians", description: "The energies of Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, and Pluto." },
+  { id: "sacred-eclipses", title: "Sacred Eclipses", description: "Solar and lunar eclipses as thresholds of collective rebirth." },
+  { id: "meteor-messages", title: "Meteor Messages", description: "Shooting stars, meteor showers, and the language of falling light." },
+  { id: "sun-worship-history", title: "Sun Worship Through History", description: "How every culture has bowed to the same living source of light." },
+  { id: "cosmic-consciousness", title: "Cosmic Consciousness", description: "The felt awareness that you are the universe experiencing itself." },
+  { id: "galactic-center", title: "Galactic Center", description: "The heart of our galaxy in Sagittarius — the direction of returning home." },
+  { id: "schumann-resonance", title: "Schumann Resonance", description: "The Earth's heartbeat frequency and how it tunes your own." },
+];
+
+
 
 const sections = [
   { id: "what-is-source", title: "What is Source", description: "The divine intelligence behind all creation — God, Universe, the All. Understanding your origin changes everything.", icon: Sun, colorClass: "text-amber-400" },
@@ -34,27 +65,24 @@ const sections = [
   { id: "healing-scripture-by-emotion", title: "Healing Scripture by Emotion", description: "Scripture organized by what you are feeling right now — for fear, grief, anger, shame, loneliness, anxiety, and depression.", icon: BookOpen, colorClass: "text-amber-300" },
   
   // Placeholders (10 more to reach 33)
-  { id: "placeholder-1", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-2", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-3", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-4", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-5", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-6", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-7", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-8", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-9", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
-  { id: "placeholder-10", title: "[Coming Soon]", description: "More wisdom teachings will be added to the library.", icon: Sparkles, colorClass: "text-gray-400" },
 ];
 
 export default function WisdomRoom() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 pb-32" style={{ background: "radial-gradient(ellipse at 20% 20%, hsl(25,80%,5%) 0%, hsl(25,90%,14%) 45%, hsl(25,60%,26%) 100%)" }}>
+    <div
+      className="flex-1 overflow-y-auto p-4 pb-32"
+      style={{
+        background:
+          "radial-gradient(ellipse at 20% 20%, hsl(25,80%,5%) 0%, hsl(25,90%,14%) 45%, hsl(25,60%,26%) 100%)",
+      }}
+    >
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <h1 className="font-display text-3xl font-bold text-foreground mb-2 text-center">Wisdom</h1>
         <p className="text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
-          Ancient to modern teachings on the why behind healing (33 total). Every section here is a doorway into a deeper understanding of yourself, your body, your energy, and your divine design.
+          Ancient to modern teachings on the why behind healing. Every section here is a doorway into a deeper
+          understanding of yourself, your body, your energy, and your divine design.
         </p>
       </motion.div>
 
@@ -62,12 +90,83 @@ export default function WisdomRoom() {
         <LevelPath roomId="wisdom" />
       </div>
 
+      {/* COSMICS — dedicated celestial pillar */}
+      <section
+        aria-labelledby="cosmics-heading"
+        className="max-w-6xl mx-auto mb-12 rounded-2xl border border-violet-400/20 overflow-hidden"
+        style={{
+          background:
+            "radial-gradient(ellipse at 80% 0%, hsl(260 70% 18% / 0.9) 0%, hsl(240 60% 8% / 0.95) 55%, hsl(230 50% 4% / 1) 100%)",
+          boxShadow: "inset 0 0 60px hsl(270 80% 30% / 0.25)",
+        }}
+      >
+        <div className="p-6 sm:p-8 border-b border-violet-400/10">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-11 w-11 rounded-full flex items-center justify-center bg-violet-500/15 text-violet-300 ring-1 ring-violet-400/30">
+              <Orbit className="h-6 w-6" aria-hidden="true" />
+            </div>
+            <div>
+              <h2 id="cosmics-heading" className="font-display text-2xl sm:text-3xl font-bold text-foreground">
+                Cosmics
+              </h2>
+              <p className="text-xs sm:text-sm text-violet-200/70">
+                23 cosmic healing photography teachings — the sky as scripture
+              </p>
+            </div>
+            <span className="ml-auto text-[10px] uppercase tracking-widest text-violet-300/70 border border-violet-400/30 rounded-full px-2 py-1">
+              Pillar
+            </span>
+          </div>
+          <p className="text-sm sm:text-base text-foreground/80 leading-relaxed max-w-3xl">
+            The Cosmics pillar holds our specialized cosmic healing imagery — each card pairs a celestial photograph
+            with a teaching on how that cosmic force lives inside you. Use these visuals for meditation, reflection,
+            and remembering your infinite origin.
+          </p>
+        </div>
+
+        <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {cosmicCards.map((card, index) => (
+            <motion.div
+              key={card.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.02 }}
+            >
+              <Card className="overflow-hidden bg-slate-950/60 border-violet-400/15 hover:border-violet-300/40 transition-colors backdrop-blur-sm">
+                {/* Visual display slot — ready for cosmic photography */}
+                <div
+                  className="relative aspect-[16/10] w-full flex items-center justify-center border-b border-violet-400/10"
+                  style={{
+                    background:
+                      "radial-gradient(ellipse at 30% 30%, hsl(270 80% 25% / 0.55) 0%, hsl(240 70% 10% / 0.9) 60%, hsl(230 60% 4%) 100%)",
+                  }}
+                  aria-label={`${card.title} image slot`}
+                >
+                  <ImageIcon className="h-7 w-7 text-violet-300/40" aria-hidden="true" />
+                  <span className="absolute bottom-2 right-2 text-[10px] uppercase tracking-widest text-violet-200/40">
+                    Image slot
+                  </span>
+                </div>
+                <CardHeader className="p-4">
+                  <CardTitle className="text-base font-bold text-foreground">{card.title}</CardTitle>
+                  <CardDescription className="text-xs mt-1 leading-relaxed text-foreground/70">
+                    {card.description}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Core teachings grid */}
+      <div className="max-w-6xl mx-auto mb-4">
+        <h2 className="font-display text-xl font-bold text-foreground/90 mb-1">Core Teachings</h2>
+        <p className="text-xs text-muted-foreground mb-4">The foundational wisdom library.</p>
+      </div>
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {sections.map((section, index) => {
-
           const Icon = section.icon;
-          const isPlaceholder = section.id.startsWith("placeholder");
-          
           return (
             <motion.div
               key={section.id}
@@ -76,20 +175,24 @@ export default function WisdomRoom() {
               transition={{ duration: 0.3, delay: index * 0.03 }}
             >
               <Card
-                className={`${!isPlaceholder ? "cursor-pointer hover:border-primary/40" : "opacity-50"} transition-colors bg-card/80 backdrop-blur-sm`}
-                onClick={() => !isPlaceholder && navigate(`/wisdom/${section.id}`)}
-                role={!isPlaceholder ? "button" : undefined}
-                tabIndex={!isPlaceholder ? 0 : -1}
-                onKeyDown={(e) => !isPlaceholder && e.key === "Enter" && navigate(`/wisdom/${section.id}`)}
+                className="cursor-pointer hover:border-primary/40 transition-colors bg-card/80 backdrop-blur-sm"
+                onClick={() => navigate(`/wisdom/${section.id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && navigate(`/wisdom/${section.id}`)}
               >
                 <CardHeader className="p-4">
                   <div className="flex items-start gap-3">
-                    <div className={`flex-shrink-0 h-10 w-10 rounded-full bg-muted flex items-center justify-center ${section.colorClass}`}>
+                    <div
+                      className={`flex-shrink-0 h-10 w-10 rounded-full bg-muted flex items-center justify-center ${section.colorClass}`}
+                    >
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">
                       <CardTitle className="text-base font-bold">{section.title}</CardTitle>
-                      <CardDescription className="text-xs mt-1 leading-relaxed">{section.description}</CardDescription>
+                      <CardDescription className="text-xs mt-1 leading-relaxed">
+                        {section.description}
+                      </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
@@ -101,3 +204,4 @@ export default function WisdomRoom() {
     </div>
   );
 }
+
