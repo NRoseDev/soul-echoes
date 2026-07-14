@@ -4,9 +4,40 @@ import {
   Sun, Layers, Brain, Activity, Music2, Map, GitBranch, Wind,
   Volume2, Zap, Gift, MessageSquare, Hand, Leaf, Droplet,
   Diamond, Flower2, Moon, Star, Hexagon, Sparkles, Hash, BookOpen,
+  Orbit, Image as ImageIcon,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { LevelPath } from "@/components/levels/LevelPath";
+
+type CosmicCard = { id: string; title: string; description: string };
+
+const cosmicCards: CosmicCard[] = [
+  { id: "birth-of-stars", title: "Birth of Stars", description: "Stellar nurseries where light is born from cosmic dust — a mirror of your own becoming." },
+  { id: "galactic-spirals", title: "Galactic Spirals", description: "Sacred spiral geometry written across a hundred billion suns." },
+  { id: "nebula-hearts", title: "Nebula Hearts", description: "Luminous clouds of creation — the womb of the universe made visible." },
+  { id: "pillars-of-creation", title: "Pillars of Creation", description: "Towering columns of gas and stardust — the temple of stellar genesis." },
+  { id: "supernova-rebirth", title: "Supernova Rebirth", description: "Death that seeds new worlds. The cosmic law of transformation." },
+  { id: "black-hole-mystery", title: "Black Hole Mystery", description: "Thresholds of the unknown where space, time, and self dissolve." },
+  { id: "aurora-frequencies", title: "Aurora Frequencies", description: "The Earth singing in color as solar wind meets our atmosphere." },
+  { id: "solar-flares", title: "Solar Flares", description: "The sun's living pulse — how solar activity shifts the human field." },
+  { id: "lunar-phases", title: "Lunar Phases", description: "New, waxing, full, and waning — the moon's rhythm inside your body." },
+  { id: "planetary-alignments", title: "Planetary Alignments", description: "When the planets meet, the collective heart re-tunes." },
+  { id: "cosmic-microwave", title: "Cosmic Microwave Background", description: "The oldest light in the universe — the whisper of the first moment." },
+  { id: "quantum-field", title: "Quantum Field", description: "The invisible web of potential from which all matter emerges." },
+  { id: "sacred-cosmology", title: "Sacred Cosmology", description: "How ancient traditions mapped the heavens onto the soul." },
+  { id: "zodiac-constellations", title: "Zodiac Constellations", description: "The twelve celestial gates and the archetypes they carry." },
+  { id: "starseed-origins", title: "Starseed Origins", description: "Souls remembering their home among the stars — Pleiades, Sirius, Arcturus, Andromeda." },
+  { id: "milky-way-portal", title: "Milky Way Portal", description: "Our galactic home — a river of light we drift within." },
+  { id: "planetary-guardians", title: "Planetary Guardians", description: "The energies of Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, and Pluto." },
+  { id: "sacred-eclipses", title: "Sacred Eclipses", description: "Solar and lunar eclipses as thresholds of collective rebirth." },
+  { id: "meteor-messages", title: "Meteor Messages", description: "Shooting stars, meteor showers, and the language of falling light." },
+  { id: "sun-worship-history", title: "Sun Worship Through History", description: "How every culture has bowed to the same living source of light." },
+  { id: "cosmic-consciousness", title: "Cosmic Consciousness", description: "The felt awareness that you are the universe experiencing itself." },
+  { id: "galactic-center", title: "Galactic Center", description: "The heart of our galaxy in Sagittarius — the direction of returning home." },
+  { id: "schumann-resonance", title: "Schumann Resonance", description: "The Earth's heartbeat frequency and how it tunes your own." },
+];
+
+
 
 const sections = [
   { id: "what-is-source", title: "What is Source", description: "The divine intelligence behind all creation — God, Universe, the All. Understanding your origin changes everything.", icon: Sun, colorClass: "text-amber-400" },
