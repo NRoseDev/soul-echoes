@@ -71,11 +71,18 @@ export default function WisdomRoom() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 pb-32" style={{ background: "radial-gradient(ellipse at 20% 20%, hsl(25,80%,5%) 0%, hsl(25,90%,14%) 45%, hsl(25,60%,26%) 100%)" }}>
+    <div
+      className="flex-1 overflow-y-auto p-4 pb-32"
+      style={{
+        background:
+          "radial-gradient(ellipse at 20% 20%, hsl(25,80%,5%) 0%, hsl(25,90%,14%) 45%, hsl(25,60%,26%) 100%)",
+      }}
+    >
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <h1 className="font-display text-3xl font-bold text-foreground mb-2 text-center">Wisdom</h1>
         <p className="text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
-          Ancient to modern teachings on the why behind healing (33 total). Every section here is a doorway into a deeper understanding of yourself, your body, your energy, and your divine design.
+          Ancient to modern teachings on the why behind healing. Every section here is a doorway into a deeper
+          understanding of yourself, your body, your energy, and your divine design.
         </p>
       </motion.div>
 
@@ -83,12 +90,83 @@ export default function WisdomRoom() {
         <LevelPath roomId="wisdom" />
       </div>
 
+      {/* COSMICS — dedicated celestial pillar */}
+      <section
+        aria-labelledby="cosmics-heading"
+        className="max-w-6xl mx-auto mb-12 rounded-2xl border border-violet-400/20 overflow-hidden"
+        style={{
+          background:
+            "radial-gradient(ellipse at 80% 0%, hsl(260 70% 18% / 0.9) 0%, hsl(240 60% 8% / 0.95) 55%, hsl(230 50% 4% / 1) 100%)",
+          boxShadow: "inset 0 0 60px hsl(270 80% 30% / 0.25)",
+        }}
+      >
+        <div className="p-6 sm:p-8 border-b border-violet-400/10">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-11 w-11 rounded-full flex items-center justify-center bg-violet-500/15 text-violet-300 ring-1 ring-violet-400/30">
+              <Orbit className="h-6 w-6" aria-hidden="true" />
+            </div>
+            <div>
+              <h2 id="cosmics-heading" className="font-display text-2xl sm:text-3xl font-bold text-foreground">
+                Cosmics
+              </h2>
+              <p className="text-xs sm:text-sm text-violet-200/70">
+                23 cosmic healing photography teachings — the sky as scripture
+              </p>
+            </div>
+            <span className="ml-auto text-[10px] uppercase tracking-widest text-violet-300/70 border border-violet-400/30 rounded-full px-2 py-1">
+              Pillar
+            </span>
+          </div>
+          <p className="text-sm sm:text-base text-foreground/80 leading-relaxed max-w-3xl">
+            The Cosmics pillar holds our specialized cosmic healing imagery — each card pairs a celestial photograph
+            with a teaching on how that cosmic force lives inside you. Use these visuals for meditation, reflection,
+            and remembering your infinite origin.
+          </p>
+        </div>
+
+        <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {cosmicCards.map((card, index) => (
+            <motion.div
+              key={card.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.02 }}
+            >
+              <Card className="overflow-hidden bg-slate-950/60 border-violet-400/15 hover:border-violet-300/40 transition-colors backdrop-blur-sm">
+                {/* Visual display slot — ready for cosmic photography */}
+                <div
+                  className="relative aspect-[16/10] w-full flex items-center justify-center border-b border-violet-400/10"
+                  style={{
+                    background:
+                      "radial-gradient(ellipse at 30% 30%, hsl(270 80% 25% / 0.55) 0%, hsl(240 70% 10% / 0.9) 60%, hsl(230 60% 4%) 100%)",
+                  }}
+                  aria-label={`${card.title} image slot`}
+                >
+                  <ImageIcon className="h-7 w-7 text-violet-300/40" aria-hidden="true" />
+                  <span className="absolute bottom-2 right-2 text-[10px] uppercase tracking-widest text-violet-200/40">
+                    Image slot
+                  </span>
+                </div>
+                <CardHeader className="p-4">
+                  <CardTitle className="text-base font-bold text-foreground">{card.title}</CardTitle>
+                  <CardDescription className="text-xs mt-1 leading-relaxed text-foreground/70">
+                    {card.description}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Core teachings grid */}
+      <div className="max-w-6xl mx-auto mb-4">
+        <h2 className="font-display text-xl font-bold text-foreground/90 mb-1">Core Teachings</h2>
+        <p className="text-xs text-muted-foreground mb-4">The foundational wisdom library.</p>
+      </div>
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {sections.map((section, index) => {
-
           const Icon = section.icon;
-          const isPlaceholder = section.id.startsWith("placeholder");
-          
           return (
             <motion.div
               key={section.id}
@@ -97,20 +175,24 @@ export default function WisdomRoom() {
               transition={{ duration: 0.3, delay: index * 0.03 }}
             >
               <Card
-                className={`${!isPlaceholder ? "cursor-pointer hover:border-primary/40" : "opacity-50"} transition-colors bg-card/80 backdrop-blur-sm`}
-                onClick={() => !isPlaceholder && navigate(`/wisdom/${section.id}`)}
-                role={!isPlaceholder ? "button" : undefined}
-                tabIndex={!isPlaceholder ? 0 : -1}
-                onKeyDown={(e) => !isPlaceholder && e.key === "Enter" && navigate(`/wisdom/${section.id}`)}
+                className="cursor-pointer hover:border-primary/40 transition-colors bg-card/80 backdrop-blur-sm"
+                onClick={() => navigate(`/wisdom/${section.id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && navigate(`/wisdom/${section.id}`)}
               >
                 <CardHeader className="p-4">
                   <div className="flex items-start gap-3">
-                    <div className={`flex-shrink-0 h-10 w-10 rounded-full bg-muted flex items-center justify-center ${section.colorClass}`}>
+                    <div
+                      className={`flex-shrink-0 h-10 w-10 rounded-full bg-muted flex items-center justify-center ${section.colorClass}`}
+                    >
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">
                       <CardTitle className="text-base font-bold">{section.title}</CardTitle>
-                      <CardDescription className="text-xs mt-1 leading-relaxed">{section.description}</CardDescription>
+                      <CardDescription className="text-xs mt-1 leading-relaxed">
+                        {section.description}
+                      </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
@@ -122,3 +204,4 @@ export default function WisdomRoom() {
     </div>
   );
 }
+
