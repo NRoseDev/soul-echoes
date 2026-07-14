@@ -21,14 +21,14 @@ import imgSolarFlares from "@/assets/cosmics/solar-flares.jpg";
 type CosmicCard = { id: string; title: string; description: string; image?: string };
 
 const cosmicCards: CosmicCard[] = [
-  { id: "birth-of-stars", title: "Birth of Stars", description: "Stellar nurseries where light is born from cosmic dust — a mirror of your own becoming." },
-  { id: "galactic-spirals", title: "Galactic Spirals", description: "Sacred spiral geometry written across a hundred billion suns." },
-  { id: "nebula-hearts", title: "Nebula Hearts", description: "Luminous clouds of creation — the womb of the universe made visible." },
-  { id: "pillars-of-creation", title: "Pillars of Creation", description: "Towering columns of gas and stardust — the temple of stellar genesis." },
-  { id: "supernova-rebirth", title: "Supernova Rebirth", description: "Death that seeds new worlds. The cosmic law of transformation." },
-  { id: "black-hole-mystery", title: "Black Hole Mystery", description: "Thresholds of the unknown where space, time, and self dissolve." },
-  { id: "aurora-frequencies", title: "Aurora Frequencies", description: "The Earth singing in color as solar wind meets our atmosphere." },
-  { id: "solar-flares", title: "Solar Flares", description: "The sun's living pulse — how solar activity shifts the human field." },
+  { id: "birth-of-stars", title: "Birth of Stars", description: "Stellar nurseries where light is born from cosmic dust — a mirror of your own becoming.", image: imgBirthOfStars },
+  { id: "galactic-spirals", title: "Galactic Spirals", description: "Sacred spiral geometry written across a hundred billion suns.", image: imgGalacticSpirals },
+  { id: "nebula-hearts", title: "Nebula Hearts", description: "Luminous clouds of creation — the womb of the universe made visible.", image: imgNebulaHearts },
+  { id: "pillars-of-creation", title: "Pillars of Creation", description: "Towering columns of gas and stardust — the temple of stellar genesis.", image: imgPillarsOfCreation },
+  { id: "supernova-rebirth", title: "Supernova Rebirth", description: "Death that seeds new worlds. The cosmic law of transformation.", image: imgSupernovaRebirth },
+  { id: "black-hole-mystery", title: "Black Hole Mystery", description: "Thresholds of the unknown where space, time, and self dissolve.", image: imgBlackHoleMystery },
+  { id: "aurora-frequencies", title: "Aurora Frequencies", description: "The Earth singing in color as solar wind meets our atmosphere.", image: imgAuroraFrequencies },
+  { id: "solar-flares", title: "Solar Flares", description: "The sun's living pulse — how solar activity shifts the human field.", image: imgSolarFlares },
   { id: "lunar-phases", title: "Lunar Phases", description: "New, waxing, full, and waning — the moon's rhythm inside your body." },
   { id: "planetary-alignments", title: "Planetary Alignments", description: "When the planets meet, the collective heart re-tunes." },
   { id: "cosmic-microwave", title: "Cosmic Microwave Background", description: "The oldest light in the universe — the whisper of the first moment." },
