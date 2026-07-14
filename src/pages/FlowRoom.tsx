@@ -133,16 +133,27 @@ function AuraIcon({ className }: IconProps) {
   );
 }
 
-/* 6. Cord Cutting — kept as scissor motif (red) */
+/* 6. Cord Cutting — open scissors slicing an elongated braided cord (deep red) */
 function CordCuttingIcon({ className }: IconProps) {
   return (
-    <GlowWrap color="#FF4D6D">
+    <GlowWrap color="#FF1A1A">
       <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth={SW} strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <circle cx="18" cy="18" r="6" />
-        <circle cx="18" cy="46" r="6" />
-        <path d="M24 22 L56 42" />
-        <path d="M24 42 L56 22" />
-        <path d="M40 32 L56 32" strokeDasharray="2 3" />
+        {/* elongated braided cord stretching across the card */}
+        <path d="M2 34 C8 30 14 38 20 34 C26 30 32 38 38 34 C44 30 50 38 56 34 C58 33 60 32 62 34" />
+        <path d="M2 36 C8 32 14 40 20 36 C26 32 32 40 38 36 C44 32 50 40 56 36 C58 35 60 34 62 36" />
+        <path d="M4 38 C10 34 16 42 22 38 C28 34 34 42 40 38 C46 34 52 42 58 38" />
+        {/* knots along the cord */}
+        <circle cx="20" cy="35" r="2.2" />
+        <circle cx="38" cy="35" r="2.2" />
+        <circle cx="56" cy="35" r="2.2" />
+        {/* scissor handles / finger loops */}
+        <circle cx="18" cy="16" r="5.5" />
+        <circle cx="18" cy="48" r="5.5" />
+        {/* scissor blades crossing at the cord */}
+        <path d="M22 20 L48 34 L22 44" />
+        <path d="M22 44 L48 34 L22 20" />
+        {/* pivot screw */}
+        <circle cx="34" cy="34" r="1.4" fill="currentColor" />
       </svg>
     </GlowWrap>
   );
