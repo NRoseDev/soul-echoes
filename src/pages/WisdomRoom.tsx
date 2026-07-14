@@ -160,17 +160,43 @@ export default function WisdomRoom() {
               <Card className="overflow-hidden bg-slate-950/60 border-violet-400/15 hover:border-violet-300/40 transition-colors backdrop-blur-sm">
                 {/* Visual display slot — ready for cosmic photography */}
                 <div
-                  className="relative aspect-[16/10] w-full flex items-center justify-center border-b border-violet-400/10"
-                  style={{
-                    background:
-                      "radial-gradient(ellipse at 30% 30%, hsl(270 80% 25% / 0.55) 0%, hsl(240 70% 10% / 0.9) 60%, hsl(230 60% 4%) 100%)",
-                  }}
-                  aria-label={`${card.title} image slot`}
+                  className="relative aspect-[16/10] w-full flex items-center justify-center border-b border-violet-400/10 overflow-hidden"
+                  style={
+                    card.image
+                      ? undefined
+                      : {
+                          background:
+                            "radial-gradient(ellipse at 30% 30%, hsl(270 80% 25% / 0.55) 0%, hsl(240 70% 10% / 0.9) 60%, hsl(230 60% 4%) 100%)",
+                        }
+                  }
+                  aria-label={`${card.title} image`}
                 >
-                  <ImageIcon className="h-7 w-7 text-violet-300/40" aria-hidden="true" />
-                  <span className="absolute bottom-2 right-2 text-[10px] uppercase tracking-widest text-violet-200/40">
-                    Image slot
-                  </span>
+                  {card.image ? (
+                    <>
+                      <img
+                        src={card.image}
+                        alt={card.title}
+                        loading="lazy"
+                        width={1024}
+                        height={640}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          background:
+                            "linear-gradient(180deg, hsl(240 60% 4% / 0) 55%, hsl(240 60% 4% / 0.55) 100%)",
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <ImageIcon className="h-7 w-7 text-violet-300/40" aria-hidden="true" />
+                      <span className="absolute bottom-2 right-2 text-[10px] uppercase tracking-widest text-violet-200/40">
+                        Image slot
+                      </span>
+                    </>
+                  )}
                 </div>
                 <CardHeader className="p-4">
                   <CardTitle className="text-base font-bold text-foreground">{card.title}</CardTitle>
