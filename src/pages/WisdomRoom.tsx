@@ -8,8 +8,17 @@ import {
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { LevelPath } from "@/components/levels/LevelPath";
+import cosmicsSectionCover from "@/assets/cosmics/section-cover.jpg";
+import imgBirthOfStars from "@/assets/cosmics/birth-of-stars.jpg";
+import imgGalacticSpirals from "@/assets/cosmics/galactic-spirals.jpg";
+import imgNebulaHearts from "@/assets/cosmics/nebula-hearts.jpg";
+import imgPillarsOfCreation from "@/assets/cosmics/pillars-of-creation.jpg";
+import imgSupernovaRebirth from "@/assets/cosmics/supernova-rebirth.jpg";
+import imgBlackHoleMystery from "@/assets/cosmics/black-hole-mystery.jpg";
+import imgAuroraFrequencies from "@/assets/cosmics/aurora-frequencies.jpg";
+import imgSolarFlares from "@/assets/cosmics/solar-flares.jpg";
 
-type CosmicCard = { id: string; title: string; description: string };
+type CosmicCard = { id: string; title: string; description: string; image?: string };
 
 const cosmicCards: CosmicCard[] = [
   { id: "birth-of-stars", title: "Birth of Stars", description: "Stellar nurseries where light is born from cosmic dust — a mirror of your own becoming." },
