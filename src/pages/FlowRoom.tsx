@@ -137,29 +137,36 @@ function AuraIcon({ className }: IconProps) {
 function CordCuttingIcon({ className }: IconProps) {
   return (
     <GlowWrap color="#FF1A1A">
-      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth={SW} strokeLinecap="round" strokeLinejoin="round" className={className}>
-        {/* elongated braided cord stretching across the card, passing through the cut point */}
-        <path d="M2 34 C8 30 14 38 20 34 C26 30 32 38 38 34 C44 30 50 38 56 34 C58 33 60 32 62 34" />
-        <path d="M2 37 C8 33 14 41 20 37 C26 33 32 41 38 37 C44 33 50 41 56 37 C58 36 60 35 62 37" />
-        <path d="M4 40 C10 36 16 44 22 40 C28 36 34 44 40 40 C46 36 52 44 58 40" />
-        {/* knots along the cord */}
-        <circle cx="20" cy="35.5" r="2.2" />
-        <circle cx="38" cy="35.5" r="2.2" />
-        <circle cx="56" cy="35.5" r="2.2" />
-        {/* open scissor handles / finger loops (left side) */}
-        <circle cx="15" cy="18" r="5.5" />
-        <circle cx="15" cy="52" r="5.5" />
-        {/* scissor blades crossing at the center of the cord */}
-        {/* top blade: from top handle through pivot to lower-right tip */}
-        <path d="M19 20 L34 36 L54 46" />
-        {/* bottom blade: from bottom handle through pivot to upper-right tip */}
-        <path d="M19 50 L34 34 L54 24" />
-        {/* blade back edges to give the blades visible thickness */}
-        <path d="M19 18 L34 34 L54 22" />
-        <path d="M19 52 L34 36 L54 48" />
-        {/* pivot screw at the cut point */}
-        <circle cx="34" cy="35" r="1.6" fill="currentColor" />
-        <circle cx="34" cy="35" r="1.6" />
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        {/* LEFT SIDE: Open Scissor Handles / Finger Loops */}
+        <circle cx="12" cy="20" r="5" fill="#1e1b4b" fillOpacity="0.4" />
+        <circle cx="12" cy="44" r="5" fill="#1e1b4b" fillOpacity="0.4" />
+        
+        {/* SCISSOR BLADES: Crossing and pivoting at coordinates (24, 32) */}
+        {/* Top Handle moving through the pivot, cutting down toward center-right */}
+        <path d="M16 23 L24 32 L36 38" />
+        {/* Bottom Handle moving through the pivot, cutting up toward center-right */}
+        <path d="M16 41 L24 32 L36 26" />
+        
+        {/* Blade Back Edges to give the scissor blades realistic visual thickness */}
+        <path d="M15 21 L24 32 L36 28" />
+        <path d="M15 43 L24 32 L36 36" />
+        
+        {/* Pivot center screw right where the blades meet */}
+        <circle cx="24" cy="32" r="1.5" fill="currentColor" />
+
+        {/* RIGHT SIDE: Elongated Braided Cord with center knot structure being sliced */}
+        {/* The active knot sitting right between the open scissor blades */}
+        <path d="M34 32 C38 24, 40 40, 44 32" strokeWidth={2.5} />
+        <path d="M36 30 C38 28, 42 36, 44 34" strokeWidth={1.5} className="opacity-80" />
+        
+        {/* Braided segments looping and dynamically extending entirely off to the right side */}
+        <path d="M44 32 C48 24, 52 38, 58 28 C60 25, 61 24, 63 26" strokeDasharray="3 1.5" />
+        <path d="M44 32 C46 36, 50 26, 54 36 C57 41, 60 38, 63 40" strokeDasharray="3 1.5" />
+        
+        {/* Small energy release dots around the cut junction */}
+        <circle cx="39" cy="23" r="0.8" fill="currentColor" stroke="none" />
+        <circle cx="42" cy="41" r="0.8" fill="currentColor" stroke="none" />
       </svg>
     </GlowWrap>
   );
