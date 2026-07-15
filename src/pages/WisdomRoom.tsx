@@ -52,6 +52,8 @@ import iconDreamInterp from "@/assets/wisdom-icons/dream-interpretation.png";
 import iconAstrology from "@/assets/wisdom-icons/astrology.png";
 import iconSacredGeometry from "@/assets/wisdom-icons/sacred-geometry.png";
 import iconYourSpiritualGifts from "@/assets/wisdom-icons/your-spiritual-gifts.png";
+import iconNumerology from "@/assets/wisdom-icons/numerology.png";
+import iconHealingScripture from "@/assets/wisdom-icons/healing-scripture.png";
 
 type CosmicCard = { id: string; title: string; description: string; image?: string };
 
