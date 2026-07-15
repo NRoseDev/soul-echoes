@@ -32,6 +32,16 @@ import imgSunWorshipHistory from "@/assets/cosmics/sun-worship-history.jpg";
 import imgCosmicConsciousness from "@/assets/cosmics/cosmic-consciousness.jpg";
 import imgGalacticCenter from "@/assets/cosmics/galactic-center.jpg";
 import imgSchumannResonance from "@/assets/cosmics/schumann-resonance.jpg";
+import iconWhatIsSource from "@/assets/wisdom-icons/what-is-source.png";
+import iconChakraSystem from "@/assets/wisdom-icons/chakra-system.png";
+import iconNervousSystem from "@/assets/wisdom-icons/nervous-system.png";
+import iconVagusNerve from "@/assets/wisdom-icons/vagus-nerve.png";
+import iconTuningFork from "@/assets/wisdom-icons/tuning-fork.png";
+import iconPainBodyMap from "@/assets/wisdom-icons/pain-body-map.png";
+import iconGenerationalIllness from "@/assets/wisdom-icons/generational-illness.png";
+import iconBreathwork from "@/assets/wisdom-icons/breathwork.png";
+import iconSoundHealing from "@/assets/wisdom-icons/sound-healing.png";
+import iconEnergyWork from "@/assets/wisdom-icons/energy-work.png";
 
 type CosmicCard = { id: string; title: string; description: string; image?: string };
 
@@ -64,16 +74,16 @@ const cosmicCards: CosmicCard[] = [
 
 
 const sections = [
-  { id: "what-is-source", title: "What is Source", description: "The divine intelligence behind all creation — God, Universe, the All. Understanding your origin changes everything.", icon: Sun, colorClass: "text-amber-400" },
-  { id: "chakra-system", title: "Chakra System", description: "All 12 energy centers plus the Earth Star — their locations, meanings, blockages, and how to restore flow.", icon: Layers, colorClass: "text-violet-400" },
-  { id: "nervous-system", title: "Nervous System and Polyvagal Theory", description: "Why your body responds the way it does. The science of safety, trauma, and nervous system regulation.", icon: Brain, colorClass: "text-blue-400" },
-  { id: "vagus-nerve", title: "Vagus Nerve Activation", description: "The master healing nerve. Learn what it is, how it regulates your entire body, and how to activate it.", icon: Activity, colorClass: "text-green-400" },
-  { id: "tuning-fork-therapy", title: "Tuning Fork Therapy", description: "How precise frequencies restore harmony in the body and energy field. The science and spirit behind the sound.", icon: Music2, colorClass: "text-sky-400" },
-  { id: "pain-body-map", title: "Emotional Pain Body Map", description: "Your body keeps score. A map of where grief, fear, anger, shame, and trauma live in physical tissue.", icon: Map, colorClass: "text-rose-400" },
-  { id: "generational-illness", title: "Generational Illness and Clearing", description: "How ancestral trauma is encoded in DNA and passed through family lines — and how it can be released.", icon: GitBranch, colorClass: "text-orange-400" },
-  { id: "how-breathwork-works", title: "How Breathwork Works", description: "The biochemistry and spirituality of breath. Why controlled breathing transforms your nervous system.", icon: Wind, colorClass: "text-cyan-400" },
-  { id: "how-sound-healing-works", title: "How Sound Healing Works", description: "Resonance, entrainment, solfeggio frequencies, and cymatics — how sound restructures matter and mind.", icon: Volume2, colorClass: "text-purple-400" },
-  { id: "how-energy-work-functions", title: "How Energy Work Functions", description: "The biofield, aura layers, and how practitioners move, clear, and restore life-force energy.", icon: Zap, colorClass: "text-indigo-400" },
+  { id: "what-is-source", title: "What is Source", description: "The divine intelligence behind all creation — God, Universe, the All. Understanding your origin changes everything.", icon: Sun, colorClass: "text-amber-400", image: iconWhatIsSource },
+  { id: "chakra-system", title: "Chakra System", description: "All 12 energy centers plus the Earth Star — their locations, meanings, blockages, and how to restore flow.", icon: Layers, colorClass: "text-violet-400", image: iconChakraSystem },
+  { id: "nervous-system", title: "Nervous System and Polyvagal Theory", description: "Why your body responds the way it does. The science of safety, trauma, and nervous system regulation.", icon: Brain, colorClass: "text-blue-400", image: iconNervousSystem },
+  { id: "vagus-nerve", title: "Vagus Nerve Activation", description: "The master healing nerve. Learn what it is, how it regulates your entire body, and how to activate it.", icon: Activity, colorClass: "text-green-400", image: iconVagusNerve },
+  { id: "tuning-fork-therapy", title: "Tuning Fork Therapy", description: "How precise frequencies restore harmony in the body and energy field. The science and spirit behind the sound.", icon: Music2, colorClass: "text-sky-400", image: iconTuningFork },
+  { id: "pain-body-map", title: "Emotional Pain Body Map", description: "Your body keeps score. A map of where grief, fear, anger, shame, and trauma live in physical tissue.", icon: Map, colorClass: "text-rose-400", image: iconPainBodyMap },
+  { id: "generational-illness", title: "Generational Illness and Clearing", description: "How ancestral trauma is encoded in DNA and passed through family lines — and how it can be released.", icon: GitBranch, colorClass: "text-orange-400", image: iconGenerationalIllness },
+  { id: "how-breathwork-works", title: "How Breathwork Works", description: "The biochemistry and spirituality of breath. Why controlled breathing transforms your nervous system.", icon: Wind, colorClass: "text-cyan-400", image: iconBreathwork },
+  { id: "how-sound-healing-works", title: "How Sound Healing Works", description: "Resonance, entrainment, solfeggio frequencies, and cymatics — how sound restructures matter and mind.", icon: Volume2, colorClass: "text-purple-400", image: iconSoundHealing },
+  { id: "how-energy-work-functions", title: "How Energy Work Functions", description: "The biofield, aura layers, and how practitioners move, clear, and restore life-force energy.", icon: Zap, colorClass: "text-indigo-400", image: iconEnergyWork },
   { id: "spiritual-gifts-explained", title: "Spiritual Gifts Explained", description: "The gifts of prophecy, healing, tongues, discernment, wisdom, and more — their true biblical roots.", icon: Gift, colorClass: "text-yellow-400" },
   { id: "power-of-words", title: "Power of Words", description: "Words carry vibration. Science and scripture both confirm that what you speak, you create.", icon: MessageSquare, colorClass: "text-pink-400" },
   { id: "reflexology-and-meridians", title: "Reflexology and Meridians", description: "The ancient Chinese meridian system, foot and hand reflexology, and the body's internal energy highways.", icon: Hand, colorClass: "text-teal-400" },
@@ -250,9 +260,20 @@ export default function WisdomRoom() {
                 <CardHeader className="p-4">
                   <div className="flex items-start gap-3">
                     <div
-                      className={`flex-shrink-0 h-10 w-10 rounded-full bg-muted flex items-center justify-center ${section.colorClass}`}
+                      className={`flex-shrink-0 h-10 w-10 rounded-full bg-muted flex items-center justify-center overflow-hidden ${section.colorClass}`}
                     >
-                      <Icon className="h-5 w-5" />
+                      {"image" in section && (section as { image?: string }).image ? (
+                        <img
+                          src={(section as { image: string }).image}
+                          alt=""
+                          loading="lazy"
+                          width={40}
+                          height={40}
+                          className="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <Icon className="h-5 w-5" />
+                      )}
                     </div>
                     <div className="min-w-0">
                       <CardTitle className="text-base font-bold">{section.title}</CardTitle>
