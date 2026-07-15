@@ -45,6 +45,7 @@ import iconEnergyWork from "@/assets/wisdom-icons/energy-work.png";
 import iconSpiritualGifts from "@/assets/wisdom-icons/spiritual-gifts.png";
 import iconPowerOfWords from "@/assets/wisdom-icons/power-of-words.png";
 import iconReflexology from "@/assets/wisdom-icons/reflexology-meridians.png";
+import iconSacredNourishment from "@/assets/wisdom-icons/sacred-nourishment.png";
 import iconEssentialOils from "@/assets/wisdom-icons/essential-oils.png";
 import iconCrystals from "@/assets/wisdom-icons/crystals-stones.png";
 import iconPlantMedicine from "@/assets/wisdom-icons/plant-medicine.png";
@@ -99,7 +100,7 @@ const sections = [
   { id: "spiritual-gifts-explained", title: "Spiritual Gifts Explained", description: "The gifts of prophecy, healing, tongues, discernment, wisdom, and more — their true biblical roots.", icon: Gift, colorClass: "text-yellow-400", image: iconSpiritualGifts },
   { id: "power-of-words", title: "Power of Words", description: "Words carry vibration. Science and scripture both confirm that what you speak, you create.", icon: MessageSquare, colorClass: "text-pink-400", image: iconPowerOfWords },
   { id: "reflexology-and-meridians", title: "Reflexology and Meridians", description: "The ancient Chinese meridian system, foot and hand reflexology, and the body's internal energy highways.", icon: Hand, colorClass: "text-teal-400", image: iconReflexology },
-  { id: "sacred-nourishment", title: "Sacred Nourishment", description: "Food as frequency and medicine. The gut-brain connection, healing foods, and eating as a sacred act.", icon: Leaf, colorClass: "text-lime-400" },
+  { id: "sacred-nourishment", title: "Sacred Nourishment", description: "Food as frequency and medicine. The gut-brain connection, healing foods, and eating as a sacred act.", icon: Leaf, colorClass: "text-lime-400", image: iconSacredNourishment },
   { id: "essential-oils", title: "Essential Oils Education", description: "How oils enter the body, their therapeutic properties, safe use, and which frequencies they carry.", icon: Droplet, colorClass: "text-emerald-400", image: iconEssentialOils },
   { id: "crystal-and-stone-properties", title: "Crystal and Stone Properties", description: "How crystals work energetically, common stones and their healing frequencies, and how to work with them.", icon: Diamond, colorClass: "text-fuchsia-400", image: iconCrystals },
   { id: "plant-medicine-and-herbs", title: "Plant Medicine and Herbs", description: "Adaptogens, nervines, and healing herbs across traditions. Tinctures, teas, and safe herbal practice.", icon: Flower2, colorClass: "text-green-300", image: iconPlantMedicine },
