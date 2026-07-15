@@ -42,6 +42,16 @@ import iconGenerationalIllness from "@/assets/wisdom-icons/generational-illness.
 import iconBreathwork from "@/assets/wisdom-icons/breathwork.png";
 import iconSoundHealing from "@/assets/wisdom-icons/sound-healing.png";
 import iconEnergyWork from "@/assets/wisdom-icons/energy-work.png";
+import iconSpiritualGifts from "@/assets/wisdom-icons/spiritual-gifts.png";
+import iconPowerOfWords from "@/assets/wisdom-icons/power-of-words.png";
+import iconReflexology from "@/assets/wisdom-icons/reflexology-meridians.png";
+import iconEssentialOils from "@/assets/wisdom-icons/essential-oils.png";
+import iconCrystals from "@/assets/wisdom-icons/crystals-stones.png";
+import iconPlantMedicine from "@/assets/wisdom-icons/plant-medicine.png";
+import iconDreamInterp from "@/assets/wisdom-icons/dream-interpretation.png";
+import iconAstrology from "@/assets/wisdom-icons/astrology.png";
+import iconSacredGeometry from "@/assets/wisdom-icons/sacred-geometry.png";
+import iconYourSpiritualGifts from "@/assets/wisdom-icons/your-spiritual-gifts.png";
 
 type CosmicCard = { id: string; title: string; description: string; image?: string };
 
@@ -84,17 +94,17 @@ const sections = [
   { id: "how-breathwork-works", title: "How Breathwork Works", description: "The biochemistry and spirituality of breath. Why controlled breathing transforms your nervous system.", icon: Wind, colorClass: "text-cyan-400", image: iconBreathwork },
   { id: "how-sound-healing-works", title: "How Sound Healing Works", description: "Resonance, entrainment, solfeggio frequencies, and cymatics — how sound restructures matter and mind.", icon: Volume2, colorClass: "text-purple-400", image: iconSoundHealing },
   { id: "how-energy-work-functions", title: "How Energy Work Functions", description: "The biofield, aura layers, and how practitioners move, clear, and restore life-force energy.", icon: Zap, colorClass: "text-indigo-400", image: iconEnergyWork },
-  { id: "spiritual-gifts-explained", title: "Spiritual Gifts Explained", description: "The gifts of prophecy, healing, tongues, discernment, wisdom, and more — their true biblical roots.", icon: Gift, colorClass: "text-yellow-400" },
-  { id: "power-of-words", title: "Power of Words", description: "Words carry vibration. Science and scripture both confirm that what you speak, you create.", icon: MessageSquare, colorClass: "text-pink-400" },
-  { id: "reflexology-and-meridians", title: "Reflexology and Meridians", description: "The ancient Chinese meridian system, foot and hand reflexology, and the body's internal energy highways.", icon: Hand, colorClass: "text-teal-400" },
+  { id: "spiritual-gifts-explained", title: "Spiritual Gifts Explained", description: "The gifts of prophecy, healing, tongues, discernment, wisdom, and more — their true biblical roots.", icon: Gift, colorClass: "text-yellow-400", image: iconSpiritualGifts },
+  { id: "power-of-words", title: "Power of Words", description: "Words carry vibration. Science and scripture both confirm that what you speak, you create.", icon: MessageSquare, colorClass: "text-pink-400", image: iconPowerOfWords },
+  { id: "reflexology-and-meridians", title: "Reflexology and Meridians", description: "The ancient Chinese meridian system, foot and hand reflexology, and the body's internal energy highways.", icon: Hand, colorClass: "text-teal-400", image: iconReflexology },
   { id: "sacred-nourishment", title: "Sacred Nourishment", description: "Food as frequency and medicine. The gut-brain connection, healing foods, and eating as a sacred act.", icon: Leaf, colorClass: "text-lime-400" },
-  { id: "essential-oils", title: "Essential Oils Education", description: "How oils enter the body, their therapeutic properties, safe use, and which frequencies they carry.", icon: Droplet, colorClass: "text-emerald-400" },
-  { id: "crystal-and-stone-properties", title: "Crystal and Stone Properties", description: "How crystals work energetically, common stones and their healing frequencies, and how to work with them.", icon: Diamond, colorClass: "text-fuchsia-400" },
-  { id: "plant-medicine-and-herbs", title: "Plant Medicine and Herbs", description: "Adaptogens, nervines, and healing herbs across traditions. Tinctures, teas, and safe herbal practice.", icon: Flower2, colorClass: "text-green-300" },
-  { id: "dream-interpretation", title: "Dream Interpretation", description: "Why we dream, what symbols mean, prophetic dreams, and how to journal and decode your nighttime messages.", icon: Moon, colorClass: "text-indigo-300" },
-  { id: "astrology-basics", title: "Astrology Basics", description: "Sun, Moon, and Rising signs. The 12 houses, planetary influences, and your North Node soul purpose.", icon: Star, colorClass: "text-amber-300" },
-  { id: "sacred-geometry", title: "Sacred Geometry", description: "The Flower of Life, Fibonacci sequence, golden ratio, and how divine patterns underlie all creation.", icon: Hexagon, colorClass: "text-violet-300" },
-  { id: "your-spiritual-gifts", title: "Understanding Your Spiritual Gifts", description: "Empath, Prophet, Seer, Healer, Intercessor, Lightworker, Starseed, Medicine Person and more — honestly explained.", icon: Sparkles, colorClass: "text-sky-300" },
+  { id: "essential-oils", title: "Essential Oils Education", description: "How oils enter the body, their therapeutic properties, safe use, and which frequencies they carry.", icon: Droplet, colorClass: "text-emerald-400", image: iconEssentialOils },
+  { id: "crystal-and-stone-properties", title: "Crystal and Stone Properties", description: "How crystals work energetically, common stones and their healing frequencies, and how to work with them.", icon: Diamond, colorClass: "text-fuchsia-400", image: iconCrystals },
+  { id: "plant-medicine-and-herbs", title: "Plant Medicine and Herbs", description: "Adaptogens, nervines, and healing herbs across traditions. Tinctures, teas, and safe herbal practice.", icon: Flower2, colorClass: "text-green-300", image: iconPlantMedicine },
+  { id: "dream-interpretation", title: "Dream Interpretation", description: "Why we dream, what symbols mean, prophetic dreams, and how to journal and decode your nighttime messages.", icon: Moon, colorClass: "text-indigo-300", image: iconDreamInterp },
+  { id: "astrology-basics", title: "Astrology Basics", description: "Sun, Moon, and Rising signs. The 12 houses, planetary influences, and your North Node soul purpose.", icon: Star, colorClass: "text-amber-300", image: iconAstrology },
+  { id: "sacred-geometry", title: "Sacred Geometry", description: "The Flower of Life, Fibonacci sequence, golden ratio, and how divine patterns underlie all creation.", icon: Hexagon, colorClass: "text-violet-300", image: iconSacredGeometry },
+  { id: "your-spiritual-gifts", title: "Understanding Your Spiritual Gifts", description: "Empath, Prophet, Seer, Healer, Intercessor, Lightworker, Starseed, Medicine Person and more — honestly explained.", icon: Sparkles, colorClass: "text-sky-300", image: iconYourSpiritualGifts },
   { id: "numerology-and-angel-numbers", title: "Numerology and Angel Numbers", description: "Life Path numbers, soul urge, and the meaning behind 111, 222, 333, 444, 555, 777, 888, 999, and 1111.", icon: Hash, colorClass: "text-rose-300" },
   { id: "healing-scripture-by-emotion", title: "Healing Scripture by Emotion", description: "Scripture organized by what you are feeling right now — for fear, grief, anger, shame, loneliness, anxiety, and depression.", icon: BookOpen, colorClass: "text-amber-300" },
 ];
