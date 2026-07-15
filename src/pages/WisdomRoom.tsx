@@ -25,6 +25,13 @@ import imgSacredCosmology from "@/assets/cosmics/sacred-cosmology.jpg";
 import imgZodiacConstellations from "@/assets/cosmics/zodiac-constellations.jpg";
 import imgStarseedOrigins from "@/assets/cosmics/starseed-origins.jpg";
 import imgMilkyWayPortal from "@/assets/cosmics/milky-way-portal.jpg";
+import imgPlanetaryGuardians from "@/assets/cosmics/planetary-guardians.jpg";
+import imgSacredEclipses from "@/assets/cosmics/sacred-eclipses.jpg";
+import imgMeteorMessages from "@/assets/cosmics/meteor-messages.jpg";
+import imgSunWorshipHistory from "@/assets/cosmics/sun-worship-history.jpg";
+import imgCosmicConsciousness from "@/assets/cosmics/cosmic-consciousness.jpg";
+import imgGalacticCenter from "@/assets/cosmics/galactic-center.jpg";
+import imgSchumannResonance from "@/assets/cosmics/schumann-resonance.jpg";
 
 type CosmicCard = { id: string; title: string; description: string; image?: string };
 
@@ -45,13 +52,13 @@ const cosmicCards: CosmicCard[] = [
   { id: "zodiac-constellations", title: "Zodiac Constellations", description: "The twelve celestial gates and the archetypes they carry.", image: imgZodiacConstellations },
   { id: "starseed-origins", title: "Starseed Origins", description: "Souls remembering their home among the stars — Pleiades, Sirius, Arcturus, Andromeda.", image: imgStarseedOrigins },
   { id: "milky-way-portal", title: "Milky Way Portal", description: "Our galactic home — a river of light we drift within.", image: imgMilkyWayPortal },
-  { id: "planetary-guardians", title: "Planetary Guardians", description: "The energies of Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, and Pluto." },
-  { id: "sacred-eclipses", title: "Sacred Eclipses", description: "Solar and lunar eclipses as thresholds of collective rebirth." },
-  { id: "meteor-messages", title: "Meteor Messages", description: "Shooting stars, meteor showers, and the language of falling light." },
-  { id: "sun-worship-history", title: "Sun Worship Through History", description: "How every culture has bowed to the same living source of light." },
-  { id: "cosmic-consciousness", title: "Cosmic Consciousness", description: "The felt awareness that you are the universe experiencing itself." },
-  { id: "galactic-center", title: "Galactic Center", description: "The heart of our galaxy in Sagittarius — the direction of returning home." },
-  { id: "schumann-resonance", title: "Schumann Resonance", description: "The Earth's heartbeat frequency and how it tunes your own." },
+  { id: "planetary-guardians", title: "Planetary Guardians", description: "The energies of Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, and Pluto.", image: imgPlanetaryGuardians },
+  { id: "sacred-eclipses", title: "Sacred Eclipses", description: "Solar and lunar eclipses as thresholds of collective rebirth.", image: imgSacredEclipses },
+  { id: "meteor-messages", title: "Meteor Messages", description: "Shooting stars, meteor showers, and the language of falling light.", image: imgMeteorMessages },
+  { id: "sun-worship-history", title: "Sun Worship Through History", description: "How every culture has bowed to the same living source of light.", image: imgSunWorshipHistory },
+  { id: "cosmic-consciousness", title: "Cosmic Consciousness", description: "The felt awareness that you are the universe experiencing itself.", image: imgCosmicConsciousness },
+  { id: "galactic-center", title: "Galactic Center", description: "The heart of our galaxy in Sagittarius — the direction of returning home.", image: imgGalacticCenter },
+  { id: "schumann-resonance", title: "Schumann Resonance", description: "The Earth's heartbeat frequency and how it tunes your own.", image: imgSchumannResonance },
 ];
 
 
