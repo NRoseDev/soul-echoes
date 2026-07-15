@@ -17,6 +17,14 @@ import imgSupernovaRebirth from "@/assets/cosmics/supernova-rebirth.jpg";
 import imgBlackHoleMystery from "@/assets/cosmics/black-hole-mystery.jpg";
 import imgAuroraFrequencies from "@/assets/cosmics/aurora-frequencies.jpg";
 import imgSolarFlares from "@/assets/cosmics/solar-flares.jpg";
+import imgLunarPhases from "@/assets/cosmics/lunar-phases.jpg";
+import imgPlanetaryAlignments from "@/assets/cosmics/planetary-alignments.jpg";
+import imgCosmicMicrowave from "@/assets/cosmics/cosmic-microwave.jpg";
+import imgQuantumField from "@/assets/cosmics/quantum-field.jpg";
+import imgSacredCosmology from "@/assets/cosmics/sacred-cosmology.jpg";
+import imgZodiacConstellations from "@/assets/cosmics/zodiac-constellations.jpg";
+import imgStarseedOrigins from "@/assets/cosmics/starseed-origins.jpg";
+import imgMilkyWayPortal from "@/assets/cosmics/milky-way-portal.jpg";
 
 type CosmicCard = { id: string; title: string; description: string; image?: string };
 
@@ -29,14 +37,14 @@ const cosmicCards: CosmicCard[] = [
   { id: "black-hole-mystery", title: "Black Hole Mystery", description: "Thresholds of the unknown where space, time, and self dissolve.", image: imgBlackHoleMystery },
   { id: "aurora-frequencies", title: "Aurora Frequencies", description: "The Earth singing in color as solar wind meets our atmosphere.", image: imgAuroraFrequencies },
   { id: "solar-flares", title: "Solar Flares", description: "The sun's living pulse — how solar activity shifts the human field.", image: imgSolarFlares },
-  { id: "lunar-phases", title: "Lunar Phases", description: "New, waxing, full, and waning — the moon's rhythm inside your body." },
-  { id: "planetary-alignments", title: "Planetary Alignments", description: "When the planets meet, the collective heart re-tunes." },
-  { id: "cosmic-microwave", title: "Cosmic Microwave Background", description: "The oldest light in the universe — the whisper of the first moment." },
-  { id: "quantum-field", title: "Quantum Field", description: "The invisible web of potential from which all matter emerges." },
-  { id: "sacred-cosmology", title: "Sacred Cosmology", description: "How ancient traditions mapped the heavens onto the soul." },
-  { id: "zodiac-constellations", title: "Zodiac Constellations", description: "The twelve celestial gates and the archetypes they carry." },
-  { id: "starseed-origins", title: "Starseed Origins", description: "Souls remembering their home among the stars — Pleiades, Sirius, Arcturus, Andromeda." },
-  { id: "milky-way-portal", title: "Milky Way Portal", description: "Our galactic home — a river of light we drift within." },
+  { id: "lunar-phases", title: "Lunar Phases", description: "New, waxing, full, and waning — the moon's rhythm inside your body.", image: imgLunarPhases },
+  { id: "planetary-alignments", title: "Planetary Alignments", description: "When the planets meet, the collective heart re-tunes.", image: imgPlanetaryAlignments },
+  { id: "cosmic-microwave", title: "Cosmic Microwave Background", description: "The oldest light in the universe — the whisper of the first moment.", image: imgCosmicMicrowave },
+  { id: "quantum-field", title: "Quantum Field", description: "The invisible web of potential from which all matter emerges.", image: imgQuantumField },
+  { id: "sacred-cosmology", title: "Sacred Cosmology", description: "How ancient traditions mapped the heavens onto the soul.", image: imgSacredCosmology },
+  { id: "zodiac-constellations", title: "Zodiac Constellations", description: "The twelve celestial gates and the archetypes they carry.", image: imgZodiacConstellations },
+  { id: "starseed-origins", title: "Starseed Origins", description: "Souls remembering their home among the stars — Pleiades, Sirius, Arcturus, Andromeda.", image: imgStarseedOrigins },
+  { id: "milky-way-portal", title: "Milky Way Portal", description: "Our galactic home — a river of light we drift within.", image: imgMilkyWayPortal },
   { id: "planetary-guardians", title: "Planetary Guardians", description: "The energies of Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, and Pluto." },
   { id: "sacred-eclipses", title: "Sacred Eclipses", description: "Solar and lunar eclipses as thresholds of collective rebirth." },
   { id: "meteor-messages", title: "Meteor Messages", description: "Shooting stars, meteor showers, and the language of falling light." },
