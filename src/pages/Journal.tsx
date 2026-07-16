@@ -53,20 +53,13 @@ const HeartRingIcon = ({ className }: GlowIconProps) => (
 
 // Reflection — uploaded silhouette tinted emerald with matching glow
 const ReflectionIcon = ({ className }: GlowIconProps) => (
-  <div
+  <img
+    src={reflectionIcon.url}
+    alt=""
     className={className}
     aria-hidden="true"
     style={{
-      backgroundColor: "#FF3399",
-      WebkitMaskImage: `url(${reflectionIcon.url})`,
-      maskImage: `url(${reflectionIcon.url})`,
-      WebkitMaskSize: "contain",
-      maskSize: "contain",
-      WebkitMaskRepeat: "no-repeat",
-      maskRepeat: "no-repeat",
-      WebkitMaskPosition: "center",
-      maskPosition: "center",
-      filter: "invert(1) drop-shadow(0 0 6px #00CC66) drop-shadow(0 0 14px #00CC66)",
+      filter: "drop-shadow(0 0 6px #00CC66) drop-shadow(0 0 14px #00CC66)",
     }}
   />
 );
