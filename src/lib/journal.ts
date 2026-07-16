@@ -58,7 +58,7 @@ export const JOURNAL_SECTIONS: JournalSectionDefinition[] = [
   },
   {
     id: "gratitude",
-    title: "Gratitude",
+    title: "Reflection",
     description: "Guided gratitude prompts for a kinder view.",
     emoji: "🌸",
     fields: [
