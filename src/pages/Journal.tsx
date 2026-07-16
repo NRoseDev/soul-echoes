@@ -5,6 +5,7 @@ import { useRoom } from "@/contexts/RoomContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { logProgress } from "@/lib/roomPersistence";
 import { Textarea } from "@/components/ui/textarea";
+import reflectionIcon from "@/assets/reflection-icon.jpg.asset.json";
 
 /* ---------- Chakra-tinted neon glow icons (inspired by uploaded sheet) ---------- */
 
