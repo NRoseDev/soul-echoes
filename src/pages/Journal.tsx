@@ -54,7 +54,7 @@ const HeartRingIcon = ({ className }: GlowIconProps) => (
 // Reflection — uploaded silhouette tinted emerald with matching glow
 const ReflectionIcon = ({ className }: GlowIconProps) => (
   <img
-    src={reflectionIcon.url}
+    src={reflectionIcon}
     alt=""
     className={className}
     aria-hidden="true"
