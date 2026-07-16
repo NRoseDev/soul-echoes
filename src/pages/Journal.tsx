@@ -163,8 +163,8 @@ const JOURNAL_SECTIONS = [
   },
   {
     id: "gratitude",
-    title: "Gratitude",
-    icon: HeartRingIcon,
+    title: "Reflection",
+    icon: ReflectionIcon,
     description: "Guided gratitude prompts for a kinder view",
     prompt: "What are you grateful for today, no matter how small?",
   },
