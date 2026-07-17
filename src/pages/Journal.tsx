@@ -5,6 +5,7 @@ import { useRoom } from "@/contexts/RoomContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { logProgress } from "@/lib/roomPersistence";
 import { Textarea } from "@/components/ui/textarea";
+import reflectionIcon from "/reflection-icon-green.png";
 
 /* ---------- Chakra-tinted neon glow icons (inspired by uploaded sheet) ---------- */
 
@@ -48,6 +49,19 @@ const HeartRingIcon = ({ className }: GlowIconProps) => (
     <path d="M32 52 C 14 40, 10 26, 20 20 C 26 16, 30 20, 32 24 C 34 20, 38 16, 44 20 C 54 26, 50 40, 32 52 Z" />
     <ellipse cx="32" cy="38" rx="26" ry="6" transform="rotate(-18 32 38)" />
   </GlowWrap>
+);
+
+// Reflection — uploaded silhouette tinted emerald with matching glow
+const ReflectionIcon = ({ className }: GlowIconProps) => (
+  <img
+    src={reflectionIcon}
+    alt=""
+    className={className}
+    aria-hidden="true"
+    style={{
+      filter: "drop-shadow(0 0 6px #00CC66) drop-shadow(0 0 14px #00CC66)",
+    }}
+  />
 );
 
 // Crescent moon with star — Third Eye (indigo)
@@ -142,8 +156,8 @@ const JOURNAL_SECTIONS = [
   },
   {
     id: "gratitude",
-    title: "Gratitude",
-    icon: HeartRingIcon,
+    title: "Reflection",
+    icon: ReflectionIcon,
     description: "Guided gratitude prompts for a kinder view",
     prompt: "What are you grateful for today, no matter how small?",
   },
