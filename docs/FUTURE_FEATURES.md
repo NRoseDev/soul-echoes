@@ -1,3 +1,4 @@
+## Core Philosophy & Features
 # 🪞 Reflection Journal
 
 **Status: ACTIVE DEVELOPMENT (HIGH PRIORITY)**
