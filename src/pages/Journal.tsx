@@ -207,7 +207,7 @@ const JOURNAL_SECTIONS = [
   {
     id: "daily-check-in",
     title: "Daily Check-In",
-    icon: (p: { className?: string }) => <GlowImg src={dailyCheckinIcon} color="#FF0000" {...p} />,
+    icon: DailyCheckInIcon,
     description: "Mood and intention prompts auto-logged from your daily voice stream",
     prompt: "Your Brain Dump AI has gathered today's thoughts below. Review or add guidance cues.",
   },
