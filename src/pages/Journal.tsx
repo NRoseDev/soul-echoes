@@ -22,6 +22,20 @@ const GlowImg = ({ src, color, className }: { src: string; color: string; classN
   />
 );
 
+// Emotional Release: brighter base, softer 40% opacity sacral-orange glow
+const EmotionalReleaseIcon = ({ className }: { className?: string }) => (
+  <img
+    src={emotionalReleaseIcon}
+    alt=""
+    aria-hidden="true"
+    className={className}
+    style={{
+      filter:
+        "brightness(0) invert(1) brightness(1.35) drop-shadow(0 0 6px rgba(255,122,0,0.4)) drop-shadow(0 0 14px rgba(255,122,0,0.4))",
+    }}
+  />
+);
+
 /* ---------- Chakra-tinted neon glow icons (inspired by uploaded sheet) ---------- */
 
 type GlowIconProps = { className?: string };
@@ -193,7 +207,7 @@ const JOURNAL_SECTIONS = [
   {
     id: "emotional-release",
     title: "Emotional Release Writing",
-    icon: (p: { className?: string }) => <GlowImg src={emotionalReleaseIcon} color="#FF7A00" {...p} />,
+    icon: EmotionalReleaseIcon,
     description: "Free-write space to let emotions move",
     prompt: "Let it all out. No judgment. Just feel and write.",
   },
