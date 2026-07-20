@@ -5,12 +5,13 @@ import { useRoom } from "@/contexts/RoomContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { logProgress } from "@/lib/roomPersistence";
 import { Textarea } from "@/components/ui/textarea";
-import reflectionIcon from "/reflection-icon-green.png";
-import dailyCheckinIcon from "/journal-icons/daily-checkin.png";
-import emotionalReleaseIcon from "/journal-icons/emotional-release.png";
-import manifestationIcon from "/journal-icons/manifestation.png";
-import lettersNeverSentIcon from "/journal-icons/letters-never-sent.png";
-import healthIcon from "/journal-icons/health.png";
+const CACHE_BUST = `?v=${Date.now()}`;
+const reflectionIcon = `/reflection-icon-green.png${CACHE_BUST}`;
+const dailyCheckinIcon = `/journal-icons/daily-checkin.png${CACHE_BUST}`;
+const emotionalReleaseIcon = `/journal-icons/emotional-release.png${CACHE_BUST}`;
+const manifestationIcon = `/journal-icons/manifestation.png${CACHE_BUST}`;
+const lettersNeverSentIcon = `/journal-icons/letters-never-sent.png${CACHE_BUST}`;
+const healthIcon = `/journal-icons/health.png${CACHE_BUST}`;
 
 const GlowImg = ({ src, color, className }: { src: string; color: string; className?: string }) => (
   <img
