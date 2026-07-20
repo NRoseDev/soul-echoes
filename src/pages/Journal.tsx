@@ -36,6 +36,20 @@ const EmotionalReleaseIcon = ({ className }: { className?: string }) => (
   />
 );
 
+// Manifestation: brighter base, softer 35% opacity solar-plexus yellow glow
+const ManifestationIcon = ({ className }: { className?: string }) => (
+  <img
+    src={manifestationIcon}
+    alt=""
+    aria-hidden="true"
+    className={className}
+    style={{
+      filter:
+        "brightness(0) invert(1) brightness(1.40) drop-shadow(0 0 6px rgba(255,213,0,0.35)) drop-shadow(0 0 14px rgba(255,213,0,0.35))",
+    }}
+  />
+);
+
 /* ---------- Chakra-tinted neon glow icons (inspired by uploaded sheet) ---------- */
 
 type GlowIconProps = { className?: string };
@@ -214,7 +228,7 @@ const JOURNAL_SECTIONS = [
   {
     id: "manifestation",
     title: "Manifestation",
-    icon: (p: { className?: string }) => <GlowImg src={manifestationIcon} color="#FFD500" {...p} />,
+    icon: ManifestationIcon,
     description: "Set intention and notice what you are calling in",
     prompt: "What are you calling into your life? Speak it into existence.",
   },
