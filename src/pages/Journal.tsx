@@ -22,7 +22,21 @@ const GlowImg = ({ src, color, className }: { src: string; color: string; classN
   />
 );
 
-// Emotional Release: brighter base, softer 40% opacity sacral-orange glow
+// Daily Check-In: +45% brighter base, 30% opacity root-red glow
+const DailyCheckInIcon = ({ className }: { className?: string }) => (
+  <img
+    src={dailyCheckinIcon}
+    alt=""
+    aria-hidden="true"
+    className={className}
+    style={{
+      filter:
+        "brightness(0) invert(1) brightness(1.45) drop-shadow(0 0 6px rgba(255,0,0,0.3)) drop-shadow(0 0 14px rgba(255,0,0,0.3))",
+    }}
+  />
+);
+
+// Emotional Release: +50% brighter base, 35% opacity sacral-orange glow
 const EmotionalReleaseIcon = ({ className }: { className?: string }) => (
   <img
     src={emotionalReleaseIcon}
@@ -31,7 +45,21 @@ const EmotionalReleaseIcon = ({ className }: { className?: string }) => (
     className={className}
     style={{
       filter:
-        "brightness(0) invert(1) brightness(1.35) drop-shadow(0 0 6px rgba(255,122,0,0.4)) drop-shadow(0 0 14px rgba(255,122,0,0.4))",
+        "brightness(0) invert(1) brightness(1.50) drop-shadow(0 0 6px rgba(255,122,0,0.35)) drop-shadow(0 0 14px rgba(255,122,0,0.35))",
+    }}
+  />
+);
+
+// Manifestation: brighter base, softer 35% opacity solar-plexus yellow glow
+const ManifestationIcon = ({ className }: { className?: string }) => (
+  <img
+    src={manifestationIcon}
+    alt=""
+    aria-hidden="true"
+    className={className}
+    style={{
+      filter:
+        "brightness(0) invert(1) brightness(1.40) drop-shadow(0 0 6px rgba(255,213,0,0.35)) drop-shadow(0 0 14px rgba(255,213,0,0.35))",
     }}
   />
 );
@@ -179,7 +207,7 @@ const JOURNAL_SECTIONS = [
   {
     id: "daily-check-in",
     title: "Daily Check-In",
-    icon: (p: { className?: string }) => <GlowImg src={dailyCheckinIcon} color="#FF0000" {...p} />,
+    icon: DailyCheckInIcon,
     description: "Mood and intention prompts auto-logged from your daily voice stream",
     prompt: "Your Brain Dump AI has gathered today's thoughts below. Review or add guidance cues.",
   },
@@ -214,7 +242,7 @@ const JOURNAL_SECTIONS = [
   {
     id: "manifestation",
     title: "Manifestation",
-    icon: (p: { className?: string }) => <GlowImg src={manifestationIcon} color="#FFD500" {...p} />,
+    icon: ManifestationIcon,
     description: "Set intention and notice what you are calling in",
     prompt: "What are you calling into your life? Speak it into existence.",
   },
