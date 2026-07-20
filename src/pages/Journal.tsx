@@ -22,7 +22,21 @@ const GlowImg = ({ src, color, className }: { src: string; color: string; classN
   />
 );
 
-// Emotional Release: brighter base, softer 40% opacity sacral-orange glow
+// Daily Check-In: +45% brighter base, 30% opacity root-red glow
+const DailyCheckInIcon = ({ className }: { className?: string }) => (
+  <img
+    src={dailyCheckinIcon}
+    alt=""
+    aria-hidden="true"
+    className={className}
+    style={{
+      filter:
+        "brightness(0) invert(1) brightness(1.45) drop-shadow(0 0 6px rgba(255,0,0,0.3)) drop-shadow(0 0 14px rgba(255,0,0,0.3))",
+    }}
+  />
+);
+
+// Emotional Release: +50% brighter base, 35% opacity sacral-orange glow
 const EmotionalReleaseIcon = ({ className }: { className?: string }) => (
   <img
     src={emotionalReleaseIcon}
@@ -31,7 +45,7 @@ const EmotionalReleaseIcon = ({ className }: { className?: string }) => (
     className={className}
     style={{
       filter:
-        "brightness(0) invert(1) brightness(1.35) drop-shadow(0 0 6px rgba(255,122,0,0.4)) drop-shadow(0 0 14px rgba(255,122,0,0.4))",
+        "brightness(0) invert(1) brightness(1.50) drop-shadow(0 0 6px rgba(255,122,0,0.35)) drop-shadow(0 0 14px rgba(255,122,0,0.35))",
     }}
   />
 );
