@@ -6,6 +6,21 @@ import { useAuth } from "@/contexts/AuthContext";
 import { logProgress } from "@/lib/roomPersistence";
 import { Textarea } from "@/components/ui/textarea";
 import reflectionIcon from "/reflection-icon-green.png";
+import dailyCheckinIcon from "/journal-icons/daily-checkin.png";
+import emotionalReleaseIcon from "/journal-icons/emotional-release.png";
+import manifestationIcon from "/journal-icons/manifestation.png";
+import lettersNeverSentIcon from "/journal-icons/letters-never-sent.png";
+import healthIcon from "/journal-icons/health.png";
+
+const GlowImg = ({ src, color, className }: { src: string; color: string; className?: string }) => (
+  <img
+    src={src}
+    alt=""
+    aria-hidden="true"
+    className={className}
+    style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 6px ${color}) drop-shadow(0 0 14px ${color})` }}
+  />
+);
 
 /* ---------- Chakra-tinted neon glow icons (inspired by uploaded sheet) ---------- */
 
@@ -150,7 +165,7 @@ const JOURNAL_SECTIONS = [
   {
     id: "daily-check-in",
     title: "Daily Check-In",
-    icon: StarSparkleIcon,
+    icon: (p: { className?: string }) => <GlowImg src={dailyCheckinIcon} color="#FF0000" {...p} />,
     description: "Mood and intention prompts auto-logged from your daily voice stream",
     prompt: "Your Brain Dump AI has gathered today's thoughts below. Review or add guidance cues.",
   },
@@ -178,28 +193,28 @@ const JOURNAL_SECTIONS = [
   {
     id: "emotional-release",
     title: "Emotional Release Writing",
-    icon: LightningIcon,
+    icon: (p: { className?: string }) => <GlowImg src={emotionalReleaseIcon} color="#FF7A00" {...p} />,
     description: "Free-write space to let emotions move",
     prompt: "Let it all out. No judgment. Just feel and write.",
   },
   {
     id: "manifestation",
     title: "Manifestation",
-    icon: FlowerIcon,
+    icon: (p: { className?: string }) => <GlowImg src={manifestationIcon} color="#FFD500" {...p} />,
     description: "Set intention and notice what you are calling in",
     prompt: "What are you calling into your life? Speak it into existence.",
   },
   {
     id: "letters-never-sent",
     title: "Letters Never Sent",
-    icon: EnvelopeIcon,
+    icon: (p: { className?: string }) => <GlowImg src={lettersNeverSentIcon} color="#00CC66" {...p} />,
     description: "Write what you need to say without sending it",
     prompt: "Who is this letter for? Say everything you wish you could say out loud.",
   },
   {
     id: "health-journal",
     title: "Health Journal",
-    icon: PulseIcon,
+    icon: (p: { className?: string }) => <GlowImg src={healthIcon} color="#3399FF" {...p} />,
     description: "Track body signals, symptoms, and wellness patterns",
     prompt: "How is your body feeling today? Note any symptoms, energy shifts, or wins.",
   },
