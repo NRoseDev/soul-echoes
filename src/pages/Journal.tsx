@@ -207,7 +207,7 @@ const JOURNAL_SECTIONS = [
   {
     id: "emotional-release",
     title: "Emotional Release Writing",
-    icon: (p: { className?: string }) => <GlowImg src={emotionalReleaseIcon} color="#FF7A00" {...p} />,
+    icon: EmotionalReleaseIcon,
     description: "Free-write space to let emotions move",
     prompt: "Let it all out. No judgment. Just feel and write.",
   },
