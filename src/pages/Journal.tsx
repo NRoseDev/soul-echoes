@@ -228,7 +228,7 @@ const JOURNAL_SECTIONS = [
   {
     id: "manifestation",
     title: "Manifestation",
-    icon: (p: { className?: string }) => <GlowImg src={manifestationIcon} color="#FFD500" {...p} />,
+    icon: ManifestationIcon,
     description: "Set intention and notice what you are calling in",
     prompt: "What are you calling into your life? Speak it into existence.",
   },
