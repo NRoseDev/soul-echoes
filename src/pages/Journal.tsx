@@ -6,6 +6,21 @@ import { useAuth } from "@/contexts/AuthContext";
 import { logProgress } from "@/lib/roomPersistence";
 import { Textarea } from "@/components/ui/textarea";
 import reflectionIcon from "/reflection-icon-green.png";
+import dailyCheckinIcon from "/journal-icons/daily-checkin.png";
+import emotionalReleaseIcon from "/journal-icons/emotional-release.png";
+import manifestationIcon from "/journal-icons/manifestation.png";
+import lettersNeverSentIcon from "/journal-icons/letters-never-sent.png";
+import healthIcon from "/journal-icons/health.png";
+
+const GlowImg = ({ src, color, className }: { src: string; color: string; className?: string }) => (
+  <img
+    src={src}
+    alt=""
+    aria-hidden="true"
+    className={className}
+    style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 6px ${color}) drop-shadow(0 0 14px ${color})` }}
+  />
+);
 
 /* ---------- Chakra-tinted neon glow icons (inspired by uploaded sheet) ---------- */
 
