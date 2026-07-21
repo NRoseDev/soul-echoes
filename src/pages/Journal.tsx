@@ -304,7 +304,7 @@ const JOURNAL_SECTIONS = [
   {
     id: "letters-never-sent",
     title: "Letters Never Sent",
-    icon: (p: { className?: string }) => <GlowImg src={lettersNeverSentIcon} color="#00CC66" {...p} />,
+    icon: LettersNeverSentIcon,
     description: "Write what you need to say without sending it",
     prompt: "Who is this letter for? Say everything you wish you could say out loud.",
   },
