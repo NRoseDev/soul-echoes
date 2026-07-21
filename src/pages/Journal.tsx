@@ -71,26 +71,26 @@ const ManifestationIcon = ({ className }: { className?: string }) => (
   <svg
     viewBox="0 0 64 64"
     className={className}
-    style={{ filter: "drop-shadow(0 0 6px #7BA7FF) drop-shadow(0 0 14px #7BA7FF)" }}
+    style={{ filter: "drop-shadow(0 0 6px #FFD500) drop-shadow(0 0 14px #FFB800)" }}
     aria-hidden="true"
   >
-    <g fill="none" stroke="#7BA7FF" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <g fill="none" stroke="#FFD500" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
       {/* rays */}
-      <g opacity="0.9">
-        <line x1="42" y1="6" x2="42" y2="12" />
-        <line x1="54" y1="10" x2="50" y2="15" />
-        <line x1="60" y1="20" x2="54" y2="22" />
-        <line x1="30" y1="10" x2="34" y2="15" />
-        <line x1="24" y1="20" x2="30" y2="22" />
+      <g opacity="0.95">
+        <line x1="42" y1="4" x2="42" y2="11" />
+        <line x1="54" y1="8" x2="50" y2="14" />
+        <line x1="60" y1="20" x2="53" y2="22" />
+        <line x1="30" y1="8" x2="34" y2="14" />
+        <line x1="24" y1="20" x2="31" y2="22" />
       </g>
       {/* orb with pentacle */}
-      <circle cx="42" cy="24" r="10" />
-      <polygon points="42,17 44.2,22.5 50,22.8 45.3,26.2 47,32 42,28.5 37,32 38.7,26.2 34,22.8 39.8,22.5" />
-      {/* hand */}
+      <circle cx="42" cy="22" r="10" />
+      <polygon points="42,15 44.2,20.5 50,20.8 45.3,24.2 47,30 42,26.5 37,30 38.7,24.2 34,20.8 39.8,20.5" />
+      {/* open hand */}
       <path d="M18 44 C 22 40, 28 38, 34 40 L 50 34 C 54 34, 54 40, 50 42 L 34 48 C 30 52, 22 52, 18 48 Z" />
-      {/* swirls */}
-      <path d="M14 52 c -4 0 -4 -6 0 -6 s 4 6 0 6" />
-      <path d="M8 46 c -4 0 -4 -6 0 -6 s 4 6 0 6" />
+      {/* swirls of energy */}
+      <path d="M14 54 c -4 0 -4 -6 0 -6 s 4 6 0 6" />
+      <path d="M8 48 c -4 0 -4 -6 0 -6 s 4 6 0 6" />
     </g>
   </svg>
 );
@@ -99,12 +99,12 @@ const LettersNeverSentIcon = ({ className }: { className?: string }) => (
   <svg
     viewBox="0 0 64 64"
     className={className}
-    style={{ filter: "drop-shadow(0 0 6px #C79BFF) drop-shadow(0 0 14px #C79BFF)" }}
+    style={{ filter: "drop-shadow(0 0 6px #FF5CAA) drop-shadow(0 0 14px #FF5CAA)" }}
     aria-hidden="true"
   >
-    <g fill="none" stroke="#C79BFF" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <g fill="none" stroke="#FF5CAA" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
       {/* decorative heart-vine frame */}
-      <path d="M32 8 C 20 8, 8 18, 8 32 C 8 46, 20 56, 32 56 C 44 56, 56 46, 56 32 C 56 18, 44 8, 32 8 Z" opacity="0.7" strokeDasharray="1 3" />
+      <path d="M32 8 C 20 8, 8 18, 8 32 C 8 46, 20 56, 32 56 C 44 56, 56 46, 56 32 C 56 18, 44 8, 32 8 Z" opacity="0.75" strokeDasharray="1 3" />
       <path d="M32 12 C 26 14, 24 20, 28 22" />
       <path d="M32 12 C 38 14, 40 20, 36 22" />
       <path d="M32 56 C 26 54, 24 48, 28 46" />
@@ -113,7 +113,7 @@ const LettersNeverSentIcon = ({ className }: { className?: string }) => (
       <rect x="18" y="24" width="28" height="20" rx="1.5" />
       <polyline points="18,24 32,36 46,24" />
       {/* wax seal heart */}
-      <path d="M32 40 C 28 37, 27 34, 29 33 C 30.5 32.3, 31.6 33, 32 34 C 32.4 33, 33.5 32.3, 35 33 C 37 34, 36 37, 32 40 Z" fill="#C79BFF" stroke="none" />
+      <path d="M32 40 C 28 37, 27 34, 29 33 C 30.5 32.3, 31.6 33, 32 34 C 32.4 33, 33.5 32.3, 35 33 C 37 34, 36 37, 32 40 Z" fill="#FF5CAA" stroke="none" />
     </g>
   </svg>
 );
