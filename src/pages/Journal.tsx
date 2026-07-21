@@ -29,10 +29,10 @@ const DailyCheckInIcon = ({ className }: { className?: string }) => (
   <svg
     viewBox="0 0 64 64"
     className={className}
-    style={{ filter: "drop-shadow(0 0 6px #4B7BFF) drop-shadow(0 0 14px #4B7BFF)" }}
+    style={{ filter: "drop-shadow(0 0 6px #22C55E) drop-shadow(0 0 14px #22C55E)" }}
     aria-hidden="true"
   >
-    <g fill="none" stroke="#4B7BFF" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <g fill="none" stroke="#22C55E" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
       <rect x="8" y="12" width="48" height="44" rx="4" />
       <line x1="8" y1="24" x2="56" y2="24" />
       <line x1="20" y1="8" x2="20" y2="16" />
