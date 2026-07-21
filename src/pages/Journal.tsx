@@ -29,7 +29,7 @@ const DailyCheckInIcon = ({ className }: { className?: string }) => (
     src={dailyCheckinIcon}
     alt=""
     aria-hidden="true"
-    className={className}
+    className={`${className ?? ""} !w-auto max-w-full object-contain`}
     style={{
       filter:
         "brightness(0) invert(1) brightness(1.45) drop-shadow(0 0 6px rgba(255,0,0,0.3)) drop-shadow(0 0 14px rgba(255,0,0,0.3))",
@@ -43,7 +43,7 @@ const EmotionalReleaseIcon = ({ className }: { className?: string }) => (
     src={emotionalReleaseIcon}
     alt=""
     aria-hidden="true"
-    className={className}
+    className={`${className ?? ""} !w-auto max-w-full object-contain`}
     style={{
       filter:
         "brightness(0) invert(1) brightness(1.50) drop-shadow(0 0 6px rgba(255,122,0,0.35)) drop-shadow(0 0 14px rgba(255,122,0,0.35))",
