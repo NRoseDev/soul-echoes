@@ -23,47 +23,7 @@ const GlowImg = ({ src, color, className }: { src: string; color: string; classN
   />
 );
 
-// Daily Check-In: +45% brighter base, 30% opacity root-red glow
-const DailyCheckInIcon = ({ className }: { className?: string }) => (
-  <img
-    src={dailyCheckinIcon}
-    alt=""
-    aria-hidden="true"
-    className={`${className ?? ""} !w-auto max-w-full object-contain`}
-    style={{
-      filter:
-        "brightness(0) invert(1) brightness(1.45) drop-shadow(0 0 6px rgba(255,0,0,0.3)) drop-shadow(0 0 14px rgba(255,0,0,0.3))",
-    }}
-  />
-);
-
-// Emotional Release: +50% brighter base, 35% opacity sacral-orange glow
-const EmotionalReleaseIcon = ({ className }: { className?: string }) => (
-  <img
-    src={emotionalReleaseIcon}
-    alt=""
-    aria-hidden="true"
-    className={`${className ?? ""} !w-auto max-w-full object-contain`}
-    style={{
-      filter:
-        "brightness(0) invert(1) brightness(1.50) drop-shadow(0 0 6px rgba(255,122,0,0.35)) drop-shadow(0 0 14px rgba(255,122,0,0.35))",
-    }}
-  />
-);
-
-// Manifestation: brighter base, softer 35% opacity solar-plexus yellow glow
-const ManifestationIcon = ({ className }: { className?: string }) => (
-  <img
-    src={manifestationIcon}
-    alt=""
-    aria-hidden="true"
-    className={className}
-    style={{
-      filter:
-        "brightness(0) invert(1) brightness(1.40) drop-shadow(0 0 6px rgba(255,213,0,0.35)) drop-shadow(0 0 14px rgba(255,213,0,0.35))",
-    }}
-  />
-);
+// Icons rebuilt below as neon SVG icons for visual parity with the rest of the set.
 
 /* ---------- Chakra-tinted neon glow icons (inspired by uploaded sheet) ---------- */
 
