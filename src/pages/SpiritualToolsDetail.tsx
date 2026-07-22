@@ -1137,7 +1137,7 @@ export default function SpiritualToolsDetail() {
       {/* Sticky Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate("/tools")} aria-label="Back">
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5"  aria-hidden="true" />
         </Button>
         <h1 className="font-display text-xl font-bold text-foreground truncate">{title}</h1>
       </div>
@@ -1153,7 +1153,7 @@ export default function SpiritualToolsDetail() {
               className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground"
               onClick={() => navigate("/community")}
             >
-              <HeartHandshake className="h-4 w-4 mr-2" />
+              <HeartHandshake className="h-4 w-4 mr-2"  aria-hidden="true" />
               Connect with an Intercessor
             </Button>
           </div>
@@ -1172,7 +1172,7 @@ export default function SpiritualToolsDetail() {
               className="w-full bg-white/10 text-foreground border border-border hover:bg-white/20"
               onClick={() => navigate("/community")}
             >
-              <HeartHandshake className="h-4 w-4 mr-2" />
+              <HeartHandshake className="h-4 w-4 mr-2"  aria-hidden="true" />
               Talk to an Intercessor
             </Button>
             <Button

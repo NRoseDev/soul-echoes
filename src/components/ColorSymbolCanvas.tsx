@@ -317,7 +317,7 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
               style={{ backgroundColor: f.color, color: "#fff", textShadow: "0 1px 2px rgba(0,0,0,0.4)" }}
               aria-label={`Remove ${f.name}`}
             >
-              {f.name} <X className="h-3 w-3" />
+              {f.name} <X className="h-3 w-3"  aria-hidden="true" />
             </button>
           ))}
           {selectedColors.map((c) => (
@@ -326,7 +326,7 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
               style={{ backgroundColor: c.hex, color: "#fff", textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
               aria-label={`Remove color ${c.name}`}
             >
-              {c.name} <X className="h-3 w-3" />
+              {c.name} <X className="h-3 w-3"  aria-hidden="true" />
             </button>
           ))}
           {selectedSymbols.map((s) => (
@@ -335,7 +335,7 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
               aria-label={`Remove ${s.name}`}
             >
               <span>{s.name}</span>
-              <X className="h-3 w-3" />
+              <X className="h-3 w-3"  aria-hidden="true" />
             </button>
           ))}
         </motion.div>
@@ -439,7 +439,7 @@ export default function ColorSymbolCanvas({ onSend, disabled }: Props) {
         <Button onClick={handleSend} disabled={!hasSelection || disabled}
           size="lg" className="rounded-2xl px-8 text-base" aria-label="Send your expression"
         >
-          <Send className="h-4 w-4 mr-2" /> Send Expression
+          <Send className="h-4 w-4 mr-2"  aria-hidden="true" /> Send Expression
         </Button>
       </div>
     </div>

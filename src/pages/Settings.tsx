@@ -47,7 +47,7 @@ export default function SettingsPage() {
     <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-32 max-w-2xl mx-auto space-y-8 w-full">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-3">
-          <SettingsIcon className="h-7 w-7 text-primary" /> Settings
+          <SettingsIcon className="h-7 w-7 text-primary"  aria-hidden="true" /> Settings
         </h1>
         <p className="text-muted-foreground mt-1">Change your language and communication preferences.</p>
       </motion.div>
@@ -56,7 +56,7 @@ export default function SettingsPage() {
       <section className="space-y-3">
         <h2 className="font-display text-lg font-semibold text-foreground">Primary Language</h2>
         <div className="relative">
-          <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+          <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground"  aria-hidden="true" />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search…" className="pl-10 h-12" />
         </div>
         <div className="max-h-48 overflow-y-auto rounded-xl border border-border bg-card p-2 space-y-1">
@@ -89,7 +89,7 @@ export default function SettingsPage() {
             >
               <span className="text-xl">{method.icon}</span>
               <span className="text-sm flex-1">{method.label}</span>
-              <Check className="h-4 w-4 text-primary shrink-0" />
+              <Check className="h-4 w-4 text-primary shrink-0"  aria-hidden="true" />
             </div>
           ))}
         </div>
@@ -120,7 +120,7 @@ export default function SettingsPage() {
       <section className="space-y-4">
         <div>
           <h2 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
-            <Type className="h-5 w-5 text-primary" /> Dyslexia & Reading Comfort
+            <Type className="h-5 w-5 text-primary"  aria-hidden="true" /> Dyslexia & Reading Comfort
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
             Choose a font that's easier on your eyes. Changes apply instantly across every page.
@@ -147,7 +147,7 @@ export default function SettingsPage() {
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-semibold text-foreground">{opt.label}</span>
-                  {active && <Check className="h-4 w-4 text-primary" />}
+                  {active && <Check className="h-4 w-4 text-primary"  aria-hidden="true" />}
                 </div>
                 <div
                   className="text-xl text-foreground mb-2"
@@ -163,7 +163,7 @@ export default function SettingsPage() {
 
         <div className="rounded-xl border-2 border-border bg-card p-4 flex items-start gap-4">
           <div className="rounded-lg bg-primary/10 p-2.5">
-            <Sun className="h-5 w-5 text-primary" />
+            <Sun className="h-5 w-5 text-primary"  aria-hidden="true" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-3">
@@ -194,7 +194,7 @@ export default function SettingsPage() {
 
 
       <Button onClick={handleSave} size="lg" className="w-full rounded-2xl text-base">
-        {saved ? <><Check className="h-4 w-4 mr-2" /> Saved!</> : "Save Settings"}
+        {saved ? <><Check className="h-4 w-4 mr-2"  aria-hidden="true" /> Saved!</> : "Save Settings"}
       </Button>
     </div>
   );

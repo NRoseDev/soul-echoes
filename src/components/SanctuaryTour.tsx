@@ -229,7 +229,7 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
         <div className="relative px-4 py-3 bg-gradient-to-r from-amber-400/25 via-fuchsia-500/25 to-violet-500/30 border-b border-primary/20">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-full bg-background/60 flex items-center justify-center ring-1 ring-primary/40">
-              <Compass className="h-4 w-4 text-primary" />
+              <Compass className="h-4 w-4 text-primary"  aria-hidden="true" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
@@ -244,7 +244,7 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
               aria-label="Close tour"
               className="h-7 w-7 rounded-full hover:bg-muted/60 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4"  aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -294,7 +294,7 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
               aria-label={playing ? "Pause auto-play" : "Auto-play tour"}
               className="h-8 w-8 rounded-lg border border-border hover:bg-muted flex items-center justify-center text-foreground/80"
             >
-              {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+              {playing ? <Pause className="h-3.5 w-3.5"  aria-hidden="true" /> : <Play className="h-3.5 w-3.5"  aria-hidden="true" />}
             </button>
             <button
               onClick={() => setIndex((i) => Math.max(0, i - 1))}
@@ -302,7 +302,7 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
               aria-label="Previous step"
               className="h-8 w-8 rounded-lg border border-border hover:bg-muted flex items-center justify-center text-foreground/80 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4"  aria-hidden="true" />
             </button>
             {index < total - 1 ? (
               <button
@@ -312,7 +312,7 @@ export function SanctuaryTour({ open, onOpenChange }: Props) {
                 aria-label={speaking ? "Please wait — narration is still speaking" : "Next step"}
                 className="h-8 px-3 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {speaking ? "Wait…" : <>Next <ChevronRight className="h-3.5 w-3.5" /></>}
+                {speaking ? "Wait…" : <>Next <ChevronRight className="h-3.5 w-3.5"  aria-hidden="true" /></>}
               </button>
             ) : (
               <button

@@ -86,7 +86,7 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
         className="absolute top-4 right-4 z-10 h-10 w-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
         aria-label="Close angel profile"
       >
-        <X className="h-5 w-5" />
+        <X className="h-5 w-5"  aria-hidden="true" />
       </button>
 
       <motion.div
@@ -138,7 +138,7 @@ export default function AngelProfileModal({ angel, onClose }: Props) {
                   : undefined
               }
             >
-              {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+              {isPlaying ? <Pause className="h-3 w-3"  aria-hidden="true" /> : <Play className="h-3 w-3"  aria-hidden="true" />}
               {angel.frequency}
             </button>
           ) : (

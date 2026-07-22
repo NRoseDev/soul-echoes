@@ -260,7 +260,7 @@ export default function Pricing() {
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back">
-            <ArrowLeft size={20} />
+            <ArrowLeft size={20}  aria-hidden="true" />
           </Button>
           <h1 className="text-2xl md:text-3xl font-display font-bold bg-gradient-to-r from-amber-400 via-pink-400 to-purple-500 bg-clip-text text-transparent">
             Pricing for Individual Users and Professionals + Healers
@@ -270,7 +270,7 @@ export default function Pricing() {
         {/* Honor System Banner */}
         <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-orange-500/10">
           <CardContent className="p-5 flex gap-4 items-start">
-            <HandHeart className="text-amber-400 shrink-0 mt-1" size={28} />
+            <HandHeart className="text-amber-400 shrink-0 mt-1" size={28}  aria-hidden="true" />
             <div className="space-y-2">
               <p className="text-foreground font-semibold text-lg">Built on Trust &amp; Honor 🙏</p>
               <p className="text-muted-foreground text-sm leading-relaxed">
@@ -286,7 +286,7 @@ export default function Pricing() {
         <Card className="border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-indigo-500/10">
           <CardContent className="p-5 space-y-4">
             <div className="flex items-center gap-3">
-              <Sparkles className="text-purple-400 shrink-0" size={22} />
+              <Sparkles className="text-purple-400 shrink-0" size={22}  aria-hidden="true" />
               <span className="font-semibold text-foreground text-lg">Energy Exchange</span>
             </div>
 
@@ -461,7 +461,7 @@ export default function Pricing() {
         <Card className="border-green-500/30 bg-gradient-to-r from-green-500/10 to-teal-500/10">
           <CardContent className="p-5 space-y-4">
             <div className="flex items-center gap-3">
-              <Heart className="text-green-400 shrink-0" size={22} />
+              <Heart className="text-green-400 shrink-0" size={22}  aria-hidden="true" />
               <span className="font-semibold text-foreground text-lg">Pay It Forward — Honor System</span>
             </div>
 
@@ -520,7 +520,7 @@ export default function Pricing() {
         <Card className="border-indigo-500/30 bg-gradient-to-r from-indigo-500/10 to-purple-500/10">
           <CardContent className="p-6 space-y-4">
             <div className="flex items-center gap-3">
-              <Users className="text-indigo-400" size={24} />
+              <Users className="text-indigo-400" size={24}  aria-hidden="true" />
               <span className="font-display font-bold text-xl text-foreground">
                 Where Your Payment Goes 🌍
               </span>
@@ -564,7 +564,7 @@ export default function Pricing() {
         <Card className="border-muted bg-muted/30">
           <CardContent className="p-5 space-y-3">
             <div className="flex items-start gap-3">
-              <Info className="text-muted-foreground shrink-0 mt-0.5" size={18} />
+              <Info className="text-muted-foreground shrink-0 mt-0.5" size={18}  aria-hidden="true" />
               <div className="space-y-2">
                 <p className="text-sm font-semibold text-foreground">Platform Disclaimer</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">

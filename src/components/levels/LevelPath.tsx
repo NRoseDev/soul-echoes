@@ -63,7 +63,7 @@ export function LevelPath({ roomId, className }: Props) {
                 )}
                 aria-hidden
               >
-                {done ? <Check className="h-4 w-4" /> : locked ? <Lock className="h-4 w-4" /> : lvl.level}
+                {done ? <Check className="h-4 w-4"  aria-hidden="true" /> : locked ? <Lock className="h-4 w-4"  aria-hidden="true" /> : lvl.level}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">

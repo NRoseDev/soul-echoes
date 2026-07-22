@@ -74,7 +74,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                               <p className="text-sm text-muted-foreground">{mode.desc}</p>
                               {mode.detail && <p className="text-xs text-primary/80 mt-0.5">{mode.detail}</p>}
                             </div>
-                            {active && <Check className="h-5 w-5 text-primary shrink-0" />}
+                            {active && <Check className="h-5 w-5 text-primary shrink-0"  aria-hidden="true" />}
                           </button>
                         );
                       })}

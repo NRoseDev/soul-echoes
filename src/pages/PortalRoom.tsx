@@ -435,7 +435,7 @@ function PractitionerCard({
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-foreground">{p.name}</p>
             <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30">
-              <ShieldCheck className="h-2.5 w-2.5" /> Vetted
+              <ShieldCheck className="h-2.5 w-2.5"  aria-hidden="true" /> Vetted
             </span>
           </div>
           <p className="text-xs text-muted-foreground">{p.specialty}</p>
@@ -447,8 +447,8 @@ function PractitionerCard({
             className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors"
           >
             {isSaved
-              ? <BookmarkCheck className="h-4 w-4 text-teal-400" />
-              : <Bookmark className="h-4 w-4 text-muted-foreground" />}
+              ? <BookmarkCheck className="h-4 w-4 text-teal-400"  aria-hidden="true" />
+              : <Bookmark className="h-4 w-4 text-muted-foreground"  aria-hidden="true" />}
           </button>
           <span className="text-xs text-muted-foreground" aria-hidden="true">{expanded ? "▲" : "▼"}</span>
         </div>
@@ -480,7 +480,7 @@ function PractitionerCard({
                 onClick={() => onBook(p.name)}
                 className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0"
               >
-                Book with {p.name.split(" ")[0]} <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+                Book with {p.name.split(" ")[0]} <ArrowRight className="h-3.5 w-3.5 ml-1.5"  aria-hidden="true" />
               </Button>
             </div>
           </motion.div>
@@ -565,7 +565,7 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center shadow-[0_0_24px_rgba(45,212,191,0.45)]">
-              <ShoppingCart className="h-5 w-5 text-white" />
+              <ShoppingCart className="h-5 w-5 text-white"  aria-hidden="true" />
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="font-display text-2xl font-bold bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent leading-tight">
@@ -681,7 +681,7 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
             <motion.div key="practitioners" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-4">
               <div className="rounded-2xl bg-gradient-to-r from-teal-500/10 to-emerald-500/10 border border-teal-400/20 p-4 space-y-2">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-teal-400 shrink-0" />
+                  <ShieldCheck className="h-5 w-5 text-teal-400 shrink-0"  aria-hidden="true" />
                   <p className="text-sm font-semibold text-foreground">Every practitioner is vetted</p>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
@@ -707,7 +707,7 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
             <motion.div key="crisis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-4">
               <div className="rounded-2xl bg-gradient-to-r from-rose-500/15 to-amber-500/15 border border-rose-400/30 p-4 space-y-2">
                 <div className="flex items-center gap-2">
-                  <ShieldAlert className="h-5 w-5 text-rose-300 shrink-0" />
+                  <ShieldAlert className="h-5 w-5 text-rose-300 shrink-0"  aria-hidden="true" />
                   <p className="text-sm font-semibold text-foreground">You are not alone — help is here right now</p>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
@@ -719,33 +719,33 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                 <p className="text-xs uppercase tracking-wider text-rose-300/80 font-semibold px-1">Call or text now · 24/7</p>
                 <a href="tel:988" className="flex items-center gap-3 p-4 rounded-2xl border border-rose-400/40 bg-rose-500/10 hover:bg-rose-500/15 transition-colors">
                   <div className="shrink-0 w-11 h-11 rounded-xl bg-rose-500/25 border border-rose-400/40 flex items-center justify-center">
-                    <Phone className="h-5 w-5 text-rose-300" />
+                    <Phone className="h-5 w-5 text-rose-300"  aria-hidden="true" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground">988 — Suicide & Crisis Lifeline</p>
                     <p className="text-xs text-muted-foreground">Call or text 988 · Free, confidential, 24/7 (US & Canada)</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-rose-300 shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-rose-300 shrink-0"  aria-hidden="true" />
                 </a>
                 <a href="sms:741741?body=HOME" className="flex items-center gap-3 p-4 rounded-2xl border border-amber-400/40 bg-amber-500/10 hover:bg-amber-500/15 transition-colors">
                   <div className="shrink-0 w-11 h-11 rounded-xl bg-amber-500/25 border border-amber-400/40 flex items-center justify-center">
-                    <MessageSquare className="h-5 w-5 text-amber-300" />
+                    <MessageSquare className="h-5 w-5 text-amber-300"  aria-hidden="true" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground">Crisis Text Line</p>
                     <p className="text-xs text-muted-foreground">Text <span className="font-semibold text-amber-300">HOME</span> to 741741 · Free, 24/7</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-amber-300 shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-amber-300 shrink-0"  aria-hidden="true" />
                 </a>
                 <a href="tel:911" className="flex items-center gap-3 p-4 rounded-2xl border border-red-500/40 bg-red-500/10 hover:bg-red-500/15 transition-colors">
                   <div className="shrink-0 w-11 h-11 rounded-xl bg-red-500/25 border border-red-400/40 flex items-center justify-center">
-                    <Phone className="h-5 w-5 text-red-300" />
+                    <Phone className="h-5 w-5 text-red-300"  aria-hidden="true" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground">911 — Emergency</p>
                     <p className="text-xs text-muted-foreground">If you or someone is in immediate physical danger</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-red-300 shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-red-300 shrink-0"  aria-hidden="true" />
                 </a>
               </div>
 
@@ -761,20 +761,20 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                 ].map((r) => (
                   <a key={r.name} href={r.href} className="flex items-center gap-3 p-3.5 rounded-2xl border border-white/10 bg-white/[0.04] hover:border-white/20 transition-colors">
                     <div className="shrink-0 w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                      <Phone className="h-4 w-4 text-foreground/70" />
+                      <Phone className="h-4 w-4 text-foreground/70"  aria-hidden="true" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground">{r.name}</p>
                       <p className="text-xs text-muted-foreground leading-snug">{r.desc}</p>
                     </div>
-                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0"  aria-hidden="true" />
                   </a>
                 ))}
               </div>
 
               <div className="rounded-2xl bg-teal-500/10 border border-teal-400/25 p-4 space-y-2">
                 <div className="flex items-center gap-2">
-                  <Heart className="h-4 w-4 text-teal-300" />
+                  <Heart className="h-4 w-4 text-teal-300"  aria-hidden="true" />
                   <p className="text-sm font-semibold text-foreground">While you wait — try this</p>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
@@ -792,7 +792,7 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
             <motion.div key="book" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-5">
               {bookedFor && (
                 <div className="rounded-2xl bg-teal-500/10 border border-teal-400/20 px-4 py-3 flex items-center gap-2">
-                  <Star className="h-4 w-4 text-teal-400 shrink-0" />
+                  <Star className="h-4 w-4 text-teal-400 shrink-0"  aria-hidden="true" />
                   <p className="text-sm text-teal-300">Booking with <span className="font-semibold">{bookedFor}</span></p>
                   <button onClick={() => setBookedFor(null)} className="ml-auto text-xs text-muted-foreground hover:text-foreground">Change</button>
                 </div>
@@ -820,7 +820,7 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                         <p className="text-sm font-medium text-foreground">{method.label}</p>
                         <p className="text-xs text-muted-foreground leading-snug">{method.desc}</p>
                       </div>
-                      {active && <Check className="h-4 w-4 text-teal-400 shrink-0" />}
+                      {active && <Check className="h-4 w-4 text-teal-400 shrink-0"  aria-hidden="true" />}
                     </button>
                   );
                 })}
@@ -832,7 +832,7 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                     className="w-full rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0 text-base font-semibold shadow-[0_0_24px_rgba(45,212,191,0.35)]"
                     onClick={() => showToast("Booking confirmed — your practitioner will be in touch shortly")}
                   >
-                    Confirm Booking <ArrowRight className="h-4 w-4 ml-2" />
+                    Confirm Booking <ArrowRight className="h-4 w-4 ml-2"  aria-hidden="true" />
                   </Button>
                   <p className="text-center text-[11px] text-muted-foreground/50 mt-2">
                     3% of this session fee supports Rise Up Healing nonprofit
@@ -847,7 +847,7 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
             <motion.div key="saved" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-4">
               <div className="rounded-2xl bg-gradient-to-r from-teal-500/10 to-emerald-500/10 border border-teal-400/20 p-4 space-y-1.5">
                 <div className="flex items-center gap-2">
-                  <BookmarkCheck className="h-5 w-5 text-teal-400" />
+                  <BookmarkCheck className="h-5 w-5 text-teal-400"  aria-hidden="true" />
                   <p className="text-sm font-semibold text-foreground">Save now, purchase when ready</p>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
@@ -856,7 +856,7 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
               </div>
               {savedItems.length === 0 ? (
                 <div className="text-center py-12 space-y-3">
-                  <Bookmark className="h-10 w-10 text-teal-400/30 mx-auto" />
+                  <Bookmark className="h-10 w-10 text-teal-400/30 mx-auto"  aria-hidden="true" />
                   <p className="text-sm text-muted-foreground">Nothing saved yet.</p>
                   <p className="text-xs text-muted-foreground/60">
                     Tap the bookmark icon on any product or practitioner to save it here.
@@ -885,14 +885,14 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                           item.notifyWhenReady ? "bg-teal-500/20 border border-teal-400/40 text-teal-400" : "bg-white/5 border border-white/10 text-muted-foreground hover:text-teal-400"
                         }`}
                       >
-                        {item.notifyWhenReady ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
+                        {item.notifyWhenReady ? <Bell className="h-3.5 w-3.5"  aria-hidden="true" /> : <BellOff className="h-3.5 w-3.5"  aria-hidden="true" />}
                       </button>
                       <button
                         onClick={() => toggleSave(item.id, item.title)}
                         aria-label="Remove from saved"
                         className="h-8 w-8 rounded-full flex items-center justify-center bg-white/5 border border-white/10 text-muted-foreground hover:text-rose-400 transition-colors"
                       >
-                        <BookmarkCheck className="h-3.5 w-3.5" />
+                        <BookmarkCheck className="h-3.5 w-3.5"  aria-hidden="true" />
                       </button>
                     </div>
                   ))}

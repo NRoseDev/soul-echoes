@@ -264,7 +264,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
                 onClick={() => setActivePanel(null)}
                 className="h-6 w-6 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80"
               >
-                <X className="h-3 w-3" />
+                <X className="h-3 w-3"  aria-hidden="true" />
               </button>
             </div>
             <ASLSignInput onSend={handleASLSend} />
@@ -362,7 +362,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <X className="h-5 w-5 text-foreground/70" />
+              <X className="h-5 w-5 text-foreground/70"  aria-hidden="true" />
             </motion.span>
           ) : (
             <motion.img
@@ -387,7 +387,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
           <DialogHeader className="space-y-3">
             <div className="flex items-center justify-center">
               <div className="h-14 w-14 rounded-full bg-amber-100/60 flex items-center justify-center ring-2 ring-amber-300/40">
-                <Heart className="h-7 w-7 text-amber-600" fill="currentColor" />
+                <Heart className="h-7 w-7 text-amber-600" fill="currentColor"  aria-hidden="true" />
               </div>
             </div>
             <DialogTitle className="text-center text-xl font-semibold tracking-tight text-foreground">
@@ -408,7 +408,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
                 <p className="text-sm font-medium text-emerald-800">Intercessors Available Now</p>
                 <p className="text-xs text-emerald-700/70">Typically responds within 5 minutes</p>
               </div>
-              <Users className="h-5 w-5 text-emerald-600/60" />
+              <Users className="h-5 w-5 text-emerald-600/60"  aria-hidden="true" />
             </div>
 
             <p className="text-sm text-muted-foreground text-center leading-relaxed px-2">
@@ -420,7 +420,7 @@ export default function FloatingHub({ inputMethod = "type" }: FloatingHubProps) 
               onClick={handleRequestPrayer}
               className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-600 px-5 py-3 text-sm font-medium text-white shadow-lg shadow-amber-600/20 transition-all hover:bg-amber-700 hover:shadow-amber-600/30 active:scale-[0.98]"
             >
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-4 w-4"  aria-hidden="true" />
               Request Prayer Support
             </button>
           </div>

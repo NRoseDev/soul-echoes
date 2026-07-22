@@ -402,7 +402,7 @@ export default function UnspokenDetail() {
     >
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate("/unspoken")} aria-label="Back">
-          <ArrowLeft className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5"  aria-hidden="true" />
         </Button>
         <h1 className="font-display text-xl font-bold text-foreground truncate">{title}</h1>
       </div>
