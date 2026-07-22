@@ -1,32 +1,28 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  BookOpen, Gem, Droplet, Volume2, Headphones, Users, Star, Bookmark,
+  BookOpen, Gem, Droplet, Users, Star, Bookmark,
   BookmarkCheck, Bell, BellOff, Heart, Check, X,
   CreditCard, Sliders, Gift, Globe2, ArrowRight, ShieldCheck, Zap,
-  Wind, Sun, Flame, Music2, ShieldAlert, Phone, MessageSquare, ExternalLink,
-  Package, Loader2,
+  Wind, Sun, Flame, ShieldAlert, Phone, MessageSquare, ExternalLink,
+  Package, ShoppingCart, Leaf, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
-interface BundleItem {
-  title: string;
-  kind: string; // e.g. "meditation", "track", "ebook"
-}
+type ProductCategory = "books" | "crystals" | "oils" | "cleansing";
 
-interface Bundle {
+interface Product {
   id: string;
   title: string;
   desc: string;
-  category: "audio" | "meditations" | "reading" | "physical";
+  category: ProductCategory;
+  kind: "individual" | "set";
   icon: React.ElementType;
   accentColor: string;
   accentBg: string;
-  sellerName: string;
-  sellerAskingPrice: number; // full seller asking price (USD)
-  items: BundleItem[];
+  retailPrice: number;
+  memberPrice: number;
 }
 
 interface Practitioner {
@@ -46,215 +42,212 @@ interface SavedItem {
   notifyWhenReady: boolean;
 }
 
+interface CartItem {
+  id: string;
+  title: string;
+  price: number;
+  qty: number;
+}
+
 /* ─── Constants ──────────────────────────────────────────────────────────── */
 const SAVED_KEY = "soul-echoes-portal-saved";
+const CART_KEY = "soul-echoes-shop-cart";
 
-const BUNDLE_CATEGORIES = [
-  { id: "all",         label: "All Bundles",     icon: Globe2     },
-  { id: "meditations", label: "Meditation Packs", icon: Headphones },
-  { id: "audio",       label: "Sound & Music",    icon: Music2     },
-  { id: "reading",     label: "Reading Packs",    icon: BookOpen   },
-  { id: "physical",    label: "Physical Kits",    icon: Gem        },
+const PRODUCT_CATEGORIES = [
+  { id: "all",       label: "All Products",           icon: Globe2  },
+  { id: "books",     label: "Books",                  icon: BookOpen },
+  { id: "crystals",  label: "Crystals & Stones",      icon: Gem     },
+  { id: "oils",      label: "Essential Oils",         icon: Droplet },
+  { id: "cleansing", label: "Cleansing & Sage Sets",  icon: Leaf    },
 ] as const;
 
-/**
- * Bundles group multiple items so nothing is ever sold one-by-one.
- * `sellerAskingPrice` is the FULL asking price the seller receives.
- * The UI hides pricing math — the 33% discount is applied at checkout only.
- */
-const BUNDLES: Bundle[] = [
+const PRODUCTS: Product[] = [
+  // ── Books ──
   {
-    id: "somatic-release-collection",
-    title: "Somatic Release Collection",
-    desc: "A complete guided journey for releasing stored trauma from the body — breathwork, body scans and grounding rituals bundled together.",
-    category: "meditations", icon: Headphones,
-    accentColor: "text-sky-400", accentBg: "bg-sky-500/15",
-    sellerName: "Maya R.",
-    sellerAskingPrice: 48,
-    items: [
-      { title: "10-Session Somatic Series", kind: "meditation pack" },
-      { title: "Nervous System Reset Breathwork", kind: "breathwork" },
-      { title: "Body Scan Companion Audio", kind: "audio" },
-    ],
+    id: "book-spiritual-activator",
+    title: "Spiritual Activator",
+    desc: "By Oleg Gleizer. A powerful guide to activating your spiritual gifts and clearing dense energies.",
+    category: "books", kind: "individual", icon: BookOpen,
+    accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
+    retailPrice: 24.99, memberPrice: 14.99,
   },
   {
-    id: "inner-child-sanctuary",
-    title: "Inner Child Sanctuary Bundle",
-    desc: "Reparent, comfort and reconnect with the child within. A tender, trauma-informed collection.",
-    category: "meditations", icon: Headphones,
-    accentColor: "text-pink-400", accentBg: "bg-pink-500/15",
-    sellerName: "Sadé M.",
-    sellerAskingPrice: 42,
-    items: [
-      { title: "8 Guided Inner-Child Meditations", kind: "meditation pack" },
-      { title: "Reparenting Journal Prompts (PDF)", kind: "workbook" },
-      { title: "Bedtime Comfort Audio", kind: "audio" },
-    ],
+    id: "book-6-empaths",
+    title: "6 Different Types of Empaths",
+    desc: "Discover which empath type you are and how to protect and channel your sensitivity as a gift.",
+    category: "books", kind: "individual", icon: BookOpen,
+    accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
+    retailPrice: 19.99, memberPrice: 11.99,
   },
   {
-    id: "grief-passage-pack",
-    title: "Grief Passage Pack",
-    desc: "A gentle companion for moving through loss without bypassing it. Six meditations plus written reflections.",
-    category: "meditations", icon: Headphones,
-    accentColor: "text-indigo-400", accentBg: "bg-indigo-500/15",
-    sellerName: "James O.",
-    sellerAskingPrice: 36,
-    items: [
-      { title: "6 Grief Meditations", kind: "meditation pack" },
-      { title: "Written Reflections eBook", kind: "ebook" },
-      { title: "Candle Ritual Guide", kind: "guide" },
-    ],
+    id: "book-women-thou-art-loosed",
+    title: "Women Thou Art Loosed",
+    desc: "By T.D. Jakes. Healing the wounds of the past — a landmark work on emotional and spiritual freedom for women.",
+    category: "books", kind: "individual", icon: BookOpen,
+    accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
+    retailPrice: 16.99, memberPrice: 9.99,
   },
   {
-    id: "solfeggio-sound-collection",
-    title: "Solfeggio Sound Collection",
-    desc: "A full spectrum of healing frequencies. Every solfeggio tone bundled together — never sold as single tracks.",
-    category: "audio", icon: Music2,
-    accentColor: "text-teal-400", accentBg: "bg-teal-500/15",
-    sellerName: "Kwame A.",
-    sellerAskingPrice: 54,
-    items: [
-      { title: "396 Hz — Release", kind: "track" },
-      { title: "417 Hz — Change", kind: "track" },
-      { title: "528 Hz — Repair", kind: "track" },
-      { title: "639 Hz — Connection", kind: "track" },
-      { title: "741 Hz — Expression", kind: "track" },
-      { title: "852 Hz — Intuition", kind: "track" },
-    ],
+    id: "book-chakra-vagus",
+    title: "Chakra and Vagus Nerve",
+    desc: "The bridge between energy medicine and modern polyvagal science — regulate your nervous system through your chakras.",
+    category: "books", kind: "individual", icon: BookOpen,
+    accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
+    retailPrice: 22.99, memberPrice: 13.49,
   },
   {
-    id: "binaural-deep-rest",
-    title: "Binaural Deep Rest Bundle",
-    desc: "12 binaural sessions across theta, delta and alpha — bundled for trauma processing, deep sleep and calm.",
-    category: "audio", icon: Volume2,
-    accentColor: "text-sky-400", accentBg: "bg-sky-500/15",
-    sellerName: "Lena V.",
-    sellerAskingPrice: 30,
-    items: [
-      { title: "4 Theta Sessions", kind: "audio" },
-      { title: "4 Delta Sessions", kind: "audio" },
-      { title: "4 Alpha Sessions", kind: "audio" },
-    ],
+    id: "book-set-foundations",
+    title: "Healing Foundations — 4 Book Set",
+    desc: "All four foundational Soul Echoes books shipped together at the deepest member savings.",
+    category: "books", kind: "set", icon: Package,
+    accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
+    retailPrice: 84.96, memberPrice: 44.99,
+  },
+
+  // ── Crystals ──
+  {
+    id: "crystal-rose-quartz",
+    title: "Raw Rose Quartz — Individual Stone",
+    desc: "Ethically sourced raw rose quartz for heart-opening, self-love and gentle emotional healing.",
+    category: "crystals", kind: "individual", icon: Gem,
+    accentColor: "text-rose-300", accentBg: "bg-rose-500/15",
+    retailPrice: 14.99, memberPrice: 7.99,
   },
   {
-    id: "trauma-informed-library",
-    title: "Trauma-Informed Reading Library",
-    desc: "The foundational reading pack. Four landmark books bundled together for a full self-guided study.",
-    category: "reading", icon: BookOpen,
-    accentColor: "text-amber-400", accentBg: "bg-amber-500/15",
-    sellerName: "Soul Echoes Editors",
-    sellerAskingPrice: 66,
-    items: [
-      { title: "The Body Keeps the Score", kind: "book" },
-      { title: "Waking the Tiger", kind: "book" },
-      { title: "The Power of Now", kind: "book" },
-      { title: "You Can Heal Your Life", kind: "book" },
-    ],
+    id: "crystal-amethyst",
+    title: "Raw Amethyst Cluster",
+    desc: "Natural amethyst for intuition, calm and spiritual protection.",
+    category: "crystals", kind: "individual", icon: Gem,
+    accentColor: "text-violet-300", accentBg: "bg-violet-500/15",
+    retailPrice: 19.99, memberPrice: 10.99,
   },
   {
-    id: "grounding-crystal-kit",
-    title: "Grounding Crystal Kit",
-    desc: "A curated set of ethically sourced crystals for protection, calm and heart-opening — shipped as one kit.",
-    category: "physical", icon: Gem,
-    accentColor: "text-rose-400", accentBg: "bg-rose-500/15",
-    sellerName: "Rosa E.",
-    sellerAskingPrice: 78,
-    items: [
-      { title: "Rose Quartz Heart Set", kind: "crystal" },
-      { title: "Amethyst Cluster", kind: "crystal" },
-      { title: "Black Tourmaline + Selenite", kind: "crystal" },
-      { title: "Printed Care Guide", kind: "guide" },
-    ],
+    id: "crystal-black-tourmaline",
+    title: "Black Tourmaline — Protection Stone",
+    desc: "Raw black tourmaline for grounding, EMF protection and clearing dense energy.",
+    category: "crystals", kind: "individual", icon: Gem,
+    accentColor: "text-slate-300", accentBg: "bg-slate-500/15",
+    retailPrice: 12.99, memberPrice: 6.99,
   },
   {
-    id: "essential-oils-trio",
-    title: "Nervous System Essential Oils Trio",
-    desc: "Three signature blends — grounding, heart-opening and trauma release — shipped together as one healing trio.",
-    category: "physical", icon: Droplet,
-    accentColor: "text-violet-400", accentBg: "bg-violet-500/15",
-    sellerName: "Faith W.",
-    sellerAskingPrice: 60,
-    items: [
-      { title: "Trauma Release Blend", kind: "oil" },
-      { title: "Heart Opening Blend", kind: "oil" },
-      { title: "Grounding & Clarity Blend", kind: "oil" },
-    ],
+    id: "crystal-set-grounding",
+    title: "Grounding Crystal Set (4 stones)",
+    desc: "Curated set: black tourmaline, hematite, smoky quartz, and red jasper — for stability and safety.",
+    category: "crystals", kind: "set", icon: Package,
+    accentColor: "text-rose-300", accentBg: "bg-rose-500/15",
+    retailPrice: 54.99, memberPrice: 29.99,
+  },
+  {
+    id: "crystal-set-heart",
+    title: "Heart-Opening Crystal Set (3 stones)",
+    desc: "Rose quartz, green aventurine, and rhodonite — for self-love, forgiveness and gentle heart healing.",
+    category: "crystals", kind: "set", icon: Package,
+    accentColor: "text-rose-300", accentBg: "bg-rose-500/15",
+    retailPrice: 44.99, memberPrice: 24.99,
+  },
+  {
+    id: "crystal-set-chakra",
+    title: "Full Chakra Crystal Set (7 stones)",
+    desc: "One raw stone for each of the 7 chakras, with a printed care and placement guide.",
+    category: "crystals", kind: "set", icon: Package,
+    accentColor: "text-violet-300", accentBg: "bg-violet-500/15",
+    retailPrice: 79.99, memberPrice: 39.99,
+  },
+
+  // ── Essential Oils ──
+  {
+    id: "oil-lavender",
+    title: "Lavender Essential Oil (15ml)",
+    desc: "100% pure therapeutic-grade lavender for calm, sleep and nervous-system regulation.",
+    category: "oils", kind: "individual", icon: Droplet,
+    accentColor: "text-violet-300", accentBg: "bg-violet-500/15",
+    retailPrice: 18.99, memberPrice: 10.99,
+  },
+  {
+    id: "oil-frankincense",
+    title: "Frankincense Essential Oil (15ml)",
+    desc: "Sacred resin oil for meditation, spiritual grounding and cellular renewal.",
+    category: "oils", kind: "individual", icon: Droplet,
+    accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
+    retailPrice: 32.99, memberPrice: 18.99,
+  },
+  {
+    id: "oil-peppermint",
+    title: "Peppermint Essential Oil (15ml)",
+    desc: "Cooling, uplifting and mentally clarifying — for focus, headaches and energy.",
+    category: "oils", kind: "individual", icon: Droplet,
+    accentColor: "text-emerald-300", accentBg: "bg-emerald-500/15",
+    retailPrice: 16.99, memberPrice: 8.99,
+  },
+  {
+    id: "oil-set-nervous-system",
+    title: "Nervous System Trio (3 × 15ml)",
+    desc: "Lavender + Frankincense + Vetiver — a curated set for calming, grounding and trauma release.",
+    category: "oils", kind: "set", icon: Package,
+    accentColor: "text-violet-300", accentBg: "bg-violet-500/15",
+    retailPrice: 79.99, memberPrice: 39.99,
+  },
+  {
+    id: "oil-set-starter",
+    title: "Essential Oils Starter Set (6 oils)",
+    desc: "Lavender, peppermint, lemon, tea tree, eucalyptus, frankincense — the six most-used healing oils.",
+    category: "oils", kind: "set", icon: Package,
+    accentColor: "text-emerald-300", accentBg: "bg-emerald-500/15",
+    retailPrice: 129.99, memberPrice: 64.99,
+  },
+
+  // ── Cleansing & Sage ──
+  {
+    id: "cleansing-white-sage",
+    title: "White Sage Smudge Bundle",
+    desc: "Ethically harvested California white sage — for clearing spaces, homes and objects.",
+    category: "cleansing", kind: "individual", icon: Leaf,
+    accentColor: "text-lime-300", accentBg: "bg-lime-500/15",
+    retailPrice: 12.99, memberPrice: 6.49,
+  },
+  {
+    id: "cleansing-palo-santo",
+    title: "Palo Santo Sticks (5 pack)",
+    desc: "Sustainably sourced Palo Santo — sweet, protective and uplifting sacred wood.",
+    category: "cleansing", kind: "individual", icon: Flame,
+    accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
+    retailPrice: 14.99, memberPrice: 7.99,
+  },
+  {
+    id: "cleansing-selenite-wand",
+    title: "Selenite Cleansing Wand",
+    desc: "A pure selenite wand for clearing your aura and charging other crystals.",
+    category: "cleansing", kind: "individual", icon: Sparkles,
+    accentColor: "text-slate-200", accentBg: "bg-slate-400/15",
+    retailPrice: 15.99, memberPrice: 8.99,
+  },
+  {
+    id: "cleansing-set-starter",
+    title: "Home Cleansing Starter Set",
+    desc: "White sage bundle, palo santo sticks, selenite wand, abalone shell + printed ritual guide.",
+    category: "cleansing", kind: "set", icon: Package,
+    accentColor: "text-lime-300", accentBg: "bg-lime-500/15",
+    retailPrice: 59.99, memberPrice: 29.99,
+  },
+  {
+    id: "cleansing-set-ceremony",
+    title: "Full Ceremony Cleansing Kit",
+    desc: "Everything in the Starter Set plus florida water, sea salt, black tourmaline and a lighter.",
+    category: "cleansing", kind: "set", icon: Package,
+    accentColor: "text-lime-300", accentBg: "bg-lime-500/15",
+    retailPrice: 89.99, memberPrice: 44.99,
   },
 ];
 
 const PRACTITIONERS: Practitioner[] = [
-  {
-    id: "breathwork-maya",
-    name: "Maya R.",
-    specialty: "Breathwork Teacher",
-    tags: ["Trauma-Informed", "Online", "Sliding Scale"],
-    emoji: "🌬️",
-    bio: "Certified holotropic breathwork facilitator specializing in nervous system regulation and somatic trauma release. 8 years experience.",
-    accentColor: "from-sky-500/20 to-teal-500/20",
-  },
-  {
-    id: "meditation-james",
-    name: "James O.",
-    specialty: "Meditation Guide",
-    tags: ["Mindfulness", "MBSR", "Grief Support"],
-    emoji: "🧘",
-    bio: "Trained in MBSR and Vipassana traditions. Leads one-on-one and group sessions for anxiety, grief, and burnout recovery.",
-    accentColor: "from-violet-500/20 to-purple-500/20",
-  },
-  {
-    id: "yoga-sade",
-    name: "Sadé M.",
-    specialty: "Yoga Teacher & Healer",
-    tags: ["Trauma-Sensitive", "Restorative", "Donation-Based"],
-    emoji: "🌿",
-    bio: "Trauma-sensitive yoga teacher (500-RYT) offering restorative and yin practices for healing, rest, and body reconnection.",
-    accentColor: "from-emerald-500/20 to-teal-500/20",
-  },
-  {
-    id: "energy-lena",
-    name: "Lena V.",
-    specialty: "Energy Worker & Reiki Master",
-    tags: ["Reiki", "Chakra Work", "Remote Sessions"],
-    emoji: "✨",
-    bio: "Reiki Master Teacher and intuitive energy worker. Offers distance sessions and in-person work focused on emotional clearing.",
-    accentColor: "from-amber-500/20 to-yellow-500/20",
-  },
-  {
-    id: "sound-kwame",
-    name: "Kwame A.",
-    specialty: "Sound Healer",
-    tags: ["Crystal Bowls", "Gong Bath", "Group & 1:1"],
-    emoji: "🔔",
-    bio: "Certified sound healing practitioner using Tibetan bowls, crystal singing bowls, and gongs. Trained in Integrative Sound Healing.",
-    accentColor: "from-teal-500/20 to-cyan-500/20",
-  },
-  {
-    id: "shaman-rose",
-    name: "Rosa E.",
-    specialty: "Shamanic Practitioner",
-    tags: ["Ancestral Healing", "Soul Retrieval", "Ceremony"],
-    emoji: "🦅",
-    bio: "Trained in traditional shamanic practices for over 15 years. Specialises in soul retrieval, ancestral healing, and ceremony.",
-    accentColor: "from-orange-500/20 to-rose-500/20",
-  },
-  {
-    id: "intercessor-faith",
-    name: "Faith W.",
-    specialty: "Intercessor & Spiritual Director",
-    tags: ["Prayer", "Spiritual Direction", "Trauma & Faith"],
-    emoji: "🕊️",
-    bio: "Ordained minister and trained spiritual director offering intercessory prayer and spiritual companionship to those healing from trauma and crisis of faith.",
-    accentColor: "from-indigo-500/20 to-violet-500/20",
-  },
-  {
-    id: "vetted-healer-nadia",
-    name: "Nadia L.",
-    specialty: "Trauma-Informed Healer",
-    tags: ["IFS", "Parts Work", "Energy Exchange"],
-    emoji: "🌸",
-    bio: "Trained in Internal Family Systems (IFS) and somatic practices. Offers parts work, nervous system support, and energy-exchange pricing.",
-    accentColor: "from-pink-500/20 to-rose-500/20",
-  },
+  { id: "breathwork-maya", name: "Maya R.", specialty: "Breathwork Teacher", tags: ["Trauma-Informed", "Online", "Sliding Scale"], emoji: "🌬️", bio: "Certified holotropic breathwork facilitator specializing in nervous system regulation and somatic trauma release. 8 years experience.", accentColor: "from-sky-500/20 to-teal-500/20" },
+  { id: "meditation-james", name: "James O.", specialty: "Meditation Guide", tags: ["Mindfulness", "MBSR", "Grief Support"], emoji: "🧘", bio: "Trained in MBSR and Vipassana traditions. Leads one-on-one and group sessions for anxiety, grief, and burnout recovery.", accentColor: "from-violet-500/20 to-purple-500/20" },
+  { id: "yoga-sade", name: "Sadé M.", specialty: "Yoga Teacher & Healer", tags: ["Trauma-Sensitive", "Restorative", "Donation-Based"], emoji: "🌿", bio: "Trauma-sensitive yoga teacher (500-RYT) offering restorative and yin practices for healing, rest, and body reconnection.", accentColor: "from-emerald-500/20 to-teal-500/20" },
+  { id: "energy-lena", name: "Lena V.", specialty: "Energy Worker & Reiki Master", tags: ["Reiki", "Chakra Work", "Remote Sessions"], emoji: "✨", bio: "Reiki Master Teacher and intuitive energy worker. Offers distance sessions and in-person work focused on emotional clearing.", accentColor: "from-amber-500/20 to-yellow-500/20" },
+  { id: "sound-kwame", name: "Kwame A.", specialty: "Sound Healer", tags: ["Crystal Bowls", "Gong Bath", "Group & 1:1"], emoji: "🔔", bio: "Certified sound healing practitioner using Tibetan bowls, crystal singing bowls, and gongs. Trained in Integrative Sound Healing.", accentColor: "from-teal-500/20 to-cyan-500/20" },
+  { id: "shaman-rose", name: "Rosa E.", specialty: "Shamanic Practitioner", tags: ["Ancestral Healing", "Soul Retrieval", "Ceremony"], emoji: "🦅", bio: "Trained in traditional shamanic practices for over 15 years. Specialises in soul retrieval, ancestral healing, and ceremony.", accentColor: "from-orange-500/20 to-rose-500/20" },
+  { id: "intercessor-faith", name: "Faith W.", specialty: "Intercessor & Spiritual Director", tags: ["Prayer", "Spiritual Direction", "Trauma & Faith"], emoji: "🕊️", bio: "Ordained minister and trained spiritual director offering intercessory prayer and spiritual companionship.", accentColor: "from-indigo-500/20 to-violet-500/20" },
+  { id: "vetted-healer-nadia", name: "Nadia L.", specialty: "Trauma-Informed Healer", tags: ["IFS", "Parts Work", "Energy Exchange"], emoji: "🌸", bio: "Trained in Internal Family Systems (IFS) and somatic practices. Offers parts work, nervous system support, and energy-exchange pricing.", accentColor: "from-pink-500/20 to-rose-500/20" },
 ];
 
 const PAYMENT_METHODS = [
@@ -270,7 +263,7 @@ const PAYMENT_METHODS = [
 ];
 
 const SECTION_TABS = [
-  { id: "products",       label: "Marketplace",          icon: Gem        },
+  { id: "products",       label: "Shop",                 icon: ShoppingCart },
   { id: "practitioners",  label: "Practitioner Connect", icon: Users      },
   { id: "crisis",         label: "Crisis Counselor",     icon: ShieldAlert },
   { id: "book",           label: "Book a Session",       icon: Star       },
@@ -279,13 +272,17 @@ const SECTION_TABS = [
 type SectionId = typeof SECTION_TABS[number]["id"];
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
-const PLATFORM_DISCOUNT_RATE = 0.33;
-
 function loadSaved(): SavedItem[] {
   try { return JSON.parse(localStorage.getItem(SAVED_KEY) || "[]"); } catch { return []; }
 }
 function persistSaved(items: SavedItem[]) {
   localStorage.setItem(SAVED_KEY, JSON.stringify(items));
+}
+function loadCart(): CartItem[] {
+  try { return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); } catch { return []; }
+}
+function persistCart(items: CartItem[]) {
+  localStorage.setItem(CART_KEY, JSON.stringify(items));
 }
 
 /* ─── Sub-components ─────────────────────────────────────────────────────── */
@@ -306,58 +303,54 @@ function ImpactBanner() {
       <div className="flex items-center gap-2">
         <Check className="h-4 w-4 text-teal-400 shrink-0" aria-hidden="true" />
         <span className="text-sm text-foreground/80">
-          Every bundle includes an <span className="font-bold text-teal-300">automatic member discount</span> — applied at checkout.
+          Exclusive <span className="font-bold text-teal-300">Member Pricing</span> on every physical product.
         </span>
       </div>
     </div>
   );
 }
 
-/* ─── Bundle Card ────────────────────────────────────────────────────────── */
-function BundleCard({
-  bundle, savedIds, onToggleSave, onCheckout,
+/* ─── Product Card ───────────────────────────────────────────────────────── */
+function ProductCard({
+  product, savedIds, onToggleSave, onAddToCart, onBuyNow,
 }: {
-  bundle: Bundle;
+  product: Product;
   savedIds: Set<string>;
   onToggleSave: (id: string, title: string) => void;
-  onCheckout: (bundle: Bundle) => void;
+  onAddToCart: (p: Product) => void;
+  onBuyNow: (p: Product) => void;
 }) {
-  const isSaved = savedIds.has(bundle.id);
-  const Icon = bundle.icon;
-  const itemCount = bundle.items.length;
-  const summaryId = `bundle-${bundle.id}-summary`;
-  const contentsId = `bundle-${bundle.id}-contents`;
+  const isSaved = savedIds.has(product.id);
+  const Icon = product.icon;
+  const savings = Math.round((1 - product.memberPrice / product.retailPrice) * 100);
+  const titleId = `product-${product.id}-title`;
 
   return (
     <motion.article
       layout
       className="rounded-2xl border border-white/10 bg-white/[0.04] overflow-hidden"
-      aria-labelledby={summaryId}
+      aria-labelledby={titleId}
     >
       <div className="p-4 space-y-3">
         <div className="flex items-start gap-3">
           <div
-            className={`shrink-0 w-11 h-11 rounded-xl ${bundle.accentBg} flex items-center justify-center`}
+            className={`shrink-0 w-11 h-11 rounded-xl ${product.accentBg} flex items-center justify-center`}
             aria-hidden="true"
           >
-            <Icon className={`h-5 w-5 ${bundle.accentColor}`} />
+            <Icon className={`h-5 w-5 ${product.accentColor}`} />
           </div>
           <div className="flex-1 min-w-0">
-            <h3
-              id={summaryId}
-              className="text-sm font-semibold text-foreground leading-tight"
-            >
-              {bundle.title}
+            <h3 id={titleId} className="text-sm font-semibold text-foreground leading-tight">
+              {product.title}
             </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              <Package className="inline h-3 w-3 mr-1 -mt-0.5" aria-hidden="true" />
-              <span>{itemCount}-item bundle · by {bundle.sellerName}</span>
+            <p className="text-[11px] text-muted-foreground mt-0.5 uppercase tracking-wide">
+              {product.kind === "set" ? "Curated Set · Ships together" : "Individual item"}
             </p>
           </div>
           <button
             type="button"
-            onClick={() => onToggleSave(bundle.id, bundle.title)}
-            aria-label={isSaved ? `Remove ${bundle.title} from saved` : `Save ${bundle.title} for later`}
+            onClick={() => onToggleSave(product.id, product.title)}
+            aria-label={isSaved ? `Remove ${product.title} from saved` : `Save ${product.title} for later`}
             aria-pressed={isSaved}
             className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-teal-400 transition-colors"
           >
@@ -367,167 +360,52 @@ function BundleCard({
           </button>
         </div>
 
-        <p className="text-sm text-muted-foreground leading-relaxed">{bundle.desc}</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">{product.desc}</p>
 
-        <div>
-          <p className="text-[11px] uppercase tracking-wide font-semibold text-teal-300/80 mb-1.5">
-            What's included
-          </p>
-          <ul id={contentsId} className="space-y-1" aria-label={`${bundle.title} contents`}>
-            {bundle.items.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-foreground/80">
-                <Check className="h-3 w-3 text-teal-400 mt-0.5 shrink-0" aria-hidden="true" />
-                <span>
-                  <span className="font-medium text-foreground/90">{item.title}</span>
-                  <span className="text-muted-foreground"> · {item.kind}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p className="text-[11px] text-muted-foreground/70 mt-2 italic">
-            Sold as a complete bundle — individual items are not available separately.
-          </p>
-        </div>
-
-        <Button
-          type="button"
-          size="lg"
-          onClick={() => onCheckout(bundle)}
-          aria-label={`Buy the ${bundle.title} bundle — ${itemCount} items — proceed to secure checkout`}
-          aria-describedby={contentsId}
-          className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0 text-sm font-semibold focus-visible:ring-2 focus-visible:ring-teal-300"
+        {/* Member pricing */}
+        <div
+          className="rounded-xl border border-teal-400/30 bg-teal-500/10 px-3 py-2.5 flex items-center justify-between"
+          role="group"
+          aria-label={`Member price ${product.memberPrice.toFixed(2)} dollars, retail ${product.retailPrice.toFixed(2)}, save ${savings} percent`}
         >
-          Buy Bundle <ArrowRight className="h-4 w-4 ml-2" aria-hidden="true" />
-        </Button>
-      </div>
-    </motion.article>
-  );
-}
-
-/* ─── Bundle Checkout Modal ──────────────────────────────────────────────── */
-function BundleCheckoutModal({
-  bundle, onClose, onConfirmed,
-}: {
-  bundle: Bundle;
-  onClose: () => void;
-  onConfirmed: (msg: string) => void;
-}) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const userCharge = Math.round(bundle.sellerAskingPrice * (1 - PLATFORM_DISCOUNT_RATE) * 100) / 100;
-
-  const handleConfirm = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { error: fnError } = await supabase.functions.invoke("bundle-purchase", {
-        body: {
-          bundleId: bundle.id,
-          bundleTitle: bundle.title,
-          sellerId: bundle.sellerName,
-          sellerAskingPrice: bundle.sellerAskingPrice,
-        },
-      });
-      if (fnError) throw fnError;
-      onConfirmed(`Purchased "${bundle.title}" — enjoy your bundle`);
-      onClose();
-    } catch (e) {
-      console.error(e);
-      setError("Checkout could not complete. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="checkout-title"
-      aria-describedby="checkout-desc"
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md rounded-3xl bg-neutral-900 border border-white/10 p-5 space-y-4 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 id="checkout-title" className="font-display text-lg font-bold text-foreground">
-              Confirm Bundle Purchase
-            </h2>
-            <p id="checkout-desc" className="text-xs text-muted-foreground mt-0.5">
-              {bundle.items.length} items · by {bundle.sellerName}
+            <p className="text-[10px] uppercase tracking-wider text-teal-300/80 font-semibold">Member Price</p>
+            <p className="text-2xl font-bold text-teal-300 leading-tight">
+              ${product.memberPrice.toFixed(2)}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close checkout"
-            className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-teal-400"
-          >
-            <X className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          </button>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-          <p className="text-sm font-semibold text-foreground mb-2">{bundle.title}</p>
-          <ul className="space-y-1 text-xs text-foreground/80" aria-label="Bundle contents at checkout">
-            {bundle.items.map((item, i) => (
-              <li key={i} className="flex items-start gap-2">
-                <Check className="h-3 w-3 text-teal-400 mt-0.5 shrink-0" aria-hidden="true" />
-                <span>{item.title}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div
-          className="rounded-2xl border border-teal-400/30 bg-teal-500/10 p-4"
-          role="group"
-          aria-label="Pricing summary"
-        >
-          <div className="flex items-baseline justify-between">
-            <span className="text-sm text-foreground/80">You pay today</span>
-            <span
-              className="text-3xl font-bold text-teal-300"
-              aria-live="polite"
-              aria-label={`Total: ${userCharge.toFixed(2)} US dollars`}
-            >
-              ${userCharge.toFixed(2)}
-            </span>
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground line-through">
+              Retail ${product.retailPrice.toFixed(2)}
+            </p>
+            <p className="text-[11px] font-semibold text-emerald-300">Save {savings}%</p>
           </div>
-          <p className="text-[11px] text-teal-200/80 mt-1">
-            Automatic member discount already applied.
-          </p>
         </div>
 
-        {error && (
-          <p role="alert" className="text-xs text-rose-300 text-center">{error}</p>
-        )}
-
-        <Button
-          type="button"
-          size="lg"
-          disabled={loading}
-          onClick={handleConfirm}
-          aria-label={`Confirm purchase of ${bundle.title} for ${userCharge.toFixed(2)} US dollars`}
-          className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0 text-base font-semibold focus-visible:ring-2 focus-visible:ring-teal-300"
-        >
-          {loading
-            ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" /> Processing…</>)
-            : (<>Confirm & Pay <ArrowRight className="h-4 w-4 ml-2" aria-hidden="true" /></>)}
-        </Button>
-
-        <p className="text-[11px] text-center text-muted-foreground/70">
-          Secure checkout · 3% of every bundle supports Rise Up Healing
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onAddToCart(product)}
+            aria-label={`Add ${product.title} to cart`}
+            className="rounded-xl border-teal-400/40 text-teal-200 hover:bg-teal-500/15 text-sm"
+          >
+            <ShoppingCart className="h-4 w-4 mr-1.5" aria-hidden="true" /> Add to Cart
+          </Button>
+          <Button
+            type="button"
+            onClick={() => onBuyNow(product)}
+            aria-label={`Buy ${product.title} now — ships to your address`}
+            className="rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0 text-sm font-semibold"
+          >
+            Buy Now <ArrowRight className="h-4 w-4 ml-1" aria-hidden="true" />
+          </Button>
+        </div>
+        <p className="text-[10px] text-muted-foreground/60 text-center">
+          Physical product · ships to your address
         </p>
-      </motion.div>
-    </div>
+      </div>
+    </motion.article>
   );
 }
 
@@ -620,19 +498,20 @@ interface PortalRoomProps {
 export default function PortalRoom({ initialSection = "products" }: PortalRoomProps) {
   const [activeSection, setActiveSection] = useState<SectionId>(initialSection);
 
-  useEffect(() => {
-    setActiveSection(initialSection);
-  }, [initialSection]);
-  const [bundleCategory, setBundleCategory] = useState<string>("all");
+  useEffect(() => { setActiveSection(initialSection); }, [initialSection]);
+
+  const [productCategory, setProductCategory] = useState<string>("all");
   const [savedItems, setSavedItems] = useState<SavedItem[]>(loadSaved);
+  const [cart, setCart] = useState<CartItem[]>(loadCart);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const [bookedFor, setBookedFor] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const [checkoutBundle, setCheckoutBundle] = useState<Bundle | null>(null);
 
   const savedIds = new Set(savedItems.map((s) => s.id));
+  const cartCount = cart.reduce((n, c) => n + c.qty, 0);
 
   useEffect(() => { persistSaved(savedItems); }, [savedItems]);
+  useEffect(() => { persistCart(cart); }, [cart]);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -657,8 +536,24 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
     );
   };
 
-  const filteredBundles =
-    bundleCategory === "all" ? BUNDLES : BUNDLES.filter((b) => b.category === bundleCategory);
+  const addToCart = (p: Product) => {
+    setCart((prev) => {
+      const existing = prev.find((c) => c.id === p.id);
+      if (existing) {
+        return prev.map((c) => c.id === p.id ? { ...c, qty: c.qty + 1 } : c);
+      }
+      return [...prev, { id: p.id, title: p.title, price: p.memberPrice, qty: 1 }];
+    });
+    showToast(`Added "${p.title}" to cart`);
+  };
+
+  const buyNow = (p: Product) => {
+    addToCart(p);
+    showToast(`Proceeding to checkout for "${p.title}"`);
+  };
+
+  const filteredProducts =
+    productCategory === "all" ? PRODUCTS : PRODUCTS.filter((p) => p.category === productCategory);
 
   return (
     <div
@@ -670,14 +565,23 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center shadow-[0_0_24px_rgba(45,212,191,0.45)]">
-              <Globe2 className="h-5 w-5 text-white" />
+              <ShoppingCart className="h-5 w-5 text-white" />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <h1 className="font-display text-2xl font-bold bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent leading-tight">
-                The Portal
+                Shop
               </h1>
-              <p className="text-xs text-teal-400/70">Healing products · Practitioners · Sessions</p>
+              <p className="text-xs text-teal-400/70">Physical healing tools · Books · Crystals · Oils · Cleansing</p>
             </div>
+            {cartCount > 0 && (
+              <div
+                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-500/20 border border-teal-400/40 text-teal-200 text-xs font-semibold"
+                aria-label={`${cartCount} items in cart`}
+              >
+                <ShoppingCart className="h-3.5 w-3.5" aria-hidden="true" />
+                {cartCount}
+              </div>
+            )}
           </div>
         </motion.div>
       </div>
@@ -714,7 +618,7 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
       <div className="flex-1 overflow-y-auto">
         <AnimatePresence mode="wait">
 
-          {/* ════ HEALING PRODUCTS ════ */}
+          {/* ════ SHOP — PHYSICAL PRODUCTS ════ */}
           {activeSection === "products" && (
             <motion.div key="products" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-4">
 
@@ -722,10 +626,10 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
               <div
                 className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none"
                 role="tablist"
-                aria-label="Filter bundles by category"
+                aria-label="Filter products by category"
               >
-                {BUNDLE_CATEGORIES.map((cat) => {
-                  const active = bundleCategory === cat.id;
+                {PRODUCT_CATEGORIES.map((cat) => {
+                  const active = productCategory === cat.id;
                   const Icon = cat.icon;
                   return (
                     <button
@@ -733,7 +637,7 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                       type="button"
                       role="tab"
                       aria-selected={active}
-                      onClick={() => setBundleCategory(cat.id)}
+                      onClick={() => setProductCategory(cat.id)}
                       className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs transition-all focus-visible:ring-2 focus-visible:ring-teal-400 ${
                         active
                           ? "bg-teal-500/20 border-teal-400/50 text-teal-300"
@@ -748,20 +652,24 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
               </div>
 
               <p className="text-xs text-muted-foreground/70">
-                Every listing is a curated <span className="text-teal-300 font-medium">complete bundle</span>. Individual songs, tracks or items are not sold separately. Your discount is applied automatically at checkout.
+                Physical healing tools shipped directly to you at{" "}
+                <span className="text-teal-300 font-medium">exclusive member pricing</span>.
+                All meditations, sound therapy and digital packs are already free inside your{" "}
+                <span className="text-teal-300 font-medium">Tools</span> section based on your subscription tier.
               </p>
 
               <section
-                aria-label={`${filteredBundles.length} healing bundles available`}
-                className="space-y-3"
+                aria-label={`${filteredProducts.length} physical products available`}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
               >
-                {filteredBundles.map((bundle) => (
-                  <BundleCard
-                    key={bundle.id}
-                    bundle={bundle}
+                {filteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
                     savedIds={savedIds}
                     onToggleSave={(id, title) => toggleSave(id, title, "product")}
-                    onCheckout={(b) => setCheckoutBundle(b)}
+                    onAddToCart={addToCart}
+                    onBuyNow={buyNow}
                   />
                 ))}
               </section>
@@ -771,18 +679,15 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
           {/* ════ FIND A PRACTITIONER ════ */}
           {activeSection === "practitioners" && (
             <motion.div key="practitioners" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-4">
-
-              {/* Values pledge */}
               <div className="rounded-2xl bg-gradient-to-r from-teal-500/10 to-emerald-500/10 border border-teal-400/20 p-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="h-5 w-5 text-teal-400 shrink-0" />
                   <p className="text-sm font-semibold text-foreground">Every practitioner is vetted</p>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  All healers, teachers, and guides in The Portal have agreed to Soul Echoes values — trauma-informed practice, inclusive access, confidentiality, non-judgment, and sliding scale pricing for those who need it.
+                  All healers, teachers, and guides have agreed to Soul Echoes values — trauma-informed practice, inclusive access, confidentiality, non-judgment, and sliding scale pricing.
                 </p>
               </div>
-
               <div className="space-y-2">
                 {PRACTITIONERS.map((p) => (
                   <PractitionerCard
@@ -800,8 +705,6 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
           {/* ════ CRISIS COUNSELOR ════ */}
           {activeSection === "crisis" && (
             <motion.div key="crisis" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-4">
-
-              {/* You are not alone banner */}
               <div className="rounded-2xl bg-gradient-to-r from-rose-500/15 to-amber-500/15 border border-rose-400/30 p-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <ShieldAlert className="h-5 w-5 text-rose-300 shrink-0" />
@@ -812,14 +715,9 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                 </p>
               </div>
 
-              {/* Immediate crisis lines */}
               <div className="space-y-2">
                 <p className="text-xs uppercase tracking-wider text-rose-300/80 font-semibold px-1">Call or text now · 24/7</p>
-
-                <a
-                  href="tel:988"
-                  className="flex items-center gap-3 p-4 rounded-2xl border border-rose-400/40 bg-rose-500/10 hover:bg-rose-500/15 transition-colors"
-                >
+                <a href="tel:988" className="flex items-center gap-3 p-4 rounded-2xl border border-rose-400/40 bg-rose-500/10 hover:bg-rose-500/15 transition-colors">
                   <div className="shrink-0 w-11 h-11 rounded-xl bg-rose-500/25 border border-rose-400/40 flex items-center justify-center">
                     <Phone className="h-5 w-5 text-rose-300" />
                   </div>
@@ -829,11 +727,7 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                   </div>
                   <ArrowRight className="h-4 w-4 text-rose-300 shrink-0" />
                 </a>
-
-                <a
-                  href="sms:741741?body=HOME"
-                  className="flex items-center gap-3 p-4 rounded-2xl border border-amber-400/40 bg-amber-500/10 hover:bg-amber-500/15 transition-colors"
-                >
+                <a href="sms:741741?body=HOME" className="flex items-center gap-3 p-4 rounded-2xl border border-amber-400/40 bg-amber-500/10 hover:bg-amber-500/15 transition-colors">
                   <div className="shrink-0 w-11 h-11 rounded-xl bg-amber-500/25 border border-amber-400/40 flex items-center justify-center">
                     <MessageSquare className="h-5 w-5 text-amber-300" />
                   </div>
@@ -843,11 +737,7 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                   </div>
                   <ArrowRight className="h-4 w-4 text-amber-300 shrink-0" />
                 </a>
-
-                <a
-                  href="tel:911"
-                  className="flex items-center gap-3 p-4 rounded-2xl border border-red-500/40 bg-red-500/10 hover:bg-red-500/15 transition-colors"
-                >
+                <a href="tel:911" className="flex items-center gap-3 p-4 rounded-2xl border border-red-500/40 bg-red-500/10 hover:bg-red-500/15 transition-colors">
                   <div className="shrink-0 w-11 h-11 rounded-xl bg-red-500/25 border border-red-400/40 flex items-center justify-center">
                     <Phone className="h-5 w-5 text-red-300" />
                   </div>
@@ -859,23 +749,17 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                 </a>
               </div>
 
-              {/* Specialized support */}
               <div className="space-y-2 pt-2">
                 <p className="text-xs uppercase tracking-wider text-teal-300/80 font-semibold px-1">Specialized support</p>
-
                 {[
-                  { name: "The Trevor Project", desc: "LGBTQ+ youth · Call 1-866-488-7386 · Text START to 678-678", href: "tel:18664887386", color: "violet" },
-                  { name: "Trans Lifeline", desc: "Peer support by & for trans people · 1-877-565-8860", href: "tel:18775658860", color: "pink" },
-                  { name: "Veterans Crisis Line", desc: "Dial 988 then press 1 · Text 838255", href: "tel:988", color: "emerald" },
-                  { name: "SAMHSA National Helpline", desc: "Substance use & mental health · 1-800-662-4357", href: "tel:18006624357", color: "sky" },
-                  { name: "RAINN — Sexual Assault Hotline", desc: "1-800-656-4673 · Confidential 24/7 support", href: "tel:18006564673", color: "indigo" },
-                  { name: "National Domestic Violence Hotline", desc: "1-800-799-7233 · Text START to 88788", href: "tel:18007997233", color: "rose" },
+                  { name: "The Trevor Project", desc: "LGBTQ+ youth · Call 1-866-488-7386 · Text START to 678-678", href: "tel:18664887386" },
+                  { name: "Trans Lifeline", desc: "Peer support by & for trans people · 1-877-565-8860", href: "tel:18775658860" },
+                  { name: "Veterans Crisis Line", desc: "Dial 988 then press 1 · Text 838255", href: "tel:988" },
+                  { name: "SAMHSA National Helpline", desc: "Substance use & mental health · 1-800-662-4357", href: "tel:18006624357" },
+                  { name: "RAINN — Sexual Assault Hotline", desc: "1-800-656-4673 · Confidential 24/7 support", href: "tel:18006564673" },
+                  { name: "National Domestic Violence Hotline", desc: "1-800-799-7233 · Text START to 88788", href: "tel:18007997233" },
                 ].map((r) => (
-                  <a
-                    key={r.name}
-                    href={r.href}
-                    className="flex items-center gap-3 p-3.5 rounded-2xl border border-white/10 bg-white/[0.04] hover:border-white/20 transition-colors"
-                  >
+                  <a key={r.name} href={r.href} className="flex items-center gap-3 p-3.5 rounded-2xl border border-white/10 bg-white/[0.04] hover:border-white/20 transition-colors">
                     <div className="shrink-0 w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
                       <Phone className="h-4 w-4 text-foreground/70" />
                     </div>
@@ -888,7 +772,6 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                 ))}
               </div>
 
-              {/* Grounding right now */}
               <div className="rounded-2xl bg-teal-500/10 border border-teal-400/25 p-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <Heart className="h-4 w-4 text-teal-300" />
@@ -898,7 +781,6 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                   Breathe in for 4, hold for 4, breathe out for 8. Name 5 things you can see, 4 you can touch, 3 you can hear, 2 you can smell, 1 you can taste. You are here. You are safe in this moment.
                 </p>
               </div>
-
               <p className="text-[11px] text-center text-muted-foreground/60 italic pt-2">
                 Soul Echoes is not a replacement for emergency services or licensed mental health care.
               </p>
@@ -908,7 +790,6 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
           {/* ════ BOOK A SESSION ════ */}
           {activeSection === "book" && (
             <motion.div key="book" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-5">
-
               {bookedFor && (
                 <div className="rounded-2xl bg-teal-500/10 border border-teal-400/20 px-4 py-3 flex items-center gap-2">
                   <Star className="h-4 w-4 text-teal-400 shrink-0" />
@@ -916,12 +797,10 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                   <button onClick={() => setBookedFor(null)} className="ml-auto text-xs text-muted-foreground hover:text-foreground">Change</button>
                 </div>
               )}
-
               <div className="space-y-1">
                 <h2 className="font-display text-lg font-bold text-foreground">Choose How to Pay</h2>
                 <p className="text-sm text-muted-foreground">All options are valid. Pay in the way that honours where you are right now.</p>
               </div>
-
               <div className="space-y-2">
                 {PAYMENT_METHODS.map((method) => {
                   const Icon = method.icon;
@@ -931,9 +810,7 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                       key={method.id}
                       onClick={() => setSelectedPayment(method.id)}
                       className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl border transition-all text-left ${
-                        active
-                          ? `${method.bg} ${method.border} shadow-[0_0_14px_rgba(45,212,191,0.2)]`
-                          : "bg-white/[0.03] border-white/10 hover:border-white/20"
+                        active ? `${method.bg} ${method.border} shadow-[0_0_14px_rgba(45,212,191,0.2)]` : "bg-white/[0.03] border-white/10 hover:border-white/20"
                       }`}
                     >
                       <div className={`shrink-0 w-9 h-9 rounded-xl ${method.bg} border ${method.border} flex items-center justify-center`}>
@@ -948,7 +825,6 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                   );
                 })}
               </div>
-
               {selectedPayment && (
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
                   <Button
@@ -969,18 +845,15 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
           {/* ════ WAIT & SAVE ════ */}
           {activeSection === "saved" && (
             <motion.div key="saved" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-4">
-
-              {/* Explainer */}
               <div className="rounded-2xl bg-gradient-to-r from-teal-500/10 to-emerald-500/10 border border-teal-400/20 p-4 space-y-1.5">
                 <div className="flex items-center gap-2">
                   <BookmarkCheck className="h-5 w-5 text-teal-400" />
                   <p className="text-sm font-semibold text-foreground">Save now, purchase when ready</p>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Bookmark any product or practitioner. Turn on notifications and we'll let you know when you're ready — or when a spot opens up. No pressure, no rush.
+                  Bookmark any product or practitioner. Turn on notifications and we'll let you know when you're ready — or when a spot opens up.
                 </p>
               </div>
-
               {savedItems.length === 0 ? (
                 <div className="text-center py-12 space-y-3">
                   <Bookmark className="h-10 w-10 text-teal-400/30 mx-auto" />
@@ -994,16 +867,13 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
                     className="rounded-xl border-teal-400/30 text-teal-300 mt-2"
                     onClick={() => setActiveSection("products")}
                   >
-                    Browse Products
+                    Browse Shop
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-2">
                   {savedItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-white/10 bg-white/[0.04]"
-                    >
+                    <div key={item.id} className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-white/10 bg-white/[0.04]">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
                         <p className="text-xs text-muted-foreground capitalize">{item.type}</p>
@@ -1033,17 +903,6 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
 
         </AnimatePresence>
       </div>
-
-      {/* ── Bundle Checkout Modal ── */}
-      <AnimatePresence>
-        {checkoutBundle && (
-          <BundleCheckoutModal
-            bundle={checkoutBundle}
-            onClose={() => setCheckoutBundle(null)}
-            onConfirmed={(msg) => showToast(msg)}
-          />
-        )}
-      </AnimatePresence>
 
       {/* ── Toast ── */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">{toast ?? ""}</div>
