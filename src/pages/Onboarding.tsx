@@ -169,7 +169,7 @@ export default function OnboardingPage({ onComplete }: { onComplete?: () => void
             size="lg"
             className="rounded-2xl gap-2 h-14 text-base"
           >
-            <Mic className="h-5 w-5" /> Get Started
+            <Mic className="h-5 w-5"  aria-hidden="true" /> Get Started
           </Button>
         </motion.div>
       </div>
@@ -314,7 +314,7 @@ export default function OnboardingPage({ onComplete }: { onComplete?: () => void
           className="space-y-4"
         >
           <div className="h-16 w-16 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto">
-            <Heart className="h-8 w-8 text-blue-500" />
+            <Heart className="h-8 w-8 text-blue-500"  aria-hidden="true" />
           </div>
           <h2 className="text-2xl font-bold text-foreground">Our Mission</h2>
           <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
@@ -340,7 +340,7 @@ export default function OnboardingPage({ onComplete }: { onComplete?: () => void
             size="lg"
             className="rounded-2xl gap-2"
           >
-            <ArrowRight className="h-4 w-4" /> Next
+            <ArrowRight className="h-4 w-4"  aria-hidden="true" /> Next
           </Button>
           <Input
             type="text"
@@ -368,7 +368,7 @@ export default function OnboardingPage({ onComplete }: { onComplete?: () => void
           className="space-y-4"
         >
           <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto">
-            <TrendingUp className="h-8 w-8 text-green-500" />
+            <TrendingUp className="h-8 w-8 text-green-500"  aria-hidden="true" />
           </div>
           <h2 className="text-2xl font-bold text-foreground">Our Impact</h2>
           <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
@@ -394,7 +394,7 @@ export default function OnboardingPage({ onComplete }: { onComplete?: () => void
             size="lg"
             className="rounded-2xl gap-2"
           >
-            <ArrowRight className="h-4 w-4" /> Next
+            <ArrowRight className="h-4 w-4"  aria-hidden="true" /> Next
           </Button>
           <Input
             type="text"
@@ -448,7 +448,7 @@ export default function OnboardingPage({ onComplete }: { onComplete?: () => void
             size="lg"
             className="rounded-2xl gap-2"
           >
-            <ArrowRight className="h-4 w-4" /> Next
+            <ArrowRight className="h-4 w-4"  aria-hidden="true" /> Next
           </Button>
           <Input
             type="text"
@@ -476,7 +476,7 @@ export default function OnboardingPage({ onComplete }: { onComplete?: () => void
           className="space-y-4"
         >
           <div className="h-16 w-16 rounded-full bg-pink-500/20 flex items-center justify-center mx-auto">
-            <Users className="h-8 w-8 text-pink-500" />
+            <Users className="h-8 w-8 text-pink-500"  aria-hidden="true" />
           </div>
           <h2 className="text-2xl font-bold text-foreground">Our Healer Community</h2>
           <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
@@ -502,7 +502,7 @@ export default function OnboardingPage({ onComplete }: { onComplete?: () => void
             size="lg"
             className="rounded-2xl gap-2"
           >
-            <ArrowRight className="h-4 w-4" /> Begin
+            <ArrowRight className="h-4 w-4"  aria-hidden="true" /> Begin
           </Button>
           <Input
             type="text"

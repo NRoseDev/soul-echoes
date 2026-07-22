@@ -190,7 +190,7 @@ export default function VoiceSettingsPage() {
           className="text-center space-y-4"
         >
           <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto">
-            <Mic className="h-8 w-8 text-primary animate-pulse" />
+            <Mic className="h-8 w-8 text-primary animate-pulse"  aria-hidden="true" />
           </div>
           <h2 className="text-2xl font-bold text-foreground">{setup.currentStep.question}</h2>
           <p className="text-sm text-muted-foreground">
@@ -216,7 +216,7 @@ export default function VoiceSettingsPage() {
             size="lg"
             className="rounded-2xl gap-2"
           >
-            <SkipForward className="h-4 w-4" /> Skip This Step
+            <SkipForward className="h-4 w-4"  aria-hidden="true" /> Skip This Step
           </Button>
         </div>
       </div>
@@ -227,7 +227,7 @@ export default function VoiceSettingsPage() {
     <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-2xl mx-auto space-y-8">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-3">
-          <Volume2 className="h-7 w-7 text-primary" /> Communication & Voice
+          <Volume2 className="h-7 w-7 text-primary"  aria-hidden="true" /> Communication & Voice
         </h1>
         <p className="text-muted-foreground mt-1">Choose how you communicate and how Soul Echoes speaks to you.</p>
         <Button
@@ -236,7 +236,7 @@ export default function VoiceSettingsPage() {
           size="sm"
           className="mt-3 gap-2"
         >
-          <Mic className="h-4 w-4" /> Start Guided Setup
+          <Mic className="h-4 w-4"  aria-hidden="true" /> Start Guided Setup
         </Button>
       </motion.div>
 

@@ -55,7 +55,7 @@ export default function LevelPage() {
         onClick={() => navigate(track.routeBase)}
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" /> Back to {track.roomTitle}
+        <ArrowLeft className="h-4 w-4"  aria-hidden="true" /> Back to {track.roomTitle}
       </button>
 
       <header className="space-y-2">
@@ -68,7 +68,7 @@ export default function LevelPage() {
 
       {locked ? (
         <div className="rounded-2xl border border-border bg-muted/30 p-6 text-center space-y-2">
-          <Lock className="h-6 w-6 mx-auto text-muted-foreground" />
+          <Lock className="h-6 w-6 mx-auto text-muted-foreground"  aria-hidden="true" />
           <p className="font-semibold">This level isn't open yet.</p>
           <p className="text-sm text-muted-foreground">
             Complete Level {level - 1} first — this is progression, not a paywall.
@@ -110,7 +110,7 @@ export default function LevelPage() {
             <Button onClick={onComplete} disabled={saving || done}>
               {done ? (
                 <>
-                  <Check className="h-4 w-4 mr-2" /> Completed
+                  <Check className="h-4 w-4 mr-2"  aria-hidden="true" /> Completed
                 </>
               ) : saving ? (
                 "Saving…"

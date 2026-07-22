@@ -62,7 +62,7 @@ export default function UniversalNav({
               animate={{ rotate: 180 }}
               exit={{ rotate: 0 }}
             >
-              <X className="h-6 w-6" />
+              <X className="h-6 w-6"  aria-hidden="true" />
             </motion.div>
           ) : (
             <motion.div
@@ -71,7 +71,7 @@ export default function UniversalNav({
               animate={{ rotate: 0 }}
               exit={{ rotate: 180 }}
             >
-              <Compass className="h-6 w-6" />
+              <Compass className="h-6 w-6"  aria-hidden="true" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -98,7 +98,7 @@ export default function UniversalNav({
               className="fixed bottom-24 right-6 z-40 w-80 rounded-2xl bg-card border border-border shadow-2xl p-6 space-y-4"
             >
               <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                <Compass className="h-5 w-5 text-primary" />
+                <Compass className="h-5 w-5 text-primary"  aria-hidden="true" />
                 Where would you like to go?
               </h2>
 
@@ -133,7 +133,7 @@ export default function UniversalNav({
                     className="w-full justify-start gap-2"
                     disabled={isSaving}
                   >
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="h-4 w-4"  aria-hidden="true" />
                     Go Back
                   </Button>
                 )}
@@ -143,7 +143,7 @@ export default function UniversalNav({
                   variant="ghost"
                   className="w-full justify-start gap-2"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4"  aria-hidden="true" />
                   Stay Here
                 </Button>
               </div>

@@ -111,7 +111,7 @@ export default function JournalSection() {
       <div className="min-h-[calc(100vh-5rem)] bg-gradient-to-br from-violet-950 via-indigo-950 to-sky-800 text-white px-4 py-8">
         <div className="max-w-3xl mx-auto rounded-3xl border border-white/10 bg-white/5 p-8 shadow-xl shadow-black/25">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Back">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4"  aria-hidden="true" />
           </Button>
           <h1 className="mt-6 text-3xl font-bold">Journal section not found</h1>
           <p className="mt-4 text-muted-foreground">Return to the Journal room and choose a valid section.</p>
@@ -126,7 +126,7 @@ export default function JournalSection() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-3">
             <Button onClick={() => navigate(-1)} variant="secondary" size="sm" className="bg-white/10 text-white hover:bg-white/15">
-              <ArrowLeft className="h-4 w-4" /> Back
+              <ArrowLeft className="h-4 w-4"  aria-hidden="true" /> Back
             </Button>
             <div className="space-y-2">
               <p className="text-sm uppercase tracking-[0.2em] text-sky-200">Journal</p>
@@ -135,7 +135,7 @@ export default function JournalSection() {
             </div>
           </div>
           <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-slate-100">
-            <CircleCheck className="h-4 w-4 text-emerald-300" />
+            <CircleCheck className="h-4 w-4 text-emerald-300"  aria-hidden="true" />
             <span>{hasLoaded ? status : "Loading…"}</span>
           </div>
         </div>

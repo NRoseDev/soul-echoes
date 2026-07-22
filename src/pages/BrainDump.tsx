@@ -575,7 +575,7 @@ export default function BrainDump() {
                 disabled={isLoading}
               />
               <Button type="submit" size="icon" disabled={!input.trim() || isLoading} className="shrink-0 h-12 w-12 rounded-xl" aria-label="Send message">
-                <Send className="h-5 w-5" />
+                <Send className="h-5 w-5"  aria-hidden="true" />
               </Button>
             </form>
           </div>
@@ -591,11 +591,11 @@ export default function BrainDump() {
               </p>
               {isListening ? (
                 <Button onClick={stopListening} size="lg" variant="destructive" className="rounded-2xl px-8 gap-2">
-                  <MicOff className="h-5 w-5" /> Stop Listening
+                  <MicOff className="h-5 w-5"  aria-hidden="true" /> Stop Listening
                 </Button>
               ) : (
                 <Button onClick={startListening} size="lg" className="rounded-2xl px-8 gap-2" disabled={isLoading}>
-                  <Mic className="h-5 w-5" /> Tap to Speak
+                  <Mic className="h-5 w-5"  aria-hidden="true" /> Tap to Speak
                 </Button>
               )}
               {speech.transcript && (
@@ -653,7 +653,7 @@ export default function BrainDump() {
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
                     <button onClick={() => replayMessage(msg.content)} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mt-1" aria-label="Replay this message">
-                      <Volume2 className="h-3 w-3" /> Replay
+                      <Volume2 className="h-3 w-3"  aria-hidden="true" /> Replay
                     </button>
                   </div>
                 ) : (
@@ -702,7 +702,7 @@ export default function BrainDump() {
                 onClick={() => navigate(analysis.exerciseSuggestion.path)}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-500/25 border border-teal-400/40 text-teal-200 hover:bg-teal-500/35 transition-all text-sm font-semibold"
               >
-                {analysis.exerciseSuggestion.buttonLabel} <ArrowRight className="h-3.5 w-3.5" />
+                {analysis.exerciseSuggestion.buttonLabel} <ArrowRight className="h-3.5 w-3.5"  aria-hidden="true" />
               </button>
             </div>
 
@@ -764,7 +764,7 @@ export default function BrainDump() {
                       onClick={() => navigate(p.path)}
                       className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white/[0.08] hover:bg-white/[0.16] border-t border-white/10 text-sm font-semibold text-white transition-all"
                     >
-                      Open {p.room} <ArrowRight className="h-3.5 w-3.5" />
+                      Open {p.room} <ArrowRight className="h-3.5 w-3.5"  aria-hidden="true" />
                     </button>
                   </div>
                 ))}
@@ -815,7 +815,7 @@ export default function BrainDump() {
       <div className="border-t border-border bg-background">
         <div className="flex items-center justify-end px-4 pt-2">
           <button onClick={() => { setAutoRead(!autoRead); if (ttsSpeaking) ttsStop(); }} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-            {autoRead ? <Volume2 className="h-3 w-3" /> : <VolumeX className="h-3 w-3" />}
+            {autoRead ? <Volume2 className="h-3 w-3"  aria-hidden="true" /> : <VolumeX className="h-3 w-3"  aria-hidden="true" />}
             {autoRead ? "Auto-read on" : "Auto-read off"}
           </button>
         </div>
@@ -860,7 +860,7 @@ export default function BrainDump() {
                 className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
                 aria-label="Back to Brain Dump"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4"  aria-hidden="true" />
                 Back to Brain Dump
               </button>
             </div>
@@ -882,7 +882,7 @@ export default function BrainDump() {
                 <p className="text-xs uppercase tracking-[0.18em] text-purple-300 font-semibold">Soul Echo</p>
                 {isLoading && messages[messages.length - 1]?.role !== "assistant" ? (
                   <div className="flex items-center gap-2 text-white/50">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin"  aria-hidden="true" />
                     <span className="text-sm">Listening to your heart…</span>
                   </div>
                 ) : (() => {
@@ -897,7 +897,7 @@ export default function BrainDump() {
                         className="flex items-center gap-1 text-xs text-white/40 hover:text-white/70 transition-colors"
                         aria-label="Replay this message"
                       >
-                        <Volume2 className="h-3 w-3" /> Replay
+                        <Volume2 className="h-3 w-3"  aria-hidden="true" /> Replay
                       </button>
                     </>
                   ) : null;
@@ -943,7 +943,7 @@ export default function BrainDump() {
                         onClick={() => { setShowCardScreen(false); navigate(p.path); }}
                         className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white/[0.07] hover:bg-white/[0.15] border-t border-white/10 text-sm font-semibold text-white transition-all"
                       >
-                        Open {p.room} <ArrowRight className="h-3.5 w-3.5" />
+                        Open {p.room} <ArrowRight className="h-3.5 w-3.5"  aria-hidden="true" />
                       </button>
                     </div>
                   ))}

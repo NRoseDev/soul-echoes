@@ -58,7 +58,7 @@ export default function HealingJourneys({ onBack }: { onBack: () => void }) {
   if (!authChecked) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-teal-400" />
+        <Loader2 className="h-6 w-6 animate-spin text-teal-400"  aria-hidden="true" />
       </div>
     );
   }
@@ -71,10 +71,10 @@ export default function HealingJourneys({ onBack }: { onBack: () => void }) {
         className="h-9 w-9 rounded-full flex items-center justify-center bg-white/[0.06] border border-white/10 hover:bg-white/[0.1]"
         aria-label="Back to Portal"
       >
-        <ArrowLeft className="h-4 w-4 text-foreground" />
+        <ArrowLeft className="h-4 w-4 text-foreground"  aria-hidden="true" />
       </button>
       <div className="flex items-center gap-2">
-        <Sparkles className="h-5 w-5 text-teal-300" />
+        <Sparkles className="h-5 w-5 text-teal-300"  aria-hidden="true" />
         <h2 className="font-display text-lg font-bold text-foreground">Healing Journeys</h2>
       </div>
     </div>
@@ -91,7 +91,7 @@ export default function HealingJourneys({ onBack }: { onBack: () => void }) {
             className="max-w-sm text-center space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-6"
           >
             <div className="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center">
-              <LogIn className="h-6 w-6 text-white" />
+              <LogIn className="h-6 w-6 text-white"  aria-hidden="true" />
             </div>
             <div>
               <h3 className="font-semibold text-foreground">Sign in to enter</h3>
@@ -103,7 +103,7 @@ export default function HealingJourneys({ onBack }: { onBack: () => void }) {
               onClick={() => navigate("/auth")}
               className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0"
             >
-              Sign in or create account <ArrowLeft className="h-4 w-4 ml-1.5 rotate-180" />
+              Sign in or create account <ArrowLeft className="h-4 w-4 ml-1.5 rotate-180"  aria-hidden="true" />
             </Button>
           </motion.div>
         </div>
@@ -154,7 +154,7 @@ function HubView({ onRecord, onBrowse }: { onRecord: () => void; onBrowse: () =>
       >
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-teal-500/30 border border-teal-400/40 flex items-center justify-center">
-            <Video className="h-5 w-5 text-teal-200" />
+            <Video className="h-5 w-5 text-teal-200"  aria-hidden="true" />
           </div>
           <div className="flex-1">
             <p className="font-semibold text-foreground">Record Your Journey</p>
@@ -169,7 +169,7 @@ function HubView({ onRecord, onBrowse }: { onRecord: () => void; onBrowse: () =>
       >
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center">
-            <Play className="h-5 w-5 text-foreground" />
+            <Play className="h-5 w-5 text-foreground"  aria-hidden="true" />
           </div>
           <div className="flex-1">
             <p className="font-semibold text-foreground">Browse Journeys</p>
@@ -403,7 +403,7 @@ function RecordView({
                 <img src={bgImagePreview} alt="Background" className="mx-auto max-h-40 rounded-xl" />
               ) : (
                 <div className="flex flex-col items-center gap-1.5 text-muted-foreground text-sm">
-                  <ImageIcon className="h-5 w-5" />
+                  <ImageIcon className="h-5 w-5"  aria-hidden="true" />
                   Tap to choose an image
                 </div>
               )}
@@ -415,7 +415,7 @@ function RecordView({
       {/* Duration picker */}
       <div className="space-y-2">
         <p className="text-xs font-semibold text-foreground/80 uppercase tracking-wide flex items-center gap-1.5">
-          <Clock className="h-3.5 w-3.5" /> Maximum length
+          <Clock className="h-3.5 w-3.5"  aria-hidden="true" /> Maximum length
         </p>
         <div className="flex flex-wrap gap-2">
           {ANGEL_DURATIONS.map((min) => {
@@ -454,7 +454,7 @@ function RecordView({
               transition={{ duration: 1.6, repeat: Infinity }}
               className="relative w-20 h-20 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 shadow-[0_0_40px_rgba(45,212,191,0.6)] flex items-center justify-center"
             >
-              <Mic className="h-8 w-8 text-white" />
+              <Mic className="h-8 w-8 text-white"  aria-hidden="true" />
             </motion.div>
           </div>
         )}
@@ -476,10 +476,10 @@ function RecordView({
             {recording && (
               <>
                 <Button size="sm" variant="outline" onClick={togglePause} className="rounded-xl border-white/20 text-xs">
-                  {paused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
+                  {paused ? <Play className="h-3 w-3"  aria-hidden="true" /> : <Pause className="h-3 w-3"  aria-hidden="true" />}
                 </Button>
                 <Button size="sm" onClick={stopRecording} className="rounded-xl bg-white/10 hover:bg-white/20 border-0 text-xs">
-                  <Square className="h-3 w-3 mr-1" /> Stop
+                  <Square className="h-3 w-3 mr-1"  aria-hidden="true" /> Stop
                 </Button>
               </>
             )}
@@ -508,7 +508,7 @@ function RecordView({
             onChange={(e) => { const f = e.target.files?.[0]; if (f) { setUploadFile(f); setRecordedBlob(null); } }}
           />
           <div className="rounded-2xl border border-dashed border-white/20 bg-white/[0.03] p-4 text-center cursor-pointer hover:border-teal-400/40 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Upload className="h-4 w-4" />
+            <Upload className="h-4 w-4"  aria-hidden="true" />
             {uploadFile ? uploadFile.name : "Tap to choose a video or audio file"}
           </div>
         </label>
@@ -541,7 +541,7 @@ function RecordView({
           disabled={uploading}
           className="flex-1 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0"
         >
-          {uploading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sharing…</> : "Share Journey"}
+          {uploading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin"  aria-hidden="true" /> Sharing…</> : "Share Journey"}
         </Button>
       </div>
     </motion.div>
@@ -604,11 +604,11 @@ function BrowseView({ currentUserId, onBack }: { currentUserId: string; onBack: 
     >
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-teal-400" />
+          <Loader2 className="h-6 w-6 animate-spin text-teal-400"  aria-hidden="true" />
         </div>
       ) : journeys.length === 0 ? (
         <div className="text-center py-12 space-y-2">
-          <Sparkles className="h-10 w-10 text-teal-400/40 mx-auto" />
+          <Sparkles className="h-10 w-10 text-teal-400/40 mx-auto"  aria-hidden="true" />
           <p className="text-sm text-muted-foreground">No journeys shared yet.</p>
           <p className="text-xs text-muted-foreground/60">Be the first to plant a seed.</p>
         </div>
@@ -625,7 +625,7 @@ function BrowseView({ currentUserId, onBack }: { currentUserId: string; onBack: 
                   {urls.bg && <img src={urls.bg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-80" />}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center shadow-[0_0_30px_rgba(45,212,191,0.5)]">
-                      <Mic className="h-7 w-7 text-white" />
+                      <Mic className="h-7 w-7 text-white"  aria-hidden="true" />
                     </div>
                   </div>
                   {urls.video && <audio src={urls.video} controls className="absolute bottom-2 left-2 right-2 w-[calc(100%-1rem)]" />}
@@ -639,13 +639,13 @@ function BrowseView({ currentUserId, onBack }: { currentUserId: string; onBack: 
                   </div>
                   {j.user_id === currentUserId && (
                     <button onClick={() => handleDelete(j)} aria-label="Delete journey" className="h-7 w-7 rounded-full hover:bg-rose-500/20 flex items-center justify-center">
-                      <Trash2 className="h-3.5 w-3.5 text-rose-400" />
+                      <Trash2 className="h-3.5 w-3.5 text-rose-400"  aria-hidden="true" />
                     </button>
                   )}
                 </div>
                 <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                   {mode && <span className="px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10">{mode.label}</span>}
-                  <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{fmtDur(j.duration_seconds)}</span>
+                  <span className="flex items-center gap-1"><Clock className="h-3 w-3"  aria-hidden="true" />{fmtDur(j.duration_seconds)}</span>
                   {j.is_practitioner && <span className="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30">Practitioner</span>}
                 </div>
               </div>

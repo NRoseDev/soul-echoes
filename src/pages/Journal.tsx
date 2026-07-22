@@ -26,19 +26,19 @@ const GlowImg = ({ src, color, className }: { src: string; color: string; classN
 // --- Original uploaded PNG icons, tinted with chakra neon glow only ---
 
 const DailyCheckInIcon = ({ className }: { className?: string }) => (
-  <GlowImg src={dailyCheckinIcon} color="#22C55E" className={className} />
+  <GlowImg src={dailyCheckinIcon} color="#22C55E" className={className}  aria-hidden="true" />
 );
 
 const EmotionalReleaseIcon = ({ className }: { className?: string }) => (
-  <GlowImg src={emotionalReleaseIcon} color="#B266FF" className={className} />
+  <GlowImg src={emotionalReleaseIcon} color="#B266FF" className={className}  aria-hidden="true" />
 );
 
 const ManifestationIcon = ({ className }: { className?: string }) => (
-  <GlowImg src={manifestationIcon} color="#FFD500" className={className} />
+  <GlowImg src={manifestationIcon} color="#FFD500" className={className}  aria-hidden="true" />
 );
 
 const LettersNeverSentIcon = ({ className }: { className?: string }) => (
-  <GlowImg src={lettersNeverSentIcon} color="#FF5CAA" className={className} />
+  <GlowImg src={lettersNeverSentIcon} color="#FF5CAA" className={className}  aria-hidden="true" />
 );
 
 
@@ -234,7 +234,7 @@ const JOURNAL_SECTIONS = [
   {
     id: "health-journal",
     title: "Health Journal",
-    icon: (p: { className?: string }) => <GlowImg src={healthIcon} color="#3399FF" {...p} />,
+    icon: (p: { className?: string }) => <GlowImg src={healthIcon} color="#3399FF" {...p}  aria-hidden="true" />,
     description: "Track body signals, symptoms, and wellness patterns",
     prompt: "How is your body feeling today? Note any symptoms, energy shifts, or wins.",
   },
@@ -374,7 +374,7 @@ export default function Journal() {
             <div className="max-w-4xl mx-auto space-y-6">
               <div className="space-y-2 border-b border-purple-500/20 pb-4">
                 <h1 className="text-4xl font-bold tracking-wide text-amber-100 flex items-center gap-3">
-                  <BookOpen className="h-8 w-8 text-amber-400" /> Journal Room
+                  <BookOpen className="h-8 w-8 text-amber-400"  aria-hidden="true" /> Journal Room
                 </h1>
                 <p className="text-purple-200/80 max-w-2xl font-light">
                   Your safe space for automated documentation. Brain Dump audio sessions are compiled silently below.

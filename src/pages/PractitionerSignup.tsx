@@ -85,7 +85,7 @@ export default function PractitionerSignup() {
       <div className="flex items-center justify-center h-full p-6">
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center space-y-4 max-w-md">
           <div className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center mx-auto">
-            <Check className="h-8 w-8 text-secondary" />
+            <Check className="h-8 w-8 text-secondary"  aria-hidden="true" />
           </div>
           <h2 className="font-display text-2xl font-bold text-foreground">Application Received</h2>
           <p className="text-muted-foreground">
@@ -152,7 +152,7 @@ export default function PractitionerSignup() {
           {hasScenario && (
             <div className="space-y-2 p-4 rounded-2xl border-2 border-accent/30 bg-accent/5">
               <label className="text-sm font-medium text-foreground flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-accent" />
+                <ShieldCheck className="h-4 w-4 text-accent"  aria-hidden="true" />
                 {selectedRole === "dispatcher" ? DISPATCHER_SCENARIO : INTERCESSOR_SCENARIO}
               </label>
               <Textarea
@@ -167,7 +167,7 @@ export default function PractitionerSignup() {
           {/* Reference */}
           <div className="space-y-3">
             <p className="text-sm font-medium text-foreground flex items-center gap-2">
-              <Heart className="h-4 w-4 text-primary" />
+              <Heart className="h-4 w-4 text-primary"  aria-hidden="true" />
               One character reference — someone who knows your heart now, not your past
             </p>
             <Input
@@ -227,7 +227,7 @@ export default function PractitionerSignup() {
             className="w-full rounded-2xl text-lg py-6"
           >
             {submitting ? "Submitting…" : "Submit Application"}
-            <ChevronRight className="ml-2 h-5 w-5" />
+            <ChevronRight className="ml-2 h-5 w-5"  aria-hidden="true" />
           </Button>
         </motion.div>
       )}

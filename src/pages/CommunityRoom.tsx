@@ -227,7 +227,7 @@ export default function CommunityRoom() {
 
               <div className="rounded-2xl bg-gradient-to-r from-rose-500/10 via-violet-500/10 to-amber-500/10 border border-white/10 p-4 space-y-2">
                 <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-violet-300" />
+                  <Users className="h-5 w-5 text-violet-300"  aria-hidden="true" />
                   <p className="text-sm font-semibold text-foreground">Four circles of healing</p>
                 </div>
                 <p className="text-xs text-foreground/70 leading-relaxed">
@@ -277,7 +277,7 @@ export default function CommunityRoom() {
                                 <div className="flex flex-wrap gap-1.5">
                                   {circle.topics.map((t) => (
                                     <span key={t} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border ${styles.chip}`}>
-                                      <Hash className="h-2.5 w-2.5" />
+                                      <Hash className="h-2.5 w-2.5"  aria-hidden="true" />
                                       {t}
                                     </span>
                                   ))}
@@ -291,7 +291,7 @@ export default function CommunityRoom() {
                                   className={`flex-1 rounded-xl border ${styles.border} ${styles.text} bg-transparent hover:bg-white/5`}
                                   onClick={() => { setStoryFilter(circle.id); setActiveSection("stories"); }}
                                 >
-                                  <MessageCircle className="h-4 w-4 mr-1.5" />
+                                  <MessageCircle className="h-4 w-4 mr-1.5"  aria-hidden="true" />
                                   Read stories
                                 </Button>
                                 <Button
@@ -299,7 +299,7 @@ export default function CommunityRoom() {
                                   className={`flex-1 rounded-xl border-0 ${styles.bg} ${styles.text} hover:opacity-90`}
                                   onClick={() => { setComposeCircle(circle.id); setComposeOpen(true); }}
                                 >
-                                  <Plus className="h-4 w-4 mr-1.5" />
+                                  <Plus className="h-4 w-4 mr-1.5"  aria-hidden="true" />
                                   Share yours
                                 </Button>
                               </div>
@@ -342,7 +342,7 @@ export default function CommunityRoom() {
               {/* Search + compose */}
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
+                  <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40"  aria-hidden="true" />
                   <Input
                     placeholder="Search stories, tags, topics…"
                     value={search}
@@ -355,7 +355,7 @@ export default function CommunityRoom() {
                   className="h-9 rounded-xl bg-gradient-to-r from-rose-500/80 via-violet-500/80 to-amber-500/80 hover:opacity-90 border-0 text-white"
                   onClick={() => setComposeOpen(true)}
                 >
-                  <Plus className="h-4 w-4 mr-1" />
+                  <Plus className="h-4 w-4 mr-1"  aria-hidden="true" />
                   Share
                 </Button>
               </div>
@@ -364,7 +364,7 @@ export default function CommunityRoom() {
               <div className="space-y-3">
                 {filteredStories.length === 0 && (
                   <div className="text-center py-12 space-y-2">
-                    <MessageCircle className="h-10 w-10 text-foreground/20 mx-auto" />
+                    <MessageCircle className="h-10 w-10 text-foreground/20 mx-auto"  aria-hidden="true" />
                     <p className="text-sm text-foreground/60">No stories match yet.</p>
                     <p className="text-xs text-foreground/40">Be the first to share.</p>
                   </div>
@@ -390,7 +390,7 @@ export default function CommunityRoom() {
                           <p className="text-[11px] text-foreground/50">{circle.label} · {story.timeAgo}</p>
                         </div>
                         <span className={`shrink-0 text-[10px] px-2 py-1 rounded-full border ${styles.chip}`}>
-                          <Hash className="h-2.5 w-2.5 inline mr-0.5" />{story.tag}
+                          <Hash className="h-2.5 w-2.5 inline mr-0.5"  aria-hidden="true" />{story.tag}
                         </span>
                       </div>
 
@@ -405,21 +405,21 @@ export default function CommunityRoom() {
                           className={`flex items-center gap-1.5 text-xs transition-colors ${isHearted ? "text-rose-300" : "text-foreground/50 hover:text-rose-300"}`}
                           aria-label={isHearted ? "Remove heart" : "Send heart"}
                         >
-                          <Heart className={`h-4 w-4 ${isHearted ? "fill-rose-300" : ""}`} />
+                          <Heart className={`h-4 w-4 ${isHearted ? "fill-rose-300" : ""}`}  aria-hidden="true" />
                           {story.hearts}
                         </button>
                         <button
                           onClick={() => showToast("Replies are coming soon — thank you for showing up")}
                           className="flex items-center gap-1.5 text-xs text-foreground/50 hover:text-violet-300 transition-colors"
                         >
-                          <MessageCircle className="h-4 w-4" />
+                          <MessageCircle className="h-4 w-4"  aria-hidden="true" />
                           {story.replies}
                         </button>
                         <button
                           onClick={() => showToast("Sending care 💜")}
                           className="ml-auto flex items-center gap-1.5 text-xs text-foreground/50 hover:text-amber-300 transition-colors"
                         >
-                          <Send className="h-3.5 w-3.5" />
+                          <Send className="h-3.5 w-3.5"  aria-hidden="true" />
                           Send care
                         </button>
                       </div>
@@ -442,7 +442,7 @@ export default function CommunityRoom() {
             <motion.div key="guidelines" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 space-y-4">
               <div className="rounded-2xl bg-gradient-to-r from-rose-500/10 via-violet-500/10 to-amber-500/10 border border-white/10 p-4 space-y-2">
                 <div className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-violet-300" />
+                  <Shield className="h-5 w-5 text-violet-300"  aria-hidden="true" />
                   <p className="text-sm font-semibold text-foreground">How we hold this space</p>
                 </div>
                 <p className="text-xs text-foreground/70 leading-relaxed">
@@ -500,7 +500,7 @@ export default function CommunityRoom() {
               className="w-full max-w-md rounded-3xl bg-gradient-to-br from-slate-900 to-slate-950 border border-white/10 p-5 space-y-4 shadow-2xl"
             >
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-violet-300" />
+                <Sparkles className="h-5 w-5 text-violet-300"  aria-hidden="true" />
                 <h3 className="font-display text-lg font-bold text-foreground">Share your story</h3>
               </div>
 
@@ -557,7 +557,7 @@ export default function CommunityRoom() {
                   className="flex-1 rounded-xl bg-gradient-to-r from-rose-500 via-violet-500 to-amber-500 hover:opacity-90 border-0 text-white"
                   onClick={submitStory}
                 >
-                  Share <ArrowRight className="h-4 w-4 ml-1" />
+                  Share <ArrowRight className="h-4 w-4 ml-1"  aria-hidden="true" />
                 </Button>
               </div>
             </motion.div>

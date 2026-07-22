@@ -47,14 +47,14 @@ export function AppSidebar() {
         {!collapsed ? (
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-primary" />
+              <Sparkles className="h-4 w-4 text-primary"  aria-hidden="true" />
             </div>
             <span className="font-display text-lg font-bold text-sidebar-foreground">Soul Echoes</span>
           </div>
         ) : (
           <div className="flex justify-center">
             <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-primary" />
+              <Sparkles className="h-4 w-4 text-primary"  aria-hidden="true" />
             </div>
           </div>
         )}
@@ -88,7 +88,7 @@ export function AppSidebar() {
                           <span className="text-sm flex-1">{item.title}</span>
                         )}
                         {!collapsed && !item.free && (
-                          <Lock className="h-3 w-3 text-muted-foreground/40 shrink-0" />
+                          <Lock className="h-3 w-3 text-muted-foreground/40 shrink-0"  aria-hidden="true" />
                         )}
                       </NavLink>
                     </SidebarMenuButton>
@@ -110,7 +110,7 @@ export function AppSidebar() {
                 aria-label="AI Tour and System Guide"
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-sidebar-accent border border-primary/30 bg-gradient-to-r from-amber-400/10 via-fuchsia-500/10 to-violet-500/15 hover:from-amber-400/20 hover:via-fuchsia-500/20 hover:to-violet-500/25 shadow-[0_0_18px_hsl(280_70%_60%/0.18)]"
               >
-                <TreeOfLifeTourIcon className="h-6 w-6 shrink-0" />
+                <TreeOfLifeTourIcon className="h-6 w-6 shrink-0"  aria-hidden="true" />
                 {!collapsed && (
                   <span className="text-sm font-semibold bg-gradient-to-r from-amber-300 via-fuchsia-300 to-violet-300 bg-clip-text text-transparent">
                     AI Tour
@@ -124,7 +124,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <NavLink to="/voice-settings" aria-label="Voice Settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
-                <Volume2 className={`h-5 w-5 shrink-0 ${location.pathname === "/voice-settings" ? "text-sidebar-primary" : "text-muted-foreground"}`} />
+                <Volume2 className={`h-5 w-5 shrink-0 ${location.pathname === "/voice-settings" ? "text-sidebar-primary" : "text-muted-foreground"}`}  aria-hidden="true" />
                 {!collapsed && <span className="text-sm">Voice Settings</span>}
               </NavLink>
             </SidebarMenuButton>
@@ -132,7 +132,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <NavLink to="/pricing" aria-label="Pricing" className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent ${highlightPath === "/pricing" ? "tour-pulse" : ""}`} activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
-                <CreditCard className={`h-5 w-5 shrink-0 ${location.pathname === "/pricing" ? "text-sidebar-primary" : "text-muted-foreground"}`} />
+                <CreditCard className={`h-5 w-5 shrink-0 ${location.pathname === "/pricing" ? "text-sidebar-primary" : "text-muted-foreground"}`}  aria-hidden="true" />
                 {!collapsed && <span className="text-sm">Pricing</span>}
               </NavLink>
             </SidebarMenuButton>
@@ -140,7 +140,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <NavLink to="/settings" aria-label="Settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
-                <Settings className={`h-5 w-5 shrink-0 ${location.pathname === "/settings" ? "text-sidebar-primary" : "text-muted-foreground"}`} />
+                <Settings className={`h-5 w-5 shrink-0 ${location.pathname === "/settings" ? "text-sidebar-primary" : "text-muted-foreground"}`}  aria-hidden="true" />
                 {!collapsed && <span className="text-sm">Settings</span>}
               </NavLink>
             </SidebarMenuButton>

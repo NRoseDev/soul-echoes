@@ -30,7 +30,7 @@ export default function ListeningIndicator({ visible, level = 0 }: { visible: bo
         {/* Center mic icon */}
         <div className="relative z-10 w-10 h-10 rounded-full bg-primary flex items-center justify-center"
           style={{ filter: `brightness(${iconBrightness})` }}>
-          <Mic className="h-5 w-5 text-primary-foreground" />
+          <Mic className="h-5 w-5 text-primary-foreground"  aria-hidden="true" />
         </div>
       </div>
       <p className="text-sm text-muted-foreground font-body animate-pulse">

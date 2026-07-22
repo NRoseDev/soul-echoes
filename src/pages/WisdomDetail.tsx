@@ -21,13 +21,13 @@ export default function WisdomDetail() {
         }}
       >
         <div className="max-w-3xl mx-auto text-center py-16 text-foreground">
-          <BookOpen className="mx-auto mb-4 text-primary" size={40} />
+          <BookOpen className="mx-auto mb-4 text-primary" size={40}  aria-hidden="true" />
           <h1 className="font-display text-2xl font-bold mb-2">Teaching not found</h1>
           <p className="text-muted-foreground mb-6">
             This wisdom teaching is being prepared. Please return to the library.
           </p>
           <Button onClick={() => navigate("/wisdom")} variant="secondary">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Wisdom
+            <ArrowLeft className="mr-2 h-4 w-4"  aria-hidden="true" /> Back to Wisdom
           </Button>
         </div>
       </div>
@@ -49,7 +49,7 @@ export default function WisdomDetail() {
           size="sm"
           className="mb-4 text-foreground/80 hover:text-foreground"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Wisdom
+          <ArrowLeft className="mr-2 h-4 w-4"  aria-hidden="true" /> Back to Wisdom
         </Button>
 
         <motion.div
@@ -59,7 +59,7 @@ export default function WisdomDetail() {
           className="mb-6 text-center"
         >
           <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-primary/15 text-primary mb-3">
-            <BookOpen className="h-6 w-6" />
+            <BookOpen className="h-6 w-6"  aria-hidden="true" />
           </div>
           <h1 className="font-display text-3xl font-bold text-foreground">
             {data.title}

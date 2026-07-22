@@ -66,7 +66,7 @@ export default function Auth() {
       >
         <div className="flex flex-col items-center gap-3 text-center">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-500 flex items-center justify-center shadow-[0_0_24px_rgba(45,212,191,0.45)]">
-            <Sparkles className="h-6 w-6 text-white" />
+            <Sparkles className="h-6 w-6 text-white"  aria-hidden="true" />
           </div>
           <div>
             <h1 className="font-display text-xl font-bold bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
@@ -80,7 +80,7 @@ export default function Auth() {
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"  aria-hidden="true" />
             <Input
               type="email"
               placeholder="you@example.com"
@@ -92,7 +92,7 @@ export default function Auth() {
             />
           </div>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"  aria-hidden="true" />
             <Input
               type="password"
               placeholder="Password (min 6 chars)"
@@ -110,7 +110,7 @@ export default function Auth() {
             className="w-full rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 border-0"
           >
             {loading ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
-            <ArrowRight className="h-4 w-4 ml-1.5" />
+            <ArrowRight className="h-4 w-4 ml-1.5"  aria-hidden="true" />
           </Button>
         </form>
 

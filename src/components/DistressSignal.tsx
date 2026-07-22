@@ -309,7 +309,7 @@ export default function DistressSignal() {
                   className="h-8 w-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80"
                   aria-label="Close"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-4 w-4"  aria-hidden="true" />
                 </button>
               </div>
 

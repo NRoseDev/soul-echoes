@@ -65,12 +65,12 @@ export default function HealingResources() {
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild>
               <a href="/practitioner/signup" className="inline-flex items-center gap-2">
-                Connect to a healer <ArrowRight className="h-4 w-4" />
+                Connect to a healer <ArrowRight className="h-4 w-4"  aria-hidden="true" />
               </a>
             </Button>
             <Button variant="secondary" asChild>
               <a href="/flow" className="inline-flex items-center gap-2">
-                Try a practice <ArrowRight className="h-4 w-4" />
+                Try a practice <ArrowRight className="h-4 w-4"  aria-hidden="true" />
               </a>
             </Button>
           </div>

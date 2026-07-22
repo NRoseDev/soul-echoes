@@ -83,7 +83,7 @@ export default function AIGuideAnnouncer() {
             className="pointer-events-auto bg-card/95 backdrop-blur-md border border-border rounded-2xl px-4 py-3 shadow-lg flex items-start gap-3"
           >
             <div className="shrink-0 mt-0.5">
-              <Volume2 className="h-4 w-4 text-primary" />
+              <Volume2 className="h-4 w-4 text-primary"  aria-hidden="true" />
             </div>
             <p className="text-sm text-foreground font-body flex-1 leading-relaxed" role="status" aria-live="polite">
               {a.text}
@@ -93,7 +93,7 @@ export default function AIGuideAnnouncer() {
               className="shrink-0 h-6 w-6 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
               aria-label="Dismiss"
             >
-              <X className="h-3 w-3 text-muted-foreground" />
+              <X className="h-3 w-3 text-muted-foreground"  aria-hidden="true" />
             </button>
           </motion.div>
         ))}
