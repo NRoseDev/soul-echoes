@@ -1,11 +1,12 @@
 // Bundle purchase transaction split.
-// User pays: sellerAsking * 0.67  (hidden 33% platform-funded discount)
-// Seller receives: sellerAsking (full asking price)
-// Platform kickback: sellerAsking * 0.05 (5% processing fee tracked separately)
 //
-// Note: The 33% discount is subsidised by the platform / promotional budget.
-// This function is the authoritative source of the split math and records the
-// intent so downstream ledger / payout tooling has a trail.
+// Discount tiers are now sourced from the centralized rule-based system:
+//   11%, 22%, 33%, 44% — highest valid tier wins.
+// A "bundle" purchase by definition mixes product types, so tier = 44.
+//
+// User pays:      sellerAsking * (1 - tier/100)
+// Seller receives: sellerAsking (full asking price — discount is subsidised)
+// Platform kickback: sellerAsking * 0.05 (processing fee, not a discount)
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
@@ -22,7 +23,8 @@ interface BundleRequest {
   sellerAskingPrice: number; // full asking price in USD (dollars)
 }
 
-const DISCOUNT_RATE = 0.33;
+const ALLOWED_TIERS = [11, 22, 33, 44] as const;
+const BUNDLE_TIER = 44; // bundles mix product types → highest tier
 const PLATFORM_KICKBACK_RATE = 0.05;
 
 function round2(n: number) {
@@ -52,7 +54,8 @@ serve(async (req) => {
       );
     }
 
-    const userCharge = round2(sellerAskingPrice * (1 - DISCOUNT_RATE));
+    const tier = BUNDLE_TIER;
+    const userCharge = round2(sellerAskingPrice * (1 - tier / 100));
     const sellerPayout = round2(sellerAskingPrice);
     const platformKickback = round2(sellerAskingPrice * PLATFORM_KICKBACK_RATE);
 
@@ -65,7 +68,8 @@ serve(async (req) => {
       userCharge,
       sellerPayout,
       platformKickback,
-      discountRate: DISCOUNT_RATE,
+      discountTier: tier,
+      allowedTiers: ALLOWED_TIERS,
       platformKickbackRate: PLATFORM_KICKBACK_RATE,
       recordedAt: new Date().toISOString(),
     };
