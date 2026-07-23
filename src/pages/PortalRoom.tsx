@@ -378,12 +378,12 @@ function ProductCard({
         <div
           className="rounded-xl border border-teal-400/30 bg-teal-500/10 px-3 py-2.5 flex items-center justify-between"
           role="group"
-          aria-label={`Member price ${product.memberPrice.toFixed(2)} dollars, retail ${product.retailPrice.toFixed(2)}, save ${savings} percent`}
+          aria-label={`Member price ${memberPrice.toFixed(2)} dollars, retail ${product.retailPrice.toFixed(2)}, save ${savings} percent (tier ${tier}%)`}
         >
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-teal-300/80 font-semibold">Member Price</p>
+            <p className="text-[10px] uppercase tracking-wider text-teal-300/80 font-semibold">Member Price · {tier}% off</p>
             <p className="text-2xl font-bold text-teal-300 leading-tight">
-              ${product.memberPrice.toFixed(2)}
+              ${memberPrice.toFixed(2)}
             </p>
           </div>
           <div className="text-right">
