@@ -521,6 +521,12 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
 
   const savedIds = new Set(savedItems.map((s) => s.id));
   const cartCount = cart.reduce((n, c) => n + c.qty, 0);
+  const cartPricing = cartTotals(
+    cart.map<PricingItem>((c) => ({
+      id: c.id, category: c.category, kind: c.kind,
+      retailPrice: c.retailPrice, qty: c.qty,
+    })),
+  );
 
   useEffect(() => { persistSaved(savedItems); }, [savedItems]);
   useEffect(() => { persistCart(cart); }, [cart]);
