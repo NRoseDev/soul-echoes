@@ -538,7 +538,7 @@ export default function Pricing() {
                 { icon: "♿", title: "Accessibility", desc: "ASL, AAC, screen reader, and more" },
                 { icon: "🆘", title: "Crisis Services", desc: "24/7 crisis counselor availability" },
                 { icon: "💎", title: "Practitioner Store Share", desc: "Practitioners keep 97% of store sales and 3% supports Rise Up Healing." },
-                { icon: "🛍️", title: "Store Discount", desc: "Users receive 33% off all store products." },
+                { icon: "🛍️", title: "Store Discount", desc: "Tiered member pricing — 11%, 22%, 33%, or 44% off. Highest valid tier is auto-applied at checkout." },
                 { icon: "🌍", title: "Global Reach", desc: "Multilingual support and outreach" },
               ].map((item) => (
                 <div key={item.title} className="flex gap-3 items-start p-3 rounded-lg bg-card/50">
