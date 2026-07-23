@@ -679,8 +679,9 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
               <p className="text-xs text-muted-foreground/70">
                 Physical healing tools shipped directly to you at{" "}
                 <span className="text-teal-300 font-medium">exclusive member pricing</span>.
-                All meditations, sound therapy and digital packs are already free inside your{" "}
-                <span className="text-teal-300 font-medium">Tools</span> section based on your subscription tier.
+                Meditations, breathwork and sound healing are{" "}
+                <span className="text-teal-300 font-medium">never sold here</span> — they unlock
+                inside the app based on your membership tier.
               </p>
 
               <section
