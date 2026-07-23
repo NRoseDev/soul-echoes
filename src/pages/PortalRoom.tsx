@@ -332,7 +332,9 @@ function ProductCard({
 }) {
   const isSaved = savedIds.has(product.id);
   const Icon = product.icon;
-  const savings = Math.round((1 - product.memberPrice / product.retailPrice) * 100);
+  const memberPrice = itemMemberPrice(product);
+  const tier = itemBaseTier(product);
+  const savings = tier;
   const titleId = `product-${product.id}-title`;
 
   return (
