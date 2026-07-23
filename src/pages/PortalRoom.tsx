@@ -554,7 +554,11 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
       if (existing) {
         return prev.map((c) => c.id === p.id ? { ...c, qty: c.qty + 1 } : c);
       }
-      return [...prev, { id: p.id, title: p.title, price: p.memberPrice, qty: 1 }];
+      return [...prev, {
+        id: p.id, title: p.title,
+        retailPrice: p.retailPrice, category: p.category, kind: p.kind,
+        qty: 1,
+      }];
     });
     showToast(`Added "${p.title}" to cart`);
   };
