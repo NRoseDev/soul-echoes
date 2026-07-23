@@ -8,9 +8,18 @@ import {
   Package, ShoppingCart, Leaf, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  applyTier,
+  cartTier,
+  cartTotals,
+  itemBaseTier,
+  itemMemberPrice,
+  type PricingCategory,
+  type PricingItem,
+} from "@/lib/pricing";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
-type ProductCategory = "books" | "crystals" | "oils" | "cleansing";
+type ProductCategory = PricingCategory;
 
 interface Product {
   id: string;
@@ -22,7 +31,6 @@ interface Product {
   accentColor: string;
   accentBg: string;
   retailPrice: number;
-  memberPrice: number;
 }
 
 interface Practitioner {
