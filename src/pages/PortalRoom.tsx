@@ -597,11 +597,16 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
             </div>
             {cartCount > 0 && (
               <div
-                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-500/20 border border-teal-400/40 text-teal-200 text-xs font-semibold"
-                aria-label={`${cartCount} items in cart`}
+                className="shrink-0 flex flex-col items-end gap-0.5 px-3 py-1.5 rounded-full bg-teal-500/20 border border-teal-400/40 text-teal-200 text-xs font-semibold"
+                aria-label={`${cartCount} items in cart, cart discount tier ${cartPricing.tier} percent, member total ${cartPricing.memberTotal.toFixed(2)} dollars`}
               >
-                <ShoppingCart className="h-3.5 w-3.5" aria-hidden="true" />
-                {cartCount}
+                <div className="flex items-center gap-1.5">
+                  <ShoppingCart className="h-3.5 w-3.5" aria-hidden="true" />
+                  {cartCount} · {cartPricing.tier}% off
+                </div>
+                <span className="text-[10px] text-teal-100/90 font-normal">
+                  ${cartPricing.memberTotal.toFixed(2)}
+                </span>
               </div>
             )}
           </div>
