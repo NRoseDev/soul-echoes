@@ -53,7 +53,9 @@ interface SavedItem {
 interface CartItem {
   id: string;
   title: string;
-  price: number;
+  retailPrice: number;
+  category: ProductCategory;
+  kind: "individual" | "set";
   qty: number;
 }
 
