@@ -9,8 +9,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  applyTier,
-  cartTier,
   cartTotals,
   itemBaseTier,
   itemMemberPrice,
