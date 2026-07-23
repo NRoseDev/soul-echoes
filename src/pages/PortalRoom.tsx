@@ -8,9 +8,16 @@ import {
   Package, ShoppingCart, Leaf, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  cartTotals,
+  itemBaseTier,
+  itemMemberPrice,
+  type PricingCategory,
+  type PricingItem,
+} from "@/lib/pricing";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
-type ProductCategory = "books" | "crystals" | "oils" | "cleansing";
+type ProductCategory = PricingCategory;
 
 interface Product {
   id: string;
@@ -22,7 +29,6 @@ interface Product {
   accentColor: string;
   accentBg: string;
   retailPrice: number;
-  memberPrice: number;
 }
 
 interface Practitioner {
@@ -45,7 +51,9 @@ interface SavedItem {
 interface CartItem {
   id: string;
   title: string;
-  price: number;
+  retailPrice: number;
+  category: ProductCategory;
+  kind: "individual" | "set";
   qty: number;
 }
 
@@ -69,7 +77,7 @@ const PRODUCTS: Product[] = [
     desc: "By Oleg Gleizer. A powerful guide to activating your spiritual gifts and clearing dense energies.",
     category: "books", kind: "individual", icon: BookOpen,
     accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
-    retailPrice: 24.99, memberPrice: 14.99,
+    retailPrice: 24.99,
   },
   {
     id: "book-6-empaths",
@@ -77,7 +85,7 @@ const PRODUCTS: Product[] = [
     desc: "Discover which empath type you are and how to protect and channel your sensitivity as a gift.",
     category: "books", kind: "individual", icon: BookOpen,
     accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
-    retailPrice: 19.99, memberPrice: 11.99,
+    retailPrice: 19.99,
   },
   {
     id: "book-women-thou-art-loosed",
@@ -85,7 +93,7 @@ const PRODUCTS: Product[] = [
     desc: "By T.D. Jakes. Healing the wounds of the past — a landmark work on emotional and spiritual freedom for women.",
     category: "books", kind: "individual", icon: BookOpen,
     accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
-    retailPrice: 16.99, memberPrice: 9.99,
+    retailPrice: 16.99,
   },
   {
     id: "book-chakra-vagus",
@@ -93,7 +101,7 @@ const PRODUCTS: Product[] = [
     desc: "The bridge between energy medicine and modern polyvagal science — regulate your nervous system through your chakras.",
     category: "books", kind: "individual", icon: BookOpen,
     accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
-    retailPrice: 22.99, memberPrice: 13.49,
+    retailPrice: 22.99,
   },
   {
     id: "book-set-foundations",
@@ -101,7 +109,7 @@ const PRODUCTS: Product[] = [
     desc: "All four foundational Soul Echoes books shipped together at the deepest member savings.",
     category: "books", kind: "set", icon: Package,
     accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
-    retailPrice: 84.96, memberPrice: 44.99,
+    retailPrice: 84.96,
   },
 
   // ── Crystals ──
@@ -111,7 +119,7 @@ const PRODUCTS: Product[] = [
     desc: "Ethically sourced raw rose quartz for heart-opening, self-love and gentle emotional healing.",
     category: "crystals", kind: "individual", icon: Gem,
     accentColor: "text-rose-300", accentBg: "bg-rose-500/15",
-    retailPrice: 14.99, memberPrice: 7.99,
+    retailPrice: 14.99,
   },
   {
     id: "crystal-amethyst",
@@ -119,7 +127,7 @@ const PRODUCTS: Product[] = [
     desc: "Natural amethyst for intuition, calm and spiritual protection.",
     category: "crystals", kind: "individual", icon: Gem,
     accentColor: "text-violet-300", accentBg: "bg-violet-500/15",
-    retailPrice: 19.99, memberPrice: 10.99,
+    retailPrice: 19.99,
   },
   {
     id: "crystal-black-tourmaline",
@@ -127,7 +135,7 @@ const PRODUCTS: Product[] = [
     desc: "Raw black tourmaline for grounding, EMF protection and clearing dense energy.",
     category: "crystals", kind: "individual", icon: Gem,
     accentColor: "text-slate-300", accentBg: "bg-slate-500/15",
-    retailPrice: 12.99, memberPrice: 6.99,
+    retailPrice: 12.99,
   },
   {
     id: "crystal-set-grounding",
@@ -135,7 +143,7 @@ const PRODUCTS: Product[] = [
     desc: "Curated set: black tourmaline, hematite, smoky quartz, and red jasper — for stability and safety.",
     category: "crystals", kind: "set", icon: Package,
     accentColor: "text-rose-300", accentBg: "bg-rose-500/15",
-    retailPrice: 54.99, memberPrice: 29.99,
+    retailPrice: 54.99,
   },
   {
     id: "crystal-set-heart",
@@ -143,7 +151,7 @@ const PRODUCTS: Product[] = [
     desc: "Rose quartz, green aventurine, and rhodonite — for self-love, forgiveness and gentle heart healing.",
     category: "crystals", kind: "set", icon: Package,
     accentColor: "text-rose-300", accentBg: "bg-rose-500/15",
-    retailPrice: 44.99, memberPrice: 24.99,
+    retailPrice: 44.99,
   },
   {
     id: "crystal-set-chakra",
@@ -151,7 +159,7 @@ const PRODUCTS: Product[] = [
     desc: "One raw stone for each of the 7 chakras, with a printed care and placement guide.",
     category: "crystals", kind: "set", icon: Package,
     accentColor: "text-violet-300", accentBg: "bg-violet-500/15",
-    retailPrice: 79.99, memberPrice: 39.99,
+    retailPrice: 79.99,
   },
 
   // ── Essential Oils ──
@@ -161,7 +169,7 @@ const PRODUCTS: Product[] = [
     desc: "100% pure therapeutic-grade lavender for calm, sleep and nervous-system regulation.",
     category: "oils", kind: "individual", icon: Droplet,
     accentColor: "text-violet-300", accentBg: "bg-violet-500/15",
-    retailPrice: 18.99, memberPrice: 10.99,
+    retailPrice: 18.99,
   },
   {
     id: "oil-frankincense",
@@ -169,7 +177,7 @@ const PRODUCTS: Product[] = [
     desc: "Sacred resin oil for meditation, spiritual grounding and cellular renewal.",
     category: "oils", kind: "individual", icon: Droplet,
     accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
-    retailPrice: 32.99, memberPrice: 18.99,
+    retailPrice: 32.99,
   },
   {
     id: "oil-peppermint",
@@ -177,7 +185,7 @@ const PRODUCTS: Product[] = [
     desc: "Cooling, uplifting and mentally clarifying — for focus, headaches and energy.",
     category: "oils", kind: "individual", icon: Droplet,
     accentColor: "text-emerald-300", accentBg: "bg-emerald-500/15",
-    retailPrice: 16.99, memberPrice: 8.99,
+    retailPrice: 16.99,
   },
   {
     id: "oil-set-nervous-system",
@@ -185,7 +193,7 @@ const PRODUCTS: Product[] = [
     desc: "Lavender + Frankincense + Vetiver — a curated set for calming, grounding and trauma release.",
     category: "oils", kind: "set", icon: Package,
     accentColor: "text-violet-300", accentBg: "bg-violet-500/15",
-    retailPrice: 79.99, memberPrice: 39.99,
+    retailPrice: 79.99,
   },
   {
     id: "oil-set-starter",
@@ -193,7 +201,7 @@ const PRODUCTS: Product[] = [
     desc: "Lavender, peppermint, lemon, tea tree, eucalyptus, frankincense — the six most-used healing oils.",
     category: "oils", kind: "set", icon: Package,
     accentColor: "text-emerald-300", accentBg: "bg-emerald-500/15",
-    retailPrice: 129.99, memberPrice: 64.99,
+    retailPrice: 129.99,
   },
 
   // ── Cleansing & Sage ──
@@ -203,7 +211,7 @@ const PRODUCTS: Product[] = [
     desc: "Ethically harvested California white sage — for clearing spaces, homes and objects.",
     category: "cleansing", kind: "individual", icon: Leaf,
     accentColor: "text-lime-300", accentBg: "bg-lime-500/15",
-    retailPrice: 12.99, memberPrice: 6.49,
+    retailPrice: 12.99,
   },
   {
     id: "cleansing-palo-santo",
@@ -211,7 +219,7 @@ const PRODUCTS: Product[] = [
     desc: "Sustainably sourced Palo Santo — sweet, protective and uplifting sacred wood.",
     category: "cleansing", kind: "individual", icon: Flame,
     accentColor: "text-amber-300", accentBg: "bg-amber-500/15",
-    retailPrice: 14.99, memberPrice: 7.99,
+    retailPrice: 14.99,
   },
   {
     id: "cleansing-selenite-wand",
@@ -219,7 +227,7 @@ const PRODUCTS: Product[] = [
     desc: "A pure selenite wand for clearing your aura and charging other crystals.",
     category: "cleansing", kind: "individual", icon: Sparkles,
     accentColor: "text-slate-200", accentBg: "bg-slate-400/15",
-    retailPrice: 15.99, memberPrice: 8.99,
+    retailPrice: 15.99,
   },
   {
     id: "cleansing-set-starter",
@@ -227,7 +235,7 @@ const PRODUCTS: Product[] = [
     desc: "White sage bundle, palo santo sticks, selenite wand, abalone shell + printed ritual guide.",
     category: "cleansing", kind: "set", icon: Package,
     accentColor: "text-lime-300", accentBg: "bg-lime-500/15",
-    retailPrice: 59.99, memberPrice: 29.99,
+    retailPrice: 59.99,
   },
   {
     id: "cleansing-set-ceremony",
@@ -235,7 +243,7 @@ const PRODUCTS: Product[] = [
     desc: "Everything in the Starter Set plus florida water, sea salt, black tourmaline and a lighter.",
     category: "cleansing", kind: "set", icon: Package,
     accentColor: "text-lime-300", accentBg: "bg-lime-500/15",
-    retailPrice: 89.99, memberPrice: 44.99,
+    retailPrice: 89.99,
   },
 ];
 
@@ -322,7 +330,9 @@ function ProductCard({
 }) {
   const isSaved = savedIds.has(product.id);
   const Icon = product.icon;
-  const savings = Math.round((1 - product.memberPrice / product.retailPrice) * 100);
+  const memberPrice = itemMemberPrice(product);
+  const tier = itemBaseTier(product);
+  const savings = tier;
   const titleId = `product-${product.id}-title`;
 
   return (
@@ -366,12 +376,12 @@ function ProductCard({
         <div
           className="rounded-xl border border-teal-400/30 bg-teal-500/10 px-3 py-2.5 flex items-center justify-between"
           role="group"
-          aria-label={`Member price ${product.memberPrice.toFixed(2)} dollars, retail ${product.retailPrice.toFixed(2)}, save ${savings} percent`}
+          aria-label={`Member price ${memberPrice.toFixed(2)} dollars, retail ${product.retailPrice.toFixed(2)}, save ${savings} percent (tier ${tier}%)`}
         >
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-teal-300/80 font-semibold">Member Price</p>
+            <p className="text-[10px] uppercase tracking-wider text-teal-300/80 font-semibold">Member Price · {tier}% off</p>
             <p className="text-2xl font-bold text-teal-300 leading-tight">
-              ${product.memberPrice.toFixed(2)}
+              ${memberPrice.toFixed(2)}
             </p>
           </div>
           <div className="text-right">
@@ -509,6 +519,12 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
 
   const savedIds = new Set(savedItems.map((s) => s.id));
   const cartCount = cart.reduce((n, c) => n + c.qty, 0);
+  const cartPricing = cartTotals(
+    cart.map<PricingItem>((c) => ({
+      id: c.id, category: c.category, kind: c.kind,
+      retailPrice: c.retailPrice, qty: c.qty,
+    })),
+  );
 
   useEffect(() => { persistSaved(savedItems); }, [savedItems]);
   useEffect(() => { persistCart(cart); }, [cart]);
@@ -542,7 +558,11 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
       if (existing) {
         return prev.map((c) => c.id === p.id ? { ...c, qty: c.qty + 1 } : c);
       }
-      return [...prev, { id: p.id, title: p.title, price: p.memberPrice, qty: 1 }];
+      return [...prev, {
+        id: p.id, title: p.title,
+        retailPrice: p.retailPrice, category: p.category, kind: p.kind,
+        qty: 1,
+      }];
     });
     showToast(`Added "${p.title}" to cart`);
   };
@@ -575,11 +595,16 @@ export default function PortalRoom({ initialSection = "products" }: PortalRoomPr
             </div>
             {cartCount > 0 && (
               <div
-                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-500/20 border border-teal-400/40 text-teal-200 text-xs font-semibold"
-                aria-label={`${cartCount} items in cart`}
+                className="shrink-0 flex flex-col items-end gap-0.5 px-3 py-1.5 rounded-full bg-teal-500/20 border border-teal-400/40 text-teal-200 text-xs font-semibold"
+                aria-label={`${cartCount} items in cart, cart discount tier ${cartPricing.tier} percent, member total ${cartPricing.memberTotal.toFixed(2)} dollars`}
               >
-                <ShoppingCart className="h-3.5 w-3.5" aria-hidden="true" />
-                {cartCount}
+                <div className="flex items-center gap-1.5">
+                  <ShoppingCart className="h-3.5 w-3.5" aria-hidden="true" />
+                  {cartCount} · {cartPricing.tier}% off
+                </div>
+                <span className="text-[10px] text-teal-100/90 font-normal">
+                  ${cartPricing.memberTotal.toFixed(2)}
+                </span>
               </div>
             )}
           </div>
