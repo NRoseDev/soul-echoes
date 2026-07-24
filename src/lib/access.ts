@@ -65,22 +65,33 @@ export interface ContentItem {
   level: ContentLevel;
 }
 
+/**
+ * Categories that are ALWAYS available at every tier, including Tier 1.
+ * Journaling is baseline access — a user's own reflections and entries
+ * are never gated behind a tier and must never be lost.
+ */
+export const ALWAYS_AVAILABLE_CATEGORIES: ReadonlySet<ContentCategory> =
+  new Set<ContentCategory>(["journal-prompt"]);
+
 /** Minimum tier required to unlock a specific piece of content. */
-export function minTierFor(item: Pick<ContentItem, "level">): Tier {
+export function minTierFor(item: Pick<ContentItem, "level" | "category">): Tier {
+  if (item.category && ALWAYS_AVAILABLE_CATEGORIES.has(item.category)) return 1;
   return LEVEL_MIN_TIER[item.level];
 }
 
 /** Does the given user tier unlock this content? */
 export function canAccess(
   userTier: Tier | null | undefined,
-  item: Pick<ContentItem, "level">,
+  item: Pick<ContentItem, "level" | "category">,
 ): boolean {
+  if (item.category && ALWAYS_AVAILABLE_CATEGORIES.has(item.category)) return true;
   if (!userTier) return item.level === "basic"; // logged-out / unknown → basic only
   return userTier >= minTierFor(item);
 }
 
+
 /** Filter a list of content items down to what the user can access. */
-export function accessibleContent<T extends Pick<ContentItem, "level">>(
+export function accessibleContent<T extends Pick<ContentItem, "level" | "category">>(
   userTier: Tier | null | undefined,
   items: T[],
 ): T[] {
@@ -93,9 +104,10 @@ export function accessibleContent<T extends Pick<ContentItem, "level">>(
  */
 export function lockReason(
   userTier: Tier | null | undefined,
-  item: Pick<ContentItem, "level">,
+  item: Pick<ContentItem, "level" | "category">,
 ): { requiredTier: Tier; label: string } | null {
   if (canAccess(userTier, item)) return null;
   const req = minTierFor(item);
   return { requiredTier: req, label: TIER_LABEL[req] };
 }
+
