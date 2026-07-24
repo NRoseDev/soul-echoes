@@ -312,6 +312,16 @@ export default function Journal() {
     return () => window.removeEventListener("soul-echoes-voice-input" as any, handleVoiceStreamIntercept);
   }, [aiRoomCues, selectedSection]);
 
+  // Auto-save the current entry in the background whenever content settles.
+  useEffect(() => {
+    if (!user || !selectedSection || !currentContent.trim()) return;
+    const timer = setTimeout(() => {
+      handleSaveEntry();
+    }, 1200);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentContent, selectedSection, user]);
+
   const currentSection = selectedSection
     ? JOURNAL_SECTIONS.find((s) => s.id === selectedSection)
     : null;
