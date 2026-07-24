@@ -15,7 +15,7 @@ const SCREEN_ANNOUNCEMENTS: Record<string, string> = {
   "/shadow-work": "Shadow Work room. Explore your deeper self safely.",
   "/wisdom": "Wisdom room. Receive guidance and insight.",
   "/tools": "Tools. Access rituals, prayers, and healing aids.",
-  "/community": "Community space. You are not alone.",
+  "/community": "Tribe space. You are not alone.",
   "/practitioner": "Practitioner Connect. Find a healer or teacher.",
   "/crisis": "Crisis Counselor. Immediate support is available.",
   "/voice-settings": "Voice Settings. Choose how the app speaks to you.",

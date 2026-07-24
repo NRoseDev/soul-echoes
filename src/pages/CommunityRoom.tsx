@@ -97,7 +97,7 @@ const SECTION_TABS = [
   { id: "circles",    label: "Healing Circles",   icon: Users },
   { id: "stories",    label: "Stories & Support", icon: MessageCircle },
   { id: "journeys",   label: "Healing Journeys",  icon: Sparkles },
-  { id: "guidelines", label: "Community Care",    icon: Shield },
+  { id: "guidelines", label: "Tribe Care",    icon: Shield },
 ] as const;
 
 const GUIDELINES = [
@@ -181,11 +181,11 @@ export default function CommunityRoom() {
       <div className="px-4 pt-5 pb-3 shrink-0">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full overflow-hidden bg-white/[0.06] border border-white/15 shadow-[0_0_24px_rgba(167,139,250,0.4)]">
-            <img src={communityIcon} alt="Community" className="w-full h-full object-cover" loading="eager" decoding="async" />
+            <img src={communityIcon} alt="Tribe" className="w-full h-full object-cover" loading="eager" decoding="async" />
           </div>
           <div>
             <h1 className="font-display text-2xl font-bold bg-gradient-to-r from-rose-300 via-violet-300 to-amber-300 bg-clip-text text-transparent leading-tight">
-              Community
+              Tribe
             </h1>
             <p className="text-xs text-foreground/60">You are not alone — heal alongside others walking the same path</p>
           </div>
@@ -446,7 +446,7 @@ export default function CommunityRoom() {
                   <p className="text-sm font-semibold text-foreground">How we hold this space</p>
                 </div>
                 <p className="text-xs text-foreground/70 leading-relaxed">
-                  Community only works when everyone is safe. These aren't rules to police you — they're promises we make to each other.
+                  Tribe only works when everyone is safe. These aren't rules to police you — they're promises we make to each other.
                 </p>
               </div>
 
@@ -474,7 +474,7 @@ export default function CommunityRoom() {
               </div>
 
               <p className="text-[11px] text-center text-foreground/50 italic pt-2">
-                Soul Echoes Community is peer support, not therapy. Be gentle with yourself and each other.
+                Soul Echoes Tribe is peer support, not therapy. Be gentle with yourself and each other.
               </p>
             </motion.div>
           )}

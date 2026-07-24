@@ -534,7 +534,7 @@ export default function Pricing() {
               {[
                 { icon: "🏗️", title: "Platform Development", desc: "Keeping Soul Echoes free and evolving" },
                 { icon: "🤝", title: "Practitioner Support", desc: "Fair pay for healers and therapists" },
-                { icon: "🌱", title: "Community Programs", desc: "Free healing circles and workshops" },
+                { icon: "🌱", title: "Tribe Programs", desc: "Free healing circles and workshops" },
                 { icon: "♿", title: "Accessibility", desc: "ASL, AAC, screen reader, and more" },
                 { icon: "🆘", title: "Crisis Services", desc: "24/7 crisis counselor availability" },
                 { icon: "💎", title: "Practitioner Store Share", desc: "Practitioners keep 97% of store sales and 3% supports Rise Up Healing." },

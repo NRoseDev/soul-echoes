@@ -15,7 +15,7 @@ const NAV_ITEMS = [
   { path: "/", label: "Home", icon: Home },
   { path: "/journal", label: "Journal", icon: JournalIcon },
   { path: "/flow", label: "Flow", icon: FlowIcon },
-  { path: "/community", label: "Community", icon: CommunityIcon },
+  { path: "/community", label: "Tribe", icon: CommunityIcon },
   { path: "/shop", label: "Portal", icon: PortalIcon },
 ];
 

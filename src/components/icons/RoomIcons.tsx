@@ -175,7 +175,7 @@ export function CommunityIcon({ className }: Props) {
     <div className={`overflow-hidden rounded-full ${className ?? base}`}>
       <img
         src={communityIconPng}
-        alt="Community"
+        alt="Tribe"
         className="w-full h-full object-cover"
         aria-hidden="true"
       />

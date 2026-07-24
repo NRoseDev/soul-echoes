@@ -299,7 +299,7 @@ function ImpactBanner() {
     <div
       className="mx-4 mt-4 mb-1 rounded-2xl bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-400/30 px-4 py-3 flex flex-col sm:flex-row items-center gap-3"
       role="note"
-      aria-label="Community impact and member benefit"
+      aria-label="Tribe impact and member benefit"
     >
       <div className="flex items-center gap-2 shrink-0">
         <Heart className="h-5 w-5 text-rose-400" aria-hidden="true" />
