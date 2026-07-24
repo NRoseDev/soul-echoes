@@ -97,7 +97,7 @@ export default function OnboardingPage({ onComplete }: { onComplete?: () => void
   const moveToPricing = useCallback(() => {
     setStep("pricing");
     announceGuide(
-      "Brain Dump is always free and unlimited. Paid tiers unlock access to more healing rooms, priority features, and yearly savings. You can also connect with professional healers and practitioners anytime. Say, type, or click Next to learn about our healer community."
+      "Brain Dump is always free and unlimited. Paid tiers unlock access to more healing rooms, priority features, and yearly savings. You can also connect with professional healers and practitioners anytime. Say, type, or click Next to learn about our healer tribe."
     );
     setTimeout(() => multiModal.startListening(), 2500);
   }, [multiModal]);
@@ -478,7 +478,7 @@ export default function OnboardingPage({ onComplete }: { onComplete?: () => void
           <div className="h-16 w-16 rounded-full bg-pink-500/20 flex items-center justify-center mx-auto">
             <Users className="h-8 w-8 text-pink-500"  aria-hidden="true" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Our Healer Community</h2>
+          <h2 className="text-2xl font-bold text-foreground">Our Healer Tribe</h2>
           <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
             Soul Echoes connects you with certified spiritual practitioners, therapists, and healers. Whether you need deeper guidance, professional support, or spiritual direction, our healer network is here for you.
           </p>

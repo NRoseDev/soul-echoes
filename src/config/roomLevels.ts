@@ -124,7 +124,7 @@ export const ROOM_LEVELS: Record<string, RoomLevelTrack> = {
   },
   community: {
     roomId: "community",
-    roomTitle: "Community",
+    roomTitle: "Tribe",
     routeBase: "/community",
     levels: stubLevels("community", [
       "Showing Up Safely",

@@ -80,7 +80,7 @@ const STEPS: Step[] = [
     highlightPath: "/tools",
   },
   {
-    title: "Community 👥",
+    title: "Tribe 👥",
     body:
       "Four healing circles — Physical, Mental & Emotional, Spiritual Awakening, Energy & Spirit. Share stories and submit feature requests here.",
     highlightPath: "/community",
