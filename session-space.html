@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soul Echoes - Virtual Session Space</title>
+    <style>
+        :root {
+            --bg-sanctuary: #0d0c10; /* Deep, grounded cosmic dark */
+            --bg-dashboard: #111015; /* Slate dark for the care panel */
+            --text-pure: #f5f5f7;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --accent-frequency: #a3a3ff; /* Soft, cooling blue/violet */
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-line: rgba(255, 255, 255, 0.07);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-sanctuary);
+            font-family: system-ui, -apple-system, sans-serif;
+            color: var(--text-pure);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Split-Screen Main Layout */
+        .session-container {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* LEFT PANEL: Seeker's Sanctuary View */
+        .sanctuary-view {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            border-right: 1px solid var(--border-line);
+            background-color: var(--bg-sanctuary);
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            height: 80vh;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            background: #151419;
+            border: 1px solid var(--border-line);
+        }
+
+        .main-video-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Grounding Breath Guide Animation Overlay */
+        .breathing-guide-circle {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 44px;
+            height: 44px;
+            border: 2px solid var(--accent-frequency);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--accent-frequency);
+            animation: breathe 12s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.2; }
+            33% { transform: translateX(-50%) scale(2.8); opacity: 0.8; } /* Inhale */
+            58% { transform: translateX(-50%) scale(2.8); opacity: 0.8; } /* Hold */
+        }
+
+        .sanctuary-controls {
+            margin-top: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .grounding-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--accent-frequency);
+            color: var(--text-pure);
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .grounding-btn:hover {
+            background: var(--accent-frequency);
+            color: var(--bg-sanctuary);
+            box-shadow: 0 0 15px rgba(163, 163, 255, 0.4);
+        }
+
+        /* RIGHT PANEL: Healer's Care Dashboard */
+        .care-dashboard {
+            background-color: var(--bg-dashboard);
+            padding: 40px 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .dashboard-header {
+            margin-bottom: 10px;
+        }
+
+        .dashboard-header h2 {
+            font-size: 1.6rem;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+        }
+
+        .dashboard-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        /* UI Cards */
+        .data-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-line);
+            border-radius: 20px;
+            padding: 24px;
+        }
+
+        .data-card h3 {
+            font-size: 1.05rem;
+            font-weight: 500;
+            margin-bottom: 14px;
+            color: var(--accent-frequency);
+            letter-spacing: 0.3px;
+        }
+
+        /* Recent Echoes Stream */
+        .scroll-box {
+            max-height: 150px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .timestamp {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .journal-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-pure);
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        /* Somatic Tension Map Component */
+        .body-map-container {
+            height: 180px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px dashed rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .tension-node {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            animation: pulse-node 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-node {
+            0%, 100% { box-shadow: 0 0 4px rgba(239, 68, 68, 0.2); opacity: 0.8; }
+            50% { box-shadow: 0 0 12px rgba(239, 68, 68, 0.6); opacity: 1; }
+        }
+
+        /* Intuitive Notepad / Integration Drop */
+        .notes-input {
+            width: 100%;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-line);
+            border-radius: 12px;
+            padding: 14px;
+            color: var(--text-pure);
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: none;
+            line-height: 1.5;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .notes-input:focus {
+            border-color: var(--accent-frequency);
+        }
+
+        .seal-session-btn {
+            width: 100%;
+            margin-top: 14px;
+            background: var(--text-pure);
+            color: var(--bg-sanctuary);
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .seal-session-btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="session-container">
+        
+        <!-- LEFT PANEL: The Seeker's Immersive Sanctuary View -->
+        <div class="sanctuary-view">
+            <div class="video-wrapper">
+                <!-- Native placeholder for video processing -->
+                <div class="main-video-feed" id="video-stream"></div>
+                
+                <!-- Grounding Breath Overlay -->
+                <div class="breathing-guide-circle"></div>
+            </div>
+            
+            <div class="sanctuary-controls">
+                <button class="grounding-btn">✨ Activate Grounding Frequency (528Hz)</button>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: The Healer's Care Dashboard -->
+        <div class="care-dashboard">
+            <div class="dashboard-header">
+                <h2>Tribe Care Center</h2>
+                <p>Sacred Workspace & Intuitive Diagnostics</p>
+            </div>
+            
+            <!-- Core Component 1: Live Journal Sync -->
+            <div class="data-card">
+                <h3>Recent Echoes (Journal Stream)</h3>
+                <div class="scroll-box">
+                    <p class="timestamp">Subconscious Dream Tracker - 11:11 PM</p>
+                    <p class="journal-text">"Feeling a heavy restriction in my chest cavity today. A recurring dream about breaking through dense, ancient stone barriers to get to light..."</p>
+                </div>
+            </div>
+
+            <!-- Core Component 2: Somatic Blueprint Map Placeholder -->
+            <div class="data-card">
+                <h3>Somatic Tension Map</h3>
+                <div class="body-map-container">
+                    <div class="tension-node">Anahata / Heart Blockage Detected</div>
+                </div>
+            </div>
+
+            <!-- Core Component 3: Integration Practices Flow -->
+            <div class="data-card">
+                <h3>Session Integration Practices</h3>
+                <textarea class="notes-input" placeholder="Channel the 3 core integration practices / assignments for the Seeker's home screen..."></textarea>
+                <button class="seal-session-btn">Seal Session & Drop Practices</button>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
