@@ -312,6 +312,16 @@ export default function Journal() {
     return () => window.removeEventListener("soul-echoes-voice-input" as any, handleVoiceStreamIntercept);
   }, [aiRoomCues, selectedSection]);
 
+  // Auto-save the current entry in the background whenever content settles.
+  useEffect(() => {
+    if (!user || !selectedSection || !currentContent.trim()) return;
+    const timer = setTimeout(() => {
+      handleSaveEntry();
+    }, 1200);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentContent, selectedSection, user]);
+
   const currentSection = selectedSection
     ? JOURNAL_SECTIONS.find((s) => s.id === selectedSection)
     : null;
@@ -470,13 +480,12 @@ export default function Journal() {
                 className="flex-1 min-h-[300px] bg-slate-950/60 border border-purple-500/20 text-white placeholder-purple-300/30 focus:border-amber-500/40 rounded-xl p-4 focus:ring-0 resize-none font-light leading-relaxed"
               />
 
-              <button
-                onClick={handleSaveEntry}
-                disabled={isSavingEntry || !currentContent.trim()}
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-600 hover:to-indigo-700 text-white text-xs uppercase tracking-widest px-6 py-3 rounded-lg font-medium shadow-md transition-all active:scale-95 disabled:opacity-40 self-start"
+              <p
+                aria-live="polite"
+                className="text-xs uppercase tracking-widest text-purple-300/60 font-light self-start"
               >
-                {isSavingEntry ? "Securing Entry..." : "Lock into Cloud"}
-              </button>
+                {isSavingEntry ? "Auto-saving…" : "Auto-saved securely"}
+              </p>
             </div>
           </motion.div>
         )}
