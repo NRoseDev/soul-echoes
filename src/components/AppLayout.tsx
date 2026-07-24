@@ -7,6 +7,8 @@ import FloatingHub from "@/components/FloatingHub";
 import { getPreferences, savePreferences, type InputMethod } from "@/lib/preferences";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { JournalIcon, FlowIcon, CommunityIcon, PortalIcon } from "@/components/icons/RoomIcons";
+import { ProgressTracker } from "@/components/ProgressTracker";
+import { ResumeBanner } from "@/components/ResumeBanner";
 
 // Clean, streamlined navigation structure for a clear user flow
 const NAV_ITEMS = [
@@ -98,10 +100,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             </header>
             <main className="flex-1 flex flex-col overflow-hidden">
+              <ResumeBanner />
               {children}
             </main>
           </div>
         </div>
+        <ProgressTracker />
         <FloatingHub inputMethod={inputMethod} />
         
         {/* Premium Bottom Navigation Bar */}
