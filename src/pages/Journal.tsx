@@ -257,6 +257,43 @@ interface JournalEntry {
   updatedAt: string;
 }
 
+interface HealerSuggestion {
+  room: { name: string; reason: string };
+  element: { name: string; symbol: string; color: string; practice: string };
+}
+
+function deriveHealerSuggestion(brainDump: string, cues: string[]): HealerSuggestion {
+  const text = (brainDump || "").toLowerCase();
+  const has = (...words: string[]) => words.some((w) => text.includes(w));
+
+  // Room selection
+  let room = { name: "Brain Dump", reason: "Continue releasing today's noise before deeper work." };
+  if (cues.includes("Shadow Work Room") || has("fear", "dark", "hide", "shame", "anger"))
+    room = { name: "Shadow Work Room", reason: "Today's dump surfaced shadow material worth meeting gently." };
+  else if (has("body", "hurt", "tight", "pain", "sleep", "tired"))
+    room = { name: "Breathe Room", reason: "Body signals point to nervous system regulation first." };
+  else if (has("word", "said", "unsaid", "silent", "voice"))
+    room = { name: "Unspoken Chamber", reason: "There are words asking to be spoken safely." };
+  else if (has("lost", "meaning", "purpose", "why"))
+    room = { name: "Wisdom Room", reason: "Meaning-making tools can reframe today's questions." };
+  else if (has("guide", "angel", "spirit", "sign"))
+    room = { name: "Spiritual Tools", reason: "You're reaching for guidance — meet it with structure." };
+
+  // Energetic element (chakra-aligned)
+  let element = { name: "Earth", symbol: "🜃", color: "#8B5A2B", practice: "Ground: bare feet, slow exhale, 3 minutes." };
+  if (has("cry", "grief", "flow", "emotion", "wave"))
+    element = { name: "Water", symbol: "🜄", color: "#3399FF", practice: "Hand on heart, let one wave move through you." };
+  else if (has("angry", "burn", "fire", "passion", "rage", "spark"))
+    element = { name: "Fire", symbol: "🜂", color: "#FF7A00", practice: "Shake it out for 60 seconds, then exhale twice as long." };
+  else if (has("scattered", "racing", "thought", "overwhelm", "breath"))
+    element = { name: "Air", symbol: "🜁", color: "#B266FF", practice: "Box breath: 4 in · 4 hold · 4 out · 4 hold, four rounds." };
+  else if (has("empty", "numb", "still", "quiet", "spirit", "source"))
+    element = { name: "Ether", symbol: "✧", color: "#FFD700", practice: "Sit in silence and name one thing you can sense." };
+
+  return { room, element };
+}
+
+
 export default function Journal() {
   const { user } = useAuth();
   const { goBack } = useRoom();
@@ -473,7 +510,53 @@ export default function Journal() {
                 </div>
               )}
 
+              {selectedSection === "healer-session-journal" && (() => {
+                const brainDump = entries["daily-check-in"]?.content || "";
+                const suggestion = deriveHealerSuggestion(brainDump, aiRoomCues);
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div
+                      className="rounded-lg border border-amber-400/30 bg-amber-500/5 p-4 space-y-1.5"
+                      aria-label="Suggested healing room based on today's brain dump"
+                    >
+                      <p className="text-xs uppercase tracking-wider text-amber-300 font-semibold">
+                        Suggested Room
+                      </p>
+                      <p className="text-lg text-amber-100 font-medium">{suggestion.room.name}</p>
+                      <p className="text-xs text-purple-100/70 font-light leading-relaxed">
+                        {suggestion.room.reason}
+                      </p>
+                      {!brainDump && (
+                        <p className="text-[10px] uppercase tracking-widest text-purple-300/50 pt-1">
+                          Default · no brain dump yet today
+                        </p>
+                      )}
+                    </div>
+                    <div
+                      className="rounded-lg border p-4 space-y-1.5"
+                      style={{
+                        borderColor: `${suggestion.element.color}55`,
+                        backgroundColor: `${suggestion.element.color}0F`,
+                      }}
+                      aria-label={`Energetic element for today: ${suggestion.element.name}`}
+                    >
+                      <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: suggestion.element.color }}>
+                        Energetic Element
+                      </p>
+                      <p className="text-lg font-medium text-white flex items-center gap-2">
+                        <span aria-hidden="true">{suggestion.element.symbol}</span>
+                        {suggestion.element.name}
+                      </p>
+                      <p className="text-xs text-purple-100/70 font-light leading-relaxed">
+                        {suggestion.element.practice}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+
               <Textarea
+
                 value={currentContent}
                 onChange={(e) => setCurrentContent(e.target.value)}
                 placeholder="Reviewing auto-sync channels... Your thoughts are fully secured."
