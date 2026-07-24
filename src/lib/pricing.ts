@@ -70,10 +70,25 @@ export function cartTier(items: PricingItem[]): DiscountTier {
   return candidates.reduce((max, t) => (t > max ? t : max), 11 as DiscountTier);
 }
 
+/**
+ * Minimum savings floor: every discounted item/cart must save at least $3
+ * off retail. Percentages (11/22/33/44) remain the source of truth; the
+ * floor only kicks in when the raw percentage discount would save less
+ * than $3. Never applied to items whose retail price is under $3 itself.
+ */
+export const MIN_SAVINGS_FLOOR = 3;
+
+function withFloor(retailPrice: number, memberPrice: number): number {
+  if (retailPrice < MIN_SAVINGS_FLOOR) return memberPrice;
+  const flooredMax = retailPrice - MIN_SAVINGS_FLOOR;
+  return Math.round(Math.min(memberPrice, flooredMax) * 100) / 100;
+}
+
 /** Apply a tier to a retail price and return the discounted price (2 dp). */
 export function applyTier(retailPrice: number, tier: DiscountTier): number {
   const raw = retailPrice * (1 - tier / 100);
-  return Math.round(raw * 100) / 100;
+  const rounded = Math.round(raw * 100) / 100;
+  return withFloor(retailPrice, rounded);
 }
 
 /** Convenience: discounted price for a single item using its base tier. */
@@ -88,7 +103,8 @@ export function cartTotals(items: PricingItem[]) {
     (sum, i) => sum + i.retailPrice * Math.max(1, i.qty ?? 1),
     0,
   );
-  const memberTotal = Math.round(retailTotal * (1 - tier / 100) * 100) / 100;
+  const rawMember = Math.round(retailTotal * (1 - tier / 100) * 100) / 100;
+  const memberTotal = withFloor(retailTotal, rawMember);
   return {
     tier,
     retailTotal: Math.round(retailTotal * 100) / 100,
@@ -96,3 +112,4 @@ export function cartTotals(items: PricingItem[]) {
     savings: Math.round((retailTotal - memberTotal) * 100) / 100,
   };
 }
+
