@@ -510,7 +510,53 @@ export default function Journal() {
                 </div>
               )}
 
+              {selectedSection === "healer-session-journal" && (() => {
+                const brainDump = entries["daily-check-in"]?.content || "";
+                const suggestion = deriveHealerSuggestion(brainDump, aiRoomCues);
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div
+                      className="rounded-lg border border-amber-400/30 bg-amber-500/5 p-4 space-y-1.5"
+                      aria-label="Suggested healing room based on today's brain dump"
+                    >
+                      <p className="text-xs uppercase tracking-wider text-amber-300 font-semibold">
+                        Suggested Room
+                      </p>
+                      <p className="text-lg text-amber-100 font-medium">{suggestion.room.name}</p>
+                      <p className="text-xs text-purple-100/70 font-light leading-relaxed">
+                        {suggestion.room.reason}
+                      </p>
+                      {!brainDump && (
+                        <p className="text-[10px] uppercase tracking-widest text-purple-300/50 pt-1">
+                          Default · no brain dump yet today
+                        </p>
+                      )}
+                    </div>
+                    <div
+                      className="rounded-lg border p-4 space-y-1.5"
+                      style={{
+                        borderColor: `${suggestion.element.color}55`,
+                        backgroundColor: `${suggestion.element.color}0F`,
+                      }}
+                      aria-label={`Energetic element for today: ${suggestion.element.name}`}
+                    >
+                      <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: suggestion.element.color }}>
+                        Energetic Element
+                      </p>
+                      <p className="text-lg font-medium text-white flex items-center gap-2">
+                        <span aria-hidden="true">{suggestion.element.symbol}</span>
+                        {suggestion.element.name}
+                      </p>
+                      <p className="text-xs text-purple-100/70 font-light leading-relaxed">
+                        {suggestion.element.practice}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+
               <Textarea
+
                 value={currentContent}
                 onChange={(e) => setCurrentContent(e.target.value)}
                 placeholder="Reviewing auto-sync channels... Your thoughts are fully secured."
