@@ -1,12 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function Journal() {
   const [reflection, setReflection] = useState('');
-  const [savedEntries, setSavedEntries] = useState<string[]>([]);
+  const [savedEntries, setSavedEntries] = useState<string[]>(() => {
+    try {
+      const localData = localStorage.getItem('soul_echoes_journal_entries');
+      return localData ? JSON.parse(localData) : [];
+    } catch (error) {
+      return [];
+    }
+  });
+  
   const [articulationPrompt, setArticulationPrompt] = useState('How can you clearly articulate your core vision today?');
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('soul_echoes_journal_entries', JSON.stringify(savedEntries));
+    } catch (error) {
+      console.error('Failed to save entries locally', error);
+    }
+  }, [savedEntries]);
 
   const handleSave = () => {
     if (!reflection.trim()) return;
