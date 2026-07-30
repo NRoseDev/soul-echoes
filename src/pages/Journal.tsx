@@ -1,578 +1,79 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen } from "lucide-react";
-import { useRoom } from "@/contexts/RoomContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { logProgress } from "@/lib/roomPersistence";
+import React, { useState } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-const CACHE_BUST = `?v=${Date.now()}`;
-const reflectionIcon = `/reflection-icon-green.png${CACHE_BUST}`;
-const dailyCheckinIcon = `/journal-icons/daily-checkin.png${CACHE_BUST}`;
-const emotionalReleaseIcon = `/journal-icons/emotional-release.png${CACHE_BUST}`;
-const manifestationIcon = `/journal-icons/manifestation.png${CACHE_BUST}`;
-const lettersNeverSentIcon = `/journal-icons/letters-never-sent.png${CACHE_BUST}`;
-const healthIcon = `/journal-icons/health.png${CACHE_BUST}`;
-
-const GlowImg = ({ src, color, className }: { src: string; color: string; className?: string }) => (
-  <img
-    src={src}
-    alt=""
-    aria-hidden="true"
-    className={className}
-    style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 6px ${color}) drop-shadow(0 0 14px ${color})` }}
-  />
-);
-
-// --- Original uploaded PNG icons, tinted with chakra neon glow only ---
-
-const DailyCheckInIcon = ({ className }: { className?: string }) => (
-  <GlowImg src={dailyCheckinIcon} color="#22C55E" className={className}  aria-hidden="true" />
-);
-
-const EmotionalReleaseIcon = ({ className }: { className?: string }) => (
-  <GlowImg src={emotionalReleaseIcon} color="#B266FF" className={className}  aria-hidden="true" />
-);
-
-const ManifestationIcon = ({ className }: { className?: string }) => (
-  <GlowImg src={manifestationIcon} color="#FFD500" className={className}  aria-hidden="true" />
-);
-
-const LettersNeverSentIcon = ({ className }: { className?: string }) => (
-  <GlowImg src={lettersNeverSentIcon} color="#FF5CAA" className={className}  aria-hidden="true" />
-);
-
-
-/* ---------- Chakra-tinted neon glow icons (inspired by uploaded sheet) ---------- */
-
-type GlowIconProps = { className?: string };
-
-const GlowWrap = ({
-  color,
-  children,
-  className,
-}: {
-  color: string;
-  children: React.ReactNode;
-  className?: string;
-}) => (
-  <svg
-    viewBox="0 0 64 64"
-    className={className}
-    style={{ filter: `drop-shadow(0 0 6px ${color}) drop-shadow(0 0 14px ${color})` }}
-    aria-hidden="true"
-  >
-    <g fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-      {children}
-    </g>
-  </svg>
-);
-
-// Star with sparkle dust — Solar Plexus (gold)
-const StarSparkleIcon = ({ className }: GlowIconProps) => (
-  <GlowWrap color="#FFD500" className={className}>
-    <polygon points="32,10 38,26 55,26 41,36 46,52 32,42 18,52 23,36 9,26 26,26" />
-    <circle cx="12" cy="14" r="0.8" fill="#FFD500" />
-    <circle cx="54" cy="16" r="1" fill="#FFD500" />
-    <circle cx="50" cy="54" r="0.8" fill="#FFD500" />
-    <circle cx="14" cy="52" r="1" fill="#FFD500" />
-  </GlowWrap>
-);
-
-// Heart with planetary ring — Heart Chakra (emerald)
-const HeartRingIcon = ({ className }: GlowIconProps) => (
-  <GlowWrap color="#00CC66" className={className}>
-    <path d="M32 52 C 14 40, 10 26, 20 20 C 26 16, 30 20, 32 24 C 34 20, 38 16, 44 20 C 54 26, 50 40, 32 52 Z" />
-    <ellipse cx="32" cy="38" rx="26" ry="6" transform="rotate(-18 32 38)" />
-  </GlowWrap>
-);
-
-// Reflection — uploaded silhouette tinted emerald with matching glow
-const ReflectionIcon = ({ className }: GlowIconProps) => (
-  <img
-    src={reflectionIcon}
-    alt=""
-    className={className}
-    aria-hidden="true"
-    style={{
-      filter: "drop-shadow(0 0 6px #00CC66) drop-shadow(0 0 14px #00CC66)",
-    }}
-  />
-);
-
-// Crescent moon with star — Third Eye (indigo)
-const MoonStarIcon = ({ className }: GlowIconProps) => (
-  <GlowWrap color="#4B7BFF" className={className}>
-    <path d="M42 12 A 22 22 0 1 0 42 52 A 17 17 0 1 1 42 12 Z" />
-    <polygon points="50,18 52,22 56,22 53,25 54,29 50,27 46,29 47,25 44,22 48,22" />
-  </GlowWrap>
-);
-
-// Eclipse — Shadow Work (crimson ring, dark core)
-const EclipseIcon = ({ className }: GlowIconProps) => (
-  <svg
-    viewBox="0 0 64 64"
-    className={className}
-    style={{ filter: "drop-shadow(0 0 8px #B30000) drop-shadow(0 0 18px #7a0000)" }}
-    aria-hidden="true"
-  >
-    <circle cx="32" cy="32" r="20" fill="#0a0000" stroke="#FF2222" strokeWidth="2.4" />
-    <circle cx="32" cy="32" r="24" fill="none" stroke="#FF2222" strokeWidth="1" opacity="0.7" />
-  </svg>
-);
-
-// Lightning bolt — Sacral (orange)
-const LightningIcon = ({ className }: GlowIconProps) => (
-  <GlowWrap color="#FF7A00" className={className}>
-    <polygon points="36,6 16,36 30,36 26,58 48,26 34,26 40,6" />
-  </GlowWrap>
-);
-
-// Blooming flower — Crown (violet/white)
-const FlowerIcon = ({ className }: GlowIconProps) => (
-  <GlowWrap color="#B266FF" className={className}>
-    <path d="M32 8 C 40 18, 40 26, 32 32 C 24 26, 24 18, 32 8 Z" />
-    <path d="M56 32 C 46 40, 38 40, 32 32 C 38 24, 46 24, 56 32 Z" />
-    <path d="M32 56 C 24 46, 24 38, 32 32 C 40 38, 40 46, 32 56 Z" />
-    <path d="M8 32 C 18 24, 26 24, 32 32 C 26 40, 18 40, 8 32 Z" />
-    <circle cx="32" cy="32" r="3.5" fill="#ffffff" />
-  </GlowWrap>
-);
-
-// Envelope — Letters Never Sent (rose)
-const EnvelopeIcon = ({ className }: GlowIconProps) => (
-  <GlowWrap color="#FF5CAA" className={className}>
-    <rect x="8" y="20" width="48" height="30" rx="2" />
-    <polyline points="8,20 32,36 56,20" />
-    <line x1="8" y1="50" x2="24" y2="38" />
-    <line x1="56" y1="50" x2="40" y2="38" />
-  </GlowWrap>
-);
-
-// Pulse wave — Health Journal (turquoise)
-const PulseIcon = ({ className }: GlowIconProps) => (
-  <GlowWrap color="#00E5CC" className={className}>
-    <path d="M6 34 L16 34 L20 20 L30 48 L38 34 L46 34 L50 24 L58 44" />
-  </GlowWrap>
-);
-
-// Meditating figure inside lotus petals — Healer Session Journal (teal)
-const LotusIcon = ({ className }: GlowIconProps) => (
-  <GlowWrap color="#20C4C4" className={className}>
-    {/* center tall petal */}
-    <path d="M32 6 C 28 16, 28 24, 32 30 C 36 24, 36 16, 32 6 Z" />
-    {/* inner side petals */}
-    <path d="M14 20 C 18 28, 24 32, 30 32 C 28 26, 22 22, 14 20 Z" />
-    <path d="M50 20 C 46 28, 40 32, 34 32 C 36 26, 42 22, 50 20 Z" />
-    {/* outer side petals */}
-    <path d="M4 30 C 10 38, 20 40, 30 38 C 26 32, 16 28, 4 30 Z" />
-    <path d="M60 30 C 54 38, 44 40, 34 38 C 38 32, 48 28, 60 30 Z" />
-    {/* base bowl */}
-    <path d="M10 44 C 18 54, 46 54, 54 44" />
-    {/* meditating figure: head */}
-    <circle cx="32" cy="30" r="3.4" />
-    {/* torso */}
-    <path d="M32 34 C 29 38, 29 42, 32 44 C 35 42, 35 38, 32 34 Z" />
-    {/* arms resting on knees */}
-    <path d="M25 44 C 22 42, 21 43, 22 46" />
-    <path d="M39 44 C 42 42, 43 43, 42 46" />
-    {/* crossed legs */}
-    <path d="M20 48 C 26 46, 38 46, 44 48 C 40 50, 24 50, 20 48 Z" />
-  </GlowWrap>
-
-);
-
-const JOURNAL_SECTIONS = [
-  {
-    id: "daily-check-in",
-    title: "Daily Check-In",
-    icon: DailyCheckInIcon,
-    description: "Mood and intention prompts auto-logged from your daily voice stream",
-    prompt: "Your Brain Dump AI has gathered today's thoughts below. Review or add guidance cues.",
-  },
-  {
-    id: "gratitude",
-    title: "Reflection",
-    icon: ReflectionIcon,
-    description: "Guided gratitude prompts for a kinder view",
-    prompt: "What are you grateful for today, no matter how small?",
-  },
-  {
-    id: "dream-journal",
-    title: "Dream Journal",
-    icon: MoonStarIcon,
-    description: "Capture dreams with date and detail",
-    prompt: "What did you dream about? What feelings did it evoke?",
-  },
-  {
-    id: "shadow-work",
-    title: "Shadow Work Prompts",
-    icon: EclipseIcon,
-    description: "Deep reflection questions for honest growth",
-    prompt: "What part of yourself are you avoiding? What can you learn from it?",
-  },
-  {
-    id: "emotional-release",
-    title: "Emotional Release Writing",
-    icon: EmotionalReleaseIcon,
-    description: "Free-write space to let emotions move",
-    prompt: "Let it all out. No judgment. Just feel and write.",
-  },
-  {
-    id: "manifestation",
-    title: "Manifestation",
-    icon: ManifestationIcon,
-    description: "Set intention and notice what you are calling in",
-    prompt: "What are you calling into your life? Speak it into existence.",
-  },
-  {
-    id: "letters-never-sent",
-    title: "Letters Never Sent",
-    icon: LettersNeverSentIcon,
-    description: "Write what you need to say without sending it",
-    prompt: "Who is this letter for? Say everything you wish you could say out loud.",
-  },
-  {
-    id: "health-journal",
-    title: "Health Journal",
-    icon: (p: { className?: string }) => <GlowImg src={healthIcon} color="#3399FF" {...p}  aria-hidden="true" />,
-    description: "Track body signals, symptoms, and wellness patterns",
-    prompt: "How is your body feeling today? Note any symptoms, energy shifts, or wins.",
-  },
-  {
-    id: "healer-session-journal",
-    title: "Healer Session Journal",
-    icon: LotusIcon,
-    description: "Record insights and aftercare from healing sessions",
-    prompt: "What came up during your session? What guidance are you carrying forward?",
-  },
-];
-
-interface JournalEntry {
-  id: string;
-  sectionId: string;
-  content: string;
-  inputType: "text" | "voice" | "mixed";
-  suggestedCues: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface HealerSuggestion {
-  room: { name: string; reason: string };
-  element: { name: string; symbol: string; color: string; practice: string };
-}
-
-function deriveHealerSuggestion(brainDump: string, cues: string[]): HealerSuggestion {
-  const text = (brainDump || "").toLowerCase();
-  const has = (...words: string[]) => words.some((w) => text.includes(w));
-
-  // Room selection
-  let room = { name: "Brain Dump", reason: "Continue releasing today's noise before deeper work." };
-  if (cues.includes("Shadow Work Room") || has("fear", "dark", "hide", "shame", "anger"))
-    room = { name: "Shadow Work Room", reason: "Today's dump surfaced shadow material worth meeting gently." };
-  else if (has("body", "hurt", "tight", "pain", "sleep", "tired"))
-    room = { name: "Breathe Room", reason: "Body signals point to nervous system regulation first." };
-  else if (has("word", "said", "unsaid", "silent", "voice"))
-    room = { name: "Unspoken Chamber", reason: "There are words asking to be spoken safely." };
-  else if (has("lost", "meaning", "purpose", "why"))
-    room = { name: "Wisdom Room", reason: "Meaning-making tools can reframe today's questions." };
-  else if (has("guide", "angel", "spirit", "sign"))
-    room = { name: "Spiritual Tools", reason: "You're reaching for guidance — meet it with structure." };
-
-  // Energetic element (chakra-aligned)
-  let element = { name: "Earth", symbol: "🜃", color: "#8B5A2B", practice: "Ground: bare feet, slow exhale, 3 minutes." };
-  if (has("cry", "grief", "flow", "emotion", "wave"))
-    element = { name: "Water", symbol: "🜄", color: "#3399FF", practice: "Hand on heart, let one wave move through you." };
-  else if (has("angry", "burn", "fire", "passion", "rage", "spark"))
-    element = { name: "Fire", symbol: "🜂", color: "#FF7A00", practice: "Shake it out for 60 seconds, then exhale twice as long." };
-  else if (has("scattered", "racing", "thought", "overwhelm", "breath"))
-    element = { name: "Air", symbol: "🜁", color: "#B266FF", practice: "Box breath: 4 in · 4 hold · 4 out · 4 hold, four rounds." };
-  else if (has("empty", "numb", "still", "quiet", "spirit", "source"))
-    element = { name: "Ether", symbol: "✧", color: "#FFD700", practice: "Sit in silence and name one thing you can sense." };
-
-  return { room, element };
-}
-
 
 export default function Journal() {
-  const { user } = useAuth();
-  const { goBack } = useRoom();
-  const [selectedSection, setSelectedSection] = useState<string | null>(null);
-  const [entries, setEntries] = useState<Record<string, JournalEntry>>({});
-  const [currentContent, setCurrentContent] = useState("");
-  const [aiRoomCues, setAiRoomCues] = useState<string[]>([]);
-  const [isSavingEntry, setIsSavingEntry] = useState(false);
+  const [reflection, setReflection] = useState('');
+  const [savedEntries, setSavedEntries] = useState<string[]>([]);
+  const [articulationPrompt, setArticulationPrompt] = useState('How can you clearly articulate your core vision today?');
 
-  useEffect(() => {
-    const handleVoiceStreamIntercept = (event: CustomEvent) => {
-      const { transcript, reply } = event.detail;
-      if (!transcript) return;
-
-      const textAnalysis = (transcript + " " + (reply || "")).toLowerCase();
-      const updatedCues = [...aiRoomCues];
-
-      if (textAnalysis.includes("fear") || textAnalysis.includes("dark") || textAnalysis.includes("hide")) {
-        if (!updatedCues.includes("Shadow Work Room")) updatedCues.push("Shadow Work Room");
-      }
-      if (textAnalysis.includes("body") || textAnalysis.includes("hurt") || textAnalysis.includes("sleep")) {
-        if (!updatedCues.includes("Health Journal")) updatedCues.push("Health Journal");
-      }
-      if (textAnalysis.includes("dream") || textAnalysis.includes("night")) {
-        if (!updatedCues.includes("Dream Journal")) updatedCues.push("Dream Journal");
-      }
-
-      setAiRoomCues(updatedCues);
-
-      setEntries((prev) => {
-        const existingLog = prev["daily-check-in"]?.content || "";
-        const compiledEntry: JournalEntry = {
-          id: `daily-check-in-sync`,
-          sectionId: "daily-check-in",
-          content: existingLog
-            ? `${existingLog}\n[User]: ${transcript}`
-            : `[Auto-Logged Brain Dump Log]:\n${transcript}`,
-          inputType: "voice",
-          suggestedCues: updatedCues,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        if (selectedSection === "daily-check-in") {
-          setCurrentContent(compiledEntry.content);
-        }
-
-        return { ...prev, "daily-check-in": compiledEntry };
-      });
-    };
-
-    window.addEventListener("soul-echoes-voice-input" as any, handleVoiceStreamIntercept);
-    return () => window.removeEventListener("soul-echoes-voice-input" as any, handleVoiceStreamIntercept);
-  }, [aiRoomCues, selectedSection]);
-
-  // Auto-save the current entry in the background whenever content settles.
-  useEffect(() => {
-    if (!user || !selectedSection || !currentContent.trim()) return;
-    const timer = setTimeout(() => {
-      handleSaveEntry();
-    }, 1200);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentContent, selectedSection, user]);
-
-  const currentSection = selectedSection
-    ? JOURNAL_SECTIONS.find((s) => s.id === selectedSection)
-    : null;
-
-  const handleSelectSection = (sectionId: string) => {
-    setSelectedSection(sectionId);
-    const existing = entries[sectionId];
-    setCurrentContent(existing ? existing.content : "");
+  const handleSave = () => {
+    if (!reflection.trim()) return;
+    setSavedEntries([reflection, ...savedEntries]);
+    setReflection('');
   };
 
-  const handleSaveEntry = async () => {
-    if (!user || !selectedSection || !currentContent.trim()) return;
+  const prompts = [
+    'How can you clearly articulate your core vision today?',
+    'What boundary do you need to set to protect your creative energy?',
+    'Describe your ideal state of flow and how to access it right now.'
+  ];
 
-    setIsSavingEntry(true);
-    try {
-      const entry: JournalEntry = {
-        id: `${selectedSection}-${Date.now()}`,
-        sectionId: selectedSection,
-        content: currentContent,
-        inputType: selectedSection === "daily-check-in" ? "voice" : "text",
-        suggestedCues: selectedSection === "daily-check-in" ? aiRoomCues : [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      setEntries((prev) => ({ ...prev, [selectedSection]: entry }));
-
-      await logProgress(
-        user.id,
-        "journal",
-        selectedSection,
-        "completed",
-        {
-          sectionId: selectedSection,
-          contentLength: currentContent.length,
-          cuesApplied: entry.suggestedCues,
-        },
-        undefined,
-        undefined,
-        currentContent
-      );
-    } catch (error) {
-      console.error("Error saving entry:", error);
-    } finally {
-      setIsSavingEntry(false);
-    }
+  const nextPrompt = () => {
+    const currentIndex = prompts.indexOf(articulationPrompt);
+    const nextIndex = (currentIndex + 1) % prompts.length;
+    setArticulationPrompt(prompts[nextIndex]);
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 min-h-screen">
-      <AnimatePresence mode="wait">
-        {!selectedSection ? (
-          <motion.div
-            key="menu"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="p-6 pb-32 space-y-6"
-          >
-            <div className="max-w-4xl mx-auto space-y-6">
-              <div className="space-y-2 border-b border-purple-500/20 pb-4">
-                <h1 className="text-4xl font-bold tracking-wide text-amber-100 flex items-center gap-3">
-                  <BookOpen className="h-8 w-8 text-amber-400"  aria-hidden="true" /> Journal Room
-                </h1>
-                <p className="text-purple-200/80 max-w-2xl font-light">
-                  Your safe space for automated documentation. Brain Dump audio sessions are compiled silently below.
-                </p>
-              </div>
+    <div className="container mx-auto p-6 max-w-4xl space-y-6">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">Soul Echoes Reflection Journal</h1>
+        <p className="text-muted-foreground">
+          Capture your daily thoughts, reflections, and articulation training notes.
+        </p>
+      </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {JOURNAL_SECTIONS.map((section) => {
-                  const SectionIcon = section.icon;
-                  const hasEntry = entries[section.id];
+      <Card className="border-primary/20 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="text-lg">Articulation Training Module</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="font-medium text-foreground">{articulationPrompt}</p>
+          <Button variant="outline" size="sm" onClick={nextPrompt}>
+            New Prompt
+          </Button>
+        </CardContent>
+      </Card>
 
-                  return (
-                    <motion.button
-                      key={section.id}
-                      onClick={() => handleSelectSection(section.id)}
-                      aria-label={`Open ${section.title}`}
-                      className={`p-6 rounded-xl border backdrop-blur-md text-left transition-all group flex flex-col justify-between h-48 relative overflow-hidden ${
-                        section.id === "daily-check-in" && hasEntry
-                          ? "bg-amber-500/10 border-amber-400/40"
-                          : "bg-slate-900/40 border-purple-500/20 hover:border-amber-400/30"
-                      }`}
-                      whileHover={{ scale: 1.02, y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <div>
-                        <div className="w-14 h-14 rounded-xl bg-black/40 border border-white/5 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                          <SectionIcon className="h-10 w-10" />
-                        </div>
-                        <h3 className="text-lg font-medium tracking-wide text-white group-hover:text-amber-200 transition-colors">
-                          {section.title}
-                        </h3>
-                        <p className="text-xs text-purple-200/60 mt-1 line-clamp-2 font-light">
-                          {section.description}
-                        </p>
-                      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>New Reflection Entry</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Textarea 
+            placeholder="Write your reflection or articulation practice notes here..." 
+            value={reflection} 
+            onChange={(e) => setReflection(e.target.value)}
+            rows={5}
+          />
+          <Button onClick={handleSave}>Save Entry</Button>
+        </CardContent>
+      </Card>
 
-                      {hasEntry && (
-                        <div className="text-[10px] uppercase tracking-wider font-semibold text-amber-400 mt-2 flex items-center gap-1.5">
-                          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-                          {section.id === "daily-check-in" ? "Synced from Brain Dump" : "Entry Saved"}
-                        </div>
-                      )}
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </div>
-          </motion.div>
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Previous Entries</h2>
+        {savedEntries.length === 0 ? (
+          <p className="text-muted-foreground italic">No journal entries saved yet.</p>
         ) : (
-          <motion.div
-            key="entry"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="min-h-screen p-6 flex flex-col"
-          >
-            <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col space-y-5">
-              <button
-                onClick={() => setSelectedSection(null)}
-                className="flex items-center gap-2 text-xs uppercase tracking-widest text-purple-300 hover:text-white transition-colors self-start"
-              >
-                ← Back to Journal Matrix
-              </button>
-
-              <div className="flex items-center gap-3">
-                {currentSection && <currentSection.icon className="h-10 w-10" />}
-                <div>
-                  <h2 className="text-2xl font-semibold text-amber-100">{currentSection?.title}</h2>
-                  <p className="text-sm text-purple-200/70 font-light">{currentSection?.prompt}</p>
-                </div>
-              </div>
-
-              {selectedSection === "daily-check-in" && aiRoomCues.length > 0 && (
-                <div className="rounded-lg border border-amber-400/30 bg-amber-500/5 p-4 space-y-2">
-                  <p className="text-xs uppercase tracking-wider text-amber-300 font-semibold">
-                    AI Suggested Healing Cues
-                  </p>
-                  <p className="text-sm text-purple-100/80 font-light">
-                    Based on today's Brain Dump dialogue, your companion recommends spending time in these spaces:
-                  </p>
-                  <ul className="space-y-1">
-                    {aiRoomCues.map((cue, idx) => (
-                      <li key={idx} className="text-sm text-amber-200">→ Go check out {cue}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {selectedSection === "healer-session-journal" && (() => {
-                const brainDump = entries["daily-check-in"]?.content || "";
-                const suggestion = deriveHealerSuggestion(brainDump, aiRoomCues);
-                return (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div
-                      className="rounded-lg border border-amber-400/30 bg-amber-500/5 p-4 space-y-1.5"
-                      aria-label="Suggested healing room based on today's brain dump"
-                    >
-                      <p className="text-xs uppercase tracking-wider text-amber-300 font-semibold">
-                        Suggested Room
-                      </p>
-                      <p className="text-lg text-amber-100 font-medium">{suggestion.room.name}</p>
-                      <p className="text-xs text-purple-100/70 font-light leading-relaxed">
-                        {suggestion.room.reason}
-                      </p>
-                      {!brainDump && (
-                        <p className="text-[10px] uppercase tracking-widest text-purple-300/50 pt-1">
-                          Default · no brain dump yet today
-                        </p>
-                      )}
-                    </div>
-                    <div
-                      className="rounded-lg border p-4 space-y-1.5"
-                      style={{
-                        borderColor: `${suggestion.element.color}55`,
-                        backgroundColor: `${suggestion.element.color}0F`,
-                      }}
-                      aria-label={`Energetic element for today: ${suggestion.element.name}`}
-                    >
-                      <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: suggestion.element.color }}>
-                        Energetic Element
-                      </p>
-                      <p className="text-lg font-medium text-white flex items-center gap-2">
-                        <span aria-hidden="true">{suggestion.element.symbol}</span>
-                        {suggestion.element.name}
-                      </p>
-                      <p className="text-xs text-purple-100/70 font-light leading-relaxed">
-                        {suggestion.element.practice}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              <Textarea
-
-                value={currentContent}
-                onChange={(e) => setCurrentContent(e.target.value)}
-                placeholder="Reviewing auto-sync channels... Your thoughts are fully secured."
-                className="flex-1 min-h-[300px] bg-slate-950/60 border border-purple-500/20 text-white placeholder-purple-300/30 focus:border-amber-500/40 rounded-xl p-4 focus:ring-0 resize-none font-light leading-relaxed"
-              />
-
-              <p
-                aria-live="polite"
-                className="text-xs uppercase tracking-widest text-purple-300/60 font-light self-start"
-              >
-                {isSavingEntry ? "Auto-saving…" : "Auto-saved securely"}
-              </p>
-            </div>
-          </motion.div>
+          savedEntries.map((entry, index) => (
+            <Card key={index}>
+              <CardContent className="p-4 whitespace-pre-wrap">{entry}</CardContent>
+            </Card>
+          ))
         )}
-      </AnimatePresence>
+      </div>
     </div>
   );
 }
